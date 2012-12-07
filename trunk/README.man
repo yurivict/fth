@@ -24,7 +24,7 @@
 .\"
 .\" Ident: $Id: README.man,v 1.22 2012/11/29 05:00:52 mi-scholz Exp $
 .\"
-.Dd November 28, 2012
+.Dd December 07, 2012
 .Dt README
 .Os
 .\"
@@ -61,18 +61,17 @@ as well as with
 .Sh WHERE IS FTH LOCATED?
 You can get the latest archive from
 .Pa http://sourceforge.net/projects/fth/ .
-If you prefer cvs, you can get the sources from
-.Pa fth.cvs.sourceforge.net .
-The first time type
+If you prefer svn, you can get the sources from
+.Pa svn.code.sf.net/p/fth/code/ .
+Check out the source tree with
 .Bd -literal -compact
-% setenv CVSROOT :pserver:anonymous@fth.cvs.sourceforge.net:/cvsroot/fth
-% cvs -z3 co -P fth
+% svn checkout svn://svn.code.sf.net/p/fth/code/trunk/
 .Ed
-for source tree updating type
+and update it later with
 .Bd -literal -compact
-% cvs -q update -CdP
+% svn update
 .Ed
-in the new fth directory.
+in the new trunk directory.
 .\"
 .\" REQUIREMENTS
 .\"

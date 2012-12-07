@@ -16,13 +16,12 @@ INTRODUCTION
 
 WHERE IS FTH LOCATED?
      You can get the latest archive from http://sourceforge.net/projects/fth/.
-     If you prefer cvs, you can get the sources from fth.cvs.sourceforge.net.
-     The first time type
-     % setenv CVSROOT :pserver:anonymous@fth.cvs.sourceforge.net:/cvsroot/fth
-     % cvs -z3 co -P fth
-     for source tree updating type
-     % cvs -q update -CdP
-     in the new fth directory.
+     If you prefer svn, you can get the sources from
+     svn.code.sf.net/p/fth/code/.  Check out the source tree with
+     % svn checkout svn://svn.code.sf.net/p/fth/code/trunk/
+     and update it later with
+     % svn update
+     in the new trunk directory.
 
 REQUIREMENTS
      The interactive Fth interpreter supports tcsh-like command-line editing
