@@ -60,18 +60,18 @@ as well as with
 .\"
 .Sh WHERE IS FTH LOCATED?
 You can get the latest archive from
-.Pa http://sourceforge.net/projects/fth/ .
-If you prefer svn, you can get the sources from
+.Pa http://www.sf.net/projects/fth/ .
+If you prefer svn, you can get the source code from
 .Pa svn.code.sf.net/p/fth/code/ .
 Check out the source tree with
 .Bd -literal -compact
-% svn checkout svn://svn.code.sf.net/p/fth/code/trunk/
+% svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
 .Ed
 and update it later with
 .Bd -literal -compact
 % svn update
 .Ed
-in the new trunk directory.
+in the new fth directory.
 .\"
 .\" REQUIREMENTS
 .\"

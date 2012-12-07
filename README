@@ -15,13 +15,13 @@ INTRODUCTION
      build with clang(1) as well as with gcc(1).
 
 WHERE IS FTH LOCATED?
-     You can get the latest archive from http://sourceforge.net/projects/fth/.
-     If you prefer svn, you can get the sources from
+     You can get the latest archive from http://www.sf.net/projects/fth/.  If
+     you prefer svn, you can get the source code from
      svn.code.sf.net/p/fth/code/.  Check out the source tree with
-     % svn checkout svn://svn.code.sf.net/p/fth/code/trunk/
+     % svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
      and update it later with
      % svn update
-     in the new trunk directory.
+     in the new fth directory.
 
 REQUIREMENTS
      The interactive Fth interpreter supports tcsh-like command-line editing
