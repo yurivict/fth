@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id: hash-test.fs,v 1.18 2012/10/29 03:36:00 mi-scholz Exp $
+\ Ident: $Id$
 
 require test-utils.fs
 

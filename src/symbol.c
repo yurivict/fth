@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: symbol.c,v 1.95 2012/11/19 01:33:04 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #if defined(HAVE_CONFIG_H)

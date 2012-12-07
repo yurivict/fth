@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: fth-lib.h,v 1.127 2012/12/07 00:21:50 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #if !defined(_FTH_LIB_H_)

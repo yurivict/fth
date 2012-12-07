@@ -4,7 +4,7 @@
  ** ANS Forth CORE word-set written in C
  ** Author: John Sadler (john_sadler@alum.mit.edu)
  ** Created: 19 July 1997
- ** $Id: primitives.c,v 1.104 2012/11/27 00:36:02 mi-scholz Exp $
+ ** $Id$
  *******************************************************************/
 /*
 ** Copyright (c) 1997 John Sadler (john_sadler@alum.mit.edu)

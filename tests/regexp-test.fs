@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id: regexp-test.fs,v 1.15 2012/05/19 23:17:42 mi-scholz Exp $
+\ Ident: $Id$
 
 'regexp provided? [unless] skip-file [then]
 

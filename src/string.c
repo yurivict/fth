@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: string.c,v 1.158 2012/11/20 01:05:32 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #if defined(HAVE_CONFIG_H)

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: fth-dbm.c,v 1.11 2012/11/02 05:10:27 mi-scholz Exp $
+ * Ident: $Id$
  *
  * Commentary:
  *

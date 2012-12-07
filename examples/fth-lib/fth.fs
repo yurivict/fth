@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id: fth.fs,v 1.62 2012/11/14 04:59:09 mi-scholz Exp $
+\ Ident: $Id$
 
 \ Commentary:
 \

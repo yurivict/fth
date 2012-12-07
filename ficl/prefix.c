@@ -4,7 +4,7 @@
  ** Parser extensions for Ficl
  ** Authors: Larry Hastings & John Sadler (john_sadler@alum.mit.edu)
  ** Created: April 2001
- ** $Id: prefix.c,v 1.26 2012/11/28 14:40:10 mi-scholz Exp $
+ ** $Id$
  *******************************************************************/
 /*
 ** Copyright (c) 1997-2001 John Sadler (john_sadler@alum.mit.edu)

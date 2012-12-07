@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: config.h.in,v 1.23 2012/09/14 03:12:27 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #include "fth-config.h"
