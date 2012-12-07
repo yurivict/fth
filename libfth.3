@@ -1,0 +1,2168 @@
+.\" Copyright (c) 2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\" Ident: $Id: libfth.3,v 1.36 2012/11/28 14:40:00 mi-scholz Exp $
+.\"
+.ds str-Lb-libfth Forth Library (libfth, \-lfth)
+.\"
+.Dd November 28, 2012
+.Dt LIBFTH 3
+.Os
+.\"
+.\" NAME
+.\"
+.Sh NAME
+.Nm libfth
+.Nd Forth script and extension language library
+.\"
+.\" LIBRARY
+.\"
+.Sh LIBRARY
+.Lb libfth
+.\"
+.\" SYNOPSIS
+.\"
+.Sh SYNOPSIS
+.In fth.h
+.\"
+.\" DESCRIPTION
+.\"
+.Sh DESCRIPTION
+This is the Fth library manual page.  Fth is known to compile with
+.Xr clang 1
+and 
+.Xr gcc 1 .
+One can include Fth library functions in applications and in C
+extension libraries.  The following shows example for each:
+.Ss Hello-World application:
+.Bd -literal -compact
+% cat hello.c
+#include <fth.h>
+int
+main(int argc, char *argv[])
+{
+	fth_init();
+	fth_printf(\(dq%s, World%c\en\(dq, \(dqHello\(dq, '!');
+	return (EXIT_SUCCESS);
+}
+.Ed
+Compile and link it with:
+.Bd -literal -compact
+% cc -I/usr/local/include/fth -I/usr/local/include -c hello.c
+% cc hello.o -o hello -L/usr/local/lib -lfth -lm
+.Ed
+A test run looks like this:
+.Dl % ./hello \(rA Hello, World!
+.Ss Hello-World library:
+.Bd -literal -compact
+% cat libhello.c
+#include <fth.h>
+
+/*
+ * hello-prim ( str1 -- str2 )
+ * intro hello-prim \(rA \(dqHello, World!\(dq
+ */
+static void
+ficl_hello_primitive(ficlVm *vm)
+{
+	FTH intro, world, result;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	intro = fth_pop_ficl_cell(vm);
+	world = fth_variable_ref(\(dqworld\(dq);
+	result = fth_make_string_format(\(dq%S, %S!\(dq, intro, world);
+	fth_push_ficl_cell(vm, result);
+}
+
+/*
+ * hello-proc ( str1 -- str2 )
+ * intro hello-proc \(rA \(dqHello, World!\(dq
+ */
+static FTH
+fth_hello_procedure(FTH intro)
+{
+	FTH world, result;
+
+	world = fth_variable_ref(\(dqworld\(dq);
+	result = fth_make_string_format(\(dq%S, %S!\(dq, intro, world);
+	return (result);
+}
+
+void
+Init_libhello(void)
+{
+	fth_define_variable(\(dqintro\(dq,
+	    fth_make_string(\(dqHello\(dq), NULL);
+	fth_define_constant(\(dqworld\(dq,
+	    fth_make_string(\(dqWorld\(dq), NULL);
+	FTH_PRI1(\(dqhello-prim\(dq,
+	    ficl_hello_primitive, NULL);
+	FTH_PROC(\(dqhello-proc\(dq,
+	    fth_hello_procedure, 1, 0, 0, NULL);
+}
+.Ed
+Compile and link it with:
+.Bd -literal -compact
+% cc -fPIC -I/usr/local/include/fth -I/usr/local/include -c libhello.c
+% cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
+.Ed
+Installing isn't necessarily required for testing.  Start fth and
+load the new library with 
+.Dl dl-load ./libhello.so Init_libhello
+The new words 
+.Cm hello-prim
+and 
+.Cm hello-proc
+as well as the variable
+.Sy intro
+and the constant 
+.Sy world
+are available.
+.Bd -literal -compact
+% fth
+fth> dl-load ./libhello.so Init_libhello
+fth> intro hello-prim \(rA \(dqHello, World!\(dq
+fth> intro hello-proc \(rA \(dqHello, World!\(dq
+fth> \(dqGoodbye\(dq to intro
+fth> intro hello-prim \(rA \(dqGoodbye, World!\(dq
+fth> \(dqBye\(dq hello-proc \(rA \(dqBye, World!\(dq
+fth> bye
+%
+.Ed
+If the new library is finished, one can install it with
+.Dl % fth -ve \(dqinstall libhello.so\(dq
+After installing you can load your new library with
+.Dl dl-load libhello Init_libhello
+.\"
+.\" Arrays (array.c)
+.\"
+.Ss Arrays
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_ARRAY_P
+.\" FTH_ASSOC_P
+.\" FTH_CONS_P
+.\" FTH_PAIR_P
+.\"
+.It Ft bool Fn FTH_ARRAY_P "obj"
+.It Ft bool Fn FTH_ASSOC_P "obj"
+.It Ft bool Fn FTH_CONS_P "obj"
+.It Ft bool Fn FTH_PAIR_P "obj"
+All four return true if
+.Ar obj
+is an array object, otherwise false.
+.It Ft FTH Fn fth_array_append "FTH array1" "FTH array2"
+.It Ft void Fn fth_array_clear "FTH array"
+.It Ft FTH Fn fth_array_compact "FTH array"
+.It Ft FTH Fn fth_array_copy "FTH array"
+.It Ft FTH Fn fth_array_delete "FTH array" "ficlInteger index"
+.It Ft FTH Fn fth_array_delete_key "FTH array" "FTH key"
+.It Ft FTH Fn fth_array_each "FTH array" "FTH (*func)(FTH value" "FTH data)" "FTH data"
+.It Ft FTH Fn fth_array_each_with_index "FTH array" "FTH (*func)(FTH value, FTH data, ficlInteger idx)" "FTH data"
+.It Ft bool Fn fth_array_equal_p "FTH obj1" "FTH obj2"
+.It Ft FTH Fn fth_array_fill "FTH array" "FTH value"
+.It Ft FTH Fn fth_array_find "FTH array" "FTH key"
+.It Ft ficlInteger Fn fth_array_index "FTH array" "FTH key"
+.It Ft FTH Fn fth_array_insert "FTH array" "ficlInteger index" "FTH value"
+.It Ft FTH Fn fth_array_join "FTH array" "FTH sep"
+.\"
+.\" fth_array_length
+.\"
+.It Ft ficlInteger Fn fth_array_length "FTH obj"
+If 
+.Ar obj
+is an Array object, return its length, otherwise -1.
+.It Ft FTH Fn fth_array_map "FTH array" "FTH (*func)(FTH value" "FTH data)" "FTH data"
+.It Ft bool Fn fth_array_member_p "FTH array" "FTH key"
+.It Ft FTH Fn fth_array_pop "FTH array"
+.It Ft FTH Fn fth_array_push "FTH array" "FTH value"
+.\"
+.\" fth_array_ref
+.\"
+.It Ft FTH Fn fth_array_ref "FTH array" "ficlInteger index"
+Return value at position
+.Ar index .
+Negative index counts from backward.  Raise 
+.Ar out-of-range
+exception if index is not in 
+.Ar array's
+range.
+.It Ft FTH Fn fth_array_reject "FTH array" "FTH proc_or_xt" "FTH args"
+.It Ft FTH Fn fth_array_reverse "FTH array"
+.\"
+.\" fth_array_set
+.\"
+.It Ft FTH Fn fth_array_set "FTH array" "ficlInteger index" "FTH value"
+Store 
+.Ar value
+at position 
+.Ar index
+and return 
+.Ar value .
+Negative index counts from backward.  Raise 
+.Ar out-of-range
+exception if index is not in 
+.Ar array's
+range.
+.It Ft FTH Fn fth_array_shift "FTH array"
+.It Ft FTH Fn fth_array_sort "FTH array" "FTH proc_or_xt"
+.It Ft FTH Fn fth_array_subarray "FTH array" "ficlInteger start" "ficlInteger end"
+.It Ft FTH Fn fth_array_to_array "FTH array"
+.\"
+.\" fth_array_to_list
+.\"
+.It Ft FTH Fn fth_array_to_list "FTH obj"
+Return
+.Ar obj
+as List object.
+.It Ft FTH Fn fth_array_uniq "FTH array"
+.It Ft FTH Fn fth_array_unshift "FTH array" "FTH value"
+.It Ft FTH Fn fth_make_array_len "ficlInteger len"
+.It Ft FTH Fn fth_make_array_var "ficlInteger len" "..."
+.\"
+.\" fth_make_array_with_init
+.\"
+.It Ft FTH Fn fth_make_array_with_init "ficlInteger len" "FTH init"
+Return Array with 
+.Ar len
+entries each initialized to 
+.Ar init .
+.It Ft FTH Fn fth_make_empty_array "void"
+.El
+.Pp
+Assocs:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_acell_key "FTH cell"
+.It Ft FTH Fn fth_acell_value "FTH cell"
+.It Ft FTH Fn fth_array_assoc "FTH assoc" "FTH key"
+.It Ft FTH Fn fth_array_assoc_ref "FTH assoc" "FTH key"
+.It Ft FTH Fn fth_array_assoc_remove "FTH assoc" "FTH key"
+.It Ft FTH Fn fth_array_assoc_set "FTH assoc" "FTH key" "FTH value"
+.It Ft FTH Fn fth_assoc "FTH assoc" "FTH key" "FTH value"
+.It Ft FTH Fn fth_make_acell "FTH key" "FTH value"
+.El
+.Pp
+Lists:
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_LIST_P
+.\"
+.It Ft bool Fn FTH_LIST_P "obj"
+Return true if
+.Ar obj
+is nil or a cons pointer (array object), otherwise false.
+.It Ft FTH Fn fth_acons "FTH key" "FTH value" "FTH alist"
+.It Ft FTH Fn fth_cadddr "FTH list"
+.It Ft FTH Fn fth_caddr "FTH list"
+.It Ft FTH Fn fth_cadr "FTH list"
+.\"
+.\" fth_car
+.\"
+.It Ft FTH Fn fth_car "FTH list"
+If length of
+.Ar list
+is greather than 0, return first list entry, otherwise FTH_NIL.
+.It Ft FTH Fn fth_cddr "FTH list"
+.\"
+.\" fth_cdr
+.\"
+.It Ft FTH Fn fth_cdr "FTH list"
+If length of
+.Ar list
+is greather than 1, return new list without first entry of
+.Ar list ,
+otherwise FTH_NIL.
+.\"
+.\" fth_cons
+.\"
+.It Ft FTH Fn fth_cons "FTH value" "FTH list"
+Return Lisp-like cons pointer with 
+.Ar value
+as car and 
+.Ar list
+as cdr.
+.\"
+.\" fth_cons_2
+.\"
+.It Ft FTH Fn fth_cons_2 "FTH obj1" "FTH obj2" "FTH list"
+Return Lisp-like cons pointer with 
+.Ar obj1
+as car,
+.Ar obj2
+as cadr and 
+.Ar list
+as cddr.
+.\"
+.\" fth_list_append
+.\"
+.It Ft FTH Fn fth_list_append "FTH args"
+If 
+.Ar args
+is not an Array or List object, return FTH_NIL, otherwise return
+new List object with each element of
+.Ar args
+append with 
+.Sx fth_array_append .
+.\"
+.\" fth_list_assoc
+.\"
+.It Ft FTH Fn fth_list_assoc "FTH alist" "FTH key"
+If 
+.Ar key
+matches, return corresponding key-value pair, otherwise FTH_FALSE.
+.\"
+.\" fth_list_assoc_ref
+.\"
+.It Ft FTH Fn fth_list_assoc_ref "FTH alist" "FTH key"
+If 
+.Ar key
+matches, return corresponding value, otherwise FTH_FALSE.
+.\"
+.\" fth_list_assoc_remove
+.\"
+.It Ft FTH Fn fth_list_assoc_remove "FTH alist" "FTH key"
+If 
+.Ar key
+matches, remove key-value pair from
+.Ar alist . 
+Return current assoc-list.
+.\"
+.\" fth_list_assoc_set
+.\"
+.It Ft FTH Fn fth_list_assoc_set "FTH alist" "FTH key" "FTH value"
+If 
+.Ar key
+matches, set key-value pair, otherwise add new pair to
+.Ar alist .
+Return current assoc-list.
+.\"
+.\" fth_list_copy
+.\"
+.It Ft FTH Fn fth_list_copy "FTH list"
+Return copy of 
+.Ar list
+using object-copy for all elements.
+.\"
+.\" fth_list_length
+.\"
+.It Ft ficlInteger Fn fth_list_length "FTH obj"
+If 
+.Ar obj
+is a list (or array), return length of list, if 
+.Ar obj
+is nil, return 0 otherwise -1.
+.\"
+.\" fth_list_member_p
+.\"
+.It Ft FTH Fn fth_list_member_p "FTH list" "FTH key"
+Return FTH_TRUE if 
+.Ar key
+exists in 
+.Ar list ,
+otherwise FTH_FALSE.
+.\"
+.\" fth_list_ref
+.\"
+.It Ft FTH Fn fth_list_ref "FTH list" "ficlInteger index"
+Return element at position 
+.Ar index .
+Negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in 
+.Ar list's
+range.
+.\"
+.\" fth_list_reverse
+.\"
+.It Ft FTH Fn fth_list_reverse "FTH list"
+Return new list with elements reversed.
+.\"
+.\" fth_list_set
+.\"
+.It Ft FTH Fn fth_list_set "FTH list" "ficlInteger index" "FTH value"
+Store 
+.Ar value
+at position 
+.Ar index
+and return 
+.Ar value .
+Negative index counts from backward.  Raise 
+.Ar out-of-range
+exception if index is not in
+.Ar list's
+range.
+.It Ft FTH Fn fth_list_to_array "FTH list"
+.It Ft FTH Fn fth_make_empty_list "void"
+.It Ft FTH Fn fth_make_list_len "ficlInteger len"
+.It Ft FTH Fn fth_make_list_var "ficlInteger len" "...'
+.It Ft FTH Fn fth_make_list_with_init "ficlInteger len" "FTH init"
+.El
+.\"
+.\" File Functions (file.c)
+.\"
+.Ss File Functions
+General file functions:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_file_atime "const char *name"
+.It Ft FTH Fn fth_file_basename "const char *name" "const char *ext"
+.It Ft void Fn fth_file_chmod "const char *name" "mode_t mode"
+.It Ft void Fn fth_file_copy "const char *src" "const char *dst"
+.It Ft FTH Fn fth_file_ctime "const char *name"
+.It Ft void Fn fth_file_delete "const char *name"
+.It Ft FTH Fn fth_file_dirname "const char *name"
+.It Ft bool Fn fth_file_install "const char *src" "const char *dst" "mode_t mode"
+.It Ft FTH Fn fth_file_length "const char *name"
+.It Ft FTH Fn fth_file_match_dir "FTH string" "FTH regexp"
+.It Ft void Fn fth_file_mkdir "const char *name" "mode_t mode"
+.It Ft void Fn fth_file_mkfifo "const char *name" "mode_t mode"
+.It Ft FTH Fn fth_file_mtime "const char *name"
+.It Ft FTH Fn fth_file_realpath "const char *name"
+.It Ft void Fn fth_file_rename "const char *src" "const char *dst"
+.It Ft void Fn fth_file_rmdir "const char *name"
+.It Ft FTH Fn fth_file_split "const char *name"
+.It Ft void Fn fth_file_symlink "const char *src" "const char *dst"
+.El
+.Pp
+File test functions:
+.Bl -tag -width MMM -compact
+.It Ft bool Fn fth_file_block_p "const char *name"
+.It Ft bool Fn fth_file_character_p "const char *name"
+.It Ft bool Fn fth_file_directory_p "const char *name"
+.It Ft bool Fn fth_file_executable_p "const char *name"
+.It Ft bool Fn fth_file_exists_p "const char *name"
+.It Ft bool Fn fth_file_fifo_p "const char *name"
+.It Ft bool Fn fth_file_grpowned_p "const char *name"
+.It Ft bool Fn fth_file_owned_p "const char *name"
+.It Ft bool Fn fth_file_readable_p "const char *name"
+.It Ft bool Fn fth_file_setgid_p "const char *name"
+.It Ft bool Fn fth_file_setuid_p "const char *name"
+.It Ft bool Fn fth_file_socket_p "const char *name"
+.It Ft bool Fn fth_file_sticky_p "const char *name"
+.It Ft bool Fn fth_file_symlink_p "const char *name"
+.It Ft bool Fn fth_file_writable_p "const char *name"
+.It Ft bool Fn fth_file_zero_p "const char *name"
+.El
+.\"
+.\" Hashs (hash.c)
+.\"
+.Ss Hashs
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_HASH_P
+.\"
+.It Ft bool Fn FTH_HASH_P "obj"
+Return true if
+.Ar obj
+is a hash object, otherwise false.
+.It Ft void Fn fth_hash_clear "FTH hash"
+.It Ft FTH Fn fth_hash_copy "FTH hash"
+.It Ft FTH Fn fth_hash_delete "FTH hash" "FTH key"
+.It Ft FTH Fn fth_hash_each "FTH hash" "FTH (*f)(FTH key, FTH val, FTH data)" "FTH data"
+.It Ft bool Fn fth_hash_equal_p "FTH obj1" "FTH obj2"
+.It Ft FTH Fn fth_hash_find "FTH hash" "FTH key"
+.It Ft FTH Fn fth_hash_keys "FTH hash"
+.It Ft FTH Fn fth_hash_map "FTH hash" "FTH (*f)(FTH key, FTH val, FTH data)" "FTH data"
+.It Ft bool Fn fth_hash_member_p "FTH hash" "FTH key"
+.It Ft FTH Fn fth_hash_ref "FTH hash" "FTH key"
+.It Ft void Fn fth_hash_set "FTH hash" "FTH key" "FTH value"
+.It Ft FTH Fn fth_hash_to_array "FTH hash"
+.It Ft FTH Fn fth_hash_values "FTH hash"
+.It Ft FTH Fn fth_make_hash "void"
+.It Ft FTH Fn fth_make_hash_len "int hashsize"
+.El
+.Pp
+Property functions:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_hash_id "FTH obj"
+.It Ft FTH Fn fth_object_id "FTH obj"
+.It Ft FTH Fn fth_object_properties "FTH obj"
+.It Ft FTH Fn fth_object_property_ref "FTH obj" "FTH key"
+.It Ft void Fn fth_object_property_set "FTH obj" "FTH key" "FTH value"
+.It Ft FTH Fn fth_properties "FTH obj"
+.It Ft FTH Fn fth_property_ref "FTH obj" "FTH key"
+.It Ft void Fn fth_property_set "FTH obj" "FTH key" "FTH value"
+.It Ft FTH Fn fth_word_properties "FTH obj"
+.It Ft FTH Fn fth_word_property_ref "FTH obj" "FTH key"
+.It Ft void Fn fth_word_property_set "FTH obj" "FTH key" "FTH value"
+.El
+.\"
+.\" Hooks (hook.c)
+.\"
+.Ss Hooks
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_HOOK_P
+.\"
+.It Ft bool Fn FTH_HOOK_P "obj"
+Return true if
+.Ar obj
+is a hook object, otherwise false.
+.\"
+.\" fth_add_hook
+.\"
+.It Ft void Fn fth_add_hook "FTH hook" "FTH proc"
+Add hook procedure 
+.Ar proc
+to
+.Ar hook .
+Raise 
+.Ar bad-arity
+exception if 
+.Ar proc's
+arity doesn't match 
+.Ar hook's
+arity.
+.It Ft FTH Fn fth_hook_apply "FTH hook" "FTH args" "const char *caller"
+.It Ft int Fn fth_hook_arity "FTH hook"
+.\"
+.\" fth_hook_clear
+.\"
+.It Ft void Fn fth_hook_clear "FTH hook"
+Remove all hook procedures from 
+.Ar hook .
+.\"
+.\" fth_hook_empty_p
+.\"
+.It Ft bool Fn fth_hook_empty_p "FTH hook"
+Return true if no hook procedure exist in 
+.Ar hook ,
+otherwise false.
+.It Ft bool Fn fth_hook_equal_p "FTH obj1" "FTH obj2"
+.It Ft bool Fn fth_hook_member_p "FTH hook" "FTH name"
+.It Ft FTH Fn fth_hook_names "FTH hook"
+.\"
+.\" fth_hook_to_array
+.\"
+.It Ft FTH Fn fth_hook_to_array "FTH hook"
+Return array of all 
+.Ar hook
+procedures.
+.\"
+.\" fth_make_hook
+.\"
+.It Ft FTH Fn fth_make_hook "const char *name" "int arity" "const char *doc"
+Return a Hook object called 
+.Ar name
+with 
+.Ar arity
+required arguments, 0 optional arguments and no rest arguments.  An
+optional documentation
+.Ar doc
+can be provided.
+.It Ft FTH Fn fth_make_hook_with_arity "const char *n" "int req" "int opt" "bool rest" "const char *d"
+.\"
+.\" fth_make_simple_hook
+.\"
+.It Ft FTH Fn fth_make_simple_hook "int arity"
+Return a Hook object with 
+.Ar arity
+required arguments, 0 optional arguments and no rest arguments.
+.It Ft FTH Fn fth_remove_hook "FTH hook" "FTH name"
+.It Ft FTH Fn fth_run_hook "FTH hook" "int len" "..."
+.It Ft FTH Fn fth_run_hook_again "FTH hook" "int len" "..."
+.It Ft FTH Fn fth_run_hook_bool "FTH hook" "int len" "..."
+.El
+.\"
+.\" IO (io.c)
+.\"
+.Ss IO functions
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_IO_P
+.\"
+.It Ft bool Fn FTH_IO_P "obj"
+Return true if
+.Ar obj
+is an IO object, otherwise false.
+.It Ft void Fn fth_io_close "FTH io"
+.It Ft bool Fn fth_io_closed_p "FTH obj"
+.It Ft bool Fn fth_io_eof_p "FTH io"
+.It Ft bool Fn fth_io_equal_p "FTH obj1" "FTH obj2"
+.It Ft char* Fn fth_io_filename "FTH io"
+.It Ft int Fn fth_io_fileno "FTH io"
+.It Ft void Fn fth_io_flush "FTH io"
+.It Ft int Fn fth_io_getc "FTH io"
+.It Ft bool Fn fth_io_input_p "FTH obj"
+.It Ft ficl2Integer Fn fth_io_length "FTH obj"
+.It Ft int Fn fth_io_mode "FTH io"
+.It Ft FTH Fn fth_io_nopen "const char *host" "int port" "int type"
+.It Ft FTH Fn fth_io_open "const char *name" "int fam"
+.It Ft bool Fn fth_io_output_p "FTH obj"
+.It Ft FTH Fn fth_io_popen "FTH cmd" "int fam"
+.It Ft ficl2Integer Fn fth_io_pos_ref "FTH io"
+.It Ft void Fn fth_io_pos_set "FTH io" "ficl2Integer pos"
+.It Ft void* Fn fth_io_ptr "FTH io"
+.It Ft void Fn fth_io_putc "FTH io" "int c"
+.It Ft char* Fn fth_io_read "FTH io"
+.It Ft FTH Fn fth_io_read_line "FTH io"
+.It Ft FTH Fn fth_io_readlines "FTH io"
+.It Ft void Fn fth_io_rewind "FTH io"
+.It Ft FTH Fn fth_io_sopen "FTH string" "int fam"
+.It Ft FTH Fn fth_io_to_string "FTH io"
+.It Ft void Fn fth_io_write "FTH io" "const char *line"
+.It Ft void Fn fth_io_write_and_flush "FTH io" "const char *line"
+.It Ft void Fn fth_io_write_format "FTH io" "FTH fmt" "FTH args"
+.It Ft void Fn fth_io_writelines "FTH io" "FTH array"
+.It Ft FTH Fn fth_readlines "const char *name"
+.It Ft int Fn fth_set_exit_status "int status"
+.It Ft FTH Fn fth_set_io_stderr "FTH io"
+.It Ft FTH Fn fth_set_io_stdin "FTH io"
+.It Ft FTH Fn fth_set_io_stdout "FTH io"
+.It Ft void Fn fth_writelines "const char *name" "FTH array"
+.El
+.\"
+.\" Miscellaneous (misc.c)
+.\"
+.Ss Miscellaneous
+Predicate functions:
+.Bl -tag -width MMM -compact
+.It Ft bool Fn fth_boolean_p "FTH obj"
+.It Ft bool Fn fth_instance_flag_p "FTH obj" "int flags"
+.It Ft bool Fn fth_instance_type_p "FTH obj" "int type"
+.It Ft bool Fn fth_word_defined_p "FTH obj"
+.It Ft bool Fn fth_word_type_p "FTH obj" "int type"
+.El
+.\"
+.\" Initialization functions
+.\"
+.Pp
+Initialization functions:
+.Bl -tag -width MMM -compact
+.It Ft void Fn fth_exit "int n"
+.It Ft void Fn fth_make_ficl "unsigned int d_size" "unsigned int s_size" "unsigned int r_size" "unsigned int l_size"
+.It Ft void Fn fth_reset "void"
+.El
+.\"
+.\" Evaluation functions
+.\"
+.Pp
+Evaluation functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" fth_add_feature
+.\"
+.It Ft void Fn fth_add_feature "const char *name"
+Push C string
+.Ar name
+to environment word list for later review with
+.Cm provided?
+and
+.Dv *features* .
+.It Ft int  Fn fth_catch_eval "const char *buffer"
+.It Ft int  Fn fth_catch_exec "ficlWord *word"
+.\"
+.\" fth_eval
+.\"
+.It Ft FTH  Fn fth_eval "const char *buffer"
+Evaluate C string
+.Ar buffer .
+If
+.Ar buffer
+is NULL, return #undef, if
+.Ar buffer
+evaluates to FTH_BYE, exit program, if
+.Ar buffer
+evaluates to no value, return #undef, if
+.Ar buffer
+evaluates to a single value, remove it from stack and return it, if
+.Ar buffer
+evaluates to more than one value, remove them from stackand and
+return them as Fth array.
+.\"
+.\" fth_init
+.\"
+.It Ft void Fn fth_init "void"
+This function must be called before any libfth.so action can take place.
+.\"
+.\" fth_provided_p
+.\"
+.It Ft bool Fn fth_provided_p "const char *name"
+Test if feature
+.Ar name
+exists in environment word list.
+.El
+.\"
+.\" Loading source files
+.\"
+.Pp
+Loading source files:
+.Bl -tag -width MMM -compact
+.\"
+.\" fth_add_load_lib_path
+.\"
+.It Ft void Fn fth_add_load_lib_path "const char *path"
+Push 
+.Ar path
+at the end of global array variable 
+.Dv *load-lib-path*
+if not already there.
+.\"
+.\" fth_add_load_path
+.\"
+.It Ft void Fn fth_add_load_path "const char *path"
+Push 
+.Ar path
+at the end of global array variable 
+.Dv *load-path*
+if not already there.
+.\"
+.\" fth_add_loaded_files
+.\"
+.It Ft void Fn fth_add_loaded_files "const char *file"
+Push 
+.Ar file
+at the end of global array variable 
+.Dv *loaded-files*
+if not already there.
+.It Ft char* Fn fth_basename "const char *path"
+.\"
+.\" fth_dl_load
+.\"
+.It Ft FTH  Fn fth_dl_load "const char *lib" "const char *func"
+Load C string 
+.Ar name
+as dynamic library if not already loaded and add
+.Ar name
+to global array 
+.Dv *loaded-files* .
+C string 
+.Ar func
+will be called after load was successful.  Before loading the dynamic
+library run hook
+.Cm before-load-hook
+if not empty.  If this hook returns #f, return immediately without
+loading the library and return FTH_FALSE.  If loading finishes
+successfully or library was already loaded, return FTH_TRUE, otherwise
+raise
+.Ar so-file-error
+exception.  After loading the dynamic library run hook
+.Cm after-load-hook
+if not empty.  If 
+.Ar name
+has no file extension, \(dq.so\(dq will be added.  If
+.Ar name
+or 
+.Ar name
+plus \(dq.so\(dq doesn't exist, try all path names from 
+.Dv *load-lib-path*
+with
+.Ar name .
+.It Ft FTH  Fn fth_find_file "FTH name"
+.It Ft void Fn fth_install "void"
+.It Ft void Fn fth_install_file "FTH fname"
+.\"
+.\" fth_load_file
+.\"
+.It Ft FTH  Fn fth_load_file "const char *name"
+Load C string 
+.Ar name
+as Fth source file and add 
+.Ar name
+to global array
+.Dv *loaded-files* .
+Before loading source file run hook 
+.Cm before-load-hook
+if not empty.  If this hook returns #f, nothing is loaded and return value is
+FTH_FALSE.  If loading finishes successfully, return value is FTH_TRUE,
+otherwise throw an exception.  After loading source file run hook
+.Cm after-load-hook
+if not empty.  If 
+.Ar name
+has no file extension, FTH_FILE_EXTENSION
+.Sq .fs
+will be added.  If 
+.Ar name
+or 
+.Ar name
+plus FTH_FILE_EXTENSION doesn't exist, try all path names from 
+.Dv *load-path*
+with
+.Ar name .
+.\"
+.\" fth_load_global_init_file
+.\"
+.It Ft FTH  Fn fth_load_global_init_file "void"
+Load FTH_GLOBAL_INIT_FILE 
+.Pa ${prefix}/etc/fthrc
+as Forth source file if it exists, otherwise do nothing.  Run
+.Cm before-load-hook
+and
+.Cm after-load-hook
+if not empty.
+.\"
+.\" fth_load_init_file
+.\"
+.It Ft FTH  Fn fth_load_init_file "const char *init_file"
+Load C string 
+.Ar init_file
+as Forth source file if it exists, otherwise do nothing.  If 
+.Ar init_file
+is NULL, try to load 
+.Dv ${FTH_INIT_FILE} .
+If 
+.Dv ${FTH_INIT_FILE}
+is not set, try to load 
+.Dv ${HOME}/.fthrc
+instead.  Run 
+.Cm before-load-hook
+and 
+.Cm after-load-hook
+if not empty.
+.\"
+.\" fth_require_file
+.\"
+.It Ft FTH  Fn fth_require_file "const char *name"
+Load C string 
+.Ar name
+as Fth source file if not already loaded and add 
+.Ar name
+to global array
+.Dv *loaded-files* .
+Before loading source file run hook 
+.Cm before-load-hook
+if not empty.  If this hook returns #f, nothing is loaded and return value is
+FTH_FALSE.  If loading finishes successfully, return value is FTH_TRUE,
+otherwise throw an exception.  After loading source file run hook
+.Cm after-load-hook
+if not empty.  If
+.Ar name
+has no file extension, FTH_FILE_EXTENSION
+.Sq .fs
+will be added.  If 
+.Ar name
+or 
+.Ar name
+plus FTH_FILE_EXTENSION doesn't exist, try all path names from 
+.Dv *load-path*
+with
+.Ar name .
+.\"
+.\" fth_unshift_load_lib_path
+.\"
+.It Ft void Fn fth_unshift_load_lib_path "const char *path"
+Prepend 
+.Ar path
+to the beginning of global array variable
+.Dv *load-lib-path*
+if not already there.
+.\"
+.\" fth_unshift_load_path
+.\"
+.It Ft void Fn fth_unshift_load_path "const char *path"
+Prepend 
+.Ar path
+to the beginning of global array variable
+.Dv *load-path*
+if not already there.
+.El
+.\"
+.\" Rest
+.\"
+.Pp
+Rest:
+.Bl -tag -width MMM -compact
+.It Ft FTH  Fn fth_apropos "FTH regexp"
+.It Ft void Fn fth_begin_values_to_obj "ficlVm *vm" "char *name" "FTH args"
+.It Ft FTH  Fn fth_find_in_wordlist "const char *name"
+.It Ft char* Fn fth_parse_word "void"
+.It Ft char* Fn fth_short_version "void"
+.It Ft char* Fn fth_version "void"
+.\"
+.\" fth_word_ref
+.\"
+.It Ft FTH  Fn fth_word_ref "const char *name"
+Find 
+.Ar name
+in Forth dictionary and return ficlWord.
+.It Ft FTH  Fn fth_wordlist_each "bool (*func)(ficlWord *word, FTH data)" "FTH data"
+.El
+.\"
+.\" Numbers (numbers.c)
+.\"
+.Ss Numbers
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_NUMBER_P
+.\" fth_number_p
+.\"
+.It Ft bool Fn FTH_NUMBER_P "obj"
+.It Ft bool Fn fth_number_p "obj"
+Both return true if
+.Ar obj
+is any kind of a number, otherwise false.
+.\"
+.\" FTH_FIXNUM_P
+.\" fth_fixnum_p
+.\"
+.It Ft bool Fn FTH_FIXNUM_P "obj"
+.It Ft bool Fn fth_fixnum_p "obj"
+Both return true if
+.Ar obj
+is a fixnum, otherwise false.
+.\"
+.\" FTH_LONG_LONG_P
+.\" FTH_INTEGER_P
+.\" fth_integer_p
+.\"
+.It Ft bool Fn FTH_LONG_LONG "obj"
+.It Ft bool Fn FTH_INTEGER_P "obj"
+.It Ft bool Fn fth_integer_p "obj"
+All three return true if
+.Ar obj
+is an integer, otherwise false.
+.\"
+.\" FTH_UNSIGNED_P
+.\" fth_unsigned_p
+.\"
+.It Ft bool Fn FTH_UNSIGNED_P "obj"
+.It Ft bool Fn fth_unsigned_p "obj"
+Both return true if
+.Ar obj
+is a unsigned integer, otherwise false.
+.\"
+.\" FTH_OFF_T_P
+.\"
+.It Ft bool Fn FTH_OFF_T_P "obj"
+Return true if
+.Ar obj
+is an off_t object, otherwise false.
+.\"
+.\" FTH_UOFF_T_P
+.\" fth_uoff_t_p
+.\"
+.It Ft bool Fn FTH_UOFF_T_P "obj"
+.It Ft bool Fn fth_uoff_t_p "obj"
+Both return true if
+.Ar obj
+is an unsigned off_t object, otherwise false.
+.\"
+.\" FTH_FLOAT_P
+.\"
+.It Ft bool Fn FTH_FLOAT_P "obj"
+Return true if
+.Ar obj
+is a float object, otherwise false.
+.\"
+.\" FTH_EXACT_P
+.\" fth_exact_p
+.\"
+.It Ft bool Fn FTH_EXACT_P "obj"
+.It Ft bool Fn fth_exact_p "obj"
+Both return true if
+.Ar obj
+is an exact number, otherwise false.
+.\"
+.\" fth_complex_ref
+.\"
+.It Ft Fn ficlComplex fth_complex_ref "FTH x"
+Return C ficlComplex from
+.Ar x .
+.It Ft FTH Fn fth_float_copy "FTH x"
+.\"
+.\" fth_float_ref
+.\"
+.It Ft ficlFloat Fn fth_float_ref "FTH x"
+Return C ficlFloat from 
+.Ar x .
+.\"
+.\" fth_float_ref_or_else
+.\"
+.It Ft ficlFloat Fn fth_float_ref_or_else "FTH x" "ficlFloat fallback"
+Return C ficlFloat from 
+.Ar x .
+If 
+.Ar x
+doesn't fit in Fixnum, FTH off_t, FTH float, FTH complex, or any
+bignum, return
+.Ar fallback .
+.\"
+.\" fth_int_ref
+.\"
+.It Ft ficlInteger Fn fth_int_ref "FTH x"
+Return C ficlInteger from 
+.Ar x .
+.\"
+.\" fth_int_ref_or_else
+.\"
+.It Ft ficlInteger Fn fth_int_ref_or_else "FTH x" "ficlInteger fallback"
+Return C ficlInteger from 
+.Ar x .
+If 
+.Ar x
+doesn't fit in Fixnum, FTH off_t, FTH float, FTH complex, or any
+bignum, return 
+.Ar fallback .
+.It Ft bool Fn fth_isinf "ficlFloat f"
+.It Ft bool Fn fth_isnan "ficlFloat f"
+.\"
+.\" fth_long_long_ref
+.\"
+.It Ft ficl2Integer Fn fth_long_long_ref "FTH x"
+Return C ficl2Integer from 
+.Ar x .
+.\"
+.\" fth_make_int
+.\"
+.It Ft FTH Fn fth_make_int "ficlInteger n"
+Return a FTH fixnum or a FTH off_t object depending on 
+.Ar n .
+.\"
+.\" fth_make_float
+.\"
+.It Ft FTH Fn fth_make_float "ficlFloat f"
+Return a FTH float object from
+.Ar f .
+.\"
+.\" fth_make_long_long
+.\"
+.It Ft FTH Fn fth_make_long_long "ficl2Integer d"
+Return a FTH fixnum or a FTH off_t object depending on 
+.Ar d .
+.It Ft FTH Fn fth_make_off_t "ficl2Integer d"
+.It Ft ficlFloat Fn fth_real_ref "FTH x"
+.\"
+.\" fth_make_ulong_long
+.\"
+.It Ft FTH Fn fth_make_ulong_long "ficl2Unsigned ud"
+Return a FTH unsigned fixnum or a FTH uoff_t object depending on 
+.Ar ud .
+.\"
+.\" fth_make_unsigned
+.\"
+.It Ft FTH Fn fth_make_unsigned "ficlUnsigned u"
+Return a FTH unsigned fixnum or a FTH uoff_t object depending on 
+.Ar u .
+.It Ft FTH Fn fth_make_uoff_t "ficl2Unsigned ud"
+.It Ft FTH Fn fth_off_t_copy "FTH obj"
+.\"
+.\" fth_ulong_long_ref
+.\"
+.It Ft ficl2Unsigned Fn fth_ulong_long_ref "FTH x"
+Return C ficl2Unsigned from
+.Ar x .
+.\"
+.\" fth_unsigned_ref
+.\"
+.It Ft ficlUnsigned Fn fth_unsigned_ref "FTH x"
+Return C ficlUnsigned from 
+.Ar x .
+.El
+.Pp
+Random numbers:
+.Bl -tag -width MMM -compact
+.It Ft ficlFloat Fn fth_frandom "ficlFloat f"
+Return
+.Ar -f
+...
+.Ar f .
+.It Ft ficlFloat Fn fth_random "ficlFloat f"
+Return 0 ...
+.Ar f .
+.It Ft void Fn fth_srand "ficlInteger n"
+.El
+.Pp
+Complex numbers:
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_COMPLEX_P
+.\"
+.It Ft bool Fn FTH_COMPLEX_P "obj"
+Return true if
+.Ar obj
+is a complex object, otherwise false.
+.It Ft ficlComplex Fn ficlStackPopComplex "ficlStack *stack"
+.It Ft void Fn ficlStackPushComplex "ficlStack *stack" "ficlComplex cp"
+.\"
+.\" fth_make_complex
+.\"
+.It Ft FTH Fn fth_make_complex "ficlComplex z"
+Return a FTH complex object from
+.Ar z .
+.It Ft FTH Fn fth_make_polar "ficlFloat real" "ficlFloat theta"
+.It Ft FTH Fn fth_make_rectangular "ficlFloat real" "ficlFloat image"
+.El
+.Pp
+Big and rational numbers
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_BIGNUM_P
+.\"
+.It Ft bool Fn FTH_BIGNUM_P "obj"
+Return true if
+.Ar obj
+is a bignum object, otherwise false.
+.\"
+.\" FTH_BIGFLOAT_P
+.\"
+.It Ft bool Fn FTH_BIGFLOAT_P "obj"
+Return true if
+.Ar obj
+is a bigfloat object, otherwise false.
+.\"
+.\" FTH_RATIO_P
+.\"
+.It Ft bool Fn FTH_RATIO_P "obj"
+Return true if
+.Ar obj
+is a ratio object, otherwise false.
+.\"
+.\" FTH_RAND_STATE_P
+.\"
+.It Ft bool Fn FTH_RAND_STATE_P "obj"
+Return true if
+.Ar obj
+is a rand-state object, otherwise false.
+.\"
+.\" fth_denominator
+.\"
+.It Ft FTH Fn fth_denominator "FTH x"
+Return denominator from
+.Ar x 
+or 1.
+.It Ft FTH Fn fth_exact_to_inexact "FTH x"
+.It Ft FTH Fn fth_inexact_to_exact "FTH x"
+.It Ft FTH Fn fth_make_bignum "ficlBignum bn"
+.It Ft FTH Fn fth_make_bignum "FTH m"
+.\"
+.\" fth_make_ratio
+.\"
+.It Ft FTH Fn fth_make_ratio "FTH num" "FTH den"
+Return a FTH ratio object from
+.Ar num
+and
+.Ar den .
+.It Ft FTH Fn fth_make_ratio_from_float "ficlFloat f"
+.It Ft FTH Fn fth_make_ratio_from_int "ficlInteger num" "ficlInteger den"
+.It Ft FTH Fn fth_make_rational "ficlRatio r"
+.\"
+.\" fth_numerator
+.\"
+.It Ft FTH Fn fth_numerator "FTH x"
+Return numerator from
+.Ar x
+or 0.
+.It Ft FTH Fn fth_ratio_floor "FTH x"
+.\"
+.\" fth_rationalize
+.\"
+.It Ft FTH Fn fth_rationalize "FTH x" "FTH err"
+Return inexact number within 
+.Ar err
+of
+.Ar x .
+.El
+.Pp
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_number_add "FTH x" "FTH y"
+.It Ft FTH Fn fth_number_div "FTH x" "FTH y"
+.It Ft bool Fn fth_number_equal_p "FTH x" "FTH y"
+.It Ft bool Fn fth_number_less_p "FTH x" "FTH y"
+.It Ft FTH Fn fth_number_mul "FTH x" "FTH y"
+.It Ft FTH Fn fth_number_sub "FTH x" "FTH y"
+.El
+.\"
+.\" Object (object.c)
+.\"
+.Ss Objects
+GC related functions:
+.Bl -tag -width MMM -compact
+.It Ft void Fn fth_gc_mark "FTH obj"
+.It Ft FTH Fn fth_gc_off "void"
+.It Ft FTH Fn fth_gc_on "void"
+.It Ft FTH Fn fth_gc_permanent "FTH obj"
+.\"
+.\" fth_gc_protect
+.\"
+.It Ft FTH Fn fth_gc_protect "FTH obj"
+Protect 
+.Ar obj
+from garbage collection until fth_gc_unprotect.
+.It Ft FTH Fn fth_gc_protect_set "FTH out" "FTH in"
+.It Ft void Fn fth_gc_unmark "FTH obj"
+.\"
+.\" fth_gc_unprotect
+.\"
+.It Ft FTH Fn fth_gc_unprotect "FTH obj"
+Unprotect 
+.Ar obj
+from garbage collection.
+.El
+.Pp
+Object type related functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" fth_instance_ref_gen
+.\"
+.It Ft void* Fn fth_instance_ref_gen "FTH obj"
+Return GEN-struct of 
+.Ar obj .
+.\"
+.\" fth_make_object_type
+.\"
+.It Ft FTH Fn fth_make_object_type "const char *name"
+Add 
+.Ar name
+to feature environment list, create a constant fth-\c
+.Ar name
+of object-type and return new object-type
+.Ar name .
+.It Ft FTH Fn fth_make_object_type_from "const char *name" "FTH base"
+.It Ft bool Fn fth_object_type_p "FTH obj"
+.El
+.Pp
+Instance related functions:
+.Bl -tag -width MMM -compact
+.It Ft bool Fn fth_instance_p "FTH obj"
+.\"
+.\" fth_make_instance
+.\"
+.It Ft FTH Fn fth_make_instance "FTH obj" "void *gen"
+Return new instance of Object type 
+.Ar obj
+with 
+.Ar gen
+wrapped in.
+.\"
+.\" fth_object_is_instance_of
+.\"
+.It Ft bool Fn fth_object_is_instance_of "FTH obj" "FTH type"
+Return true if 
+.Ar obj
+is an instance of 
+.Ar type ,
+otherwise false.
+.El
+.Pp
+Object set functions:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_set_object_apply "FTH obj" "void *apply" "int req" "int opt" "int rest"
+.It Ft FTH Fn fth_set_object_copy "FTH obj" "FTH (*copy)(FTH obj)"
+.It Ft FTH Fn fth_set_object_dump "FTH obj" "FTH (*dump)(FTH obj)"
+.It Ft FTH Fn fth_set_object_equal_p "FTH obj" "FTH (*equal_p)(FTH obj1" "FTH obj2)"
+.It Ft FTH Fn fth_set_object_free "FTH obj" "void (*free)(FTH obj)"
+.It Ft FTH Fn fth_set_object_inspect "FTH obj" "FTH (*inspect)(FTH obj)"
+.It Ft FTH Fn fth_set_object_length "FTH obj" "FTH (*length)(FTH obj)"
+.It Ft FTH Fn fth_set_object_mark "FTH obj" "void (*mark)(FTH obj)"
+.It Ft FTH Fn fth_set_object_to_array "FTH obj" "FTH (*to_array)(FTH obj)"
+.It Ft FTH Fn fth_set_object_to_string "FTH obj" "FTH (*to_string)(FTH obj)"
+.It Ft FTH Fn fth_set_object_value_ref "FTH obj" "FTH (*value_ref)(FTH obj" "FTH index)"
+.It Ft FTH Fn fth_set_object_value_set "FTH obj" "FTH (*value_set)(FTH obj" "FTH index" "FTH value)"
+.El
+.Pp
+Object functions:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn fth_object_apply "FTH obj" "FTH args"
+.It Ft FTH Fn fth_object_copy "FTH obj"
+.It Ft FTH Fn fth_object_dump "FTH obj"
+.It Ft bool Fn fth_object_empty_p "FTH obj"
+.\"
+.\" fth_object_equal_p
+.\"
+.It Ft bool Fn fth_object_equal_p "FTH obj1" "FTH obj2"
+Test if 
+.Ar obj1 
+is equal
+.Ar obj2 .
+.It Ft FTH Fn fth_object_find "FTH obj" "FTH key"
+.It Ft FTH Fn fth_object_index "FTH obj" "FTH key"
+.It Ft FTH Fn fth_object_inspect "FTH obj"
+.It Ft ficlInteger Fn fth_object_length "FTH obj"
+.It Ft bool Fn fth_object_member_p "FTH obj" "FTH key"
+.It Ft char* Fn fth_object_name "FTH obj"
+.It Ft bool Fn fth_object_range_p "FTH obj" "ficlInteger index"
+.It Ft FTH Fn fth_object_sort "FTH obj" "FTH proc"
+.It Ft FTH Fn fth_object_to_array "FTH obj"
+.\"
+.\" fth_object_to_string
+.\"
+.It Ft FTH Fn fth_object_to_string "FTH obj"
+Return Fth string representation of
+.Ar obj .
+.It Ft FTH Fn fth_object_to_string_2 "FTH obj"
+Like
+.Sx fth_object_to_string
+but if
+.Ar obj
+is a string, wrap string to \(dqstring\(dq.
+.It Ft FTH Fn fth_object_value_ref "FTH obj" "ficlInteger index"
+.It Ft FTH Fn fth_object_value_set "FTH obj" "ficlInteger index" "FTH value"
+.It Ft char* Fn fth_to_c_dump "FTH obj"
+.It Ft char* Fn fth_to_c_inspect "FTH obj"
+.It Ft char* Fn fth_to_c_string "FTH obj"
+.It Ft char* Fn fth_to_c_string_2 "FTH obj"
+If
+.Ar obj
+is a string, wrap string to \(dqstring\(dq.
+.El
+.Pp
+Cycle through objects:
+.Bl -tag -width MMM -compact
+.It Ft ficlInteger Fn fth_cycle_next "FTH obj"
+.It Ft ficlInteger Fn fth_cycle_pos_0 "FTH obj"
+.It Ft ficlInteger Fn fth_cycle_pos_ref "FTH obj"
+.It Ft ficlInteger Fn fth_cycle_pos_set "FTH obj" "ficlInteger index"
+.It Ft FTH Fn fth_object_cycle_ref "FTH obj"
+.It Ft FTH Fn fth_object_cycle_set "FTH obj" "FTH value"
+.El
+.Pp
+Stack access functions:
+.Bl -tag -width MMM -compact
+.It Ft FTH Fn ficl_to_fth "FTH obj"
+.It Ft FTH Fn fth_pop_ficl_cell "ficlVm *vm"
+.It Ft void Fn fth_push_ficl_cell "ficlVm *vm" "FTH obj"
+.It Ft FTH Fn fth_to_ficl "FTH obj"
+.El
+.\"
+.\" Ports (port.c)
+.\"
+.Ss Ports
+.Bl -tag -width MMM -compact
+.\"
+.\" fth_port_close
+.\"
+.It Ft void Fn fth_port_close "FTH port"
+Close
+.Ar port ;
+if
+.Ar port
+is FTH_FALSE, do nothing.
+.\"
+.\" fth_port_display
+.\"
+.It Ft void Fn fth_port_display "FTH port" "FTH obj"
+Put string representation of Fth object
+.Ar obj
+to output port
+.Ar port .
+If
+.Ar port
+is FTH_FALSE, print to standard out.
+.\"
+.\" fth_port_flush
+.\"
+.It Ft void Fn fth_port_flush "FTH port"
+Flush
+.Ar port ;
+if
+.Ar port
+is FTH_FALSE, do nothing.
+.It Ft int Fn fth_port_getc "FTH port"
+.It Ft char* Fn fth_port_gets "FTH port"
+.It Ft void Fn fth_port_putc "FTH port" "int c"
+.\"
+.\" fth_port_puts
+.\"
+.It Ft void Fn fth_port_puts "FTH port" "const char *str"
+Put C string
+.Ar str
+to output port
+.Ar port .
+If
+.Ar port
+is FTH_FALSE, print to standard out.
+.It Ft out_cb Fn fth_set_error_cb "out_cb cb"
+.It Ft out_cb Fn fth_set_print_and_error_cb "out_cb cb"
+.It Ft out_cb Fn fth_set_print_cb "out_cb cb"
+.It Ft in_cb Fn fth_set_read_cb "in_cb cb"
+.\"
+.\" fth_port_to_string
+.\"
+.It Ft FTH Fn fth_port_to_string "FTH port"
+Return content of 
+.Ar port
+as Fth string.  If
+.Ar port
+is FTH_FALSE, return FTH_FALSE.
+.El
+.\"
+.\" Printf (printf.c)
+.\"
+.Ss Printf
+The format string for the following functions can have zero or more of
+the following flags:
+.Bl -tag -offset indent -width MMMMMMMM -compact
+.It Sq Cm #
+The value will be converted to an alternate form.  For
+.Cm b ,
+.Cm B ,
+.Cm o
+and
+.Cm O 
+conversions prepend a zero before output, for
+.Cm x
+and
+.Cm X
+conversions prepend a
+.Sq 0x
+respective
+.Sq 0X
+before output.  For
+.Cm a ,
+.Cm A ,
+.Cm e ,
+.Cm E ,
+.Cm f ,
+.Cm F ,
+.Cm g
+and
+.Cm G
+conversions the result will always have a decimal point.
+.It Sq Cm -
+Flush output left.
+.It So Cm 0 Sc No (zero)
+Padding with
+.Sq 0
+(zero) rather than blank.
+.It Sq Cm l
+Modifier for
+.Ar long ,
+.Ar unsigned long
+and
+.Ar long * .
+.It Sq Cm ll
+Modifier for
+.Ar long long ,
+.Ar unsigned long long
+and
+.Ar long long * .
+.It Sq Cm z
+Modifier for
+.Ar size_t .
+.El
+The following conversion specifiers are known:
+.Bl -tag -offset indent -width MMMMMMMM -compact
+.It Cm %
+A
+.Sq %
+is written.
+.It Cm aAeEfFgG
+Floating point output like
+.Xr sprintf 3 .
+.It Cm bBdoOpuUxX
+Integer output in binary, decimal, octal, void pointer, unsigned and
+hexadecimal form.
+.It Cm c
+Single character output.
+.It Cm D
+Dump string output of any Forth object with
+.Cm object-dump .
+.It Cm I
+Inspect string output of any Forth object with
+.Cm object-inspect .
+.It Cm M
+String representation of any Forth object with
+.Cm object->string ,
+in addition, strings will be enclosed in double quotations
+(\(dqstring\(dq).
+.It Cm qQs
+C string char * output.
+.It Cm S
+String representation of any Forth object with
+.Cm object->string .
+.El
+.Bl -tag -width MMM -compact
+.It Ft int Fn fth_asprintf "char **result" "const char *fmt" "..."
+.It Ft int Fn fth_debug "const char *fmt" "..."
+.It Ft int Fn fth_error "const char *str"
+.It Ft int Fn fth_errorf "const char *fmt" "..."
+.It Ft char* Fn fth_format "const char *fmt" "..."
+.It Ft int Fn fth_fprintf "FILE *fp" "const char *fmt" "..."
+.It Ft int Fn fth_ioprintf "FTH io" "const char *fmt" "..."
+.It Ft int Fn fth_port_printf "FTH port" "const char *fmt" "..."
+.It Ft int Fn fth_port_vprintf "FTH port" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_print "const char *str"
+.It Ft int Fn fth_printf "const char *fmt" "..."
+.It Ft int Fn fth_snprintf "char *buffer" "size_t size" "const char *fmt" "..."
+.It Ft int Fn fth_sprintf "char *buffer" "const char *fmt" "..."
+.It Ft int Fn fth_vasprintf "char **result" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_verrorf "const char *fmt" "va_list ap"
+.It Ft char* Fn fth_vformat "const char *fmt" "va_list ap"
+.It Ft int Fn fth_vfprintf "FILE *fp" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_vioprintf "FTH io" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_vprintf "const char *fmt" "va_list ap"
+.It Ft int Fn fth_vsnprintf "char *buffer" "size_t size" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_vsprintf "char *buffer" "const char *fmt" "va_list ap"
+.It Ft int Fn fth_warning "const char *fmt" "..."
+.El
+.\"
+.\" Procs (proc.c)
+.\"
+.Ss Procs
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_PROC_P
+.\"
+.It Ft bool Fn FTH_PROC_P "obj"
+Return true if
+.Ar obj
+is a proc object, otherwise false.
+.\"
+.\" FTH_WORD_P
+.\"
+.It Ft bool Fn FTH_WORD_P "obj"
+Return true if
+.Ar obj
+is a ficlWord, otherwise false.
+.\"
+.\" fth_define_procedure
+.\"
+.It Ft ficlWord* Fn fth_define_procedure "const char *name" "FTH (*func)()" "int req" "int opt" "int rest" "const char *doc"
+Return new ficlWord 
+.Ar name
+tied to C function 
+.Ar func
+with 
+.Ar req
+required arguments, 
+.Ar opt
+optional arguments and 
+.Ar rest
+(true) or no 
+.Ar rest
+(false) arguments with optional documentation string
+.Ar doc .
+.Ar func
+takes zero or more FTH objects and returns a FTH object.
+.\"
+.\" fth_define_void_procedure
+.\"
+.It Ft ficlWord* Fn fth_define_void_procedure "const char *name" "void (*func)()" "int req" "int opt" "int rest" "const char *doc"
+Return new ficlWord 
+.Ar name
+tied to C function 
+.Ar func
+with 
+.Ar req
+required arguments, 
+.Ar opt
+optional arguments and 
+.Ar rest
+(true) or no 
+.Ar rest
+(false) arguments with optional documentation string
+.Ar doc .
+.Ar func
+takes zero or more FTH objects and doesn't return any (void).
+.\"
+.\" fth_documentation_ref
+.\"
+.It Ft FTH Fn fth_documentation_ref "FTH obj"
+Return documentation property string of 
+.Ar obj
+or FTH_FALSE.
+.\"
+.\" fth_documentation_set
+.\"
+.It Ft void Fn fth_documentation_set "FTH obj" "FTH doc"
+Set documentation property string of any 
+.Ar obj 
+to
+.Ar doc .
+.It Ft FTH Fn fth_get_optarg "ficlInteger req" "FTH def"
+.It Ft FTH Fn fth_get_optkey "FTH key" "FTH def"
+.It Ft ficl2Integer Fn fth_get_optkey_2int "FTH key" "ficl2Integer def"
+.It Ft ficlInteger Fn fth_get_optkey_int "FTH key" "ficlInteger def"
+.It Ft int Fn fth_get_optkey_fix "FTH key" "int def"
+.It Ft char* Fn fth_get_optkey_str "FTH key" "char *def"
+.It Ft FTH Fn fth_make_proc "ficlWord *word" "int req" "int opt" "bool rest"
+.It Ft FTH Fn fth_make_proc_from_func "const char *" "FTH (*)()" "bool" "int" "int" "bool"
+.\"
+.\" fth_proc_apply
+.\"
+.It Ft FTH Fn fth_proc_apply "FTH proc" "FTH args" "const char *caller"
+If 
+.Ar proc
+is a Proc object, execute its ficlWord with
+Array object
+.Ar args
+as arguments on stack.
+.Ar caller
+can be any C string used for error message.  Raise 
+.Ar bad-arity
+exception if 
+.Ar proc
+has more required arguments than 
+.Ar len .
+Raise
+.Ar eval-error
+exception if an error occured during evaluation.
+.Pp
+If 
+.Ar proc
+is not a Proc object, return FTH_FALSE,
+If 
+.Ar proc
+doesn't leave a return value on stack, return FTH_FALSE, if
+.Ar proc
+leaves a singel value on stack, return it, if 
+.Ar proc
+leaves more than one values on stack, return them as Array object.
+.\"
+.\" fth_proc_arity
+.\"
+.It Ft int Fn fth_proc_arity "FTH proc"
+If 
+.Ar proc
+is a Proc object, return required arguments as C int, otherwise
+return 0.
+.\"
+.\" fth_proc_call
+.\"
+.It Ft FTH Fn fth_proc_call "FTH proc" "const char *caller" "int len" "..."
+If 
+.Ar proc
+is a Proc object, execute its ficlWord with
+.Ar len
+arguments on stack.
+.Ar caller
+can be any C string used for error message.  Raise 
+.Ar bad-arity
+exception if 
+.Ar proc
+has more required arguments than 
+.Ar len .
+Raise
+.Ar eval-error
+exception if an error occured during evaluation.
+.Pp
+If 
+.Ar proc
+is not a Proc object, return FTH_FALSE,
+If 
+.Ar proc
+doesn't leave a return value on stack, return FTH_FALSE, if
+.Ar proc
+leaves a singel value on stack, return it, if 
+.Ar proc
+leaves more than one values on stack, return them as Array object.
+.\"
+.\" fth_proc_name
+.\"
+.It Ft char* Fn fth_proc_name "FTH obj"
+If 
+.Ar obj
+is a ficlWord, return name as C string, otherwise return
+\(dqnot-a-proc\(dq.
+.\"
+.\" fth_proc_source_ref
+.\"
+.It Ft FTH Fn fth_proc_source_ref "FTH proc"
+Return source string property of 
+.Ar proc ,
+or FTH_FALSE if not available.
+.\"
+.\" fth_proc_source_set
+.\"
+.It Ft void Fn fth_proc_source_set "FTH proc" "FTH source"
+Set source string property of
+.Ar proc
+to
+.Ar source .
+.It Ft ficlWord* Fn fth_proc_to_xt "FTH proc"
+.It Ft FTH Fn fth_source_file "FTH obj"
+.It Ft FTH Fn fth_source_line "FTH obj"
+.It Ft FTH Fn fth_source_ref "FTH obj"
+.It Ft void Fn fth_source_set "FTH obj" "FTH source"
+.It Ft ficlWord* Fn fth_word_doc_set "ficlWord *word" "const char *str"
+.It Ft FTH Fn proc_from_proc_or_xt "FTH proc_or_xt" "int req" "int opt" "bool rest"
+.El
+.\"
+.\" Define Variables (proc.c)
+.\"
+.Ss Define Variables
+.Bl -tag -width MMM -compact
+.\"
+.\" fth_define
+.\"
+.It Ft FTH Fn fth_define "const char *name" "FTH value"
+Define constant
+.Ar name
+to 
+.Ar value
+which can be a FTH Fixnum (in contrast to 
+.Sx fth_define_constant
+below) or any other FTH object.  Return
+.Ar value .
+.\"
+.\" fth_define_constant
+.\"
+.It Ft FTH Fn fth_define_constant "const char *name" "FTH value" "const char *doc"
+Define constant
+.Ar name 
+to
+.Ar value 
+which can be a C integer (in contrast to 
+.Sx fth_define
+above) or any other FTH object.
+.Ar doc
+can be NULL or a description of the constant for the
+.Cm help
+word.  Return
+.Ar value
+where C integers are converted to FTH Fixnums, any other objects
+remain untouched.
+.\"
+.\" fth_define_variable
+.\"
+.It Ft FTH Fn fth_define_variable "const char *name" "FTH value" "const char *doc"
+Define global variable
+.Ar name
+to
+.Ar value
+which can be a FTH Fixnum or any other FTH object, see the similar
+function
+.Fn fth_define
+for constants above.  Return
+.Ar value .
+.\"
+.\" fth_defined_p
+.\"
+.It Ft bool Fn fth_defined_p "const char *name"
+Return true if 
+.Ar name
+is defined in the dictionary, otherwise false.
+.It Ft void Fn fth_trace_var "FTH obj" "FTH proc_or_xt"
+.It Ft FTH Fn fth_trace_var_execute "ficlWord *word"
+.It Ft void Fn fth_untrace_var "FTH obj"
+.It Ft FTH Fn fth_var_ref "FTH obj"
+.It Ft FTH Fn fth_var_set "FTH obj" "FTH value"
+.\"
+.\" fth_variable_ref
+.\"
+.It Ft FTH Fn fth_variable_ref "const char *name"
+Return FTH value from global variable or constant 
+.Ar name .
+.\"
+.\" fth_variable_set
+.\"
+.It Ft FTH Fn fth_variable_set "const char *name" "FTH value"
+Set (or create if not existing) global variable 
+.Ar name
+to 
+.Ar value .
+Return
+.Ar value .
+.El
+.\"
+.\" Regexp object type (regexp.c)
+.\"
+.Ss Regexp object type
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_REGEXP_P
+.\"
+.It Ft bool Fn FTH_REGEXP_P "obj"
+Return true if
+.Ar obj
+is a regexp object, otherwise false.
+.\"
+.\" fth_make_regexp
+.\"
+.It Ft FTH Fn fth_make_regexp "const char *reg"
+Return new regexp object from
+.Ar reg
+which may contain regular expression.
+.\"
+.\" fth_regexp_find
+.\"
+.It Ft int Fn fth_regexp_find "const char *reg" "const char *str"
+Return match index or -1 if not found.
+.\"
+.\" fth_regexp_match
+.\"
+.It Ft ficlInteger Fn fth_regexp_match "FTH regexp" "FTH string"
+Return match length or -1 if not found.
+.\"
+.\" fth_regexp_replace
+.\"
+.It Ft FTH Fn fth_regexp_replace "FTH regexp" "FTH string" "FTH replace"
+Replace 1st occurrence of
+.Ar regexp
+in
+.Ar string
+with
+.Ar replace
+if found.  References \e1 to \e9 in
+.Ar replace
+will be replaced by corresponding subexpressions.  If no corresponding
+subexpression exist, an
+.Ar regexp-error
+exception will be raised.
+.\"
+.\" fth_regexp_search
+.\"
+.It Ft ficlInteger Fn fth_regexp_search "FTH regexp" "FTH string" "ficlInteger start" "ficlInteger range"
+Return match index or -1 if not found.  If
+.Ar range
+is -1, search entire string.
+.El
+.\"
+.\" String object type (string.c)
+.\"
+.Ss String object type
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_STRING_P
+.\"
+.It Ft bool Fn FTH_STRING_P "obj"
+Return true if
+.Ar obj
+is a string object, otherwise false.
+.\"
+.\" FTH_CHAR_P
+.\" fth_char_p
+.\"
+.It Ft bool Fn FTH_CHAR_P "obj"
+.It Ft bool Fn fth_char_p "obj"
+Both return true if
+.Ar obj
+is an ASCII character, otherwise false.
+.It Ft FTH Fn fth_make_empty_string "void"
+.\"
+.\" fth_make_string
+.\"
+.It Ft FTH Fn fth_make_string "const char *str"
+Return a new Fth string object constructed from C string
+.Ar str .
+.It Ft FTH Fn fth_make_string_format "const char *fmt" "..."
+.\"
+.\" fth_make_string_len
+.\"
+.It Ft FTH Fn fth_make_string_len "const char *str" "ficlInteger len"
+Return a new Fth string object constructed from C string
+.Ar str
+with at most
+.Ar len
+characters.
+.It Ft FTH Fn fth_make_string_or_false "const char *str"
+.It Ft FTH Fn fth_string_append "FTH string1" "FTH string2"
+.It Ft FTH Fn fth_string_capitalize "FTH string"
+.It Ft FTH Fn fth_string_char_ref "FTH string" "ficlInteger index"
+.It Ft FTH Fn fth_string_char_set "FTH string" "ficlInteger index" "FTH value"
+.It Ft FTH Fn fth_string_chomp "FTH string"
+.It Ft FTH Fn fth_string_copy "FTH string"
+.It Ft char Fn fth_string_c_char_ref "FTH string" "ficlInteger index"
+.It Ft char Fn fth_string_c_char_set "FTH string" "ficlInteger index" "char c"
+.It Ft FTH Fn fth_string_delete "FTH string" "ficlInteger index"
+.It Ft FTH Fn fth_string_downcase "FTH string"
+.It Ft bool Fn fth_string_equal_p "FTH obj1" "FTH obj2"
+.It Ft int Fn fth_string_eval "FTH string"
+.It Ft FTH Fn fth_string_fill "FTH string" "FTH fill_char"
+.It Ft FTH Fn fth_string_find "FTH string" "FTH key"
+.It Ft FTH Fn fth_string_format "FTH string" "FTH args_list"
+.It Ft bool Fn fth_string_greater_p "FTH obj1" "FTH obj2"
+.It Ft FTH Fn fth_string_index "FTH string" "FTH key"
+.It Ft FTH Fn fth_string_insert "FTH string" "ficlInteger index" "FTH value"
+.It Ft ficlInteger Fn fth_string_length "FTH string"
+.It Ft bool Fn fth_string_less_p "FTH obj1" "FTH obj2"
+.It Ft bool Fn fth_string_member_p "FTH string" "FTH key"
+.It Ft bool Fn fth_string_not_equal_p "FTH obj1" "FTH obj2"
+.It Ft FTH Fn fth_string_pop "FTH string"
+.It Ft FTH Fn fth_string_push "FTH string" "FTH add_str"
+.\"
+.\" fth_string_ref
+.\"
+.It Ft char* Fn fth_string_ref "FTH string"
+Return C string from Fth
+.Ar string
+or NULL.
+.It Ft FTH Fn fth_string_replace "FTH string" "FTH from" "FTH to"
+.It Ft FTH Fn fth_string_reverse "FTH string"
+.It Ft FTH Fn fth_string_scat "FTH string" "const char *str"
+.It Ft FTH Fn fth_string_sformat "FTH string" "const char *fmt" "..."
+.It Ft FTH Fn fth_string_shift "FTH string"
+.It Ft FTH Fn fth_string_sncat "FTH string" "const char *str" "ficlInteger len"
+.It Ft FTH Fn fth_string_split "FTH string" "FTH sep_str"
+.It Ft FTH Fn fth_string_substring "FTH string" "ficlInteger start" "ficlInteger end"
+.It Ft FTH Fn fth_string_to_array "FTH string"
+.It Ft FTH Fn fth_string_unshift "FTH string" "FTH add_str"
+.It Ft FTH Fn fth_string_upcase "FTH string"
+.\" Next is actually from printf.c,
+.It Ft FTH Fn fth_string_vformat "const char *fmt" "FTH args"
+.It Ft FTH Fn fth_string_vsformat "FTH string" "const char *fmt" "va_list ap"
+.El
+.\"
+.\" Symbols (symbol.c)
+.\"
+.Ss Symbols
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_SYMBOL_P
+.\"
+.It Ft bool Fn FTH_SYMBOL_P "obj"
+Return true if
+.Ar obj
+is a symbol, otherwise false.
+.It Ft bool Fn fth_string_or_symbol_p "FTH obj"
+.It Ft char* Fn fth_string_or_symbol_ref "FTH obj"
+.\"
+.\" fth_symbol
+.\"
+.It Ft FTH Fn fth_symbol "const char *name"
+Return value, the word address, of symbol
+.Ar name ;
+if symbol doesn't exist, creat it.
+.It Ft bool Fn fth_symbol_equal_p "FTH obj1" "FTH obj2"
+.It Ft bool Fn fth_symbol_p "const char *name"
+.\"
+.\" fth_symbol_ref
+.\"
+.It Ft char* Fn fth_symbol_ref "FTH obj"
+Return C string name of symbol
+.Ar obj
+without first sign (\(aq) or NULL.
+.El
+.\"
+.\" Keywords (symbol.c)
+.\"
+.Ss Keywords
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_KEYWORD_P
+.\"
+.It Ft bool Fn FTH_KEYWORD_P "obj"
+Return true if
+.Ar obj
+is a keyword, otherwise false.
+.\"
+.\" fth_keyword
+.\"
+.It Ft FTH Fn fth_keyword "const char *name"
+Return value, the word address, of keyword
+.Ar name ;
+if keyword doesn't exist, creat it.
+.It Ft bool Fn fth_keyword_equal_p "FTH obj1" "FTH obj2"
+.It Ft bool Fn fth_keyword_p "const char *name"
+.It Ft char* Fn fth_keyword_ref "FTH obj"
+.El
+.\"
+.\" Exceptions (symbol.c)
+.\"
+.Ss Exceptions
+.Bl -tag -width MMM -compact
+.\"
+.\" FTH_EXCEPTION_P
+.\"
+.It Ft bool Fn FTH_EXCEPTION_P "obj"
+Return true if
+.Ar obj
+is an exception, otherwise false.
+.\"
+.\" fth_exception
+.\"
+.It Ft FTH Fn fth_exception "const char *name"
+Return a new Exception object 
+.Ar name .
+.It Ft bool Fn fth_exception_equal_p "FTH obj1" "FTH obj2"
+.It Ft FTH Fn fth_exception_last_message_ref "FTH exc"
+.It Ft void Fn fth_exception_last_message_set "FTH exc" "FTH msg"
+.It Ft FTH Fn fth_exception_message_ref "FTH exc"
+.It Ft void Fn fth_exception_message_set "FTH exc" "FTH msg"
+.It Ft char* Fn fth_exception_ref "FTH obj"
+.It Ft FTH Fn fth_make_exception "const char *name" "const char *message"
+.It Ft bool Fn fth_symbol_or_exception_p "FTH obj"
+.It Ft FTH Fn fth_symbol_or_exception_ref "FTH obj"
+.It Ft FTH Fn fth_symbol_to_exception "FTH obj"
+.El
+.\"
+.\" Utilities (utils.c)
+.\"
+.Ss Utilities
+.Bl -tag -width MMM -compact
+.It Ft void* Fn fth_calloc "size_t size" "size_t eltsize"
+.It Ft int Fn fth_evaluate "ficlVm *vm" "const char *buffer"
+.It Ft int Fn fth_execute_xt "ficlVm *vm" "ficlWord *word"
+.It Ft void Fn fth_free "void *p"
+.It Ft char* Fn fth_getenv "const char *name" "char *def"
+.It Ft void* Fn fth_malloc "size_t size"
+.It Ft void* Fn fth_realloc "void *p" "size_t size"
+.It Ft void Fn fth_repl "int argc" "char **argv"
+.It Ft char* Fn fth_strcat "char *d" "size_t size" "const char *s"
+Append
+.Ar s
+to
+.Ar d
+but doesn't exceed entire
+.Ar size
+\- 1; append terminating
+.Sq \e0 .
+.It Ft char* Fn fth_strcpy "char *d" "size_t size" "const char *s"
+Copy
+.Ar s
+to
+.Ar d
+but not more than
+.Ar size
+\- 1 chars; append terminating
+.Sq \e0 .
+.It Ft char* Fn fth_strdup "const char *s"
+.It Ft char* Fn fth_strerror "int n"
+.It Ft size_t Fn fth_strlen "const char *s"
+.It Ft char* Fn fth_strncat "char *d" "size_t size" "const char *s" "size_t count"
+Append
+.Ar count
+chars from
+.Ar s
+to
+.Ar d
+but doesn't exceed entire
+.Ar size
+\- 1; append terminating
+.Sq \e0 .
+.It Ft char* Fn fth_strncpy "char *d" "size_t size" "const char *s" "size_t count"
+Copy
+.Ar count
+chars from
+.Ar s
+to
+.Ar d
+but not more than
+.Ar size
+\- 1 chars; append terminating
+.Sq \e0 .
+.It Ft void Fn fth_throw "FTH exc" "const char *fmt" "..."
+.\"
+.\" fth_throw_error
+.\" fth_throw_list
+.\"
+.It Ft void Fn fth_throw_error "FTH exc" "FTH args"
+Throw exception
+.Ar exc
+with text built from
+.Ar args .
+If
+.Ar args
+is not an array, its string representation is used.  If
+.Ar args
+is FTH_NIL or an empty array, a default string is used.  If
+.Ar args
+is an array with one element, this string is used.  If
+.Ar args
+is an array and its first element is a format string with N %s-format
+signs,
+.Ar args
+should have N more elements.
+.Bd -literal -offset indent -compact
+/*
+ * ARGS: any object
+ */
+fth_throw_error(FTH_BAD_ARITY, proc);
+  \(rA #<bad-arity in test-proc>
+/*
+ * ARGS: nil or #()
+ */
+fth_throw_error(FTH_BAD_ARITY, FTH_NIL);
+  \(rA #<bad-arity: proc has bad arity>
+/*
+ * ARGS: #( string )
+ */
+fth_throw_error(FTH_BAD_ARITY,
+    FTH_LIST_1(fth_make_string(\(dqtest-proc\(dq));
+  \(rA #<bad-arity in test-proc>
+/*
+ * ARGS: #( fmt arg1 arg2 arg3 )
+ */
+fth_throw_error(FTH_BAD_ARITY,
+    FTH_LIST_4(fth_make_string(\(dq%s: %s args require, got %s\(dq),
+               proc,
+	       FTH_TWO,
+               FTH_THREE));
+  \(rA #<bad-arity in test-proc: 2 args required, got 3>
+.Ed
+.It Ft void Fn fth_throw_list "FTH exc" "FTH args"
+The same like
+.Cm fth_throw_error
+except for replacing format signs ~A and ~S with %s.
+.It Ft char* Fn pop_cstring "ficlVm *vm"
+.It Ft char* Fn pop_forth_string "ficlVm *vm"
+.It Ft void Fn push_cstring "ficlVm *vm" "char *s"
+.It Ft void Fn push_forth_string "ficlVm *vm" "char *string"
+.El
+.\"
+.\" ENVIRONMENT
+.\"
+.Sh ENVIRONMENT
+.Bl -tag -width MMM -compact
+.It Ev FTH_DICTIONARY_SIZE
+Overwrite default dictionary size (1024 * 1024).
+.It Ev FTH_LOCALS_SIZE
+Overwrite default number of locals (2048).
+.It Ev FTH_RETURN_SIZE
+Overwrite default size of return stack (1024).
+.It Ev FTH_STACK_SIZE
+Overwrite default size of parameter stack (8192).
+.El
+.\"
+.\" COMPATIBILITY
+.\"
+.Sh COMPATIBILITY
+.Nm
+conforms only partly to
+.Em ANS Forth .
+The double word set doesn't take two stack entries and is actually of
+type
+.Ft ficl2Integer .
+.Pp
+.Nm
+has no extra floating point stack; floats are of type
+.Ft ficlFloat .
+.\"
+.\" SEE ALSO
+.\"
+.Sh SEE ALSO
+.Xr clang 1 ,
+.Xr fth 1 ,
+.Xr sprintf 3
+.\"
+.\" STANDARDS
+.\"
+.Sh STANDARDS
+.Nm
+conforms only partly to
+.Em ANS Forth .
+.\"
+.\" HISTORY
+.\"
+.Sh HISTORY
+This manual page describes version 1.3.5.
+.Nm
+is based on
+.Em Ficl , Forth-inspired command language ,
+version 4.0.31 written by
+.An John Sadler .
+.\"
+.\" AUTHORS
+.\"
+.Sh AUTHORS
+.Nm
+and this manual page was written by
+.An Michael Scholz Aq mi-scholz@users.sourceforge.net .
+.\"
+.\" BUGS
+.\"
+.Sh BUGS
+Please report bugs to the author.
+.\"
+.\" libfth.3 ends here
+.\"

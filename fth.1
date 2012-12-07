@@ -1,0 +1,8396 @@
+.\" Copyright (c) 2004-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\" Ident: $Id: fth.1,v 1.123 2012/11/28 14:39:58 mi-scholz Exp $
+.\"
+.Dd November 28, 2012
+.Dt FTH 1
+.Os
+.\"
+.\" NAME
+.\"
+.Sh NAME
+.Nm fth
+.Nd Forth script and extension language
+.\"
+.\" SYNOPSIS
+.\"
+.Sh SYNOPSIS
+.Nm
+.Op Fl DdQqrv
+.Op Fl C Ar so\(hylib\(hypath
+.Op Fl Ee Ar pattern
+.Op Fl F Ar fs
+.Op Fl f Ar init\(hyfile
+.Op Fl I Ar fs\(hypath
+.Op Fl S Qq Ar lib init
+.Op Fl s Ar file
+.Op Ar
+.Nm
+.Oo Fl al Oc Op Fl i Op Ar suffix
+.Op Fl n \(ba Fl p
+.Fl e Ar pattern
+.Op Ar file \(ba \(hy
+.Nm
+.Op Fl h \(ba Fl V
+.\"
+.\" DESCRIPTION
+.\"
+.Sh DESCRIPTION
+This is the manual page for the interactive and script processing
+Forth interpreter
+.Nm .
+It is based on
+.Em Ficl .
+This manual page provides information for running
+.Nm
+in a
+.Ux
+command line environment.  See
+.Xr libfth 3
+for Forth as an extension language.
+.\"
+.\" Argument list processing
+.\"
+.Ss Argument list processing
+.Bl -tag -width MMM -compact
+.\"
+.\" -a
+.\"
+.It Fl a
+Split every line to array
+.Dv *farray*
+before evaluation.  The split string is field separator
+.Dv *fs* .
+Used with
+.Fl n
+or
+.Fl p
+option.
+.\"
+.\" -C
+.\"
+.It Fl C Ar path
+Prepend
+.Ar path
+to
+.Dv *load\(hylib\(hypath* ,
+multiple calls possible.
+.\"
+.\" -D
+.\"
+.It Fl D
+Show backtrace and exit with return code 1 if an exception was found
+evaluating the initialization file, running a script, loading
+additional source files, or evaluating strings from the command line.
+.\"
+.\" -d
+.\"
+.It Fl d
+Set global variable
+.Dv *fth\(hydebug*
+to #t.
+.\"
+.\" -Ee
+.\"
+.It Fl E Ar pattern
+.It Fl e Ar pattern
+Evaluate
+.Ar pattern .
+After evaluation, if options
+.Fl e
+was specified, exit, if option
+.Fl E
+was specified, start read\(hyeval\(hyprint\(hyloop.  Multiple calls possible.
+If
+.Fl D
+was given and evaluation was not successful, show backtrace and exit
+with return code 1, otherwise exit with return code 0.  The last or
+only
+.Fl e Ar pattern
+can be considered between
+.Dl lambda: <{}> pattern\ ;
+and is in compile state!  If multiple
+.Fl e Ar pattern
+appear, all but the last are in interpret state.
+.\"
+.\" -F
+.\"
+.It Fl F Ar fs
+Set global variable
+.Dv *fs*
+to field separator
+.Ar fs .
+.\"
+.\" -f
+.\"
+.It Fl f Ar file
+Take initialization file
+.Ar file
+instead of
+.Pa ~/.fthrc .
+Use
+.Fl Q
+to prevent loading initialization files.
+.\"
+.\" -h
+.\"
+.It Fl h
+Display help message and exit.
+.\"
+.\" -I
+.\"
+.It Fl I Ar path
+Prepend
+.Ar path
+to
+.Dv *load\(hypath* ,
+multiple calls possible.
+.\"
+.\" -i
+.\"
+.It Fl i Op Ar suffix
+The
+.Fl e Ar pattern
+will be applied to files or stdin.  If
+.Ar suffix
+is specified, a backup file will be created with that suffix.
+.\"
+.\" -l
+.\"
+.It Fl l
+Remove line ending \en when used with
+.Fl n
+or
+.Fl p
+option.
+.\"
+.\" -n
+.\"
+.It Fl n
+Suppress output of current
+.Dv *line* .
+If not in\(hyplace
+.Fl i ,
+start an implicit loop.
+.\"
+.\" -p
+.\"
+.It Fl p
+Print current
+.Dv *line*
+to stdout.  If not in\(hyplace
+.Fl i ,
+start an implicit loop.
+.\"
+.\" -Q
+.\"
+.It Fl Q
+Neither load the system wide nor the local initialization file.
+.\"
+.\" -q
+.\"
+.It Fl q
+Do not print banner and set global variable
+.Dv *fth\(hyverbose*
+to #f.
+.\"
+.\" -r
+.\"
+.It Fl r
+Start a conventional Forth\(hylike session with data stack left
+untouched after pressing
+.Aq Return .
+Normally the data stack is printed and cleared but
+.Fl r
+changes this behavior to something like a
+.Em read\(hyeval\(hyloop
+instead of a
+.Em read\(hyeval\(hyprint\(hyloop .
+If
+.Fl D
+was given and evaluation was not successful, show backtrace and exit
+with return code 1, otherwise exit with return code 0.
+.\"
+.\" -S
+.\"
+.It Fl S Qq Ar lib init
+Load C extension library
+.Ar lib
+and call the initialization
+function
+.Ar init .
+.Ar lib
+and
+.Ar init
+must be enclosed in quotations
+.Dl -S Qq dbm Init_dbm
+Multiple calls possible.
+.\"
+.\" -s
+.\"
+.It Fl s Ar file
+Evaluate
+.Ar file
+as a Forth script and exit.  It doesn't read the initialization file.
+The global Forth variables
+.Dv *argc*
+and
+.Dv *argv*
+are set and filled with the count and command line options appearing
+after
+.Fl s Ar file .
+This must be the last option given
+to the
+.Nm
+interpreter.  Options after that are taken as script options.  If
+.Fl D
+was given and evaluation was not successful, show a backtrace and
+exit with return code 1, otherwise exit with return code 0.
+.\"
+.\" -V
+.\"
+.It Fl V
+Display version info and exit.
+.\"
+.\" -v
+.\"
+.It Fl v
+Set global variable
+.Dv *fth\(hyverbose*
+to #t (default).
+.El
+.\"
+.\" Forth variables
+.\"
+.Ss Forth variables
+.Bl -tag -width MMM -compact
+.\"
+.\" *argc*
+.\"
+.It Dv *argc*
+Number of arguments in
+.Dv *argv* .
+.\"
+.\" *argv*
+.\"
+.It Dv *argv*
+Array of command line arguments.
+.\"
+.\" *exception-list*
+.\"
+Return array of all exceptions.
+.\"
+.\" *farray*
+.\"
+.It Dv *farray*
+Auto\(hysplitted array of strings of current line.
+.\"
+.\" *features*
+.\"
+.It Dv *features*
+Return array of all features.
+.\"
+.\" *filename*
+.\"
+.It Dv *filename*
+Current file name.
+.\"
+.\" *fname*
+.\"
+.It Dv *fname*
+Current in\(hyplace file name.
+.\"
+.\" *fnr*
+.\"
+.It Dv *fnr*
+Input record number in current file.
+.\"
+.\" *fs*
+.\"
+.It Dv *fs*
+Input field separator, default one space.
+.\"
+.\" *fth-debug*
+.\"
+.It Dv *fth\(hydebug*
+If #t, show more diagnostic output.
+.\"
+.\" *fth-verbose*
+.\"
+.It Dv *fth\(hyverbose*
+If #t, show more output.
+.\"
+.\" *key*
+.\"
+.It Dv *key*
+Hold current value in a map\(emend\(hymap loop.
+.\"
+.\" *last-exception*
+.\"
+.It Dv *last\(hyexception*
+Hold last raised exception.
+.\"
+.\" *line*
+.\"
+.It Dv *line*
+Current in\(hyplace processing line.
+.\"
+.\" *lineno*
+.\"
+.It Dv *lineno*
+Current line number.
+.\"
+.\" *load-lib-path*
+.\"
+.It Dv *load\(hylib\(hypath*
+Array of directories where
+.Nm
+searchs for
+.Pa *.so
+C\(hylibrary files.
+.\"
+.\" *load-path*
+.\"
+.It Dv *load\(hypath*
+Array of directories where
+.Nm
+searchs for
+.Pa *.fs
+script files.
+.\"
+.\" *loaded-files*
+.\"
+.It Dv *loaded\(hyfiles*
+Array of already loaded files.
+.\"
+.\" *nr*
+.\"
+.It Dv *nr*
+Input record number over all files.
+.\"
+.\" *re*
+.\"
+.It Dv *re*
+Array with last regexp match.
+.\"
+.\" *re-syntax-options*
+.\"
+.It Dv *re\(hysyntax\(hyoptions*
+Regexp syntax option, default
+.Dv REG_EXTENDED.
+.\"
+.\" *re0* ... *re9*
+.\"
+.It Dv *re0*
+Regexp last entire match.
+.It Dv *re1* ... *re9*
+Regexp last subexpression matches.
+.\"
+.\" optarg
+.\"
+.It Dv optarg
+Getopt variable with current option argument string, default #f.
+.\"
+.\" opterr
+.\"
+.It Dv opterr
+If #t, getopt print error message for wrong or missing arguments;
+default #t.
+.\"
+.\" optind
+.\"
+.It Dv optind
+Getopt variable with index of next element in
+.Dv *argv*
+array, default 1.
+.\"
+.\" optopt
+.\"
+.It Dv optopt
+Getopt variable with last known option, default #f.
+.El
+.\"
+.\" Hook variables
+.\"
+.Ss Hook variables
+.Nm
+calls five hooks if they are not empty: before and after loading
+source files and in interactive mode before starting and after
+ending the repl as well as every time before showing the prompt.
+.Bl -tag -width MMM -compact
+.\"
+.\" before-load-hook
+.\"
+.It Cm before-load-hook No (\ filename -- f\ )
+Called before loading 
+.Ar filename .
+If hook returns #f, 
+.Ar filename
+won't be loaded.
+.Bd -literal -offset indent -compact
+before-load-hook lambda: <{ fname -- f }>
+	\(dq\e\e loading %s\en\(dq #( fname ) fth-print
+	#t
+; add-hook!
+.Ed
+.\"
+.\" after-load-hook
+.\"
+.It Cm after-load-hook No (\ filename --\ )
+Called after loading 
+.Ar filename
+and updating global variable 
+.Dv *loaded-files* .
+.Bd -literal -offset indent -compact
+after-load-hook lambda: <{ fname -- }>
+	\(dq\e\e %s loaded\en\(dq #( fname ) fth-print
+; add-hook!
+.Ed
+.\"
+.\" before-repl-hook
+.\"
+.It Cm before-repl-hook No (\ --\ )
+Called after initializing the
+.Xr tecla 7
+command-line editing library but before starting the repl.  A
+predefined hook showing some help lines can be replaced by your own
+message.
+.Bd -literal -offset indent -compact
+before-repl-hook reset-hook!
+before-repl-hook lambda: <{ -- }>
+	.\(dq \e\(dq cr
+	.\(dq \e Starting FTH on \(dq date .string .\(dq !\(dq cr
+	.\(dq \e\(dq cr
+; add-hook!
+.Ed
+.\"
+.\" after-repl-hook
+.\"
+.It Cm after-repl-hook No (\ history-file --\ )
+Called after leaving the repl and writing the history file but
+before leaving the program.  Its only argument is the history
+filename.  You may manipulate the history data entries.  One history
+entry consists of two lines: a time stamp preceded by a Forth comment
+backslash and the actual history line.
+.Bd -literal -offset indent -compact
+after-repl-hook lambda: <{ history -- }>
+	\e Remove duplicates from history file.
+	history readlines array-reverse! { hary }
+	#() \(dq\(dq \(dq\(dq { nhary hline tline }
+	hary array-length 0 ?do
+		hary i    array-ref to hline
+		hary i 1+ array-ref to tline
+		nhary hline array-member? unless
+			nhary hline array-unshift
+			tline array-unshift drop
+		then
+	2 +loop
+	history nhary writelines
+; add-hook!
+.Ed
+.\"
+.\" before-prompt-hook 
+.\"
+.It Cm before-prompt-hook No (\ prompt pos -- new-prompt\ )
+Called before printing a new prompt to customize the output of it.
+.Ar prompt
+is the old prompt and 
+.Ar pos
+the current history position.  The return value, preferable a string,
+is the
+.Ar prompt
+argument for the next hook procedure if any.
+.Bd -literal -offset indent -compact
+before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
+	\(dqfth (%d)> \(dq #( pos ) string-format
+; add-hook!
+.Ed
+.El
+.\"
+.\" The command-line editor
+.\"
+.Ss The command-line editor
+Command-line editing similar to
+.Xr tcsh 1
+is handled by the
+.Xr tecla 7
+library if installed.  Predefined key bindings exist for those
+similar to
+.Xr vi 1
+and
+.Xr emacs 1 .
+The default editing mode is emacs-mode.  You can switch from
+emacs-mode to vi-mode via
+.Cm M-^V
+and from vi-mode to emacs-mode via
+.Cm M-^E .
+To start in vi-mode, put a line like
+.Dl edit-mode vi
+in your
+.Pa ~/.teclarc
+file.  A history of the last command-lines can be listed with
+.Cm ^Xh ,
+the last 10 history entries can be listed with
+.Cm M-10^Xh .
+The Tab-key or
+.Cm ^I
+initiates word completion.  If the Forth dictionary has more than
+one entry starting with characters before the cursor, show all, if
+only one definition exists, complete it and add a space after the
+completed word.  If the Forth dictionary has no entry starting with
+the characters before the cursor, try file name completion.  For
+complete key listings and function descriptions, see
+.Xr tecla 7 .
+.\"
+.\" Loops
+.\"
+.Ss Loops
+Forth has loop constructs for compile state and interpret state.
+In addition to the usual do\(emloop,
+.Nm
+provides each\(emend-each and map\(emend-map loops for objects.
+.Bl -tag -width MMM -compact
+.\"
+.\" do
+.\" ?do
+.\" loop
+.\"
+.It Cm do No (\ limit start --\ ) compile-only
+.It Cm ?do No (\ limit start --\ ) compile-only
+.It Cm loop No (\ --\ ) compile-only
+Run loop from
+.Ar start
+up to but not including
+.Ar limit .
+.Cm ?do
+starts only if
+.Ar limit 
+is greater than
+.Ar start .
+.Bd -literal -offset indent -compact
+3 0 do  i .  loop \(rA 0 1 2
+.Ed
+.\"
+.\" each
+.\" end-each
+.\"
+.It Cm each No (\ obj -- val\ ) compile-only
+.It Cm end-each No (\ --\ ) compile-only
+Push each element of
+.Ar obj
+in order on stack and repeat execution of body.
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) each  .  end-each \(rA 0 1 2
+.Ed
+.\"
+.\" map
+.\" map!
+.\" end-map
+.\"
+.It Cm map No (\ obj --\ ) compile-only
+.It Cm map! No (\ obj --\ ) compile-only
+.It Cm end-map No (\ -- obj\ ) compile-only
+Set each element of
+.Ar obj
+in order to global variable 
+.Dv *key*
+and repeat execution of body.
+The current element of 
+.Ar obj
+with
+.Cm map!
+or a copy of
+.Ar obj
+with
+.Cm map
+is set to top of stack before
+.Cm end-map .
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) value a1
+a1 map   i *key* +  end-map \(rA #( 0 2 4 ) \e a copy of a1
+a1 .$ \(rA #( 0 1 2 )
+a1 map!  i *key* +  end-map \(rA #( 0 2 4 ) \e a1 has changed
+a1 .$ \(rA #( 0 2 4 )
+.Ed
+.El
+Interpret state loops for use outside word definitions in scripts or in
+the repl work like their compile state cousins above.  The body of the
+following [do]\(em[loop], [each]\(em[end-each] and [map]\(em[end-map] is
+in compile state, loop indexes
+.Cm i ,
+.Cm j ,
+.Cm k
+and
+.Cm leave
+etc can be used like in colon definitions.
+.Bl -tag -width MMM -compact
+.\"
+.\" [do]
+.\" [loop]
+.\"
+.It Cm [do] No (\ limit start --\ )
+.It Cm [loop] No (\ --\ )
+.Bd -literal -offset indent -compact
+3 0 [do]  i .  [loop] \(rA 0 1 2
+.Ed
+.\"
+.\" [each]
+.\" [end-each]
+.\"
+.It Cm [each] No (\ obj -- val\ )
+.It Cm [end-each] No (\ --\ )
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) [each]  .  [end-each] \(rA 0 1 2
+.Ed
+.\"
+.\" [map]
+.\" [map!]
+.\" [end-map]
+.\"
+.It Cm [map] No (\ obj --\ )
+.It Cm [map!] No (\ obj --\ )
+.It Cm [end-map] No (\ -- obj\ )
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) value a1
+a1 [map]   i *key* +  [end-map] \(rA #( 0 2 4 ) \e a copy of a1
+a1 .$ \(rA #( 0 1 2 )
+a1 [map!]  i *key* +  [end-map] \(rA #( 0 2 4 ) \e a1 has changed
+a1 .$ \(rA #( 0 2 4 )
+.Ed
+.El
+.\"
+.\" Arrays (array.c)
+.\"
+.Ss Arrays and Lists
+Arrays:
+.Bl -tag -width MMM -compact
+.\"
+.\" #()
+.\"
+.It Cm #() No (\ -- ary\ )
+Return array of length 0 for array-append, array-push etc.
+.\"
+.\" .array
+.\"
+.It Cm .array No (\ ary --\ )
+Print array object
+.Ar ary
+to current output.
+.\"
+.\" >array
+.\"
+.It Cm >array No (\ vals len -- ary\ )
+Return array object with
+.Ar len
+objects found on parameter stack.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.\"
+.\" array->array
+.\"
+.It Cm array->array No (\ ary1 -- ary2\ )
+Return copy of
+.Ar ary1
+only with references of each element in contrary to
+.Sx array-copy .
+If
+.Ar ary1
+is not an array, return #( ary1 ).
+.Bd -literal -offset indent -compact
+#( 0 #{ \(aqfoo 10 } 2 ) value ary1
+ary1 array->array value ary2
+ary1 1 array-ref \(aqfoo 30 hash-set!
+ary1 \(rA #( 0 #{ \(aqfoo 30 } 2 )
+ary2 \(rA #( 0 #{ \(aqfoo 30 } 2 )
+.Ed
+.\"
+.\" array->list
+.\"
+.It Cm array->list No (\ ary -- lst\ )
+Return copy of
+.Ar ary
+as list only with references of each elements in contrary to
+.Sx array-copy .
+If
+.Ar ary
+is not an array, return \(aq( ary ).
+.Bd -literal -offset indent -compact
+#( 0 #{ \(aqfoo 10 } 2 ) value ary
+ary array->list value lst
+ary 1 array-ref \(aqfoo 30 hash-set!
+lst \(rA \(aq( 0 #{ \(aqfoo 30 } 2 )
+ary \(rA #( 0 #{ \(aqfoo 30 } 2 )
+.Ed
+.\"
+.\" array-append
+.\"
+.It Cm array-append No (\ ary1 ary2 -- ary1+ary2\ )
+Append two arrays and return new one.  If
+.Ar ary2
+is not an array, append it as a single element.
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) #( 3 4 ) array-append \(rA #( 0 1 2 3 4 )
+#( 0 1 2 ) 10 array-append \(rA #( 0 1 2 10 )
+.Ed
+.\"
+.\" array-clear
+.\"
+.It Cm array-clear No (\ ary --\ )
+Clear array and set all elements to #f.
+.\"
+.\" array-compact
+.\" array-compact!
+.\"
+.It Cm array-compact No (\ ary1 prc args -- ary2\ )
+Return new array object with nil elements removed.
+.It Cm array-compact! No (\ ary prc args -- ary'\ )
+Remove all nil elements from
+.Ar ary
+and return changed array object.
+.\"
+.\" array-concat
+.\"
+.It Cm array-concat No (\ vals len -- ary\ ) alias for Sx >array
+.\"
+.\" array-copy
+.\"
+.It Cm array-copy No (\ ary1 -- ary2\ )
+Return copy of
+.Ar ary1
+with all elements new created in contrary to
+.Sx array->array .
+.Bd -literal -offset indent -compact
+#( 0 #{ \(aqfoo 10 } 2 ) value ary1
+ary1 array-copy value ary2
+ary1 1 array-ref \(aqfoo 30 hash-set!
+ary1 \(rA #( 0 #{ \(aqfoo 30 } 2 )
+ary2 \(rA #( 0 #{ \(aqfoo 10 } 2 )
+.Ed
+.\"
+.\" array-delete!
+.\"
+.It Cm array-delete! No (\ ary idx -- val\ )
+Delete and return one element from
+.Ar ary
+at position
+.Ar idx .
+Negative index counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar ary's
+range.
+.\"
+.\" array-delete-key
+.\"
+.It Cm array-delete-key No (\ ary key -- val\ )
+Delete and return
+.Ar key
+from
+.Ar ary
+if found, otherwise return #f.
+.\"
+.\" array-fill
+.\"
+.It Cm array-fill No (\ ary val --\ )
+Set all elements of
+.Ar ary
+to
+.Ar val .
+.\"
+.\" array-find
+.\"
+.It Cm array-find No (\ ary key -- key\ )
+Return key if
+.Ar key
+exists in
+.Ar ary ,
+otherwise #f.
+.\"
+.\" array-index
+.\"
+.It Cm array-index No (\ ary key -- idx\ )
+Return index of
+.Ar key
+in
+.Ar ary
+or -1 if not found.
+.\"
+.\" array-insert
+.\" array-insert!
+.\"
+.It Cm array-insert No (\ ary1 idx val -- ary2\ )
+Insert
+.Ar val
+to
+.Ar ary1
+at position
+.Ar idx
+and return new array.
+.Ar val
+can be an array or any other object.  Negative
+.Ar idx
+counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar ary1's
+range.
+.It Cm array-insert! No (\ ary idx val -- ary'\ )
+Insert
+.Ar val
+to
+.Ar ary
+at position
+.Ar idx
+and return changed array.
+.Ar val
+can be a single object or an array.  Negative
+.Ar idx
+counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar ary's
+range.
+.\"
+.\" array-join
+.\"
+.It Cm array-join No (\ ary sep -- str\ )
+Return string with all elements of
+.Ar ary
+converted to their string representation and joined together separated
+by the string
+.Ar sep .
+If
+.Ar sep
+is not a string, a space will be used as separator.
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) \(dq--\(dq array-join \(rA \(dq0--1--2\(dq
+#( 0 1 2 ) nil array-join \(rA \(dq0 1 2\(dq
+.Ed
+.\"
+.\" array-length
+.\"
+.It Cm array-length No (\ obj -- len\ )
+If
+.Ar obj
+is an array object, return its length, otherwise -1.
+.\"
+.\" array-member?
+.\"
+.It Cm array-member? No (\ ary key -- f\ )
+Return #t if
+.Ar key
+exists in
+.Ar ary ,
+otherwise #f.
+.\"
+.\" array-pop
+.\"
+.It Cm array-pop No (\ ary -- val\ )
+Remove and return last element from
+.Ar ary .
+If
+.Ar ary
+is empty, return #f.
+.\"
+.\" array-push
+.\"
+.It Cm array-push No (\ ary val -- ary'\ )
+Append
+.Ar val
+to
+.Ar ary .
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) 10 array-push \(rA #( 0 1 2 10 )
+.Ed
+.\"
+.\" array-ref
+.\"
+.It Cm array-ref No (\ ary idx -- val\ )
+Return value at position
+.Ar idx .
+Negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in
+.Ar ary's
+range.
+.\"
+.\" array-reject
+.\" array-reject!
+.\"
+.It Cm array-reject No (\ ary1 prc args -- ary2\ )
+.Ar prc
+will be called with
+.Ar args ,
+an array of zero or more proc arguments, and the current array element
+set as first arg in
+.Ar args
+array.  The length of
+.Ar args
++ 1 is the required arity of
+.Ar prc .
+If
+.Ar prc
+returns neither #f nor nil nor 0, this element will be pushed in a new
+array object.  The new array object will be returned.  In the example n1
+corresponds to the current array element and n2 comes from args, here 2.
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) lambda: <{ n1 n2 -- f }>
+	n1 n2 >
+; #( 2 ) array-reject \(rA #( 0 1 )
+.Ed
+The same a bit shorter:
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) <\(aq> > #( 2 ) array-reject \(rA #( 0 1 )
+.Ed
+.It Cm array-reject! No (\ ary prc args -- ary'\ )
+.Ar prc
+will be called with
+.Ar args ,
+an array of zero or more proc arguments, and the current array element
+set as first arg in
+.Ar args
+array.  The length of
+.Ar args
++ 1 is the required arity of
+.Ar prc .
+If
+.Ar prc
+returns neither #f nor nil nor 0, the element will be removed.  In the
+example n1 corresponds to the current array element and n2 comes from
+args, here 2.
+.\"
+.\" array-reverse
+.\" array-reverse!
+.\"
+.It Cm array-reverse No (\ ary1 -- ary2\ )
+Return new array with elements reversed.
+.It Cm array-reverse! No (\ ary -- ary'\ )
+Return
+.Ar ary
+with elements reversed.
+.\"
+.\" array-set!
+.\"
+.It Cm array-set! No (\ ary idx val --\ )
+Store
+.Ar val
+at position
+.Ar idx .
+Negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in
+.Ar ary's
+range.
+.\"
+.\" array-shift
+.\"
+.It Cm array-shift No (\ ary -- val\ )
+Remove and return first element from
+.Ar ary .
+If
+.Ar ary
+is empty, return #f.
+.\"
+.\" array-sort
+.\" array-sort!
+.\"
+.It Cm array-sort No (\ ary1 prc -- ary2\ )
+Return new sorted array.
+.Ar prc
+compares two elements A and B and should return a negative integer if A
+< B, 0 if A == B, and a positive integer if A > B.  Raise
+.Ar bad-arity
+exception if
+.Ar prc
+doesn't take two arguments.
+.Bd -literal -offset indent -compact
+#( 2 1 0 ) lambda: <{ a b -- f }>
+	a b < if
+		-1
+	else
+		a b > if
+			1
+		else
+			0
+		then
+	then
+; array-sort \(rA #( 0 1 2 )
+.Ed
+.It Cm array-sort! No (\ ary prc -- ary'\ )
+Return the sorted
+.Ar ary .
+.Ar prc
+compares two elements A and B and should return a negative integer if A
+< B, 0 if A == B, and a positive integer if A > B.  Raise
+.Ar bad-arity
+exception if
+.Ar prc
+doesn't take two arguments.
+.\"
+.\" array-subarray
+.\"
+.It Cm array-subarray No (\ ary start end -- subary\ )
+Return array built from
+.Ar ary
+beginning with index
+.Ar start
+up to but excluding index
+.Ar end .
+If
+.Ar end
+is nil, up to end of array will be returned.  Negative index counts from
+backward.  Raise
+.Ar out-of-range
+exception if
+.Ar start
+is not in
+.Ar ary's
+range.
+.Bd -literal -offset indent -compact
+#( 0 1 2 3 4 ) 2 4 array-subarray \(rA #( 2 3 )
+#( 0 1 2 3 4 ) -3 -1 array-subarray \(rA #( 2 3 4 )
+#( 0 1 2 3 4 ) -3 nil array-subarray \(rA #( 2 3 4 )
+.Ed
+.\"
+.\" array-uniq
+.\" array-uniq!
+.\"
+.It Cm array-uniq No (\ ary1 -- ary2\ )
+Return new array without duplicated elements of
+.Ar ary1 .
+.It Cm array-uniq! No (\ ary -- ary'\ )
+Return
+.Ar ary
+without duplicated elements.
+.\"
+.\" array-unshift
+.\"
+.It Cm array-unshift No (\ ary val -- ary'\ )
+Prepend
+.Ar val
+to
+.Ar ary .
+.Bd -literal -offset indent -compact
+#( 0 1 2 ) 10 array-unshift \(rA #( 10 0 1 2 )
+.Ed
+.\"
+.\" array=
+.\"
+.It Cm array= No (\ ary1 ary2 -- f\ )
+Return #t if
+.Ar ary1
+and
+.Ar ary2
+are array objects of same length and content, otherwise #f.
+.\"
+.\" array?
+.\"
+.It Cm array? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an array object, otherwise #f.
+.\"
+.\" make-array
+.\"
+.It Cm make-array No (\ len :key initial-element -- ary\ )
+Return array of length
+.Ar len
+filled with keyword INITIAL-ELEMENT values.
+.Ar initial-element
+defaults to nil if not specified.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.El
+.Pp
+Assoc arrays:
+.Bl -tag -width MMM -compact
+.\"
+.\" >assoc
+.\"
+.It Cm >assoc No (\ vals len -- ary\ )
+Return assoc array object with
+.Ar len
+/ 2 key-value pairs found on parameter stack.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0 or not even.
+.\"
+.\" array-assoc
+.\"
+.It Cm array-assoc No (\ ass key -- ret\ )
+If
+.Ar key
+matches, return corresponding key-value pair, otherwise #f.
+.\"
+.\" array-assoc-ref
+.\"
+.It Cm array-assoc-ref No (\ ass key -- val\ )
+If
+.Ar key
+matches, return corresponding value, otherwise #f.
+.\"
+.\" array-assoc-remove!
+.\"
+.It Cm array-assoc-remove! No (\ ass key -- 'ass\ )
+If
+.Ar key
+matches, remove key-value pair from
+.Ar ass .
+.\"
+.\" array-assoc-set!
+.\"
+.It Cm array-assoc-set! No (\ ass key val -- 'ass\ )
+If
+.Ar key
+matches, set key-value pair, otherwise add new pair.
+.\"
+.\" assoc
+.\"
+.It Cm assoc No (\ ass key val -- 'ass\ )
+Build sorted assoc array.
+.Ar ass
+must be an assoc array or an empty array #().
+.Bd -literal -offset indent -compact
+#() value ass
+ass \(aqa 10 assoc \(rA #a( \(aq( \(aqa . 10 ) )
+ass \(aqb 20 assoc \(rA #a( \(aq( \(aqa . 10 ) \(aq( \(aqb . 20 ) )
+.Ed
+.\"
+.\" assoc?
+.\"
+.It Cm assoc? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an assoc array object, otherwise #f.
+.El
+.Pp
+Lists:
+.Bl -tag -width MMM -compact
+.\"
+.\" '()
+.\"
+.It Cm \(aq() No (\ -- lst\ )
+Return empty list.
+.\"
+.\" .list
+.\"
+.It Cm .list No (\ lst --\ )
+Print list object
+.Ar lst
+to current output.
+.\"
+.\" >list
+.\"
+.It Cm >list No (\ vals len -- lst\ )
+Return list object with
+.Ar len
+objects found on parameter stack.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.\"
+.\" cadddr
+.\"
+.It Cm cadddr No (\ lst -- val\ )
+Return fourth entry, the cadddr, of
+.Ar list
+or nil.
+.\"
+.\" caddr
+.\"
+.It Cm caddr No (\ lst -- val\ )
+Return third entry, the caddr, of
+.Ar list
+or nil.
+.\"
+.\" cadr
+.\"
+.It Cm cadr No (\ lst -- val\ )
+Return second entry, the cadr, of
+.Ar list
+or nil.
+.\"
+.\" car
+.\"
+.It Cm car No (\ lst -- val\ )
+Return first entry, the car, of
+.Ar list
+or nil.
+.\"
+.\" cddr
+.\"
+.It Cm cddr No (\ lst -- val\ )
+Return rest, the cddr, of
+.Ar list
+without its first and second entries.
+.\"
+.\" cdr
+.\"
+.It Cm cdr No (\ lst -- val\ )
+Return rest, the cdr, of
+.Ar list
+without its first entry.
+.\"
+.\" cons
+.\"
+.It Cm cons No (\ val lst1 -- lst2\ )
+Return Lisp-like cons pointer with
+.Ar val
+as car and
+.Ar list
+as cdr.
+.\"
+.\" cons2
+.\"
+.It Cm cons2 No (\ val1 val2 lst1 -- lst2\ )
+Return Lisp-like cons pointer with
+.Ar val1
+as car,
+.Ar val2
+as cadr and
+.Ar list
+as cddr.
+.\"
+.\" cons?
+.\"
+.It Cm cons? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a cons pointer, otherwise #f.
+.\"
+.\" last-pair
+.\"
+.It Cm last-pair No (\ lst -- lp\ )
+Return last pair of
+.Ar lst .
+.Bd -literal -offset indent -compact
+\(aq( 0 1 2 3 ) last-pair \(rA \(aq( 3 )
+.Ed
+.\"
+.\" list->array
+.\"
+.It Cm list->array No (\ lst -- ary\ )
+Return copy of
+.Ar lst
+as array only with references of each element in contrary to
+.Sx list-copy .
+.Ar lst
+is not a cons pointer, return #( lst ).
+.Bd -literal -offset indent -compact
+\(aq( 0 #{ \(aqfoo 10 } 2 ) value lst1
+lst1 list->array value ary2
+lst1 1 list-ref \(aqfoo 30 hash-set!
+lst1 \(rA \(aq( 0 #{ \(aqfoo 30 } 2 )
+ary2 \(rA #( 0 #{ \(aqfoo 30 } 2 )
+.Ed
+.\"
+.\" list-append
+.\"
+.It Cm list-append No (\ arg0 arg1 ... argn n -- lst\ )
+Return list object with
+.Ar n
+objects found on parameter stack.  Raise
+.Ar out-of-range
+exception if
+.Ar n
+< 0.
+.\"
+.\" list-copy
+.\"
+.It Cm list-copy No (\ lst1 -- ary2\ )
+Return copy of
+.Ar lst1
+with all elements new created in contrary to
+.Sx list->array .
+.Bd -literal -offset indent -compact
+\(aq( 0 #{ \(aqfoo 10 } 2 ) value lst1
+lst1 list-copy value lst2
+lst1 1 list-ref \(aqfoo 30 hash-set!
+lst1 \(rA \(aq( 0 #{ \(aqfoo 30 } 2 )
+lst2 \(rA \(aq( 0 #{ \(aqfoo 10 } 2 )
+.Ed
+.\"
+.\" list-delete
+.\" list-delete!
+.\"
+.It Cm list-delete No (\ lst1 key -- lst2\ )
+Return new list without all elements equal
+.Ar key .
+.It Cm list-delete! No (\ lst key -- lst'\ )
+Return
+.Ar lst
+without all elements equal
+.Ar key .
+.\"
+.\" list-fill
+.\"
+.It Cm list-fill No (\ lst val -- lst'\ )
+Set all elements of
+.Ar lst
+to
+.Ar val .
+.\"
+.\" list-head
+.\"
+.It Cm list-head No (\ lst1 idx -- lst2\ )
+Return first
+.Ar idx
+entries of
+.Ar lst1
+in a new list or nil.
+.\"
+.\" list-index
+.\"
+.It Cm list-index No (\ lst key -- idx\ )
+Return index of
+.Ar key
+in
+.Ar lst
+or -1 if not found.
+.\"
+.\" list-insert
+.\"
+.It Cm list-insert No (\ lst1 idx val -- lst2\ )
+Insert
+.Ar val
+to
+.Ar lst1
+at position
+.Ar idx
+and return new list.
+.Ar val
+can be a list or any other object.  Negative
+.Ar idx
+counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar lst1's
+range.
+.\"
+.\" list-length
+.\"
+.It Cm list-length No (\ obj -- len\ )
+If
+.Ar obj
+is a list (or array), return length of list, if
+.Ar obj
+is nil, return 0 otherwise -1.
+.\"
+.\" list-member?
+.\"
+.It Cm list-member? No (\ lst key -- f\ )
+Return #t if
+.Ar key
+exists in
+.Ar lst ,
+otherwise #f.
+.\"
+.\" list-ref
+.\"
+.It Cm list-ref No (\ lst idx -- val\ )
+Return value at position
+.Ar idx
+of
+.Ar lst .
+Negative
+.Ar idx
+counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar lst's
+range.
+.\"
+.\" list-reverse
+.\"
+.It Cm list-reverse No (\ lst1 -- ary2\ )
+Return new list with elements reversed.
+.\"
+.\" list-set!
+.\"
+.It Cm list-set! No (\ lst idx val --\ )
+Store element
+.Ar val
+at position
+.Ar idx
+in
+.Ar lst .
+Negative
+.Ar idx
+counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar lst's
+range.
+.\"
+.\" list-slice
+.\" list-slice!
+.\"
+.It Cm list-slice No (\ lst1 idx :key count 1 -- lst2\ )
+Return new list without
+.Ar count
+elements from
+.Ar idx
+on.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar lst1's
+range.
+.Bd -literal -offset indent -compact
+#( 0 1 1 2 ) 1 :count 2 list-slice \(rA #( 0 2 )
+.Ed
+.It Cm list-slice! No (\ lst idx :key count 1 -- lst'\ )
+Return
+.Ar lst
+without
+.Ar count
+elements from
+.Ar idx
+on.  Raise
+.Ar out-of-range
+exception if
+.Ar idx
+is not in
+.Ar lst's
+range.
+.\"
+.\" list-tail
+.\"
+.It Cm list-tail No (\ lst1 idx -- lst2\ )
+Return
+.Ar idx'th
+cdr of
+.Ar lst1
+up to the last entry in a new list or nil.
+.\"
+.\" list=
+.\"
+.It Cm list= No (\ lst1 lst2 -- f\ )
+Return #t if
+.Ar lst1
+and
+.Ar lst2
+are list objects of same length and content, otherwise #f.
+.\"
+.\" list?
+.\"
+.It Cm list? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a list (nil or a cons pointer), otherwise #f.
+.\"
+.\" make-list
+.\"
+.It Cm make-list No (\ len :key initial-element nil -- lst\ )
+Return list of length
+.Ar len
+filled with keyword
+.Ar initial-element
+values.
+.Ar initial-element
+defaults to nil if not specified.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.\"
+.\" nil?
+.\"
+.It Cm nil? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is nil, otherwise #f.
+.\"
+.\" null?
+.\"
+.It Cm null? No (\ obj --f\ ) alias for Sx nil?
+.\"
+.\" pair?
+.\"
+.It Cm pair? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a pair (a cons pointer), otherwise #f.
+.\"
+.\" set-car!
+.\"
+.It Cm set-car! No (\ lst val -- lst'\ )
+Set
+.Ar val
+to car of
+.Ar lst .
+.\"
+.\" set-cdr!
+.\"
+.It Cm set-cdr! No (\ lst val -- lst'\ )
+Set
+.Ar val
+to cdr of
+.Ar lst .
+.El
+.Pp
+Assoc lists:
+.Bl -tag -width MMM -compact
+.\"
+.\" >alist
+.\"
+.It Cm >alist No (\ vals len -- alst\ )
+Return assoc list object with
+.Ar len
+/ 2 key-value pairs found on parameter stack. Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0 or not even.
+.\"
+.\" acons
+.\"
+.It Cm acons No (\ key val alst1 -- alst2\ )
+Return new Lisp-like associated list from
+.Ar key-val
+pair and
+.Ar alst1 .
+.\"
+.\" list-assoc
+.\"
+.It Cm list-assoc No (\ alst key -- ret\ )
+If
+.Ar key
+matches, return corresponding key-value pair, otherwise #f.
+.\"
+.\" list-assoc-ref
+.\"
+.It Cm list-assoc-ref No (\ alst key -- val\ )
+If
+.Ar key
+matches, return corresponding value, otherwise #f.
+.\"
+.\" list-assoc-remove!
+.\"
+.It Cm list-assoc-remove! No (\ alst key -- alst'\ )
+If
+.Ar key
+matches, remove key-value pair from
+.Ar alst .
+Return current assoc-list.
+.\"
+.\" list-assoc-set!
+.\"
+.It Cm list-assoc-set! No (\ alst key val -- alst'\ )
+If
+.Ar key
+matches, set key-value pair, otherwise add new pair to
+.Ar alst .
+Return current assoc-list.
+.El
+.\"
+.\" File Functions (file.c)
+.\"
+.Ss File Functions
+General functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" chdir
+.\"
+.It Cm chdir No (\ path --\ ) alias for Sx file-chdir
+.\"
+.\" close-pipe
+.\"
+.It Cm close-pipe No (\ fp -- ior\ )
+Forth-like word.
+.Bd -literal -offset indent -compact
+256 constant max-line
+create line-buffer max-line 2 + allot
+s\(dq pwd\(dq r/o open-pipe throw value FP
+line-buffer max-line FP read-line throw drop
+    line-buffer swap type
+FP close-pipe throw
+.Ed
+.\"
+.\" file-atime
+.\"
+.It Cm file-atime No (\ name -- time\ )
+If
+.Ar name
+is a file, return its last access time, otherwise #f.  One can convert
+the number in a readable string with
+.Cm time->string .
+.\"
+.\" file-basename
+.\"
+.It Cm file-basename No (\ name ext -- base\ )
+Return basename of file
+.Ar name
+depending on
+.Ar ext .
+.Ar ext
+may be #f, nil/undef, a string or a regexp.  If
+.Ar ext
+is #f, return file name without path name.  If
+.Ar ext
+is nil or undef, discard the part from the last dot to the end of
+basename
+.Ar name .
+If
+.Ar ext
+is a string or a regexp, discard found
+.Ar ext
+from basename
+.Ar name .
+.Bd -literal -offset indent -compact
+\(dq/home/mike/cage.snd\(dq #f file-basename \(rA \(dqcage.snd\(dq
+\(dq/home/mike/cage.snd\(dq nil file-basename \(rA \(dqcage\(dq
+\(dq/home/mike/cage.snd\(dq \(dqnd\(dq file-basename \(rA \(dqcage.s\(dq
+\(dq/home/mike/cage.snd\(dq /\e.(snd\(bawave)$/ file-basename \(rA \(dqcage\(dq
+.Ed
+.\"
+.\" file-chdir
+.\"
+.It Cm file-chdir No (\ path --\ )
+Change working directory to
+.Ar path
+and, if in a repl, print result to current standard output.  If
+.Ar path
+is nil, change working directory to
+.Dv $HOME .
+.Ar path
+may contain
+.Sq ~
+as an abbreviation for home directory.
+.\"
+.\" file-chmod
+.\"
+.It Cm file-chmod No (\ name mode --\ )
+Change access mode of file
+.Ar name
+to
+.Ar mode .
+You can write
+.Ar mode
+with octal numbers: prepend the number with
+.Sq 0o ,
+this is number zero
+.Sq 0
+and lower letter
+.Sq o ,
+similar to
+.Sq 0x
+for hexadecimal numbers.
+.\"
+.\" file-chroot
+.\"
+.It Cm file-chroot No (\ path --\ )
+Change root directory to
+.Ar path
+and, if in a repl, print result to current standard output.  This
+function is restricted to the super-user.
+.\"
+.\" file-copy
+.\"
+.It Cm file-copy No (\ src dst --\ )
+Copy file
+.Ar src
+to
+.Ar dst .
+If
+.Ar dst
+is a directory, copy
+.Ar src
+to
+.Ar DST/SRC .
+Raise
+.Ar system-error
+exception if
+.Xr fopen 3
+fails on any of the two files.
+.\"
+.\" file-ctime
+.\"
+.It Cm file-ctime No (\ name -- time\ )
+If
+.Ar name
+is a file, return its status change time, otherwise #f.  One can convert
+the number in a readable string with
+.Cm time->string .
+.\"
+.\" file-delete
+.\"
+.It Cm file-delete No (\ name --\ )
+If file
+.Ar name
+exist, delete it, otherwise do nothing.
+.\"
+.\" file-dir
+.\"
+.It Cm file-dir No (\ dir -- files-ary\ )
+Return an array of all file names found in
+.Ar dir .
+.\"
+.\" file-dirname
+.\"
+.It Cm file-dirname No (\ name -- path\ )
+Return directory part of file
+.Ar name .
+.Bd -literal -offset indent -compact
+\(dq/home/mike/cage.snd\(dq file-dirname \(rA \(dq/home/mike\(dq
+.Ed
+.\"
+.\" file-eval
+.\"
+.It Cm file-eval No (\ name --\ )
+Load and eval content of file
+.Ar name
+and add
+.Ar name
+to
+.Dv *loaded-files*
+if it wasn't there.  It's similar to
+.Cm include
+except that file name must be on stack (include is a parseword).  With
+file-eval one can load files from within word definitions.  Raise
+.Ar load-error
+exception if file-eval fails.
+.\"
+.\" file-fullpath
+.\"
+.It Cm file-fullpath No (\ name -- path\ )
+Return current working directory prepended to file
+.Ar name .
+If name starts with a slash, return
+.Ar name
+unchanged.
+.\"
+.\" file-install
+.\"
+.It Cm file-install No (\ src dst mode -- f\ )
+Install
+.Ar src
+to
+.Ar dst
+with access mode
+.Ar mode
+if
+.Ar dst
+doesn't exist or if modification time of
+.Ar src
+is greater than
+.Ar dst's .
+If
+.Ar dst
+is a directory, install
+.Ar src
+to
+.Ar dst/src .
+Return #t if
+.Ar src
+could be installed, otherwise #f.  You can write
+.Ar mode
+with octal numbers: prepend the number with
+.Sq 0o ,
+this is number zero
+.Sq 0
+and lower letter
+.Sq o ,
+similar to
+.Sq 0x
+for hexadecimal numbers.
+.Bd -literal -offset indent -compact
+: install-lib { src dst mode -- }
+	src dst mode file-install if
+		\(dq%s --> %04o %s\(dq \(aq( src mode dst )
+	else
+		\(dq%s is up-to-date\(dq \(aq( dst )
+	then  fth-print  cr
+;
+\(dqlibsndlib.so\(dq \(dq/usr/opt/lib/s7\(dq 0o755 install-lib
+.Ed
+.\"
+.\" file-jail
+.\"
+.It Cm file-jail No (\ hostname ip path --\ )
+Install secure environment with
+.Ar hostname
+and local
+.Ar ip
+address changerooted to
+.Ar path
+and run the current process and future descendants in it.  This function
+is restricted to the super-user.
+.\"
+.\" file-length
+.\"
+.It Cm file-length No (\ name -- len\ )
+If
+.Ar name
+is a file, return its length in bytes, otherwise #f.
+.\"
+.\" file-match-dir
+.\"
+.It Cm file-match-dir No (\ dir reg -- files-ary\ )
+Return an array of file names in
+.Ar dir
+matching regexp
+.Ar reg .
+.\"
+.\" file-mkdir
+.\"
+.It Cm file-mkdir No (\ name mode --\ )
+Create directory named
+.Ar name
+with access mode
+.Ar mode .
+You can write
+.Ar mode
+with octal numbers: prepend the number with
+.Sq 0o ,
+this is number zero
+.Sq 0
+and lower letter
+.Sq o ,
+similar to
+.Sq 0x
+for hexadecimal numbers.
+.\"
+.\" file-mkfifo
+.\"
+.It Cm file-mkfifo No (\ name mode --\ )
+Create fifo named
+.Ar name
+with access mode
+.Ar mode .
+You can write
+.Ar mode
+with octal numbers: prepend the number with
+.Sq 0o ,
+this is number zero
+.Sq 0
+and lower letter
+.Sq o ,
+similar to
+.Sq 0x
+for hexadecimal numbers.
+.\"
+.\" file-mtime
+.\"
+.It Cm file-mtime No (\ name -- time\ )
+If
+.Ar name
+is a file, return its last modification time, otherwise #f.  One can
+convert the number in a readable string with
+.Cm time->string .
+.\"
+.\" file-pwd
+.\"
+.It Cm file-pwd No (\ -- path\ )
+Return current working directory.
+.\"
+.\" file-realpath
+.\"
+.It Cm file-realpath No (\ name -- path\ )
+If
+.Ar name
+starts with
+.Sq ~ ,
+replace it with content of environment variable
+.Dv $HOME .
+If
+.Xr realpath 3
+function exists, return resolved path, otherwise return
+.Ar name
+with
+.Sq ~
+replacement.
+.Bd -literal -offset indent -compact
+\(dq~\(dq file-realpath \(rA \(dq/home/mike\(dq
+\(dq/usr/local\(dq file-chdir \(rA \(dq/usr/local\(dq
+file-pwd \(rA \(dq/usr/local\(dq
+\(dq../bin\(dq file-realpath \(rA \(dq/usr/bin\(dq
+.Ed
+.\"
+.\" file-rename
+.\"
+.It Cm file-rename No (\ src dst --\ )
+Rename
+.Ar src
+to
+.Ar dst .
+.\"
+.\" file-rmdir
+.\"
+.It Cm file-rmdir No (\ name --\ )
+Remove empty directory
+.Ar name .
+.\"
+.\" file-shell
+.\"
+.It Cm file-shell No (\ cmd -- str\ )
+Open pipe for reading, feed it with
+.Ar cmd
+and collect string output as long as pipe is open.  Afterwards close
+pipe, set read-only variable
+.Dv exit-status
+and return collected string (with trailing cr).
+.\"
+.\" file-split
+.\"
+.It Cm file-split No (\ name -- ary\ )
+Split file
+.Ar name
+in dirname and basename and return result in array of two strings.
+.Bd -literal -offset indent -compact
+\(dq/home/mike/cage.snd\(dq file-split
+  \(rA #( \(dq/home/mike\(dq \(dqcage.snd\(dq )
+.Ed
+.\"
+.\" file-symlink
+.\"
+.It Cm file-symlink No (\ src dst --\ )
+Create symlink from
+.Ar src
+named
+.Ar dst .
+.\"
+.\" file-system
+.\"
+.It Cm file-system No (\ cmd -- f\ )
+Execute
+.Ar cmd
+as a shell command.  Set read-only variable
+.Dv exit-status
+and return #t for success, #f otherwise.  In the latter case you can
+check
+.Dv exit-status .
+.\"
+.\" file-touch
+.\"
+.It Cm file-touch No (\ name time --\ )
+Change modification time of
+.Ar name
+to
+.Ar time .
+If
+.Ar time
+is nil, use current time.
+.\"
+.\" file-truncate
+.\"
+.It Cm file-truncate No (\ name size --\ )
+Truncate or extend file
+.Ar name
+to
+.Ar size
+bytes.
+.\"
+.\" open-pipe
+.\"
+.It Cm open-pipe No (\ addr u fam -- fp ior\ )
+Forth-like word.
+.Bd -literal -offset indent -compact
+256 constant max-line
+create line-buffer max-line 2 + allot
+s\(dq pwd\(dq r/o open-pipe throw value FP
+line-buffer max-line FP read-line throw drop
+    line-buffer swap type
+FP close-pipe throw
+.Ed
+.\"
+.\" shell
+.\"
+.It Cm shell No (\ cmd -- str\ ) alias for Sx file-shell
+.El
+.Pp
+File test functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" file-block?
+.\"
+.It Cm file-block? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a block special file, otherwise #f.
+.\"
+.\" file-character?
+.\"
+.It Cm file-character? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a character special file, otherwise #f.
+.\"
+.\" file-directory
+.\"
+.It Cm file-directory? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a directory, otherwise #f.
+.\"
+.\" file-executable?
+.\"
+.It Cm file-executable? No (\ name -- f\ )
+Return #t if
+.Ar name
+is an executable file, otherwise #f.
+.\"
+.\" file-exists?
+.\"
+.It Cm file-exists? No (\ name -- f\ )
+Return #t if
+.Ar name
+is an existing file, otherwise #f.
+.\"
+.\" file-fifo?
+.\"
+.It Cm file-fifo? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a named pipe, otherwise #f.
+.\"
+.\" file-grpowned?
+.\"
+.It Cm file-grpowned? No (\ name -- f\ )
+Return #t if
+.Ar name
+matches effective gid, otherwise #f.
+.\"
+.\" file-owned?
+.\"
+.It Cm file-owned? No (\ name -- f\ )
+Return #t if
+.Ar name
+matches effective uid, otherwise #f.
+.\"
+.\" file-readable?
+.\"
+.It Cm file-readable? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a readable file, otherwise #f.
+.\"
+.\" file-setgid?
+.\"
+.It Cm file-setgid? No (\ name -- f\ )
+Return #t if
+.Ar name
+has set gid bit, otherwise #f.
+.\"
+.\" file-setuid?
+.\"
+.It Cm file-setuid? No (\ name -- f\ )
+Return #t if
+.Ar name
+has set uid bit, otherwise #f.
+.\"
+.\" file-socket?
+.\"
+.It Cm file-socket? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a socket, otherwise #f.
+.\"
+.\" file-sticky?
+.\"
+.It Cm file-sticky? No (\ name -- f\ )
+Return #t if
+.Ar name
+has set sticky bit, otherwise #f.
+.\"
+.\" file-symlink?
+.\"
+.It Cm file-symlink? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a symbolic link, otherwise #f.
+.\"
+.\" file-writable?
+.\"
+.It Cm file-writable? No (\ name -- f\ )
+Return #t if
+.Ar name
+is a writable file, otherwise #f.
+.\"
+.\" file-zero?
+.\"
+.It Cm file-zero? No (\ name -- f\ )
+Return #t if
+.Ar name
+length is zero, otherwise #f.
+.El
+.\"
+.\" Hashs (hash.c)
+.\"
+.Ss Hashs
+.Bl -tag -width MMM -compact
+.\"
+.\" #{}
+.\"
+.It Cm #{} No (\ -- hash\ ) alias for Sx make-hash
+.\"
+.\" .hash
+.\"
+.It Cm .hash No (\ hash --\ )
+Print
+.Ar hash
+object to current output.
+.\"
+.\" >hash
+.\"
+.It Cm >hash No (\ vals len -- hash\ )
+Take
+.Ar len
+/ 2 key-value pairs from parameter stack and return hash object.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0 or
+.Ar len
+is not even.
+.Bd -literal -offset indent -compact
+\(aqfoo 0  \(aqbar 1  4 >hash \(rA  #{ \(aqfoo \(rA 0  \(aqbar \(rA 1 }
+.Ed
+.\"
+.\" hash->array
+.\"
+.It Cm hash->array No (\ hash -- ass\ )
+Return associated array with \(aq( key . value ) pairs of
+.Ar hash's
+content.
+.Bd -literal -offset indent -compact
+#{ \(aqfoo 0 \(aqbar 1 } hash->array
+  \(rA #a( \(aq( \(aqfoo . 0 ) \(aq( \(aqbar . 1 ) )
+.Ed
+.\"
+.\" hash-clear
+.\"
+.It Cm hash-clear No (\ hash --\ )
+Remove all entries from
+.Ar hash ,
+.Ar hash's
+length is zero.
+.\"
+.\" hash-copy
+.\"
+.It Cm hash-copy No (\ hash1 -- hash2\ )
+Return copy of
+.Ar hash1
+using object-copy for all elements.
+.\"
+.\" hash-delete!
+.\"
+.It Cm hash-delete! No (\ hash key -- ary\ )
+Delete key-value pair associated with
+.Ar key
+and return key-value array or #f if not found.
+.\"
+.\" hash-each
+.\"
+.It Cm hash-each No (\ hash proc --\ )
+Run
+.Ar proc
+for each key-value pair.
+.Ar proc's
+stack effect must be ( key value -- ).
+.Bd -literal -offset indent -compact
+#{ \(aqfoo 0 \(aqbar 1 } lambda: <{ key value -- }>
+	\(dq%s=%s\en\(dq #( key value ) fth-print
+; hash-each
+.Ed
+.\"
+.\" hash-find
+.\"
+.It Cm hash-find No (\ hash key -- ary\ )
+Return key-value array if
+.Ar key
+exist or #f if not found.
+.\"
+.\" hash-keys
+.\"
+.It Cm hash-keys No (\ hash -- keys\ )
+Return array of keys.
+.\"
+.\" hash-map
+.\"
+.It Cm hash-map No (\ hash1 proc -- hash2\ )
+Run
+.Ar proc
+for each key-value pair.
+.Ar proc's
+stack effect must be ( key value -- val ) where val is the new value for
+key.
+.Bd -literal -offset indent -compact
+#{ \(aqfoo 0 \(aqbar 1 } lambda: <{ key val -- val }>
+	val 10 +
+; hash-map \(rA #{ \(aqfoo => 10  \(aqbar => 11 }
+.Ed
+.\"
+.\" hash-member?
+.\"
+.It Cm hash-member? No (\ hash key -- f\ )
+Return #t if
+.Ar key
+exists, otherwise #f.
+.\"
+.\" hash-ref
+.\"
+.It Cm hash-ref No (\ hash key -- value\ )
+Return associated value or #f if not found.
+.\"
+.\" hash-set!
+.\"
+.It Cm hash-set! No (\ hash key value --\ )
+Set
+.Ar key-value
+pair of
+.Ar hash .
+If key exists, overwrite existing value, otherwise create new key-value
+entry.
+.\"
+.\" hash-values
+.\"
+.It Cm hash-values No (\ hash -- values\ )
+Return array of values.
+.\"
+.\" hash=
+.\"
+.It Cm hash= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are hash objects with same length and content, otherwise #f.
+.\"
+.\" hash?
+.\"
+.It Cm hash? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a hash object, otherwise #f.
+.\"
+.\" make-hash
+.\"
+.It Cm make-hash No (\ -- hash\ )
+Return empty hash object.
+.\"
+.\" make-hash-with-len
+.\"
+.It Cm make-hash-with-len No (\ size -- hash\ )
+Return hash object with
+.Ar size
+key-value pairs.  Keys are 0, 1, 2, ... and values are nil.
+.El
+.Pp
+Property functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" object-properties
+.\"
+.It Cm object-properties No (\ obj -- props\ )
+Return
+.Ar obj's
+properties or #f if empty.
+.\"
+.\" object-property-ref
+.\"
+.It Cm object-property-ref No (\ obj key -- val\ )
+Return
+.Ar obj's
+property val associated with
+.Ar key
+or #f if not found.
+.\"
+.\" object-property-set!
+.\"
+.It Cm object-property-set! No (\ obj key val --\ )
+Set
+.Ar key-value
+pair to
+.Ar obj's
+property object.
+.\"
+.\" properties
+.\"
+.It Cm properties No (\ obj -- props\ )
+Return
+.Ar obj's
+global properties or #f if empty.  If
+.Ar obj
+is #f, return entire global property object.
+.\"
+.\" property-ref
+.\"
+.It Cm property-ref No (\ obj key -- val\ )
+Return
+.Ar obj's
+global property val associated with
+.Ar key
+or #f if not found.
+.\"
+.\" property-set!
+.\"
+.It Cm property-set! No (\ obj key val --\ )
+Set
+.Ar key-value
+pair to
+.Ar obj's
+global property object.
+.\"
+.\" word-properties
+.\"
+.It Cm word-properties No (\ xt -- props\ )
+Return
+.Ar xt's
+properties or #f if empty.
+.\"
+.\" word-property-ref
+.\"
+.It Cm word-property-ref No (\ xt key -- val\ )
+Return
+.Ar xt's
+property val associated with
+.Ar key
+or #f if not found.
+.\"
+.\" word-property-set!
+.\"
+.It Cm word-property-set! No (\ xt key val --\ )
+Set
+.Ar key-value
+pair to
+.Ar xt's
+property object.
+.El
+.\"
+.\" Hooks (hook.c)
+.\"
+.Ss Hooks
+.Bl -tag -width MMM -compact
+.\"
+.\" .hook
+.\"
+.It Cm .hook No (\ hook --\ )
+Print hook object
+.Ar hook
+to current output.
+.\"
+.\" add-hook!
+.\"
+.It Cm add-hook! No (\ hook prc --\ ) alias for Sx hook-add
+.\"
+.\" create-hook
+.\"
+.It Cm create-hook No (\ arity help \(dqname\(dq --\ )
+Create hook variable
+.Ar name
+with
+.Ar arity
+and documentation
+.Ar help .
+.Ar arity
+can be an integer or an array of length 3, #( req opt rest ).
+.Bd -literal -offset indent -compact
+2 \(dqA simple hook.\(dq create-hook my-new-hook
+#( 2 0 #f ) \(dqA simple hook.\(dq create-hook my-new-hook
+.Ed
+.\"
+.\" hook->array
+.\"
+.It Cm hook->array No (\ hook -- ary\ )
+Return array of all
+.Ar hook
+procedures.
+.\"
+.\" hook->list
+.\"
+.It Cm hook->list No (\ hook -- proc-list\ ) alias for Sx hook->array
+.\"
+.\" hook-add
+.\"
+.It Cm hook-add No (\ hook prc --\ )
+Add hook procedure
+.Ar prc
+to
+.Ar hook .
+Raise
+.Ar bad-arity
+exception if
+.Ar prc's
+arity doesn't match
+.Ar hook's
+arity.
+.\"
+.\" hook-apply
+.\"
+.It Cm hook-apply No (\ hook args -- value-list\ )
+Run all hook procedures with
+.Ar args ,
+an array of arguments.
+.Ar args
+can be an array of arguments or a single argument.  Raise
+.Ar bad-arity
+exception if
+.Ar args's
+length doesn't match
+.Ar hook's
+arity.
+.Bd -literal -offset indent -compact
+2 make-hook value hk1
+hk1  <'> + 2 make-proc  add-hook!
+hk1 #( 1 2 ) run-hook \(rA #( 3 )
+.Ed
+.\"
+.\" hook-arity
+.\"
+.It Cm hook-arity No (\ hook -- arity\ )
+Return arity array of
+.Ar hook ,
+#( req opt rest ).
+.Bd -literal -offset indent -compact
+2 make-hook hook-arity \(rA #( 2 0 #f )
+.Ed
+.\"
+.\" hook-clear
+.\"
+.It Cm hook-clear No (\ hook --\ )
+Remove all hook procedures from
+.Ar hook .
+.\"
+.\" hook-delete
+.\"
+.It Cm hook-delete No (\ hook prc-or-name -- prc\ )
+Remove hook procedure
+.Ar prc-or-name
+from
+.Ar hook
+and return it.
+.Ar prc-or-name
+can be a string, an xt or a proc.
+.\"
+.\" hook-empty?
+.\"
+.It Cm hook-empty? No (\ hook -- f\ )
+Return #t if no hook procedure exist in
+.Ar hook ,
+otherwise #f.
+.\"
+.\" hook-member?
+.\"
+.It Cm hook-member? No (\ hook prc-or-name -- f\ )
+Return #t if procedure
+.Ar prc-or-name
+exist in
+.Ar hook ,
+otherwise #f.
+.Ar prc-or-name
+can be a string, an xt or a proc.
+.\"
+.\" hook-name
+.\"
+.It Cm hook-name No (\ hook -- name\ )
+Return name of
+.Ar hook
+as string if hook object, otherwise #f.
+.\"
+.\" hook-names
+.\"
+.It Cm hook-names No (\ hook -- name-list\ )
+Return array of hook procedure names (strings).
+.\"
+.\" hook-procs
+.\"
+.It Cm hook-procs No (\ hook -- proc-list\ ) alias for Sx hook->array
+.\"
+.\" hook=
+.\"
+.It Cm hook= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are hook objects of same arity and procedures, otherwise #f.
+.\"
+.\" hook?
+.\"
+.It Cm hook? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a hook object, otherwise #f.
+.\"
+.\" make-hook
+.\"
+.It Cm make-hook No (\ arity -- hook\ )
+Return hook object for procs accepting
+.Ar arity
+arguments.
+.Ar arity
+can be an integer or an array of length 3, #( req opt rest ).
+.Bd -literal -offset indent -compact
+2 make-hook value my-new-hook
+#( 2 0 #f ) make-hook value my-new-hook
+.Ed
+.\"
+.\" remove-hook!
+.\"
+.It Cm remove-hook! No (\ hook prc-or-name -- prc\ ) alias for Sx hook-delete
+.\"
+.\" reset-hook!
+.\"
+.It Cm reset-hook! No (\ hook --\ ) alias for Sx hook-clear
+.\"
+.\" run-hook
+.\"
+.It Cm run-hook No (\ hook args -- value-list\ ) alias for Sx hook-apply
+.El
+.\"
+.\" IO Functions (io.c)
+.\"
+.Ss IO Functions
+Global variables:
+.Bl -tag -width MMM -compact
+.\"
+.\" *stderr*
+.\"
+.It Dv *stderr*
+Return current standard error output IO object.
+.\"
+.\" *stdin*
+.\"
+.It Dv *stdin*
+Return current standard input IO object.
+.\"
+.\" *stdout*
+.\"
+.It Dv *stdout*
+Return current standard output IO object.
+.\"
+.\" set-*stderr*
+.\"
+.It Cm set-*stderr* No (\ io -- old\ )
+Set
+.Ar io
+to current standard error and return old IO object.
+.\"
+.\" set-*stdin*
+.\"
+.It Cm set-*stdin* No (\ io -- old\ )
+Set
+.Ar io
+to current standard input and return old IO object.
+.\"
+.\" set-*stdout*
+.\"
+.It Cm set-*stdout* No (\ io -- old\ )
+Set
+.Ar io
+to current standard output and return old IO object.
+.\"
+.\" set-version-control
+.\"
+.It Cm set-version-control No (\ val --\ )
+Set current version control style.  Accepted values:
+.Bl -tag -offset ident -width MMMMM -compact
+.It #t
+numbered backups
+.It nil
+numbered/simple backups
+.It #f
+simple backups
+.It undef
+no backups
+.El
+.\"
+.\" version-control
+.\"
+.It Cm version-control No (\ -- val\ )
+Return current version control style.
+.El
+.Pp
+General IO functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" .io
+.\"
+.It Cm .io No (\ io --\ )
+Print
+.Ar io
+object to current output.
+.\"
+.\" exit-status
+.\"
+.It Cm exit-status No (\ -- n\ ) alias for Sx io-exit-status
+.\"
+.\" io->string
+.\"
+.It Cm io->string No (\ io -- str\ )
+Return content of
+.Ar io
+object as string if possible.
+.\"
+.\" io-close
+.\"
+.It Cm io-close No (\ io --\ )
+If necessary, flush
+.Ar io ,
+close
+.Ar io
+object and set closed? to #t.
+.\"
+.\" io-closed?
+.\"
+.It Cm io-closed? No (\ io -- f\ )
+Return #t if
+.Ar io
+object is closed, otherwise #f.
+.\"
+.\" io-eof?
+.\"
+.It Cm io-eof? No (\ io -- f\ )
+Return #t if EOF is reached, otherwise #f.
+.\"
+.\" io-exit-status
+.\"
+.It Cm io-exit-status No (\ -- n\ )
+Return exit status of last extern process called via file-shell,
+file-system, etc.
+.\"
+.\" io-fdopen
+.\"
+.It Cm io-fdopen No (\ fd :key fam r/o -- io\ )
+Connect file descriptor
+.Ar fd
+to new IO object.  If keyword
+.Ar fam
+was not given, open file read-only, otherwise use
+.Ar fam .
+See
+.Sx io-open
+for fam.
+.Bd -literal -offset indent -compact
+2 :fam w/o io-fdopen value err-io
+err-io \(dqour error log\(dq io-write
+err-io io-flush \(rA \(dqour error log\(dq (on stderr)
+.Ed
+.\"
+.\" io-filename
+.\"
+.It Cm io-filename No (\ io -- fname\ )
+Return file name of
+.Ar io
+object or #f if file name is not available.
+.\"
+.\" io-fileno
+.\"
+.It Cm io-fileno No (\ io -- fd\ )
+Return file descriptor of
+.Ar io .
+.\"
+.\" io-flush
+.\"
+.It Cm io-flush No (\ io --\ )
+Flushe
+.Ar io
+object if possible.
+.\"
+.\" io-getc
+.\"
+.It Cm io-getc No (\ io -- c\ )
+Return next character from
+.Ar io
+object or #f if EOF.
+.\"
+.\" io-input?
+.\"
+.It Cm io-input? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an input IO object, otherwise #f.
+.\"
+.\" io-mode
+.\"
+.It Cm io-mode No (\ io -- mode\ )
+Return access mode of
+.Ar io
+object.
+.\"
+.\" io-open
+.\"
+.It Cm io-open No (\ name :key fam r/o if-exists overwrite -- io\ )
+Open file
+.Ar name
+and return new IO object.  If keyword
+.Ar fam
+was not specified, open file read-only, otherwise take
+.Ar fam .
+Possible
+.Ar fam
+values:
+.Bl -tag -offset ident -width MMM -compact
+.It Sy a/o
+apend \(dqa\(dq
+.It Sy r/a
+read/write-append \(dqa+\(dq
+.It Sy r/o
+read-only \(dqr\(dq
+.It Sy r/w
+read/write \(dqw+\(dq
+.It Sy w/o
+write-only \(dqw\(dq
+.El
+If keyword
+.Sy if-exists
+was not specified, overwrite possible existing file before open it for
+writing or appending.  Possible
+.Sy if-exists
+values:
+.Bl -tag -offset ident -width MMM -compact
+.It Sy :error
+raise
+.Ar io-error
+exception if
+.Ar name
+already exist
+.It Sy :overwrite
+overwrite existing file (default)
+.It Sy :rename
+depends on environment variable
+.Dv $VERSION_CONTROL
+and global Fth variable
+.Dv version-control
+(see there)
+.El
+.Bd -literal -offset indent -compact
+\(dqin-test\(dq io-open value rd-io1
+\(dqin-test\(dq :fam r/o io-open value rd-io2
+\(dqout-test\(dq :fam w/o io-open value ow-io1
+\(dqout-test\(dq :fam w/o :if-exists :overwrite io-open value ow-io2
+\(dqout-test\(dq :fam r/w :if-exists :error io-open value rw-io1
+\(dqout-test\(dq :fam r/w :if-exists :rename io-open value rn-io1
+.Ed
+.\"
+.\" io-open-read
+.\"
+.It Cm io-open-read No (\ name -- io\ )
+Open file
+.Ar name
+for reading and return new IO object.
+.\"
+.\" io-open-write
+.\"
+.It Cm io-open-write No (\ name :key if-exists overwrite -- io\ )
+Open file
+.Ar name
+for writing and return new IO object.  For keyword if-exists see
+.Sx io-open .
+.\"
+.\" io-output?
+.\"
+.It Cm io-output? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an output IO object, otherwise #f.
+.\"
+.\" io-pos-ref
+.\"
+.It Cm io-pos-ref No (\ io -- pos\ )
+Return current
+.Ar io
+object position.
+.\"
+.\" io-pos-set!
+.\"
+.It Cm io-pos-set! No (\ io pos --\ )
+Set
+.Ar io
+object position to
+.Ar pos .
+.\"
+.\" io-putc
+.\"
+.It Cm io-putc No (\ io c --\ )
+Write character
+.Ar c
+to
+.Ar io
+object.
+.\"
+.\" io-read
+.\"
+.It Cm io-read No (\ io -- line\ )
+Return next line from
+.Ar io
+object or #f if EOF.
+.\"
+.\" io-readlines
+.\"
+.It Cm io-readlines No (\ io -- array-of-lines\ )
+Return the entire
+.Ar io
+object content as an array of strings, line by line.
+.\"
+.\" io-reopen
+.\"
+.It Cm io-reopen No (\ io1 name :key fam io1-fam -- io2\ )
+Return new IO object as copy of
+.Ar io1
+and close
+.Ar io1 .
+If
+.Ar name
+is not a string, for example #f or nil, use file name from
+.Ar io1 .
+If keyword
+.Ar fam
+was not given, use mode from
+.Ar io1 ,
+otherwise use
+.Ar fam .
+All restrictions on reopen apply, for example, a file opened for reading
+cannot reopened for writing etc.
+.Bd -literal -offset indent -compact
+\(dq1-test\(dq io-open-write value io1
+io1 \(dqhello\(dq io-write
+io1 \(dq2-test\(dq io-reopen value io2
+io1 io-closed? \(rA #t
+io2 \(dqworld\(dq io-write
+io2 io-close
+io2 io-closed? \(rA #t
+\(dq1-test\(dq readlines \(rA #( \(dqhello\(dq )
+\(dq2-test\(dq readlines \(rA #( \(dqworld\(dq )
+*stderr* \(dqerror.log\(dq io-reopen value err-io
+.Ed
+.\"
+.\" io-rewind
+.\"
+.It Cm io-rewind No (\ io --\ )
+Rewind position to begin of
+.Ar io
+object.
+.\"
+.\" io-seek
+.\"
+.It Cm io-seek No (\ io offset :key whence io-seek-set -- pos\ )
+Add
+.Ar offset
+to the file position in
+.Ar io
+object and return new position.  Keyword
+.Ar whence
+can have the following values:
+.Bl -tag -offset indent -width MMM -compact
+.It Dv SEEK_SET
+offset counts from begin of file (default)
+.It Dv SEEK_CUR
+offset counts from current position
+.It Dv SEEK_END
+offset counts from end of file.
+.El
+.\"
+.\" io-tell
+.\"
+.It Cm io-tell No (\ io -- pos\ ) alias for Sx io-pos-ref
+.\"
+.\" io-write
+.\"
+.It Cm io-write No (\ io line --\ )
+Write
+.Ar line
+to
+.Ar io
+object.
+.\"
+.\" io-write-format
+.\"
+.It Cm io-write-format No (\ io fmt args --\ )
+Write string built from
+.Ar fmt
+and array
+.Ar fmt-args
+to
+.Ar io
+object.
+.\"
+.\" io-writelines
+.\"
+.It Cm io-writelines No (\ io array-of-lines --\ )
+Write
+.Ar array-of-lines
+to
+.Ar io
+object.
+.\"
+.\" io=
+.\"
+.It Cm io= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are IO objects with equal file names, modes and file positions,
+otherwise #f.
+.\"
+.\" io?
+.\"
+.It Cm io? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an IO object, otherwise #f.
+.\"
+.\" readlines
+.\"
+.It Cm readlines No (\ name -- array-of-lines\ )
+Open file
+.Ar name ,
+read its content in an array, close file and return the array.
+.\"
+.\" writelines
+.\"
+.It Cm writelines No (\ name array-of-lines --\ )
+Open file
+.Ar name ,
+write the content of
+.Ar array-of-lines
+to it and close file.
+.El
+.Pp
+File functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" io-open-file
+.\"
+.It Cm io-open-file No (\ :key fam r/o args -- io\ )
+General IO open function.  Open and return any IO object for
+io-read/io-write etc.  Keyword argument :fam defaults to r/o.  See
+.Sx make-soft-port
+for keyword arguments.
+.Bd -literal -offset indent -compact
+:filename \(dqfoo\(dq io-open-file value io1
+:filename \(dqfoo\(dq :fam r/o io-open-file value io2
+:filename \(dqbar\(dq :fam r/w io-open-file value io3
+:command \(dqls -lF\(dq io-open-file value io4
+:command #( \(dqls\(dq \(dq-lF\(dq ) io-open-file value io5
+:string \(dqtest string\(dq io-open-file value io6
+:soft-port \(dqtest\(dq io-open-file value io7
+.Ed
+.\"
+.\" io-open-input-file
+.\"
+.It Cm io-open-input-file No (\ :key args -- io\ )
+General IO open function.  Return IO object for reading.  See
+.Sx make-soft-input-port
+for keyword arguments.
+.Bd -literal -offset indent -compact
+:filename \(dqfoo\(dq io-open-input-file value io1
+:command \(dqls -lF\(dq io-open-input-file value io2
+:command #( \(dqls\(dq \(dq-lF\(dq) io-open-input-file value io3
+:string \(dqtest string\(dq io-open-input-file value io4
+:soft-port \(dqinput-test\(dq io-open-input-file value io5
+.Ed
+.\"
+.\" io-open-output-file
+.\"
+.It Cm io-open-output-file No (\ :key args -- io\ )
+General IO open function.  Return IO object for writing.  See
+.Sx make-soft-output-port
+for keyword arguments.
+.Bd -literal -offset indent -compact
+:filename \(dqfoo\(dq io-open-output-file value io1
+:command \(dqcat\(dq io-open-output-file value io2
+:command #( \(dqcat\(dq ) io-open-output-file value io3
+(dq(dq value s1
+:string s1 io-open-output-file value io4
+.Ed
+.\"
+.\" make-file-input-port
+.\"
+.It Cm make-file-input-port No (\ name -- io\ ) alias for Sx io-open-read
+.\"
+.\" make-file-output-port
+.\"
+.It Cm make-file-output-port No (\ name :key args -- io\ ) alias for Sx io-open-write
+.\"
+.\" make-file-port
+.\"
+.It Cm make-file-port No (\ name :key args -- io\ ) alias for Sx io-open
+.El
+.Pp
+Pipe functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" io-popen
+.\"
+.It Cm io-popen No (\ cmd :key fam r/o -- io\ )
+Open pipe for command
+.Ar cmd
+and return new IO object.
+.Ar cmd
+may be a string (with shell expansion) or an array of strings.  If
+keyword
+.Ar fam
+was not given, open pipe read-only, otherwise use
+.Ar fam .
+See
+.Sx io-open
+for fam.
+.Bd -literal -offset indent -compact
+\(dqls -lAF ~/\(dq io-popen value read-io1
+#( \(dqls\(dq \(dq-lAF\(dq \(dq~/\(dq) io-popen value read-io2
+read-io1 io->string \(rA \(dq...\(dq
+read-io1 io-close
+\(dqcat\(dq :fam w/o io-popen-write value write-io1
+write-io1 \(dqhello\(dq io-write
+write-io1 io-close
+.Ed
+.\"
+.\" io-popen-read
+.\"
+.It Cm io-popen-read No (\ cmd -- io\ )
+Open read-only pipe for command
+.Ar cmd
+and return new IO object.
+.Ar cmd
+may be a string (with shell expansion) or an array of strings.
+.\"
+.\" io-popen-write
+.\"
+.It Cm io-popen-write No (\ cmd -- io\ )
+Open write-only pipe for command
+.Ar cmd
+and return new IO object.
+.Ar cmd
+may be a string (with shell expansion) or an array of strings.
+.\"
+.\" make-pipe-input-port
+.\"
+.It Cm make-pipe-input-port No (\ cmd -- io\ ) alias for Sx io-popen-read
+.\"
+.\" make-pipe-output-port
+.\"
+.It Cm make-pipe-output-port No (\ cmd -- io\ ) alias for Sx io-popen-write
+.\"
+.\" make-pipe-port
+.\"
+.It Cm make-pipe-port No (\ cmd :key args -- io\ ) alias for Sx io-popen
+.El
+.Pp
+String functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" io-sopen
+.\"
+.It Cm io-sopen No (\ str :key fam r/o -- io\ )
+Open string with content
+.Ar string
+and return new IO object.  If keyword
+.Ar fam
+was not given, opens string read-only, otherwise takes
+.Ar fam .
+See
+.Sx io-open
+for fam.
+.Bd -literal -offset indent -compact
+\(dqtest-string\(dq value s1
+s1 io-sopen value read-io1
+read-io1 io-read \(rA \(dqtest-string\(dq
+read-io1 io-close
+s1 :fam r/a io-sopen value append-io1
+append-io1 \(dq with append content\(dq io-write
+append-io1 io-rewind
+append-io1 io-read \(rA \(dqtest-string with append content\(dq
+append-io1 io-close
+s1 .string \(rA \(dqtest-string with append content\(dq
+.Ed
+.\"
+.\" io-sopen-read
+.\"
+.It Cm io-sopen-read No (\ str -- io\ )
+Open read-only string with content
+.Ar str
+and return new IO object.
+.\"
+.\" io-sopen-write
+.\"
+.It Cm io-sopen-write No (\ str -- io\ )
+Open
+.Ar str
+for writing and return new IO object.
+.\"
+.\" make-string-input-port
+.\"
+.It Cm make-string-input-port No (\ cmd -- io\ ) alias for Sx io-sopen-read
+.\"
+.\" make-string-output-port
+.\"
+.It Cm make-string-output-port No (\ cmd :key args -- io\ ) alias for Sx io-sopen-write
+.\"
+.\" make-string-port
+.\"
+.It Cm make-string-port No (\ str :key fam r/o -- io\ ) alias for Sx io-sopen
+.El
+.Pp
+Socket functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" io-nopen
+.\"
+.It Cm io-nopen No ( host :key port 1024 domain AF_INET -- io )
+Connect to an already established server and return new IO object.
+Raise an
+.Ar socket-error
+exception if an error occured.
+.Ar host
+is a host name (AF_INET) or a path name (AF_UNIX).  If
+.Ar host
+is not a string, \(dqlocalhost\(dq will be used.
+.Ar port
+is the connection port (default 1024) if
+.Ar domain
+is AF_INET, otherwise unused, and
+.Ar domain
+can be one of AF_INET (default) or AF_UNIX.  The socket is opened with
+.Ar domain ,
+hardcoded second argument SOCK_STREAM, and hardcoded third argument of
+0, see
+.Xr socket 2
+and
+.Xr connect 2
+for more information.
+.Bd -literal -offset indent -compact
+\(dqlocalhost\(dq :port 25 io-nopen value io
+io io-read \(rA \(dq220 fth-devel.net ESMTP Sendmail ...\(dq
+io \(dqHELP\er\en\(dq io-write
+io io-read \(rA \(dq... (sendmail help output)\(dq
+io io-close
+\(dqftp.freebsd.org\(dq :port 21 io-nopen to io
+io io-read \(rA \(dq220 ftp.beastie.tdk.net FTP server ...\(dq
+io \(dqHELP\er\en\(dq io-write
+io io-read \(rA \(dq... (ftpd help output)\(dq
+io io-close
+.Ed
+.\"
+.\" make-socket-port
+.\"
+.It Cm make-socket-port No (\ host :key args -- io\ ) alias for Sx io-nopen
+.\"
+.\" net-accept
+.\"
+.It Cm net-accept No (\ fd host domain -- io\ )
+Accept a connection on a socket and return an IO object after
+established connection.
+.Ar fd
+is the socket descriptor,
+.Ar host
+can be an arbitrary name, its only use is the name for the IO object,
+.Ar domain
+is one of AF_INET or AF_UNIX.  This is used on the server side of a
+socket connection.  Raise
+.Ar socket-error
+exception if
+.Xr accept 2
+fails.
+.\"
+.\" net-bind
+.\"
+.It Cm net-bind No (\ fd host port domain --\ )
+Assign a name to a socket.
+.Ar fd
+is the socket descriptor,
+.Ar host
+is a host name (AF_INET) or a path name (AF_UNIX),
+.Ar port
+is the port if
+.Ar domain
+is AF_INET, otherwise unused, and
+.Ar domain
+is one of AF_INET or AF_UNIX.  This is used on the server side of a
+socket connection.  Raise
+.Ar socket-error
+exception if
+.Xr bind 2
+fails.
+.\"
+.\" net-connect
+.\"
+.It Cm net-connect No (\ fd host port domain -- io\ )
+Connect to a server and return IO object after an established
+connection.
+.Ar fd
+is the socket descriptor,
+.Ar host
+is a host name (AF_INET) or a name (AF_UNIX),
+.Ar port
+is the port if
+.Ar domain
+is AF_INET, otherwise unused, and
+.Ar domain
+is one of AF_INET or AF_UNIX.  This is used on the client side of a
+socket connection.  Raise
+.Ar socket-error
+exception if
+.Xr connect 2
+fails.
+.\"
+.\" net-listen
+.\"
+.It Cm net-listen No (\ fd --\ )
+Inform the operating system that connection requests should be
+delivered.
+.Ar fd
+is the previously opened socket descriptor.  This is used on the server
+side of a socket connection.  Raise
+.Ar socket-error
+exception if
+.Xr listen 2
+fails.
+.\"
+.\" net-recv
+.\"
+.It Cm net-recv No (\ fd flags -- msg\ )
+Receive data via a socket and return it.
+.Ar fd
+is the socket descriptor and
+.Ar flags
+can be 0, MSG_PEEK, or MSG_OOB.  Raise
+.Ar socket-error
+exception if
+.Xr recv 2
+fails.
+.\"
+.\" net-recvfrom
+.\"
+.It Cm net-recvfrom No (\ fd flags host port domain -- msg\ )
+Receive data via a socket and return it.
+.Ar fd
+is the socket descriptor,
+.Ar flags
+can be 0, MSG_PEEK, or MSG_OOB.
+.Ar host
+is a host name (AF_INET) or a path name (AF_UNIX),
+.Ar port
+is the port if
+.AR domain
+is AF_INET, otherwise unused, and
+.Ar domain
+is one of AF_INET or AF_UNIX.  Raise
+.Ar socket-error
+exception if
+.Xr recvfrom 2
+fails.
+.\"
+.\" net-send
+.\"
+.It Cm net-send No (\ fd msg flags --\ )
+Send data via a socket.
+.Ar fd
+is the socket descriptor,
+.Ar msg
+is the data to send and
+.Ar flags
+can be 0, MSG_PEEK or MSG_OOB.  Raise
+.Ar socket-error
+exception if
+.Xr send 2
+fails.
+.\"
+.\" net-sendto
+.\"
+.It Cm net-sendto No (\ fd msg flags host port domain --\ )
+Send data via a socket.
+.Ar fd
+is the socket descriptor,
+.Ar msg
+is the data to send,
+.Ar flags
+can be 0, MSG_PEEK, or MSG_OOB.
+.Ar host
+is a host name (AF_INET) or a name (AF_UNIX),
+.Ar port
+is the port if
+.Ar domain
+is AF_INET, otherwise unused, and
+.Ar domain
+is one of AF_INET or AF_UNIX.  Raise
+.Ar socket-error
+exception if
+.Xr sendto 2
+fails.
+.\"
+.\" net-shutdown
+.\"
+.It Cm net-shutdown No (\ fd how --\ )
+Close socket connection.
+.Ar fd
+is the socket descriptor and
+.Ar how
+is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise
+.Ar socket-error
+exception if
+.Xr shutdown 2
+fails.
+.\"
+.\" net-socket
+.\"
+.It Cm net-socket No (\ domain type -- fd\ )
+Return socket descriptor.
+.Ar domain
+can be AF_INET or AF_UNIX,
+.Ar type
+can be SOCK_STREAM or SOCK_DGRAM.  The third argument to
+.Xr socket 2
+is 0 and cannot be set by the user.  Raise
+.Ar socket-error
+exception if
+.Xr socket 2
+fails.
+.Bd -literal -offset indent -compact
+AF_INET SOCK_STREAM net-socket value fd
+fd \(dqlocalhost\(dq 1024 AF_INET net-bind
+fd net-listen
+fd \(dqlocalhost\(dq AF_INET net-accept value io
+.Ed
+.El
+.\"
+.\" Miscellaneous (misc.c)
+.\"
+.Ss Miscellaneous
+Constants:
+.Bl -tag -width MMM -compact
+.It Dv FICL_VM_STATE_INTERPRET
+.It Dv FICL_VM_STATE_COMPILE
+.It Dv INTERPRET_STATE alias for Sx FICL_VM_STATE_INTERPRET
+.It Dv COMPILE_STATE  alias for Sx FICL_VM_STATE_COMPILE
+Return compile or interpret state value for comparison with global
+variable
+.Dv state .
+.Bd -literal -offset indent -compact
+state @ COMPILE_STATE = if
+	\e compile state here
+else
+	\e interpret state here
+then
+.Ed
+.It Dv cell
+Return bytes of one cell.
+.It Dv dfloat
+Return bytes of one dfloat.
+.It Dv ficl-version
+Return Ficl version string.
+.It Dv float
+Return bytes of one float (same as dfloat).
+.It Dv fth-date
+Return version date string.
+.It Dv fth-version
+Return full Fth version string.
+.It Dv sfloat
+Return bytes of one sfloat (same as dfloat).
+.El
+.Pp
+Features and Source files:
+.Bl -tag -width MMM -compact
+.\"
+.\" *features*
+.\"
+.It Dv *features*
+Return array of all features.
+.\"
+.\" add-feature
+.\"
+.It Cm add-feature No (\ str --\ )
+Add
+.Ar str ,
+a string or symbol, to *features* list.
+.Bd -literal -offset indent -compact
+\(aqsnd add-feature
+.Ed
+.\"
+.\" add-load-lib-path
+.\"
+.It Cm add-load-lib-path No (\ path --\ )
+Add string
+.Ar path
+to
+.Dv *load-lib-path*
+array if not already there.
+.Bd -literal -offset indent -compact
+\(dq/home/mike/lib/fth\(dq add-load-lib-path
+.Ed
+.\"
+.\" add-load-path
+.\"
+.It Cm add-load-path No (\ path --\ )
+Add string
+.Ar path
+to
+.Dv *load-path*
+array if not already there.
+.Bd -literal -offset indent -compact
+\(dq/home/mike/share/fth\(dq add-load-path
+.Ed
+.\"
+.\" apropos
+.\"
+.It Cm apropos (\ obj -- ary\ )
+Return array of dictionary entries matching regexpression or string
+.Ar obj .
+.Bd -literal -offset indent -compact
+/do/ apropos \(rA #( \(dqdoLocal\(dq ... )
+.Ed
+.\"
+.\" dl-load
+.\"
+.It Cm dl-load No (\ \(dqlib\(dq \(dqfunc\(dq --\ )
+Load dynamic library
+.Ar lib
+and call its function
+.Ar func .
+.Bd -literal -offset indent -compact
+dl-load dbm Init_dbm
+.Ed
+.\"
+.\" include
+.\"
+.It Cm include No (\ \(dqname\(dq --\ )
+Load Forth source file
+.Ar name
+and add
+.Ar name
+to
+.Dv *loaded-files*
+if it wasn't already there.  If file extension wasn't specified, use
+.Sq .fs .
+If
+.Ar name
+doesn't exist, try each entry of
+.Dv *load-path*
+with
+.Ar name .
+With
+.Cm include
+one can load a file more than once.  Before loading
+.Ar name ,
+run hook
+.Sx before-load-hook .
+After loading
+.Ar name ,
+run hook
+.Sx after-load-hook .
+Raise
+.Ar no-such-file
+exception if file doesn't exist, raise
+.Ar load-error
+if an error occured during load.
+.Bd -literal -offset indent -compact
+include hello
+.Ed
+.\"
+.\" install
+.\"
+.It Cm install No (\ \(dqfile\(dq --\ )
+Install
+.Ar file
+in first writeable path found in
+.Dv *load-path*
+(*.fs[m]) or
+.Dv *load-lib-path*
+(*.so).
+.Bd -literal -offset indent -compact
+install snd-test.fs
+install sndlib.so
+.Ed
+.\"
+.\" install-file
+.\"
+.It Cm install-file No (\ file --\ )
+Install
+.Ar file
+in first writeable path found in *load-path* (*.fs[m]) or
+*load-lib-path* (*.so).
+.Bd -literal -offset indent -compact
+\(dqsnd-test.fs\(dq install-file
+\(dqsndlib.so\(dq install-file
+.Ed
+.\"
+.\" load-init-file
+.\"
+.It Cm load-init-file No (\ file --\ )
+If Forth source
+.Ar file
+exists in current or
+.Dv $HOME
+dir, load it, otherwise do nothing.
+.Bd -literal -offset indent -compact
+\(dq.my-fth-init\(dq load-init-file
+.Ed
+.\"
+.\" provided?
+.\"
+.It Cm provided? No (\ obj -- f\ )
+Return #t if
+.Ar obj ,
+a string or symbol, exists in *features* list, otherwise #f.
+.Bd -literal -offset indent -compact
+\(aqfth provided? \(rA #t
+\(aqfoo provided? \(rA #f
+.Ed
+.\"
+.\" require
+.\"
+.It Cm require No (\ \(dqname\(dq --\ )
+If Forth source file
+.Ar name
+doesn't exist in array
+.Dv *loaded-files* ,
+load it and add
+.Ar name
+to
+.Dv *loaded-files* .
+If file extension wasn't specified, use
+.Sq .fs .
+If
+.Ar name
+doesn't exist, try each entry of
+.Dv *load-path*
+with
+.Ar name .
+With
+.Cm require
+one can load a file only one time.  Before loading
+.Ar name ,
+run hook
+.Sx before-load-hook .
+After loading
+.Ar name ,
+run hook
+.Sx after-load-hook .
+Raise
+.Ar no-such-file
+exception if file doesn't exist, raise
+.Ar load-error
+if an error occured during load.
+.Bd -literal -offset indent -compact
+require hello
+.Ed
+.\"
+.\" unshift-load-lib-path
+.\"
+.It Cm unshift-load-lib-path No (\ path --\ )
+Prepend string
+.Ar path
+to
+.Dv *load-lib-path*
+array if not already there.
+.Bd -literal -offset indent -compact
+\(dq/home/mike/lib/fth\(dq unshift-load-lib-path
+.Ed
+.\"
+.\" unshift-load-path
+.\"
+.It Cm unshift-load-path No (\ path --\ )
+Prepend string
+.Ar path
+to
+.Dv *load-path*
+array if not already there.
+.Bd -literal -offset indent -compact
+\(dq/home/mike/share/fth\(dq unshift-load-path
+.Ed
+.El
+.Pp
+Catch errors:
+.Bl -tag -width MMM -compact
+.\"
+.\" fth-catch
+.\"
+.It Cm fth-catch No (\ ?? obj exc arg -- ?? res\ )
+Run proc or xt
+.Ar obj
+in save environment.  If
+.Ar obj
+fails with an exception, data and return stack environments are
+recovered to the state before execution.  If
+.Ar obj
+is #f, finishs immediately and returns #f.  The second argument
+.Ar exc
+may be a symbol, an exception, or #t.  If it's a symbol or an exception,
+this will be catched, if it's #t, all exceptions will be catched.  The
+third argument
+.Ar arg
+may be nil or a return value.  If
+.Ar arg
+is nil, the catched exception or #f will be returned, if
+.Ar arg
+is any other than nil,
+.Ar arg
+will be returned instead of the catched exception; if
+.Ar arg
+is a proc or xt, this will be executed instead of simply returned.  The
+stack effect must be ( retval -- val ).
+.Bd -literal -offset indent -compact
+3 :initial-element 0.3 make-array value ary
+ary .array \(rA #( 0.3 0.3 0.3 )
+ary 2 <\(aq> array-ref  #t  nil  fth-catch \(rA 0.3 #f
+ary 4 <\(aq> array-ref  \(aqout-of-range  #t  fth-catch
+  \(rA #( 0.3 0.3 0.3 ) 4 #t
+: ary-handler { retval -- val }
+	\(dqfrom handler: %S\en\(dq #( retval ) fth-print
+	#t ( return value )
+;
+ary 4 0.4 <\(aq> array-set!
+    \(aqout-of-range <\(aq> ary-handler fth-catch
+  prints: \(rA from handler: \e
+	#( \(aqout-of-range \(dqarray-set! (ary_set) arg 2: \e
+	4 is out of range\(dq )
+  \(rA 0.4 #t
+ary 2 0.4 <\(aq> array-set!
+    \(aqout-of-range <\(aq> ary-handler fth-catch \(rA #f
+.Ed
+.\"
+.\" fth-raise
+.\"
+.It Cm fth-raise No (\ exc fmt args --\ )
+Raise exception
+.Ar exc
+with text built from
+.Ar fmt
+and
+.Ar args .
+If
+.Ar fmt
+is a format string with N %s-format signs,
+.Ar args
+should have N elements with corresponding values.  If
+.Ar exc
+is #f, reraise last exception.
+.Bd -literal -offset indent -compact
+\(aqbad-arity \(dq%s: %s args required, got %s\(dq
+    #( proc 2 3 ) fth-throw
+  \(rA #<bad-arity in test-proc: 2 args required, got 3>
+#f #f #f fth-raise
+  \(rA reraise last exception
+.Ed
+.\"
+.\" fth-throw
+.\"
+.It Cm fth-throw No (\ exc args --\ )
+Throw exception
+.Ar exc
+with text built from
+.Ar args .
+If
+.Ar args
+is not an array, its string representation is used. If
+.Ar args
+is NIL or an empty array, a default string is used.  If
+.Ar args
+is an array with one element, this string is used. If
+.Ar args
+is an array and its first element is a format string with N %s-format
+signs,
+.Ar args
+should have N more elements with corresponding values.
+.Bd -literal -offset indent -compact
+\e
+\e ARGS: any object
+\e
+\(aqbad-arity proc fth-throw
+  \(rA #<bad-arity in test-proc>
+\e
+\e ARGS: nil or #()
+\e
+\(aqbad-arity nil fth-throw
+  \(rA #<bad-arity: proc has bad arity>
+\e
+\e ARGS: #( string )
+\e
+\(aqbad-arity #( \(dqtest-proc\(dq ) fth-throw
+  \(rA #<bad-arity in test-proc>
+\e
+\e ARGS: #( fmt arg1 arg2 arg3 )
+\e
+\(aqbad-arity #( \(dq%s: %s args required, got %s\(dq
+              proc
+              2
+              3 ) fth-throw
+  \(rA #<bad-arity in test-proc: 2 args required, got 3>
+.Ed
+.\"
+.\" stack-reset
+.\"
+.It Cm stack-reset No (\ ?? --\ )
+Reset the data stack to initial state.
+.El
+.Pp
+Time functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" current-time
+.\"
+.It Cm current-time No (\ -- secs\ )
+Return time in seconds since 1970/01/01 as ficl2Unsigned.  See
+.Xr time 3
+for more information.
+.\"
+.\" gmtime
+.\"
+.It Cm gmtime No (\ secs -- ary\ )
+Return array of eleven elements with
+.Ar secs
+converted to Greenwich Mean Time.
+.Bl -tag -offset indent -width XX -compact
+.It sec
+seconds after minute (0-60)
+.It min
+minutes after the hour (0-59)
+.It hour
+hours since midnight (0-23)
+.It mday
+day of the month (1-31)
+.It mon
+months since January (0-11)
+.It year
+years since 1900
+.It wday
+days since Sunday (0-6)
+.It yday
+days since January 1 (0-365)
+.It isdst
+Daylight Savings Time flag
+.It tm_gmtoff
+offset from UTC in seconds
+.It tm_zone
+timezone abbreviation
+.El
+.\"
+.\" localtime
+.\"
+.It Cm localtime No (\ secs -- ary\ )
+Return array of eleven elements with
+.Ar secs
+converted to local time, see gmtime.
+.\"
+.\" mktime
+.\"
+.It Cm mktime No (\ ary -- secs\ )
+Return time constructed from values of
+.Ar ary .
+.Ar ary
+may be #f or an array of up to eleven elements where single elements may be
+#f, see gmtime for array elements.
+.Bd -literal -offset indent -compact
+#( 28 40 2 14 0 112 6 13 #f 3600 \(dqCET\(dq ) mktime \(rA 1326505228
+.Ed
+.\"
+.\" strftime
+.\"
+.It Cm strftime No (\ fmt secs -- str\ )
+Convert ficl2Unsigned
+.Ar secs
+in a date string corresponding to
+.Ar fmt .
+The
+.Ar fmt
+string will be interpreted by
+.Xr strftime 3 .
+.Bd -literal -offset indent -compact
+\(dq%a %b %d %H:%M:%S %Z %Y\(dq current-time strftime
+  \(rA \(dqSat Jan 14 02:40:28 CET 2012\(dq
+.Ed
+.\"
+.\" strptime
+.\"
+.It Cm strptime No (\ str fmt -- secs\ )
+Parse
+.Ar str
+according to
+.Ar fmt
+and return seconds as ficl2Unsigned.
+.Bd -literal -offset indent -compact
+\(dq2012 01 14\(dq \(dq%Y %m %d\(dq strptime time->string
+  \(rA \(dqSat Jan 14 02:40:28 CET 2012\(dq
+.Ed
+.\"
+.\" time
+.\"
+.It Cm time No (\ -- r\ )
+Return real time, a ficlFloat.
+.\"
+.\" time->string
+.\"
+.It Cm time->string No (\ secs -- str\ )
+Convert ficl2Unsigned
+.Ar secs
+in a date string in current local time.
+.Bd -literal -offset indent -compact
+current-time time->string \(rA \(dqSat Jan 14 02:40:28 CET 2012\(dq
+.Ed
+.\"
+.\" time-reset
+.\"
+.It Cm time-reset No (\ --\ )
+Set global timeval struct variable to current time.
+.\"
+.\" utime
+.\"
+.It Cm utime No (\ -- utime stime\ )
+Return user and system time as ficlFloats.  Raise
+.Ar not-implemented
+exception if
+.Xr times 3
+is not available.
+.Bd -literal -offset indent -compact
+utime \(rA 0.171875 0.0234375
+.Ed
+.El
+.Pp
+System information:
+.Bl -tag -width MMM -compact
+.\"
+.\" date
+.\"
+.It Cm date No (\ -- str\ )
+Return date in default
+.Ux
+format as a string.
+.\"
+.\" environ
+.\"
+.It Cm environ No (\ -- ary\ )
+Return assoc array of all shell environment variables and their values.
+.\"
+.\" exec
+.\"
+.It Cm exec No (\ cmd --\ )
+Replace current process by running
+.Ar cmd
+as shell command.  If
+.Ar cmd
+is a string, shell expansion takes place and
+.Dv $SHELL
+\(em or
+.Ic sh
+if
+.Dv $SHELL
+is empty \(em executes
+.Ar cmd .
+If
+.Ar cmd
+is an array of strings, no shell expansion takes place and
+.Ar cmd NO 0 array-ref
+should be a program name.
+.Bd -literal -offset indent -compact
+lambda: <{}> #( \(dqls\(dq \(dq-lAF\(dq ) exec ; fork
+lambda: <{}> \(dqls -lAF [A-Z]*\(dq exec ; fork
+.Ed
+.\"
+.\" fork
+.\"
+.It Cm fork No (\ xt -- pid\ )
+Create child process and execute
+.Ar xt
+in the child.  The child process returns nothing, parent returns child's
+process id.
+.Bd -literal -offset indent -compact
+lambda: <{}> \(dqls -lAF\(dq exec ; fork value pid
+pid SIGKILL kill
+.Ed
+.\"
+.\" getegid
+.\"
+.It Cm getegid No (\ -- id\ )
+Return effective group id of calling process.
+.\"
+.\" getenv
+.\"
+.It Cm getenv No (\ name -- value\ )
+Return content of shell environment variable
+.Ar name
+as string or #f if variable is not defined.
+.\"
+.\" geteuid
+.\"
+.It Cm geteuid No (\ -- id\ )
+Return effective user id of calling process.
+.\"
+.\" getgid
+.\"
+.It Cm getgid No (\ -- id\ )
+Return real group id of calling process.
+.\"
+.\" gethostname
+.\"
+.It Cm gethostname No (\ -- str\ )
+Return name of current host.
+.\"
+.\" getlogin
+.\"
+.It Cm getlogin No (\ -- str\ )
+Return name of user associated with current session.
+.\"
+.\" getpid
+.\"
+.It Cm getpid No (\ -- id\ )
+Return process id.
+.\"
+.\" getppid
+.\"
+.It Cm getppid No (\ -- id\ )
+Return parent process id.
+.\"
+.\" getservbyname
+.\"
+.It Cm getservbyname No (\ str -- ary\ )
+Return array containing the service, an array of aliases, the port
+number and the protocol.  Raise
+.Ar not-implemented
+exception if
+.Xr getservbyname 3
+is not available.
+.Bd -literal -offset indent -compact
+\(dqsmtp\(dq getservbyname \(rA #( \(dqsmtp\(dq #( \(dqmail\(dq ) 25 \(dqtcp\(dq )
+.Ed
+.\"
+.\" getservbyport
+.\"
+.It Cm getservbyport No (\ port -- ary\ )
+Return array containing the service, an array of aliases, the port
+number and the protocol.  Raise
+.Ar not-implemented
+exception if
+.Xr getservbyport 3
+is not available.
+.Bd -literal -offset indent -compact
+25 getservbyport \(rA #( \(dqsmtp\(dq #( \(dqmail\(dq ) 25 \(dqtcp\(dq )
+.Ed
+.\"
+.\" getuid
+.\"
+.It Cm getuid No (\ -- id\ )
+Return real user id of calling process.
+.\"
+.\" hostname
+.\"
+.It Cm hostname No (\ --\ )
+.\"
+.\" kill
+.\"
+.It Cm kill No (\ pid sig --\ )
+Send signal
+.Ar sig
+to process ID
+.Ar pid .
+If
+.Ar pid
+is zero, send
+.Ar sig
+to current process.
+.Ar sig
+is a number or a constant like
+.Dv SIGKILL .
+.\"
+.\" putenv
+.\"
+.It Cm putenv No (\ name value --\ )
+Set
+.Ar value
+to shell environment variable
+.Ar name .
+.\"
+.\" setegid
+.\"
+.It Cm setegid No (\ id --\ )
+Set effective user
+.Ar id .
+This is only permitted if
+.Ar id
+is equal real UID or effective UID or the effective UID is that of the
+super user.
+.\"
+.\" seteuid
+.\"
+.It Cm seteuid No (\ id --\ )
+Set effective group
+.Ar id .
+This is only permitted if
+.Ar id
+is equal real GID or effective GID or the effective UID is that of the
+super user.
+.\"
+.\" setgid
+.\"
+.It Cm setgid No (\ id --\ )
+Set real group
+.Ar id .
+This is only permitted if
+.Ar id
+is equal real GID or effective GID or the effective UID is that of the
+super user.
+.\"
+.\" sethostname
+.\"
+.It Cm sethostname No (\ str --\ )
+Set name of current host to
+.Ar str .
+This call is restricted to the super-user.  Raise
+.Ar not-implemented
+exception if
+.Xr sethostname 3
+is not available.
+.\"
+.\" setuid
+.\"
+.It Cm setuid No (\ id --\ )
+Set real user
+.Ar id .
+This is only permitted if
+.Ar id
+is equal real UID or effective UID or the effective UID is that of the
+super user.
+.\"
+.\" signal
+.\"
+.It Cm signal No (\ sig xt -- old-xt\ )
+Install
+.Ar xt
+for signal
+.Ar sig
+as an signal handler and return old handler.
+.Ar XT
+must take one value from the stack, the signal, and must not return any
+value; its stack effect is ( sig -- ).  The old xt handler can be
+preserved for later use.
+.Bd -literal -offset indent -compact
+SIGINT lambda: { sig -- }
+	.\(dq SIGINT received\(dq cr
+; signal value old-xt
+.Ed
+.\"
+.\" sleep
+.\"
+.It Cm sleep No (\ secs --\ )
+Pause for
+.Ar secs
+seconds.
+.\"
+.\" wait
+.\"
+.It Cm wait No (\ -- pid\ )
+Wait for child process and return its process ID.  Set global read only
+variable
+.Dv exit-status
+to wait status.
+.\"
+.\" waitpid
+.\"
+.It Cm waitpid No (\ pid flags --\ )
+Wait for child process
+.Ar pid .
+Set global read only variable exit-status to wait status.
+.Ar flags
+may be 0 or
+.Dv WNOHANG
+and
+.Dv WUNTRACED
+ored.
+.Bd -literal -offset indent -compact
+1234 0 waitpid
+1234 WNOHANG waitpid
+1234 WNOHANG WUNTRACED or waitpid
+.Ed
+.El
+.Pp
+Getopt variables:
+.Bl -tag -width MMM -compact
+.It Dv optarg
+Getopt set this variable to the option string of an argument which
+accepts options, otherwise to #f.
+.It Dv opterr
+If #t, the default, getopt print error message in case of an error, if
+#f, no message will be printed.
+.It Dv optind
+Getopt set this variable to the index of the next element of the
+.Dv *argv*
+array.
+.It Dv optopt
+If getopt finds unknown options or getopt misses required arguments, it
+stores that option in this variable.
+.El
+.Pp
+Getopt functions:
+.Bl -tag -width MMM -compact
+.It Cm getopt No (\ argv opts -- c\ )
+Return next option character from command line options.  See
+.Sx EXAMPLES
+for an getopt example.
+.It Cm getopt-long No (\ argv opts longopts -- c\ )
+Return next option character from command line options.
+.Bd -literal -offset indent -compact
+: long-test
+	#f #f { bflag ffile }
+	#f to opterr
+	#( #( \(dqflag\(dq no-argument <char> b )
+	   #( \(dqfile\(dq required-argument <char> f ) ) { opts }
+	begin
+		*argv* \(dqbf:\(dq opts getopt-long ( ch ) dup
+	while ( ch )
+		case
+			<char> b of #t     to bflag endof
+			<char> f of optarg to ffile endof
+			<char> ? of
+				\(dq\-%c requires an argument\(dq
+				    #( optopt ) fth-warning
+			endof
+		endcase
+	repeat drop ( ch )
+	optind 0 ?do *argv* array-shift drop loop
+	*argv* array-length to *argc*
+	\(dq\-b, \-\-flag (default #f): %s\en\(dq #( bflag ) fth-print
+	\(dq\-f, \-\-file (default #f): %s\en\(dq #( ffile ) fth-print
+;
+.Ed
+.El
+.Pp
+Information and configuration:
+.Bl -tag -width MMM -compact
+.\"
+.\" (bye)
+.\"
+.It Cm (bye) No (\ n --\ )
+The exit hook fth_exit_hook will be called if set, all procs registered
+for at-exit will be executed and the current process will be terminated
+with exit code
+.Ar n .
+.\"
+.\" .cflags
+.\"
+.It Cm .cflags No (\ --\ )
+Print compiler flags to compile libfth.so to other applications.
+.\"
+.\" .libs
+.\"
+.It Cm .libs No (\ --\ )
+Print linker flags to link libfth.so to other applications.
+.\"
+.\" .long-version
+.\"
+.It Cm .long-version No (\ --\ )
+Print long package version.
+.\"
+.\" .memory
+.\"
+.It Cm .memory No (\ --\ )
+Print used and free dictionary cells.
+.\"
+.\" .prefix
+.\"
+.It Cm .prefix No (\ --\ )
+Print installation prefix path.
+.\"
+.\" .version
+.\"
+.It Cm .version No (\ --\ )
+Print package version number.
+.\"
+.\" at-exit
+.\"
+.It Cm at-exit No (\ obj --\ )
+.Ar obj ,
+an proc or xt, will be called by Fth's exit function.  More than one
+calls to at-exit are possible, all procs or xts will be called in order.
+The stack effect of
+.Ar obj
+must be ( -- ).
+.Bd -literal -offset indent -compact
+lambda: <{ -- }> \(dqtest.file\(dq file-delete ; at-exit
+.Ed
+.\"
+.\" config-cflags
+.\"
+.It Cm config-cflags No (\ -- str\ )
+Return compiler flags to compile libfth.so to other applications.
+.\"
+.\" config-libs
+.\"
+.It Cm config-libs No (\ -- str\ )
+Return linker flags to link libfth.so to other applications.
+.\"
+.\" config-prefix
+.\"
+.It Cm config-prefix No (\ -- str\ )
+Return installation prefix path.
+.\"
+.\" configure-args
+.\"
+.It Cm configure-args No (\ -- str\ )
+Return configure arguments.
+.\"
+.\" ver
+.\"
+.It Cm ver No (\ -- addr len\ )
+Return fth-version as a Forth string with addr len.
+.Bd -literal -offset indent -compact
+ver type \(rA \(dq1.3.1 (19-Mar-2012) [i386-portbld-freebsd9.0]\(dq
+.Ed
+.El
+.\"
+.\" Numbers (numbers.c)
+.\"
+.Ss Numbers
+.\"
+.\" Predicates
+.\"
+Number predicates:
+.Bl -tag -width MMM -compact
+.\"
+.\" bignum? complex?
+.\" even? exact? fixnum?
+.\" float? inexact? inf?
+.\" integer? long-long? nan?
+.\" number? odd?
+.\" prime? ratio? rational?
+.\" ulong-long? unsigned?
+.\"
+.It Cm bignum? No (\ obj -- f\ )
+.It Cm complex? No (\ obj -- f\ )
+.It Cm even? No (\ obj -- f\ )
+.It Cm exact? No (\ obj -- f\ )
+.It Cm fixnum? No (\ obj -- f\ )
+.It Cm float? No (\ obj -- f\ )
+.It Cm inexact? No (\ obj -- f\ )
+.It Cm inf? No (\ obj -- f\ )
+.It Cm integer? No (\ obj -- f\ )
+.It Cm long-long? No (\ obj -- f\ )
+.It Cm nan? No (\ obj -- f\ )
+.It Cm number? No (\ obj -- f\ )
+.It Cm odd? No (\ obj -- f\ )
+.It Cm prime? No (\ obj -- f\ )
+.It Cm ratio? No (\ obj -- f\ )
+.It Cm rational? No (\ obj -- f\ ) alias for Sx ratio?
+.It Cm ulong-long? No (\ obj -- f\ )
+.It Cm unsigned? No (\ obj -- f\ )
+Return #t if a given object is of corresponding type, otherwise #f.
+.El
+.Pp
+.\"
+.\" Misc math functions
+.\"
+Miscellaneous math functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" >bignum
+.\"
+.It Cm >bignum No (\ x -- b\ )
+Convert any number
+.Ar x
+to a bignum object.
+.\"
+.\" >c
+.\"
+.It Cm >c No (\ x -- c\ )
+Convert any number
+.Ar x
+to a complex object.
+.\"
+.\" >complex
+.\"
+.It Cm >complex No (\ r1 r2 -- c\ )
+Return complex object with real
+.Ar r1
+and image
+.Ar r2 .
+.\"
+.\" >llong
+.\"
+.It Cm >llong No (\ x -- d\ )
+Convert any number
+.Ar x
+to a long-long object.
+.\"
+.\" >ratio
+.\"
+.It Cm >ratio No (\ x -- q\ )
+Convert any number
+.Ar x
+to a ratio object.
+.\"
+.\" denominator
+.\"
+.It Cm denominator No (\ x -- n\ )
+Return denominator of
+.Ar x
+or 1.
+.\"
+.\" exac->inexact
+.\"
+.It Cm exact->inexact No (\ x -- r\ )
+Convert
+.Ar x
+to an inexact number.
+.\"
+.\" imag-ref
+.\"
+.It Cm imag-ref No (\ x -- r\ )
+Return the image part of Ar x .
+.\"
+.\" image-ref
+.\"
+.It Cm image-ref No (\ x -- r\ ) alias for Sx imag-ref
+.\"
+.\" inexact->exact
+.\"
+.It Cm inexact->exact No (\ x -- n\ )
+Convert
+.Ar x
+to an exact number.
+.\"
+.\" inf
+.\"
+.It Cm inf No (\ -- inf\ )
+Return Infinity.
+.\"
+.\" make-bignum
+.\"
+.It Cm make-bignum No (\ x -- b\ )
+Return a new bignum object.
+.\"
+.\" make-long-long
+.\"
+.It Cm make-long-long No (\ val -- d\ )
+Return new llong object (ficl2Integer) from
+.Ar val .
+.\"
+.\" make-polar
+.\"
+.It Cm make-polar No (\ real theta -- c\ )
+Return polar complex object from
+.Ar real
+and
+.Ar theta .
+.\"
+.\" make-ratio
+.\"
+.It Cm make-ratio No (\ num den -- q\ )
+Return a new ratio object with numerator
+.Ar num
+and denumerator
+.Ar den .
+.\"
+.\" make-rectangular
+.\"
+.It Cm make-rectangular No (\ r1 r2 -- c\ ) alias for Sx >complex
+.\"
+.\" make-ulong-long
+.\"
+.It Cm make-ulong-long No (\ val -- ud\ )
+Return new unsigned llong object (ficl2Unsigned) from
+.Ar val .
+.\"
+.\" nan
+.\"
+.It Cm nan No (\ -- NaN\ )
+Return Not-A-Number.
+.\"
+.\" numerator
+.\"
+.It Cm numerator No (\ x -- n\ )
+Return numerator of
+.Ar x
+or 0.
+.\"
+.\" rationalize
+.\"
+.It Cm rationalize No (\ x err -- y\ )
+Return inexact number within
+.Ar err
+of
+.Ar x .
+.\"
+.\" real-ref
+.\"
+.It Cm real-ref No (\ x -- r\ )
+Return the real part of
+.Ar x .
+.El
+.Pp
+.\"
+.\" Pseudo Randomize Numbers
+.\"
+Pseudo randomize number functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" rand-seed-ref
+.\"
+.It Cm rand-seed-ref No (\ -- seed\ )
+Return content of the seed variable fth_randx.
+.\"
+.\" rand-seed-set!
+.\"
+.It Cm rand-seed-set! No (\ seed --\ )
+Set
+.Ar seed
+to the seed variable fth_randx.
+.\"
+.\" frandom
+.\"
+.It Cm frandom No (\ r -- -r...+r\ )
+Return pseudo randomized value between
+.Ar -r
+and
+.Ar +r .
+.\"
+.\" random
+.\"
+.It Cm random No (\ r -- 0.0..r\ )
+Return pseudo randomized value between 0.0 and
+.Ar r .
+.El
+.Pp
+.\"
+.\" Formatted number output
+.\"
+These formatted number output functions will by convention add a space
+after the number:
+.Bl -tag -width MMM -compact
+.\"
+.\" .r
+.\"
+.It Cm .r No (\ n1 n2 --\ )
+Print integer
+.Ar n1
+in a right-adjusted field of
+.Ar n2
+characters.
+.Bd -literal -offset indent -compact
+17 3 .r \(rA \(ba 17 \(ba
+.Ed
+.\"
+.\" c.
+.\"
+.It Cm c. No (\ c --\ )
+Print complex number
+.Ar c .
+.Bd -literal -offset indent -compact
+17.0+1.0i c. \(rA \(ba17.000000+1.000000i \(ba
+.Ed
+.\"
+.\" d.
+.\"
+.It Cm d. No (\ d --\ )
+Print (Forth) double
+.Ar d
+(ficl2Integer).
+.Bd -literal -offset indent -compact
+17 d. \(rA \(ba17 \(ba
+.Ed
+.\"
+.\" d.r
+.\"
+.It Cm d.r No (\ d n --\ )
+Print (Forth) double
+.Ar d
+(ficl2Integer) in a right-adjusted field of
+.Ar n
+characters.
+.Bd -literal -offset indent -compact
+17 3 d.r \(rA \(ba 17 \(ba
+.Ed
+.\"
+.\" f.r
+.\"
+.It Cm f.r No (\ r n --\ )
+Print float
+.Ar r
+with
+.Ar n
+digits after decimal point.
+.Bd -literal -offset indent -compact
+17.0 3 f.r \(rA \(ba17.000 \(ba
+.Ed
+.\"
+.\" bn.
+.\"
+.It Cm bn. No (\ b --\ )
+Print bignum number.
+.Bd -literal -offset indent -compact
+17.0 bn. \(rA \(ba17 \(ba
+.Ed
+.\"
+.\" q.
+.\"
+.It Cm q. No (\ q --\ )
+Print rational number.
+.Bd -literal -offset indent -compact
+17.0 q. \(rA \(ba17/1 \(ba
+.Ed
+.\"
+.\" u.r
+.\"
+.It Cm u.r No (\ u n --\ )
+Print unsigned integer
+.Ar u
+in a right-adjusted field of
+.Ar n
+characters.
+.Bd -literal -offset indent -compact
+17 3 u.r \(rA \(ba 17 \(ba
+.Ed
+.\"
+.\" ud.
+.\"
+.It Cm ud. No (\ ud --\ )
+Print (Forth) unsigned double
+.Ar ud
+(ficl2Unsigned).
+.Bd -literal -offset indent -compact
+17 ud. \(rA \(ba17 \(ba
+.Ed
+.\"
+.\" ud.r
+.\"
+.It Cm ud.r No (\ ud n --\ )
+Print (Forth) unsigned double
+.Ar ud
+(ficl2Unsigned) in a right-adjusted field of
+.Ar n
+characters.
+.Bd -literal -offset indent -compact
+17 3 ud.r \(rA \(ba 17 \(ba
+.Ed
+.\"
+.\" uf.r
+.\"
+.It Cm uf.r No (\ r len-all len-after-comma --\ )
+Print float
+.Ar r
+in a right-adjusted field of
+.Ar len-all
+characters with
+.Ar len-after-comma
+digits.
+.Bd -literal -offset indent -compact
+17.0 8 3 uf.r \(rA \(ba 17.000 \(ba
+17.0 8 2 uf.r \(rA \(ba  17.00 \(ba
+.Ed
+.El
+.Pp
+.\"
+.\" Comparison
+.\"
+Comparison:
+.Bl -tag -width MMM -compact
+.\"
+.\" 0< 0<= 0<> 0= 0> 0>= negative? positive? zero?
+.\"
+.It Cm 0< No (\ n -- f\ )
+.It Cm 0<= No (\ n -- f\ )
+.It Cm 0<> No (\ n -- f\ )
+.It Cm 0= No (\ n -- f\ )
+.It Cm 0=> No (\ n -- f\ )
+.It Cm 0> No (\ n -- f\ )
+.It Cm negative? No (\ n -- f\ ) alias for Sx 0<
+.It Cm positive? < No (\ n -- f\ ) alias for Sx 0>=
+.It Cm zero? No (\ n -- f\ ) alias for Sx 0=
+Comparison between integer (ficlInteger) and zero.
+.\"
+.\" < <= <> = > >=
+.\"
+.It Cm < No (\ n1 n2 -- f\ )
+.It Cm <= No (\ n1 n2 -- f\ )
+.It Cm <> No (\ n1 n2 -- f\ )
+.It Cm = No (\ n1 n2 -- f\ )
+.It Cm => No (\ n1 n2 -- f\ )
+.It Cm > No (\ n1 n2 -- f\ )
+.It Cm negative? No (\ n -- f\ ) alias for Sx 0<
+.It Cm positive? < No (\ n -- f\ ) alias for Sx 0>=
+.It Cm zero? No (\ n -- f\ ) alias for Sx 0=
+Comparison between two integers (ficlInteger).
+.\"
+.\" u< u<= u<> u= u> u>=
+.\"
+.It Cm u< No (\ u1 u2 -- f\ )
+.It Cm u<= No (\ u1 u2 -- f\ )
+.It Cm u<> No (\ u1 u2 -- f\ )
+.It Cm u= No (\ u1 u2 -- f\ )
+.It Cm u=> No (\ u1 u2 -- f\ )
+.It Cm u> No (\ u1 u2 -- f\ )
+Comparison between two unsigned integers (ficlUnsigned).
+.\"
+.\" d0< d0<= d0<> d0= d0> d0>= dnegative? dpositive? dzero?
+.\"
+.It Cm d0< No (\ d -- f\ )
+.It Cm d0<= No (\ d -- f\ )
+.It Cm d0<> No (\ d -- f\ )
+.It Cm d0= No (\ d -- f\ )
+.It Cm d0> No (\ d -- f\ )
+.It Cm d0>= No (\ d -- f\ )
+.It Cm dnegative? No (\ d -- f\ ) alias for Sx d0<
+.It Cm dpositive? < No (\ d -- f\ ) alias for Sx d0>=
+.It Cm dzero? No (\ d -- f\ ) alias for Sx d0=
+Comparison between long integer (ficl2Integer) and zero.
+.Ar d
+can be any type of number but should fit in ficl2Integer.
+.Bd -literal -offset indent -compact
+1 d0>= \(rA #t
+1.0 d0< \(rA #f
+.Ed
+.\"
+.\" d< d<= d<> d= d> d>=
+.\"
+.It Cm d< No (\ d1 d2 -- f\ )
+.It Cm d<= No (\ d1 d2 -- f\ )
+.It Cm d<> No (\ d1 d2 -- f\ )
+.It Cm d= No (\ d1 d2 -- f\ )
+.It Cm d> No (\ d1 d2 -- f\ )
+.It Cm d>= No (\ d1 d2 -- f\ )
+Comparison between two long integers (ficl2Integer).
+.Ar d1
+and
+.Ar d2
+can be any type of number but should fit in ficl2Integer.
+.Bd -literal -offset indent -compact
+1 2.0 d< \(rA #t
+1.0 2 d= \(rA #f
+.Ed
+.\"
+.\" du< du<= du<> du= du> du>=
+.\"
+.It Cm du< No (\ ud1 ud2 -- f\ )
+.It Cm du<= No (\ ud1 ud2 -- f\ )
+.It Cm du<> No (\ ud1 ud2 -- f\ )
+.It Cm du= No (\ ud1 ud2 -- f\ )
+.It Cm du> No (\ ud1 ud2 -- f\ )
+.It Cm du>= No (\ ud1 ud2 -- f\ )
+Comparison between two long unsigned integers (ficl2Unsigned).
+.Ar ud1
+and
+.Ar ud2
+can be any type of number but should fit in ficl2Unsigned.
+.Bd -literal -offset indent -compact
+1 2.0 du< \(rA #t
+1.0 2 du= \(rA #f
+.Ed
+.\"
+.\" c0<> c0=
+.\"
+.It Cm c0<> No (\ c -- f\ )
+.It Cm c0= No (\ c -- f\ )
+Comparison between a complex number and zero.
+.Ar c
+can be any type of number but should fit in ficlComplex.
+.Bd -literal -offset indent -compact
+1.0+1.0i c0<> \(rA #t
+0.0+0.0i c0= \(rA #t
+1 c0= \(rA #f
+.Ed
+.\"
+.\" c<> c=
+.\"
+.It Cm c<> No (\ c1 c2 -- f\ )
+.It Cm c= No (\ c1 c2 -- f\ )
+Comparison between two numbers.
+.Ar c1
+and
+.Ar c2
+can be any type of number but should fit in ficlComplex.
+.Bd -literal -offset indent -compact
+1.0+1.0i 1i c= \(rA #t
+1+0i 2.0 c<> \(rA #t
+1 1+0i c= \(rA #t
+.Ed
+.\"
+.\" b0< b0<= b0<> b0= b0> b0>=
+.\"
+.It Cm b0< No (\ b -- f\ )
+.It Cm b0<= No (\ b -- f\ )
+.It Cm b0<> No (\ b -- f\ )
+.It Cm b0= No (\ b -- f\ )
+.It Cm b0> No (\ b -- f\ )
+.It Cm b0>= No (\ b -- f\ )
+Comparison between an arbitrary precision number and zero.
+.Ar b
+can be any type of number.
+.\"
+.\" b< b<= b<> b= b> b>=
+.\"
+.It Cm b< No (\ b1 b2 -- f\ )
+.It Cm b<= No (\ b1 b2 -- f\ )
+.It Cm b<> No (\ b1 b2 -- f\ )
+.It Cm b= No (\ b1 b2 -- f\ )
+.It Cm b> No (\ b1 b2 -- f\ )
+.It Cm b>= No (\ b1 b2 -- f\ )
+Comparison between two arbitrary precision big numbers.
+.Ar b1
+and
+.Ar b2
+can be any type of number.
+.\"
+.\" q0< q0<= q0<> q0= q0> q0>=
+.\"
+.It Cm q0< No (\ q -- f\ )
+.It Cm q0<= No (\ q -- f\ )
+.It Cm q0<> No (\ q -- f\ )
+.It Cm q0= No (\ q -- f\ )
+.It Cm q0> No (\ q -- f\ )
+.It Cm q0>= No (\ q -- f\ )
+Comparison between an arbitrary precision rational number and zero.
+.Ar q
+can be any type of number.
+.\"
+.\" q< q<= q<> q= q> q>=
+.\"
+.It Cm q< No (\ q1 q2 -- f\ )
+.It Cm q<= No (\ q1 q2 -- f\ )
+.It Cm q<> No (\ q1 q2 -- f\ )
+.It Cm q= No (\ q1 q2 -- f\ )
+.It Cm q> No (\ q1 q2 -- f\ )
+.It Cm q>= No (\ q1 q2 -- f\ )
+Comparison between two arbitrary precision rational numbers.
+.Ar q1
+and
+.Ar q2
+can be any type of number.
+.El
+.Pp
+.\"
+.\" Convertion between number types
+.\"
+Convertion between number types:
+.Bl -tag -width MMM -compact
+.\"
+.\" f>b s>b
+.\"
+.It Cm >bignum No (\ x -- b\ )
+.It Cm f>b No (\ r -- b\ ) alias for Sx >bignum
+.It Cm s>b No (\ n -- b\ ) alias for Sx >bignum
+Convert any number to a bignum object (ficlBignum).
+.\"
+.\" f>c q>c s>c
+.\"
+.It Cm >c No (\ x -- c\ )
+.It Cm f>c No (\ r -- c\ ) alias for Sx >c
+.It Cm q>c No (\ q -- c\ ) alias for Sx >c
+.It Cm s>c No (\ n -- c\ ) alias for Sx >c
+Convert any number to a complex object (ficlComplex).
+.\"
+.\" f>d s>d
+.\"
+.It Cm f>d No (\ r -- d\ )
+.It Cm s>d No (\ n -- d\ ) alias for Sx f>d
+Convert any number to Forth double word set number (ficl2Integer).
+.\"
+.\" b>f c>f d>f q>f s>f
+.\"
+.It Cm b>f No (\ b -- r\ ) alias for Sx s>f
+.It Cm c>f No (\ c -- r\ ) alias for Sx s>f
+.It Cm d>f No (\ d -- r\ ) alias for Sx s>f
+.It Cm q>f No (\ q -- r\ ) alias for Sx s>f
+.It Cm s>f No (\ n -- r\ )
+Convert any number to a float object (ficlFloat).
+.\"
+.\" c>q f>q s>q
+.\"
+.It Cm c>q No (\ c -- q\ ) alias for Sx f>q
+.It Cm f>q No (\ r -- q\ )
+.It Cm s>q No (\ n -- q\ )
+Convert complex (c>q), float (f>q), and integer (s>q) to ratio object
+(ficlRatio).
+.\"
+.\" b>s c>s d>s f>s r>s
+.\"
+.It Cm b>s No (\ b -- n\ ) alias for Sx f>s
+.It Cm c>s No (\ c -- n\ ) alias for Sx f>s
+.It Cm d>s No (\ d -- n\ ) alias for Sx f>s
+.It Cm f>s No (\ r -- n\ )
+.It Cm q>s No (\ q -- n\ ) alias for Sx f>s
+Convert any number to Forth single word set number (ficlInteger).
+.El
+.Pp
+.\"
+.\" Functions
+.\"
+Math functions:
+.Bl -tag -width MMM -compact
+.\"
+.\" 1+ 1- 2+ 2- 2* 2/ abs negate
+.\"
+.It Cm 1+ No (\ n1 -- n2\ )
+.It Cm 1- No (\ n1 -- n2\ )
+.It Cm 2+ No (\ n1 -- n2\ )
+.It Cm 2- No (\ n1 -- n2\ )
+.It Cm 2* No (\ n1 -- n2\ )
+.It Cm 2/ No (\ n1 -- n2\ )
+.It Cm abs No (\ n1 -- n2\ )
+.It Cm negate No (\ n1 -- n2\ )
+One argument integer (ficlInteger) operators.
+.\"
+.\" + - * / max min
+.\"
+.It Cm + No (\ n1 n2 -- n3\ )
+.It Cm - No (\ n1 n2 -- n3\ )
+.It Cm * No (\ n1 n2 -- n3\ )
+.It Cm / No (\ n1 n2 -- n3\ )
+.It Cm max No (\ n1 n2 -- n3\ )
+.It Cm min No (\ n1 n2 -- n3\ )
+Two argument integer (ficlInteger) operators.
+.\"
+.\" d2* d2/ dabs dnegate
+.\"
+.It Cm d2* No (\ d1 -- d2\ )
+.It Cm d2/ No (\ d1 -- d2\ )
+.It Cm dabs No (\ d1 -- d2\ )
+.It Cm dnegate No (\ d1 -- d2\ )
+One argument long integer (ficl2Integer) operators.
+.Ar d1
+can be any type of number but should fit in ficl2Integer.
+.\"
+.\" d+ d- d* d/ dmax dmin
+.\"
+.It Cm d+ No (\ d1 d2 -- d3\ )
+.It Cm d- No (\ d1 d2 -- d3\ )
+.It Cm d* No (\ d1 d2 -- d3\ )
+.It Cm d/ No (\ d1 d2 -- d3\ )
+.It Cm dmax No (\ d1 d2 -- d3\ )
+.It Cm dmin No (\ d1 d2 -- d3\ )
+Two argument long integer (ficl2Integer) operators.
+.Ar d1
+and
+.Ar d2
+can be any type of number but should fit in ficl2Integer.
+.\"
+.\" f2* f2/ fabs fnegate
+.\"
+.It Cm 1/f No (\ r1 -- r2\ )
+.It Cm f2* No (\ r1 -- r2\ )
+.It Cm f2/ No (\ r1 -- r2\ )
+.It Cm fabs No (\ r1 -- r2\ )
+.It Cm fnegate No (\ r1 -- r2\ )
+One argument real number (ficlFloat) operators.
+.Ar r1
+can be any type of number but should fit in ficlFloat.
+.\"
+.\" f+ f- f* f/ fmax fmin
+.\"
+.It Cm f+ No (\ r1 r2 -- r3\ )
+.It Cm f- No (\ r1 r2 -- r3\ )
+.It Cm f* No (\ r1 r2 -- r3\ )
+.It Cm f/ No (\ r1 r2 -- r3\ )
+.It Cm fmax No (\ r1 r2 -- r3\ )
+.It Cm fmin No (\ r1 r2 -- r3\ )
+Two argument real numbers (ficlFloat) operators.
+.Ar r1
+and
+.Ar r2
+can be any type of number but should fit in ficlFloat.
+.\"
+.\" f** fabs facos facosh falog fasin fasinh fatan fatan2 fatanh
+.\" fceil fcos fcosh fexp fexpm1 flog flog10 flog2 flogp1 floor fpow
+.\" fround fsin fsincos fsinh fsqrt ftan ftanh ftrunc
+.\"
+.It Cm f** No (\ r1 r2 -- r3\ )
+.It Cm fabs No (\ r1 -- r2\ )
+.It Cm facos No (\ r1 -- r2\ )
+.It Cm facosh No (\ r1 -- r2\ )
+.It Cm falog No (\ r1 -- r2\ )
+.It Cm fasin No (\ r1 -- r2\ )
+.It Cm fasinh No (\ r1 -- r2\ )
+.It Cm fatan No (\ r1 -- r2\ )
+.It Cm fatan2 No (\ r1 r2 -- r3\ )
+.It Cm fatanh No (\ r1 -- r2\ )
+.It Cm fceil No (\ r1 -- r2\ )
+.It Cm fcos No (\ r1 -- r2\ )
+.It Cm fcosh No (\ r1 -- r2\ )
+.It Cm fexp No (\ r1 -- r2\ )
+.It Cm fexpm1 No (\ r1 -- r2\ )
+.It Cm flog No (\ r1 -- r2\ )
+.It Cm flog10 No (\ r1 -- r2\ )
+.It Cm flog2 No (\ r1 -- r2\ )
+.It Cm flogp1 No (\ r1 -- r2\ )
+.It Cm floor No (\ r1 -- r2\ )
+.It Cm fpow No (\ r1 r2 -- r3\ ) alias for Sx f**
+.It Cm fround No (\ r1 -- r2\ )
+.It Cm fsin No (\ r1 -- r2\ )
+.It Cm fsincos No (\ r1 -- r2 r3\ )
+.It Cm fsinh No (\ r1 -- r2\ )
+.It Cm fsqrt No (\ r1 -- r2\ )
+.It Cm ftan No (\ r1 -- r2\ )
+.It Cm ftanh No (\ r1 -- r2\ )
+.It Cm ftrunc No (\ r1 -- r2\ )
+Math library functions for real numbers.
+.Cm fexpm1
+returns exp(r1) - 1.0,
+.Cm flogp1
+returns log(r1 + 1.0) and
+.Cm fsincos
+returns sin(r1) and cos(r1).
+.Ar r1
+and probable second argument
+.Ar r2
+can be any type of number but should fit in ficlFloat.
+.\"
+.\" 1/c c* c** c+ c- c/ cabs cabs2 cacos cacosh carg casin casinh
+.\" catan catan2 catanh ccos ccosh cexp clog clog10 conj conjugate
+.\" cpow csin csinh csqrt ctan ctanh magnitude
+.\"
+.It Cm 1/c No (\ c1 -- c2\ )
+.It Cm c* No (\ c1 c2 -- c3\ )
+.It Cm c** No (\ c1 c2 -- c3\ )
+.It Cm c+ No (\ c1 c2 -- c3\ )
+.It Cm c- No (\ c1 c2 -- c3\ )
+.It Cm c/ No (\ c1 c2 -- c3\ )
+.It Cm cabs No (\ c1 -- c2\ )
+.It Cm cabs2 No (\ c1 -- c2\ )
+.It Cm cacos No (\ c1 -- c2\ )
+.It Cm cacosh No (\ c1 -- c2\ )
+.It Cm carg No (\ c1 -- c2\ )
+.It Cm casin No (\ c1 -- c2\ )
+.It Cm casinh No (\ c1 -- c2\ )
+.It Cm catan No (\ c1 -- c2\ )
+.It Cm catan2 No (\ c1 c2 -- c3\ )
+.It Cm catanh No (\ c1 -- c2\ )
+.It Cm ccos No (\ c1 -- c2\ )
+.It Cm ccosh No (\ c1 -- c2\ )
+.It Cm cexp No (\ c1 -- c2\ )
+.It Cm clog No (\ c1 -- c2\ )
+.It Cm clog10 No (\ c1 -- c2\ )
+.It Cm conj No (\ c1 -- c2\ )
+.It Cm conjugate No (\ c1 -- c2\ ) alias for Sx conj
+.It Cm cpow No (\ c1 c2 -- c3\ ) alias for Sx c**
+.It Cm csin No (\ c1 -- c2\ )
+.It Cm csinh No (\ c1 -- c2\ )
+.It Cm csqrt No (\ c1 -- c2\ )
+.It Cm ctan No (\ c1 -- c2\ )
+.It Cm ctanh No (\ c1 -- c2\ )
+.It Cm magnitude No (\ c1 -- c2\ )
+Math library functions for complex numbers.
+.Ar c1
+and probable second argument
+.Ar c2
+can be any type of number but should fit in ficlComplex.
+.\"
+.\" b2* b2/ babs bnegate
+.\"
+.It Cm b2* No (\ b1 -- b2\ )
+.It Cm b2/ No (\ b1 -- b2\ )
+.It Cm babs No (\ b1 -- b2\ )
+.It Cm bnegate No (\ b1 -- b2\ )
+One argument arbitrary precision bignum functions.
+.Ar b1
+can be any type of number.
+.\"
+.\" b+ b- b* b/ b** bmax bmin bpow
+.\"
+.It Cm b+ No (\ b1 b2 -- b3\ )
+.It Cm b- No (\ b1 b2 -- b3\ )
+.It Cm b* No (\ b1 b2 -- b3\ )
+.It Cm b/ No (\ b1 b2 -- b3\ )
+.It Cm b** No (\ b1 b2 -- b3\ )
+.It Cm bmax No (\ b1 b2 -- b3\ )
+.It Cm bmin No (\ b1 b2 -- b3\ )
+.It Cm bpow No (\ b1 b2 -- b3\ ) alias for Sx b**
+Two argument arbitrary precision bignum functions.
+.Ar b1
+and
+.Ar b2
+can be any type of number.
+.\"
+.\" blshift brshift
+.\"
+.It Cm blshift No (\ b1 n -- b2\ )
+.It Cm brshift No (\ b1 n -- b2\ )
+Shifts arbitrary precision number
+.Ar b1
+.Ar n
+bits to left resp. right.
+.Ar b1
+can be any type of number while
+.Ar n
+has to be an integer (ficlInteger).
+.\"
+.\" 1/q qabs qceil qfloor qnegate
+.\"
+.It Cm 1/q No (\ q1 -- q2\ )
+.It Cm qabs No (\ q1 -- q2\ )
+.It Cm qceil No (\ q1 -- q2\ )
+.It Cm qfloor No (\ q1 -- q2\ )
+.It Cm qnegate No (\ q1 -- q2\ )
+One argument arbitrary precision rational functions.
+.Ar q1
+can be any type of number.
+.\"
+.\" q+ q- q* q/ q** qpow
+.\"
+.It Cm q+ No (\ q1 q2 -- q3\ )
+.It Cm q- No (\ q1 q2 -- q3\ )
+.It Cm q* No (\ q1 q2 -- q3\ )
+.It Cm q/ No (\ q1 q2 -- q3\ )
+.It Cm q** No (\ q1 q2 -- q3\ )
+.It Cm qpow No (\ q1 q2 -- q3\ ) alias for Sx q**
+Two argument arbitrary precision rational functions.
+.Ar q1
+and
+.Ar q2
+can be any type of number.
+.El
+.Pp
+.\"
+.\" Constants
+.\"
+Constants:
+.Bl -tag -width MMMMMMMM -compact
+.\"
+.\" euler
+.\"
+.It Sy euler
+e (\(ap2.71828)
+.\"
+.\" half-pi
+.\"
+.It Sy half-pi
+pi/2 (\(ap1.5708)
+.\"
+.\" ln-ten
+.\"
+.It Sy ln-ten
+log(10) (\(ap2.30259)
+.\"
+.\" ln-two
+.\"
+.It Sy ln-two
+log(2) (\(ap0.693147)
+.\"
+.\" pi
+.\"
+.It Sy pi
+pi (\(ap3.14159)
+.\"
+.\" sqrt-two
+.\"
+.It Sy sqrt-two
+sqrt(2) (\(ap1.41421)
+.\"
+.\" two-pi
+.\"
+.It Sy two-pi
+pi*2 (\(ap6.28319)
+.El
+.\"
+.\" Object types (object.c)
+.\"
+.Ss Object types
+.Bl -tag -width MMM -compact
+.\"
+.\" backtrace
+.\"
+.It Cm backtrace No (\ --\ )
+Print last word list from stack frame to error output.
+.\"
+.\" bt
+.\"
+.It Cm bt No (\ --\ ) alias for Sx backtrace
+.\"
+.\" frame-depth
+.\"
+.It Cm frame-depth No (\ -- n\ )
+Internal global variable.  Return the current frame depth.
+.\"
+.\" object-print-length
+.\"
+.It Cm object-print-length No (\ -- n\ )
+Return the number of objects to print for objects like array, list,
+hash.  Default value is 12.
+.\"
+.\" set-object-print-length
+.\"
+.It Cm set-object-print-length No (\ n --\ )
+Set number of objects to print for objects like array, list, hash to
+.Ar n .
+If
+.Ar n
+is negative, print all elements of a given object.
+.\"
+.\" stack-level
+.\"
+.It Cm stack-level No (\ -- n\ ) alias for Sx frame-depth
+.El
+.Pp
+Garbage collection words:
+.Bl -tag -width MMM -compact
+.\"
+.\" gc-mark
+.\"
+.It Cm gc-mark No (\ obj -- obj\ )
+Mark
+.Ar obj
+to protect it from garbage collection on next gc-run.
+.\"
+.\" gc-marked?
+.\"
+.It Cm gc-marked? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an instance and mark flag is set.  All new created objects have mark
+flag set.
+.\"
+.\" gc-off
+.\"
+.It Cm gc-off No (\ --\ )
+Turn off garbage collection.  The return code is meaningless in Forth.
+.\"
+.\" gc-on
+.\"
+.It Cm gc-on No (\ --\ )
+Turn on garbage collection.  The return code is meaningless in Forth.
+.\"
+.\" gc-permanent-objects
+.\"
+.It Cm gc-permanent-objects No (\ -- ary\ )
+Return array of all permanent objects.
+.\"
+.\" gc-permanent?
+.\"
+.It Cm gc-permanent? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an instance and permanent flag is set like constants.
+.\"
+.\" gc-protect
+.\"
+.It Cm gc-protect No (\ obj -- obj\ )
+Protect
+.Ar obj
+from garbage collection until gc-unprotect.
+.\"
+.\" gc-protected-objects
+.\"
+.It Cm gc-protected-objects No (\ -- ary\ )
+Return array of all protected objects.
+.\"
+.\" gc-protected?
+.\"
+.It Cm gc-protected? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an instance and protected flag is set.
+.\"
+.\" gc-run
+.\"
+.It Cm gc-run No (\ --\ )
+Run garbage collection immediately.
+.\"
+.\" gc-stats
+.\"
+.It Cm gc-stats No (\ --\ )
+Print garbage collection statistics.
+.Bl -tag -offset indent -width MMM -compact
+.It permanent
+permanent protected objects like constants
+.It protected
+temporary protected objects like gc-protected
+.It marked
+marked to protect from next freeing
+.It freed
+freed objects
+.It insts
+all other nonfreed objects
+.It buffer
+size of entire allocated buffer-array
+.It gc stack
+stack frame level
+.El
+.\"
+.\" gc-unmark
+.\"
+.It Cm gc-unmark No (\ obj -- obj\ )
+Unmark
+.Ar obj
+to unprotect it from garbage collection on next gc-run.
+.\"
+.\" gc-unprotect
+.\"
+.It Cm gc-unprotect No (\ obj -- obj\ )
+Unprotect
+.Ar obj
+from garbage collection.
+.El
+.Pp
+Object type and instance words:
+.Bl -tag -width MMM -compact
+.\"
+.\" instance-gen-ref
+.\"
+.It Cm instance-gen-ref No (\ obj -- gen\ )
+Return GEN-struct of
+.Ar obj .
+.\"
+.\" instance-obj-ref
+.\"
+.It Cm instance-obj-ref No (\ obj -- gen\ )
+Return object type of
+.Ar obj .
+.\"
+.\" instance-of?
+.\"
+.It Cm instance-of? No (\ obj type -- f\ )
+Return #t if
+.Ar obj
+is an instance of
+.Ar type ,
+otherwise #f.
+.\"
+.\" instance?
+.\"
+.It Cm instance? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an instance, otherwise #f.
+.\"
+.\" make-instance
+.\"
+.It Cm make-instance No (\ gen obj -- instance\ )
+Return new instance of Object type
+.Ar obj
+with
+.Ar gen
+wrapped in.
+.\"
+.\" make-object-type
+.\"
+.It Cm make-object-type No (\ name -- object-type\ )
+Create new object type
+.Ar name .
+Add
+.Ar name
+to feature environment list, create a constant fth-\c
+.Ar name
+of object-type and return new object-type
+.Ar name .
+The new created object-type can be used to bind functions to it.
+.\"
+.\" object-type-ref
+.\"
+.It Cm object-type-ref No (\ obj -- struct\ )
+Return object struct of object-type
+.Ar obj .
+.\"
+.\" object-type?
+.\"
+.It Cm object-type? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an Object type, otherwise #f.
+.\"
+.\" object-types
+.\"
+.It Cm object-types No (\ -- ary\ )
+Return array of all object names known to the system.
+.El
+.Pp
+Object set words:
+.Bl -tag -width MMM -compact
+.\"
+.\" set-object->array
+.\"
+.It Cm set-object->array No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object->array
+function for
+.Ar obj
+type.
+.\"
+.\" set-object->string
+.\"
+.It Cm set-object->string No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object->string
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-apply
+.\"
+.It Cm set-object-apply No (\ xt obj arity --\ )
+Set
+.Ar xt
+as
+.Cm object-apply
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-copy
+.\"
+.It Cm set-object-copy No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-copy
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-dump
+.\"
+.It Cm set-object-dump No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-dump
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-equal-p
+.\"
+.It Cm set-object-equal-p No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-equal?
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-free
+.\"
+.It Cm set-object-free No (\ xt obj --\ )
+Set
+.Ar xt
+as gc free function for
+.Ar obj
+type.
+.\"
+.\" set-object-inspect
+.\"
+.It Cm set-object-inspect No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-inspect
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-length
+.\"
+.It Cm set-object-length No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-length
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-mark
+.\"
+.It Cm set-object-mark No (\ xt obj --\ )
+Set
+.Ar xt
+as gc mark function for
+.Ar obj
+type.
+.\"
+.\" set-object-value-ref
+.\"
+.It Cm set-object-value-ref No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-ref
+function for
+.Ar obj
+type.
+.\"
+.\" set-object-value-set
+.\"
+.It Cm set-object-value-set No (\ xt obj --\ )
+Set
+.Ar xt
+as
+.Cm object-set!
+function for
+.Ar obj
+type.
+.El
+.Pp
+General object words
+.Bl -tag -width MMM -compact
+.\"
+.\" .inspect
+.\"
+.It Cm .inspect No (\ obj --\ )
+Print inspect string of
+.Ar obj .
+.\"
+.\" .object-name
+.\"
+.It Cm .object-name No (\ obj --\ )
+Print object name of
+.Ar obj
+to current stdout.
+.\"
+.\" apply
+.\"
+.It Cm apply No (\ obj args -- result\ ) alias for Sx object-apply
+.\"
+.\" cycle-ref
+.\"
+.It Cm cycle-ref No (\ obj -- val\ )
+Return value at current cycle-index of
+.Ar obj
+and increment cycle-index.  Cycle through content of
+.Ar obj
+from first to last entry and start again at the beginning etc.
+.\"
+.\" cycle-set!
+.\"
+.It Cm cycle-set! No (\ obj value --\ )
+Store
+.Ar value
+at current cycle-index of
+.Ar obj
+and increment cycle-index.  Cycle through content of
+.Ar obj
+from first to last entry and start again at the beginning etc.
+.\"
+.\" cycle-start!
+.\"
+.It Cm cycle-start! No (\ obj index --\ )
+Set cycle-index of
+.Ar obj
+to
+.Ar index .
+.\"
+.\" cycle-start0
+.\"
+.It Cm cycle-start0 No (\ obj --\ )
+Set cycle-index of
+.Ar obj
+to zero.
+.\"
+.\" cycle-start@
+.\"
+.It Cm cycle-start@ No (\ obj -- index\ )
+Return current cycle-index of
+.Ar obj .
+.\"
+.\" detect
+.\"
+.It Cm detect No (\ obj key -- value\ ) alias for Sx object-find
+.\"
+.\" empty?
+.\"
+.It Cm empty? No (\ obj -- f\ ) alias for Sx object-empty?
+.\"
+.\" equal?
+.\"
+.It Cm equal? No (\ obj1 obj2 -- f\ ) alias for Sx object-equal?
+.\"
+.\" first-ref
+.\"
+.It Cm first-ref No (\ obj -- val\ )
+Return first element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 1.
+.\"
+.\" first-set!
+.\"
+.It Cm first-set! No (\ obj value --\ )
+Store
+.Ar value
+to first element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 1.
+.\"
+.\" hash-id
+.\"
+.It Cm hash-id No (\ obj -- id\ )
+Return hash id computed from string representation of
+.Ar obj .
+Objects with the same content have the same id.
+.\"
+.\" index
+.\"
+.It Cm index No (\ obj key -- index\ ) alias for Sx object-index
+.\"
+.\" last-ref
+.\"
+.It Cm last-ref No (\ obj -- val\ )
+Return last element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 1.
+.\"
+.\" last-set!
+.\"
+.It Cm last-set! No (\ obj value --\ )
+Store
+.Ar value
+to last element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 1.
+.\"
+.\" length
+.\"
+.It Cm length No (\ obj -- len\ ) alias for Sx object-length
+.\"
+.\" member?
+.\"
+.It Cm member? No (\ obj key -- f\ ) alias for Sx object-member?
+.\"
+.\" object->array
+.\"
+.It Cm object->array No (\ obj -- ary\ )
+Return
+.Ar obj
+as array.
+.\"
+.\" object->string
+.\"
+.It Cm object->string No (\ obj -- str\ )
+Return string representation of
+.Ar obj .
+.\"
+.\" object-apply
+.\"
+.It Cm object-apply No (\ obj args -- result\ )
+Run apply on
+.Ar obj
+with
+.Ar args
+as arguments.
+.Ar args
+can be an array of arguments or a single argument.  The number of
+.Ar args
+must fit apply's definition.  The next two examples require each 1
+argument:
+.Bd -literal -offset indent -compact
+fth_set_object_apply(vct_tag, vct_ref, 1, 0, 0); /* C */
+<\(aq> enved-ref fth-enved 1 set-object-apply \e Forth
+.Ed
+.\"
+.\" object-copy
+.\"
+.It Cm object-copy No (\ obj1 -- obj2\ )
+Return copy of
+.Ar obj1 .
+Copy any element if
+.Ar obj1
+is an instance.
+.\"
+.\" object-debug-hook
+.\"
+.It Cm object-debug-hook No (\ obj -- hook\ )
+Return debug-hook member of
+.Ar obj
+if there is any, otherwise #f.  The hook has the stack effect (
+inspect-string obj -- new-str ).  Every object can set this hook.  If
+set, it will be called on inspecting the object with the inspect string
+as first argument.  If there are more than one hook procedures, all of
+them will be called feeded with the new string previously returned.
+.Bd -literal -offset indent -compact
+#( 0 1 ) value ary
+ary .inspect \(rA #<array[2]:  #<fixnum: 0> #<fixnum: 1>>
+ary object-debug-hook lambda: <{ str obj -- new-str }>
+	\(dqdebug-inspect: %s\(dq #( obj ) string-format
+; add-hook!
+ary .inspect \(rA #<debug-inspect: #( 0 1 )>
+ary object-debug-hook hook-clear
+ary .inspect \(rA #<array[2]:  #<fixnum: 0> #<fixnum: 1>>
+.Ed
+.\"
+.\" object-dump
+.\"
+.It Cm object-dump No (\ obj -- str\ )
+Return dump string of
+.Ar obj
+which one can eval to get the object back.
+.\"
+.\" object-empty?
+.\"
+.It Cm object-empty? No (\ obj -- f\ )
+Return #t if length of
+.Ar obj
+is zero, otherwise #f.
+.\"
+.\" object-equal?
+.\"
+.It Cm object-equal? No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+have equal content, otherwise #f.
+.\"
+.\" object-find
+.\"
+.It Cm object-find No (\ obj key -- value\ )
+Search for
+.Ar key
+in
+.Ar obj
+and return corresponding value or #f if not found.
+.\"
+.\" object-id
+.\"
+.It Cm object-id No (\ obj -- id\ )
+Return object id of
+.Ar obj ,
+a uniq number.
+.\"
+.\" object-index
+.\"
+.It Cm object-index No (\ obj key -- index\ )
+Search for
+.Ar key
+in
+.Ar obj
+and return index or -1 if not found.
+.\"
+.\" object-inspect
+.\"
+.It Cm object-inspect No (\ obj -- str\ )
+Return inspect string of
+.Ar obj .
+.\"
+.\" object-length
+.\"
+.It Cm object-length No (\ obj -- len\ )
+Return length of
+.Ar obj .
+.\"
+.\" object-member?
+.\"
+.It Cm object-member? No (\ obj key -- f\ )
+Return #t if
+.Ar key
+is present in
+.Ar obj ,
+otherwise #f.
+.\"
+.\" object-name
+.\"
+.It Cm object-name No (\ obj -- name\ )
+Return object type name of OBJ as a string.
+.\"
+.\" object-range?
+.\"
+.It Cm object-range? No (\ obj index -- f\ )
+Return #t if
+.Ar index
+is in range of
+.Ar obj ,
+otherwise #f.  If
+.Ar index
+is negative, return #f.
+.\"
+.\" object-ref
+.\"
+.It Cm object-ref No (\ obj index -- val\ )
+Return value at
+.Ar index
+from
+.Ar obj .
+If
+.Ar obj
+is of a type which can have multiple elements, an array for example,
+return value at
+.Ar index .
+If
+.Ar obj
+is of a type which consists of only one element, a fixnum for example,
+ignore
+.Ar index
+and return
+.Ar obj
+itself.
+.\"
+.\" object-set!
+.\"
+.It Cm object-set! No (\ obj index value --\ )
+Set
+.Ar value
+at
+.Ar index
+to
+.Ar obj .
+If
+.Ar obj
+is of a type which can have multiple elements, an array for example, set
+.Ar value
+at position
+.Ar index .
+If
+.Ar obj
+is of a type which consists of only one element, a fixnum for example,
+do nothing.
+.\"
+.\" object-set*!
+.\"
+.It Cm object-set*! No (\ obj index value --\ )
+Multiply
+.Ar value
+to value at
+.Ar index
+of
+.Ar obj .
+Value may be any number (ficlInteger, ficlFloat, ficlRatio or
+ficlComplex).
+.\"
+.\" object-set+!
+.\"
+.It Cm object-set+! No (\ obj index value --\ )
+Add
+.Ar value
+to value at
+.Ar index
+of
+.Ar obj .
+Value may be any number (ficlInteger, ficlFloat, ficlRatio or
+ficlComplex).
+.\"
+.\" object-set-!
+.\"
+.It Cm object-set-! No (\ obj index value --\ )
+Subtract
+.Ar value
+from value at
+.Ar index
+of
+.Ar obj .
+Value may be any number (ficlInteger, ficlFloat, ficlRatio or
+ficlComplex).
+.\"
+.\" object-set/!
+.\"
+.It Cm object-set/! No (\ obj index value --\ )
+Divide value at
+.Ar index
+of
+.Ar obj
+by
+.Ar value .
+Value may be any number (ficlInteger, ficlFloat, ficlRatio or
+ficlComplex).
+.\"
+.\" object-sort
+.\"
+.It Cm object-sort No (\ obj cmp-xt -- ary\ )
+Convert
+.Ar obj
+to an array, sort and return it.
+.Ar cmp-xt
+compares two items A and B and should return a negative integer if A <
+B, 0 if A == B, and a positive integer if A > B.
+.Bd -literal -offset indent -compact
+: numb-sort { val1 val2 -- n }
+	val1 val2 < if
+		-1
+	else
+		val1 val2 > if
+			1
+		else
+			0
+		then
+	then
+;
+#( 6 2 8 1 ) <\(aq> numb-sort object-sort \(rA #( 1 2 6 8 )
+.Ed
+.\"
+.\" range?
+.\"
+.It Cm range? No (\ obj index -- f\ ) alias for Sx object-range?
+.\"
+.\" second-ref
+.\"
+.It Cm second-ref No (\ obj -- val\ )
+Return second element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 2.
+.\"
+.\" second-set!
+.\"
+.It Cm second-set! No (\ obj value --\ )
+Store
+.Ar value
+to second element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 2.
+.\"
+.\" sort
+.\"
+.It Cm sort No (\ obj cmp-xt -- ary\ ) alias for Sx object-sort
+.\"
+.\" third-ref
+.\"
+.It Cm third-ref No (\ obj -- val\ )
+Return third element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 3.
+.\"
+.\" third-set!
+.\"
+.It Cm third-set! No (\ obj value --\ )
+Store
+.Ar value
+to third element of
+.Ar obj .
+Raise
+.Ar out-of-range
+exception if length of
+.Ar obj
+is less than 3.
+.\"
+.\" xmobj?
+.\"
+.It Cm xmobj? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an XmObj (xm.c), otherwise #f.  It is a very special Snd XM test.
+See
+.Xr snd 1
+for more information.
+.El
+.Pp
+Predicates:
+.Bl -tag -width MMM -compact
+.\"
+.\" boolean?
+.\"
+.It Cm boolean? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is #t or #f, otherwise #f.
+.\"
+.\" false?
+.\"
+.It Cm false? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is #f, otherwise #f.
+.\"
+.\" nil?
+.\"
+.It Cm nil? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is nil, otherwise #f.
+.\"
+.\" true?
+.\"
+.It Cm true? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is #t, otherwise #f.
+.\"
+.\" undef?
+.\"
+.It Cm undef? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is undef, otherwise #f.
+.El
+.\"
+.\" Ports (port.c)
+.\"
+.Ss Ports
+.Bl -tag -width MMM -compact
+.\"
+.\" make-soft-input-port
+.\"
+.It Cm make-soft-input-port No (\ :key args -- prt\ )
+Return new input soft port IO object with corresponding procs.  Not all
+procs are required.  Recognized keyword options:
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :close No (\ --\ )
+Proc for closing soft port.
+.It Sy :flush No (\ --\ )
+Proc for flushing port buffer.
+.It Sy :port-name Ar \(dqsoft\-port\(dq
+Name for IO object, default is \(dqsoft-port\(dq.
+.It Sy :read-char No (\ -- c\ )
+Proc for reading one character.
+.It Sy :read-line No (\ -- line\ )
+Proc for reading one line.
+.El
+Input example, *stdin* IO object is preserved for later use:
+.Bd -literal -offset indent -compact
+:port-name \(dqsndin\(dq
+:read-char lambda: <{ -- c }> *stdin* io-getc ;
+:read-line lambda: <{ -- line }> *stdin* io-read ;
+make-soft-port set-*stdin* value stdin-io
+.Ed
+.\"
+.\" make-soft-output-port
+.\"
+.It Cm make-soft-output-port No (\ :key args -- prt\ )
+Return new output soft port IO object with corresponding procs.  Not all
+procs are required.  Recognized keyword options:
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :close No (\ --\ )
+Proc for closing soft port.
+.It Sy :flush No (\ --\ )
+Proc for flushing port buffer.
+.It Sy :port-name Ar \(dqsoft\-port\(dq
+Name for IO object, default is \(dqsoft-port\(dq.
+.It Sy :write-char No (\ c --\ )
+Proc for writing one character.
+.It Sy :write-line No (\ line --\ )
+Proc for writing one line.
+.El
+Output example, *stdout* IO object is preserved for later use:
+.Bd -literal -offset indent -compact
+:port-name \(dqsndout\(dq
+:write-char lambda: <{ c -- }> c snd-print .stdout ;
+:write-line lambda: <{ line -- }> line snd-print .stdout ;
+make-soft-port set-*stdout* value stdout-io
+.Ed
+.\"
+.\" make-soft-port
+.\"
+.It Cm make-soft-port No (\ :key args -- prt\ )
+Return new soft port IO object with corresponding procs.  Not all procs
+are required.  Recognized keyword options:
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :close No (\ --\ )
+Proc for closing soft port.
+.It Sy :fam Ar r/o No \(ba Ar w/o No (default) \(ba Ar r/w
+For read-only use constant
+.Sy r/o ,
+for write-only use constant
+.Sy w/o
+and for read-write use constant
+.Sy r/w .
+.It Sy :flush No (\ --\ )
+Proc for flushing port buffer.
+.It Sy :port-name Ar \(dqsoft\-port\(dq
+Name for IO object, default is \(dqsoft-port\(dq.
+.It Sy :read-char No (\ -- c\ )
+Proc for reading one character.
+.It Sy :read-line No (\ -- line\ )
+Proc for reading one line.
+.It Sy :write-char No (\ c --\ )
+Proc for writing one character.
+.It Sy :write-line No (\ line --\ )
+Proc for writing one line.
+.El
+Input example, *stdin* IO object is preserved for later use:
+.Bd -literal -offset indent -compact
+:port-name \(dqsndin\(dq
+:read-char lambda: <{ -- c }> *stdin* io-getc ;
+:read-line lambda: <{ -- line }> *stdin* io-read ;
+make-soft-port set-*stdin* value stdin-io
+.Ed
+Output example, *stdout* IO object is preserved for later use:
+.Bd -literal -offset indent -compact
+:port-name \(dqsndout\(dq
+:write-char lambda: <{ c -- }> c snd-print .stdout ;
+:write-line lambda: <{ line -- }> line snd-print .stdout ;
+make-soft-port set-*stdout* value stdout-io
+.Ed
+.\"
+.\" port->string
+.\"
+.It Cm port->string No (\ prt -- str\ )
+Return content of
+.Ar prt
+object as string if available, otherwise #f.
+.\"
+.\" port-close
+.\"
+.It Cm port-close No (\ prt --\ )
+File and IO ports close their streams, other kind of ports do nothing.
+.\"
+.\" port-closed?
+.\"
+.It Cm port-closed? No (\ prt -- f\ )
+Return #t if
+.Ar io
+object is closed, otherwise #f.
+.\"
+.\" port-display
+.\"
+.It Cm port-display No (\ prt obj --\ )
+Write the string representation of
+.Ar obj
+to
+.Ar prt
+object.  If
+.Ar prt
+is #f, write to current output port (stout).
+.\"
+.\" port-flush
+.\"
+.It Cm port-flush No (\ prt --\ )
+File and IO ports flush their streams, other kind of ports do nothing.
+.\"
+.\" port-getc
+.\"
+.It Cm port-getc No (\ prt -- c\ )
+Return next character from
+.Ar prt
+IO object.  If
+.Ar prt
+is #f, read from current input port (stdin).
+.\"
+.\" port-gets
+.\"
+.It Cm port-gets No (\ prt -- str\ )
+Return one line from
+.Ar prt
+IO object.  If
+.Ar prt
+is #f, read from current input port (stdin).
+.\"
+.\" port-input?
+.\"
+.It Cm port-input? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an input IO object or #f, otherwise #f.
+.\"
+.\" port-output?
+.\"
+.It Cm port-output? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an output IO object or #f, otherwise #f.
+.\"
+.\" port-putc
+.\"
+.It Cm port-putc No (\ prt c --\ )
+Write character
+.Ar c
+to
+.Ar prt
+IO object.  If
+.Ar prt
+is #f, write to current output port (stout).
+.\"
+.\" port-puts
+.\"
+.It Cm port-puts No (\ prt str --\ )
+Write
+.Ar str
+to
+.Ar prt
+IO object.  If
+.Ar prt
+is #f, write to current output port (stout).
+.\"
+.\" port-puts-format
+.\"
+.It Cm port-puts-format No (\ prt fmt fmt-args --\ )
+Write string built from
+.Ar fmt
+and array
+.Ar fmt-args
+to
+.Ar prt
+IO object.  If
+.Ar prt
+is #f, write to current output port (stdout).  For example, write
+\(dqhello, world\(dq to stdout (#f) port:
+.Bd -literal -offset indent -compact
+#f \(dqhello, %s\(dq #( \(dqworld\(dq ) port-puts-format
+  \(rA hello, world
+.Ed
+.\"
+.\" port-puts-format
+.\"
+.It Cm port-read No (\ prt -- str\ ) alias for Sx port-gets
+.\"
+.\" port-write
+.\"
+.It Cm port-write No (\ prt str --\ ) alias for Sx port-puts
+.\"
+.\" port-write-format
+.\"
+.It Cm port-write-format No (\ prt fmt fmt-args --\ ) alias for Sx port-puts-format
+.\"
+.\" port?
+.\"
+.It Cm port? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an IO object or #f, otherwise #f.
+.El
+.Pp
+The following words recognize these options:
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :filename Ar string
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :fam Ar r/o No \(ba Ar w/o No (default) \(ba Ar r/w
+For read-only use constant
+.Sy r/o ,
+for write-only use constant
+.Sy w/o
+and for read-write use constant
+.Sy r/w .
+.El
+.It Sy :command Ar string \(ba array-of-strings
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :fam Ar r/o No \(ba Ar w/o No (default) \(ba Ar r/w
+For read-only use constant
+.Sy r/o ,
+for write-only use constant
+.Sy w/o
+and for read-write use constant
+.Sy r/w .
+.El
+.It Sy :socket Ar string
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :domain Ar domain No (AF_INET \(ba AF_UNIX)
+.It Sy :port Ar port No (default 1024)
+.El
+.It Sy :soft-port Ar string
+.Bl -tag -offset indent -width MMM -compact
+.It Sy :close No (\ --\ )
+Proc for closing soft port.
+.It Sy :fam Ar r/o No \(ba Ar w/o No (default) \(ba Ar r/w
+For read-only use constant
+.Sy r/o ,
+for write-only use constant
+.Sy w/o
+and for read-write use constant
+.Sy r/w .
+.It Sy :flush No (\ --\ )
+Proc for flushing port buffer.
+.It Sy :port-name Ar \(dqsoft\-port\(dq
+Name for IO object, default is \(dqsoft-port\(dq.
+.It Sy :read-char No (\ -- c\ )
+Proc for reading one character.
+.It Sy :read-line No (\ -- line\ )
+Proc for reading one line.
+.It Sy :write-char No (\ c --\ )
+Proc for writing one character.
+.It Sy :write-line No (\ line --\ )
+Proc for writing one line.
+.El
+.El
+.\"
+.\" with-error-to-port
+.\"
+.Bl -tag -width MMM -compact
+.It Cm with-error-to-port No (\ obj :key args --\ )
+Open IO object for output and point IO to
+.Ar *stderr* .
+If
+.Ar obj
+is a string, write string to IO object, otherwise execute
+.Ar obj
+as proc or xt with stack effect (\ --\ ).  Close IO object.
+.Ar *stderr*
+will be reset to its previous value.
+.Bd -literal -offset indent -compact
+lambda: <{ -- }>
+	\(dqhello\en\(dq .stderr
+; :filename \(dqfile.test\(dq with-error-to-port
+% cat test.file
+hello
+%
+\(dq\(dq value s
+lambda: <{ -- }>
+	*stderr* \(dqhello\(dq io-write
+; :string s with-error-to-port
+s \(rA \(dqhello\(dq
+\(dqfile.test\(dq file-delete
+\(dqhello\en\(dq :filename \(dqfile.test\(dq with-error-to-port
+% cat file.test
+hello
+%
+.Ed
+.\"
+.\" with-input-from-port
+.\"
+.It Cm with-input-from-port No (\ obj :key args -- str\ )
+Open IO object for input and point IO to
+.Ar *stdin* .
+If
+.Ar obj
+is
+.Ar nil ,
+read first line from IO object, otherwise execute
+.Ar obj
+as proc or xt with stack effect (\ -- str\ ).  Close IO object and
+return resulting string.
+.Ar *stdin*
+will be reset to its previous value.
+.Bd -literal -offset indent -compact
+% cat file.test
+hello
+%
+lambda: <{ -- str }>
+	*stdin* io-read
+; :filename \(dqfile.test\(dq with-input-from-port \(rA \(dqhello\en\(dq
+\(dqhello\(dq value s
+lambda: <{ -- str }>
+	*stdin* io-read
+; :string s with-input-from-port \(rA \(dqhello\(dq
+nil :filename \(dqfile.test\(dq with-input-from-port \(rA \(dqhello\(dq
+.Ed
+.\"
+.\" with-input-port
+.\"
+.It Cm with-input-port No (\ obj :key args -- str\ )
+Open IO object for input.  If
+.Ar obj is
+.Ar nil ,
+read first line from IO object, otherwise execute
+.Ar obj
+as a proc or xt with stack effect (\ io -- str\ ).  Close IO object and
+return resulting string.
+.Bd -literal -offset indent -compact
+% cat file.test
+hello
+%
+lambda: <{ io -- str }>
+	io io-read
+; :filename \(dqfile.test\(dq with-input-port \(rA \(dqhello\en\(dq
+\(dqhello\(dq value s
+lambda: <{ io -- str }>
+	io io-read
+; :string s with-input-port \(rA \(dqhello\(dq
+nil :filename \(dqfile.test\(dq with-input-port \(rA \(dqhello\en\(dq
+.Ed
+.\"
+.\" with-output-port
+.\"
+.It Cm with-output-port No (\ obj :key args --\ )
+Open IO object for output.  If
+.Ar obj
+is a string, write string to IO object, otherwise execute
+.Ar obj
+as proc or xt with stack effect (\ io --\ ).  Close IO object.
+.Bd -literal -offset indent -compact
+lambda: <{ io -- }>
+	io \(dqhello\en\(dq io-write
+; :filename \(dqfile.test\(dq with-output-port
+% cat file.test
+hello
+%
+\(dq\(dq value s
+lambda: <{ io -- }>
+	io \(dqhello\(dq io-write
+; :string s with-output-port
+s \(rA \(dqhello\(dq
+\(dqfile.test\(dq file-delete
+\(dqhello\en\(dq :filename \(dqfile.test\(dq with-output-port
+% cat file.test
+hello
+%
+.Ed
+.\"
+.\" with-output-to-port
+.\"
+.It Cm with-output-to-port No (\ obj :key args --\ )
+Open IO object for output and point IO to
+.Ar *stdout* .
+If
+.Ar obj
+is a string, write string to IO object, otherwise execute
+.Ar obj
+as proc or xt with stack effect (\ --\ ).  Close IO object.
+.Ar *stdout*
+will be reset to its previous value.
+.Bd -literal -offset indent -compact
+lambda: <{ -- }>
+	.\(dq hello\(dq cr
+; :filename \(dqfile.test\(dq with-output-to-port
+% cat test.file
+hello
+%
+\(dq\(dq value s
+lambda: <{ -- }>
+	*stdout* \(dqhello\(dq io-write
+; :string s with-output-to-port
+s \(rA \(dqhello\(dq
+\(dqfile.test\(dq file-delete
+\(dqhello\en\(dq :filename \(dqfile.test\(dq with-output-to-port
+% cat file.test
+hello
+%
+.Ed
+.El
+.\"
+.\" Procs and Xts (proc.c)
+.\"
+.Ss Procs and Xts
+.Bl -tag -width MMM -compact
+.\"
+.\" *filename*
+.\"
+.It Dv *filename*
+Current file name.
+.\"
+.\" *lineno*
+.\"
+.It Dv *lineno*
+Current line number.
+.\"
+.\" .proc
+.\"
+.It Cm .proc No (\ prc --\ )
+Print proc object
+.Ar prc
+to current output.
+.\"
+.\" <'set>
+.\"
+.It Cm <\(aqset> No (\ \(dqname\(dq -- set-name\(ba#f\ )
+Parse
+.Ar name
+and search for word
+.Ar set-name .
+Return xt of
+.Ar set-name
+or #f if not found.
+.Bd -literal -offset indent -compact
+<\(aqset> object-print-length \(rA set-object-print-length
+.Ed
+.\"
+.\" <{
+.\"
+.It Cm <{ No (\ --\ )
+Turn current colon definition in a proc object.  Takes tokens up to
+closing \(oq}>\(cq as local variables, \(oq--\(cq start a comment
+ignoring rest to closing \(oq}>\(cq.  In addition to other local
+variable words like
+.Cm { }
+and
+.Cm {{ }}
+this form handles two keywords,
+.Sy :key
+and
+.Sy :optional .
+Variable names are taken from keyword and optional names.  This word can
+span over more than one lines but without empty lines or comments in
+between.  If :key and :optional is used together, :key must come first.
+All keyword and optional variables must have default values.  This word
+is immediate and compile only and can only be used in word definitions.
+.Bd -literal -offset indent -compact
+: optkey-test <{ a b c
+  :key d 10 e 20 :optional f 30 g 40 -- ary }>
+	#( a b c d e f g )
+;
+1 2 3 optkey-test \(rA #( 1 2 3 10 20 30 40 )
+:d 11 1 :e 22 2 3 4 optkey-test \(rA #( 1 2 3 11 22  4 40 )
+.Ed
+.\"
+.\" <{}>
+.\"
+.It Cm <{}> No (\ --\ )
+Turn current colon definition in a proc object.  This word is immediate
+and compile only and can only be used in word definitions.
+.Bd -literal -offset indent -compact
+: we-dont-need-args <{}> ;
+<\(aq> we-dont-need-args proc? \(rA #t
+.Ed
+.\"
+.\" defined?
+.\"
+.It Cm defined? No (\ \(dqname\(dq -- f\ )
+Return #t if
+.Ar name
+is defined in the dictionary, otherwise #f.
+.Bd -literal -offset indent -compact
+defined?  10 \(rA #f
+defined? nil \(rA #t
+defined?   + \(rA #t
+.Ed
+.\"
+.\" doc"
+.\"
+.It Cm doc\(dq No (\ <ccc>\(dq --\ )
+Add input buffer to next double quote character \(oq\(dq\(cq to
+documentation of current word.  Escape double quote character with
+backslash if required in documentation.  It is not necessary to repeat
+the stack effect if it already exist in the word definition.  This word
+is immediate and compile only and can only be used in word definitions.
+.Bd -literal -offset indent -compact
+: new-word ( -- )
+	doc\(dq our documentation may contain \e
+\e\(dqdouble quotes\e\(dq.  \e
+Escape them with a backslash.\(dq
+	\e we do nothing
+;
+help new-word \(rA new-word  ( -- )  our documentation may
+contain \dqdouble quotes\(dq.  Escape them with a backslash.
+.Ed
+.\"
+.\" documentation-ref
+.\"
+.It Cm documentation-ref No (\ obj -- str\ )
+Return documentation string of
+.Ar obj
+(Forth word, object or topic) or #f.
+.\"
+.\" documentation-set!
+.\"
+.It Cm documentation-set! No (\ obj str --\ )
+Set documentation of
+.Ar obj
+(Forth word, object or topic) to
+.Ar str .
+.\"
+.\" get-func-name
+.\"
+.It Cm get-func-name No (\ -- name\ )
+Return name of current xt in word definition as string.  This word is
+immediate and compile only and can only be used in word definitions.
+.Bd -literal -offset indent -compact
+: new-word
+	get-func-name .$
+	space
+	10
+;
+new-word \(rA new-word 10
+.Ed
+.\"
+.\" get-optarg
+.\"
+.It Cm get-optarg No (\ req def -- val\ )
+Return either default value
+.Ar def
+or a value found on stack.
+.Ar req
+is the sum of required and following optional arguments.  It simulates
+the :optional keyword in Lisp/Scheme.
+.Bd -literal -offset indent -compact
+: optarg-test ( a b c=33 d=44 e=55 -- ary )
+	4 55 get-optarg { e }
+	3 44 get-optarg { d }
+	2 33 get-optarg { c }
+	{ a b }
+	#( a b c d e )
+;
+1 2 optarg-test \(rA #( 1 2 33 44 55 )
+1 2 3 4 optarg-test \(rA #( 1 2  3  4 55 )
+1 2 3 4 5 6 7 optarg-test \(rA 1 2 #( 3 4  5  6  7 )
+.Ed
+.\"
+.\" get-optargs
+.\"
+.It Cm get-optargs No (\ lst req -- vals\ )
+The plural form of get-optarg.
+.Ar args
+is an array with default values,
+.Ar req
+is number of required arguments.  Return
+.Ar req
++
+.Ar args
+length values on stack, either default ones or from stack.
+.Bd -literal -offset indent -compact
+: optargs-test ( a b c=33 d=44 e=55 -- ary )
+	#( 33 44 55 ) 2 get-optargs { a b c d e }
+	#( a b c d e )
+;
+1 2 optargs-test \(rA #( 1 2 33 44 55 )
+1 2 3 4 optargs-test \(rA #( 1 2  3  4 55 )
+1 2 3 4 5 6 7 optargs-test \(rA 1 2 #( 3 4  5  6  7 )
+.Ed
+.\"
+.\" get-optkey
+.\"
+.It Cm get-optkey No (\ key def -- val\ )
+Return either default value
+.Ar def
+or a value found on stack determined by keyword
+.Ar key .
+It simulates the :key keyword in Lisp/Scheme.
+.Bd -literal -offset indent -compact
+: optkey-test ( start dur keyword-args -- ary )
+	:frequency 440.0 get-optkey { freq }
+	:initial-phase pi get-optkey { phase }
+	{ start dur }
+	#( start dur freq phase )
+;
+0 1 optkey-test \(rA #( 0.0 1.0 440.0 3.14159 )
+0 2 :frequency 330.0 optkey-test \(rA #( 0.0 2.0 330.0 3.14159 )
+.Ed
+.\"
+.\" get-optkeys
+.\"
+.It Cm get-optkeys No (\ ary req -- vals\ )
+The plural form of get-optkey.
+.Ar ary
+is an array of key-value pairs,
+.Ar req
+is number of required arguments.  Return
+.Ar req
++
+.Ar ary
+length / 2 values on stack, either default ones or from stack.
+.Bd -literal -offset indent -compact
+: optkeys-test ( start dur keyword-args -- ary )
+	#( :frequency 440.0
+	   :initial-phase pi )
+	    2 get-optkeys { start dur freq phase }
+	#( start dur freq phase )
+;
+0 1 optkeys-test \(rA #( 0.0 1.0 440.0 3.14159 )
+0 2 :frequency 330.0 optkeys-test \(rA #( 0.0 2.0 330.0 3.14159 )
+.Ed
+.\"
+.\" help
+.\"
+.It Cm help No (\ \(dqname\(dq --\ )
+Print documentation of
+.Ar name
+(Forth word or topic) or \(dqno documentation available\(dq.
+.Bd -literal -offset indent -compact
+help make-array \e Forth word
+help array      \e topic
+.Ed
+.\"
+.\" help-add!
+.\"
+.It Cm help-add! No (\ obj str --\ )
+Append
+.Ar str
+to documentation of
+.Ar obj .
+.\"
+.\" help-ref
+.\"
+.It Cm help-ref No (\ obj -- str\ )
+Return documentation of
+.Ar obj
+(Forth word, object or topic) or \(dqno documentation available\(dq.
+.\"
+.\" help-set!
+.\"
+.It Cm help-set! No (\ obj str --\ )
+Set documentation of
+.Ar obj
+(Forth word or object) to
+.Ar str .
+.Bd -literal -offset indent -compact
+#( \(dqbehemoth\(dq \(dqpumpkin\(dq \(dqmugli\(dq ) value hosts
+hosts \(dqlocal-net hostnames\(dq help-set!
+hosts help-ref \(rA \(dqlocal-net hostnames\(dq
+.Ed
+.\"
+.\" lambda:
+.\"
+.It Cm lambda: No (\ -- xt\ )
+Start nameless word definition and set variable
+.Dv latestxt
+to word.  Stack-effect or normal comment immediately at the beginning
+will be used as documentation.  Return xt after closing semicolon
+\(oq;\(cq.
+.Bd -literal -offset indent -compact
+lambda: ( a b -- c ) + ; value plus
+plus help-ref \(rA lambda-009  ( a b -- c )
+1 2 plus execute \(rA 3
+1 2 lambda: ( a b -- c ) * ; execute \(rA 2
+.Ed
+.\"
+.\" latestxt
+.\"
+.It Cm latestxt No (\ -- xt\ )
+Return latest defined xt.
+.\"
+.\" local-variables
+.\"
+.It Cm local-variables No (\ -- vars\ )
+Return array of local variable name-value pairs up to the location in
+definition.  This word is immediate and compile only and can only be
+used in word definitions.
+.Bd -literal -offset indent -compact
+: word-with-locals { foo -- }
+	10 { bar }
+	local-variables each
+		.$ space
+	end-each
+;
+20 word-with-locals \(rA #( \(dqbar\(dq 10 ) #( \(dqfoo\(dq 20 )
+.Ed
+.\"
+.\" make-proc
+.\"
+.It Cm make-proc No (\ xt arity -- prc\ )
+Return new proc object.
+.Ar arity
+can be an integer or an array of length 3, #( req opt rest ).
+.Bd -literal -offset indent -compact
+<\(aq> +  2  make-proc \(rA +
+lambda: ( a b -- c )
+	+
+; #( 2 0 #f ) make-proc \(rA lambda-009
+.Ed
+.\"
+.\" proc->xt
+.\"
+.It Cm proc->xt No (\ prc -- xt\ )
+Return the actual word (the execution token xt) of
+.Ar prc .
+.\"
+.\" proc-apply
+.\"
+.It Cm proc-apply No (\ prc args -- res\ )
+Execute proc object
+.Ar prc
+with arguments
+.Ar args
+and return result or #f.
+.Ar args
+can be an array of arguments or a single argument.  If execution fails,
+raise
+.Ar eval-error
+exception, if length of
+.Ar args
+is less than required arity of
+.Ar prc ,
+raise
+.Ar bad-arity
+exception.
+.Bd -literal -offset indent -compact
+<\(aq> +  2  make-proc value plus
+plus #( 5 6 ) proc-apply \(rA 11
+.Ed
+.\"
+.\" proc-arity
+.\"
+.It Cm proc-arity No (\ prc -- arity\ )
+Return arity array #( req opt rest ) of proc object
+.Ar prc ,
+or #f if not a proc object.
+.\"
+.\" proc-create
+.\"
+.It Cm proc-create No (\ arity -- prc\ )
+Create nameless proc object with
+.Ar arity .
+Like
+.Cm create
+it goes with
+.Cm does> .
+.Bd -literal -offset indent -compact
+: input-fn ( gen -- proc; dir self -- r )
+	{ gen }
+	1 proc-create	\e return proc with one argument
+	gen ,		\e store gen for later use in DOES
+  does> { dir self -- r  } \e dir (ignored here) self (address)
+	self @		\e return our gen
+	readin		\e return readin value
+;
+instrument: src-simp <{ start dur amp sr sr-env fname -- }>
+	:file fname find-file make-readin { f }
+	:input  f INPUT-FN  :srate sr   make-src { sc }
+	:envelope sr-env  :duration dur make-env { en }
+	start dur run
+		i sc en env #f src amp f* *output* outa drop
+	loop
+	f mus-close drop
+;instrument
+0 1.5 0.5 0.2 #( 0 0 50 1 100 0 ) \(dqfyow.snd\(dq
+    <\(aq> src-simp with-sound
+.Ed
+.\"
+.\" proc-name
+.\"
+.It Cm proc-name No (\ prc -- name\ )
+Return name of proc object
+.Ar prc
+if found, otherwise an empty string.
+.\"
+.\" proc-source-ref
+.\"
+.It Cm proc-source-ref No (\ prc -- str\ )
+Return source string property of
+.Ar prc ,
+or #f if not available.
+.\"
+.\" proc-source-set!
+.\"
+.It Cm proc-source-set! No (\ prc str --\ )
+Set source string property of
+.Ar prc
+to
+.Ar str .
+.\"
+.\" proc?
+.\"
+.It Cm proc? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a proc object.
+.\"
+.\" run-proc
+.\"
+.It Cm run-proc No (\ prc args -- res\ ) alias for Sx proc-apply
+.\"
+.\" running-word
+.\"
+.It Cm running-word No (\ -- xt\ )
+Return current xt in word definition.  This word is immediate and
+compile only and can only be used in word definitions.
+.Bd -literal -offset indent -compact
+: new-word
+	running-word xt->name .$
+	space
+	10
+; new-word \(rA new-word 10
+.Ed
+.\"
+.\" see2
+.\"
+.It Cm see2 No (\ \(dqname\(dq --\ )
+Show word definition of
+.Ar name .
+.\"
+.\" set!
+.\"
+.It Cm set! No (\ \(dqname\(dq --\ )
+Parse
+.Ar name
+and execute word
+.Ar set-name
+if found, otherwise raise
+.Ar undefined-word
+exception.  The following two lines do the same:
+.Bd -literal -offset indent -compact
+128 set! object-print-length
+128 set-object-print-length
+.Ed
+.\"
+.\" set-execute
+.\"
+.It Cm set-execute No (\ xt -- ??\ )
+Execute
+.Ar set-xt
+if found, otherwise raise
+.Ar undefined-word
+exception.  The following two lines do the same:
+.Bd -literal -offset indent -compact
+128 <\(aq> object-print-length set-execute
+128 set-object-print-length
+.Ed
+.\"
+.\" set-xt
+.\"
+.It Cm set-xt No (\ xt1 -- xt2\ )
+Return
+.Ar set-xt
+if found, otherwise #f.
+.Bd -literal -offset indent -compact
+<\(aq> object-print-length set-xt \(rA set-object-print-length
+.Ed
+.\"
+.\" source-file
+.\"
+.It Cm source-file No (\ xt -- file\ )
+Return source file where
+.Ar xt
+was created or #f if
+.Ar xt
+is a primitive or not defined.
+.\"
+.\" source-line
+.\"
+.It Cm source-line No (\ xt -- line\ )
+Return source line number where
+.Ar xt
+was created or #f if
+.Ar xt
+is a primitive or not defined.
+.\"
+.\" source-ref
+.\"
+.It Cm source-ref No (\ obj -- str\ )
+Return source string of
+.Ar obj ,
+a proc or xt, or #f if not found.
+.\"
+.\" source-set!
+.\"
+.It Cm source-set! No (\ obj str --\ )
+Set source string of
+.Ar obj ,
+a proc or xt, to
+.Ar str .
+.\"
+.\" thunk?
+.\"
+.It Cm thunk? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a proc object with no required, optional and rest arguments.  If its
+arity is not #(\ 0 0 #f\ ), return #f.
+.\"
+.\" trace-var
+.\"
+.It Cm trace-var No (\ var proc-or-xt --\ )
+Add
+.Ar proc-or-xt
+to global
+.Ar var
+hook which is utilized on every call of
+.Cm to .
+The stack effect of
+.Ar proc-or-xt
+must be ( val -- res ).
+.Bd -literal -offset indent -compact
+clm-default-frequency \(rA 0.0
+0.0 value *clm-default-frequency*
+<\(aq> *clm-default-frequency* lambda: <{ val -- res }>
+	val set-clm-default-frequency
+; trace-var
+440.0 to *clm-default-frequency*
+*clm-default-frequency* \(rA 440.0
+clm-default-frequency   \(rA 440.0
+<\(aq> *clm-default-frequency* untrace-var
+.Ed
+.\"
+.\" untrace-var
+.\"
+.It Cm untrace-var No (\ var --\ )
+Remove previously installed hook from
+.Ar var .
+.\"
+.\" word?
+.\"
+.It Cm word? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a proc object or an xt (execution token, address of a Ficl word),
+otherwise #f.
+.\"
+.\" word-create
+.\"
+.It Cm word-create No (\ name --\ ) 
+Create word
+.Ar name
+in dictionary with does>-part as body.
+.Bd -literal -offset indent -compact
+: make-setter ( name -- ; hs val self -- )
+	{ name }
+	name \(dq!\(dq $+ word-create
+	name ,
+  does> { hs val self -- }
+	hs self @ ( slot ) val hash-set!
+;
+\(dquser-time\(dq make-setter \(aq creates setter word user-time!
+#{} value hs
+hs 3.2 user-time!
+hs \(aq #{ "user-time" => 3.2 }
+.Ed
+.\"
+.\" xt->name
+.\"
+.It Cm xt->name No (\ xt -- str\ )
+Return name of
+.Ar xt
+if found, otherwise an empty string.
+.\"
+.\" xt->origin
+.\"
+.It Cm xt->origin No (\ xt -- str\ )
+Return name, source file and source line number where
+.Ar xt
+was defined (name:file:line).  If
+.Ar xt
+is a C-primitive, return (name:primitive), if not defined, return an
+empty string.
+.\"
+.\" xt?
+.\"
+.It Cm xt? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is an xt (execution token, address of a Ficl word), otherwise #f.
+.El
+.\"
+.\" Regexp object type (regexp.c)
+.\"
+.Ss Regexp object type
+.Bl -tag -width MMM -compact
+.\"
+.\" *re-syntax-options*
+.\"
+.It Dv *re-syntax-options*
+This regexp variable can be set with the following constants.  If more
+than one constant is used, combine them with
+.Cm or ,
+see
+.Xr regex 3 .
+.Bl -tag -offset MMMMM -width MMMMMMMMMMMM -compact
+.It Dv REG_EXTENDED
+Compile modern regex, default.
+.It Dv REG_ICASE
+Compile for matching ignore case.
+.It Dv REG_NEWLINE
+Compile for newline-sensitive matching.
+.It Dv REG_NOSUB
+Compile without creating subexpression.
+.El
+For example, set matching to ignore case before creating a new regexp
+.Bd -literal -offset indent -compact
+REG_EXTENDED REG_ICASE or \ to *re-syntax-options*
+.Ed
+.\"
+.\" /
+.\"
+.It Cm / No (\ <ccc>/ -- reg\ )
+Prefix character \(oq/\(cq start a regular expression object delimited
+by a second \(oq/\(cq.
+.Bd -literal -offset indent -compact
+/(B\(bab)+/ \(rA /(B\(bab)+/
+.Ed
+.\"
+.\" make-regexp
+.\"
+.It Cm make-regexp No (\ str -- reg\ )
+Return new regexp object from
+.Ar str
+which may contain regular expression.
+.Bd -literal -offset indent -compact
+\(dq(B\(bab)+\(dq make-regexp value reg
+.Ed
+.\"
+.\" re-match
+.\"
+.It Cm re-match No (\ reg str start -- n\ )
+Return count of matched characters or -1 for no match.
+.Bd -literal -offset indent -compact
+/a*/ \(dqaaaaab\(dq 2 re-match \(rA 3
+.Ed
+.\"
+.\" re-search
+.\"
+.It Cm re-search No (\ reg str start range -- n\ )
+Return index of match or -1 for no match.
+.Bd -literal -offset indent -compact
+/a*/ \(dqaaaaab\(dq 2 4 re-search \(rA 2
+.Ed
+.\"
+.\" re/
+.\"
+.It Cm re/ No (\ space<ccc>/ -- reg\ )
+Parse regexp
+.Ar ccc
+delimited by \(oq/\(cq at compile time and at interpret time return
+parsed regexp.  Note the space after the initial
+.Cm re/ .
+It exist to satisfy fontifying in Emacs forth-mode.  See
+.Sx /
+for an alternative.
+.Bd -literal -offset indent -compact
+re/ (B\(bab)+/ \(rA /(B\(bab)+/
+.Ed
+.\"
+.\" regexp-match
+.\"
+.It Cm re= No (\ reg str -- len\(ba#f\ ) alias for Sx regexp-match
+.It Cm regexp-match No (\ reg str -- len\(ba#f\ )
+Return count of matched characters or #f.  Possible matched group
+results or #f can be found in regexp object
+.Ar reg ,
+in read-only variables
+.Dv *re1*
+to
+.Dv *re9*
+and in read-only array
+.Dv *re* .
+.Bd -literal -offset indent -compact
+/.*(bar)/ value reg
+reg \(dqfoobar\(dq regexp-match \(rA 6
+reg 0 apply \(rA foobar
+reg 1 apply \(rA bar
+reg 2 apply \(rA #f
+.Ed
+.It Cm regexp= No (\ reg str -- len\(ba#f\ ) alias for Sx regexp-match
+.\"
+.\" regexp-replace
+.\"
+.It Cm regexp-replace No (\ reg str1 replace -- str2\ )
+Replace 1st occurrence of
+.Ar reg
+in
+.Ar str1
+with
+.Ar replace
+if found.  References \e1 to \e9 in
+.Ar replace
+will be replaced by corresponding subexpressions.  If no corresponding
+subexpression exist, raise
+.Ar regexp-error
+exception.
+.Bd -literal -offset indent -compact
+/(foo)/ \(dqfoo-bar\(dq \(dq***\e\e1***\(dq regexp-replace
+  \(rA ***foo***-bar
+.Ed
+Note the double quotes on back reference characters .
+.\"
+.\" regexp-search
+.\"
+.It Cm regexp-search No (\ reg str :key start 0 range -1 -- pos\(baf\ )
+Return index of match or #f.  If index is zero, return #t to fool
+Forth\(aq
+.Cm if .
+If keyword
+.Ar range
+is -1 (default), the entire string will be searched.  Possible matched
+group results or #f can be found in regexp object
+.Ar reg ,
+in read-only variables
+.Dv *re1*
+to
+.Dv *re9*
+and in read-only array
+.Dv *re* .
+.Bd -literal -offset indent -compact
+/foo/ \(dqfoobar\(dq :start 0 :range 6 regexp-search \(rA #t (pos 0)
+/(bar)/ value reg
+reg \(dqfoobar\(dq :start 0 :range 2 regexp-search \(rA #f
+reg \(dqfoobar\(dq :start 3 :range 2 regexp-search \(rA 3
+reg 0 apply \(rA bar
+reg 1 apply \(rA bar
+reg 2 apply \(rA #f
+.Ed
+.\"
+.\" regexp?
+.\"
+.It Cm regexp? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a regexp object, otherwise #f.
+.Bd -literal -offset indent -compact
+/^s/ regexp? \(rA #t
+.Ed
+.El
+.\"
+.\" String object type (string.c)
+.\"
+.Ss String object type
+.Bl -tag -width MMM -compact
+.\"
+.\" "
+.\"
+.It Cm \(dq No (\ <ccc>\(dq -- str\ )
+Prefix character \(oq\(dq\(cq start a string object delimited by a
+second \(oq\(dq\(cq.
+.Bd -literal -offset indent -compact
+\(dqpumpkin\(dq \(rA \(dqpumpkin\(dq
+.Ed
+.\"
+.\" ""
+.\"
+.It Cm \(dq\(dq No (\ -- str\ )
+Return empty string object (\(dq\(dq).
+.\"
+.\" $"
+.\"
+.It Cm $\(dq No (\ space<ccc>\(dq -- str\ )
+Parse string
+.Ar ccc
+delimited by \(oq\(dq\(cq at compile time and at interpret time return
+parsed string.  Note the space after the initial
+.Cm $\(dq .
+It exist to satisfy fontifying in Emacs forth-mode.  See
+.Sx \(dq
+for an alternative.
+.Bd -literal -offset indent -compact
+$\(dq pumpkin\(dq \(rA \(dqpumpkin\(dq
+.Ed
+.\"
+.\" $+
+.\"
+.It Cm $+ No (\ str1 str2 -- str3\ ) alias for Sx string-append
+.\"
+.\" $>string
+.\"
+.It Cm $>string No (\ addr len -- str\ )
+Return Forth string
+.Ar addr len
+as string object.  Standard words like
+.Cm type
+and
+.Cm evaluate
+require this kind of string.
+.\"
+.\" $cr
+.\"
+.It Cm $cr No (\ -- str\ )
+Return carriage return string object (\(dq\en\(dq).
+.\"
+.\" $space
+.\"
+.It Cm $space No (\ -- str\ )
+Return string of one space (\(dq\ \(dq).
+.\"
+.\" $spaces
+.\"
+.It Cm $spaces No (\ len -- str\ )
+Return string of
+.Ar len
+spaces.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.\"
+.\" .$
+.\"
+.It Cm .$ No (\ obj --\ ) alias for Sx .string
+.\"
+.\" .debug
+.\"
+.It Cm .debug No (\ obj --\ )
+Print string representation of
+.Ar obj
+to stderr wrapped in
+.Ic #<DEBUG(F): ...> .
+.\"
+.\" .error
+.\"
+.It Cm .error No (\ obj --\ )
+Print string representation of
+.Ar obj
+to current error output.
+.\"
+.\" .g
+.\"
+.It Cm .g No (\ obj --\ ) alias for Sx .string
+.\"
+.\" .stderr
+.\"
+.It Cm .stderr No (\ obj --\ )
+Print string representation of
+.Ar obj
+to stderr.
+.\"
+.\" .stdout
+.\"
+.It Cm .stdout No (\ obj --\ )
+Print string representation of
+.Ar obj
+to stdout.
+.\"
+.\" .string
+.\"
+.It Cm .string No (\ obj --\ )
+Print string representation of
+.Ar obj
+to current output.
+.\"
+.\" <<
+.\"
+.It Cm << No (\ str val -- str\(aq \ ) alias for Sx string-push
+.\"
+.\" >string
+.\"
+.It Cm >string No (\ chars len -- str\ ) alias for Sx string-concat
+.\"
+.\" char?
+.\"
+.It Cm char? No (\ obj --\ )
+Return #t if
+.Ar obj
+is a character, otherwise #f.
+.\"
+.\" die
+.\"
+.It Cm die No (\ str --\ )
+Print
+.Ar str
+wrappen in
+.Ic #<die: ...>
+to current stderr and exit interpreter with return code 1.
+.\"
+.\" error
+.\"
+.It Cm error No (\ str --\ )
+Print
+.Ar str
+wrappen in
+.Ic #<error: ...>
+to current stderr and throw exception.
+.\"
+.\" format
+.\"
+.It Cm format No (\ fmt args --\ ) alias for Sx string-format
+.\"
+.\" fth-die
+.\"
+.It Cm fth-die No (\ fmt :optional args --\ )
+Print
+.Ar fmt
+string with corresponding
+.Ar args
+array wrapped in
+.Ic #<die: ...>
+to current stderr and exit interpreter with return code 1;
+.Ar args
+is optional.   See
+.Sx string-format
+for
+.Ar fmt
+description.
+.\"
+.\" fth-error
+.\"
+.It Cm fth-error No (\ fmt :optional args --\ )
+Print
+.Ar fmt
+string with corresponding
+.Ar args
+array wrapped in
+.Ic #<error: ...>
+to current stderr and throw exception;
+.Ar args
+is optional.   See
+.Sx string-format
+for
+.Ar fmt
+description.
+.\"
+.\" fth-format
+.\"
+.It Cm fth-format No (\ fmt :optional args -- str \ )
+Return string object from
+.Xr sprintf 3
+.Ar fmt
+string and
+.Ar args
+array containing corresponding arguments;
+.Ar args
+is optional.  See
+.Sx string-format
+for
+.Ar fmt
+description.
+.\"
+.\" fth-print
+.\"
+.It Cm fth-print No (\ fmt :optional args --\ )
+Print
+.Ar fmt
+string with corresponding
+.Ar args
+array to current stdout;
+.Ar args
+is optional.   See
+.Sx string-format
+for
+.Ar fmt
+description.
+.\"
+.\" fth-warning
+.\"
+.It Cm fth-warning No (\ fmt :optional args --\ )
+Print
+.Ar fmt
+string with corresponding
+.Ar args
+array wrapped in
+.Ic #<warning: ...>
+to current stderr;
+.Ar args
+is optional.   See
+.Sx string-format
+for
+.Ar fmt
+description.
+.\"
+.\" make-string
+.\"
+.It Cm make-string No (\ len :key initial-element \(aq \(aq -- str\ )
+Return a new string of length
+.Ar len
+filled with
+.Ar initial-element
+characters, default space.  Raise
+.Ar out-of-range
+exception if
+.Ar len
+< 0.
+.Bd -literal -offset indent -compact
+3 :initial-element <char> x make-string \(rA \(dqxxx\(dq
+.Ed
+.\"
+.\" string->array
+.\"
+.It Cm string->array No (\ str -- ary\ )
+Convert
+.Ar str
+to an array of characters.
+.Bd -literal -offset indent -compact
+\(dqfoo\(dq string->array \(rA #( 102 111 111 )
+.Ed
+.\"
+.\" string-append
+.\"
+.It Cm string-append No (\ str1 str2 -- str3\ )
+Return new string
+.Ar str1
++
+.Ar str2 .
+.\"
+.\" string-capitalize
+.\" string-capitalize!
+.\"
+.It Cm string-capitalize No (\ str1 -- str2\ )
+Return new string with first character capitalized and remaining
+characters lowercase.
+.It Cm string-capitalize! No (\ str -- str\(aq\ )
+Return
+.Ar str
+changed to first character capitalized and remaining characters
+lowercase.
+.\"
+.\" string-chomp
+.\" string-chomp!
+.\"
+.It Cm string-chomp No (\ str1 -- str2\ )
+Return new string object with possible trailing \en removed.
+.It Cm string-chomp! No (\ str -- str\(aq\ )
+Return changed
+.Ar str
+with possible trailing \en removed.
+.\"
+.\" string-concat
+.\"
+.It Cm string-concat No (\ objs len -- str\ )
+Return new string with
+.Ar len
+objects from stack converted to their string representation.
+.Bd -literal -offset indent -compact
+0 1 2 \(dq foo \(dq \(dqb\(dq \(dqa\(dq \(dqr\(dq  7 >string
+  \(rA \(dq012 foo bar\(dq
+.Ed
+.\"
+.\" string-copy
+.\"
+.It Cm string-copy No (\ str1 -- str2\ )
+Return copy of
+.Ar str1 .
+.\"
+.\" string-delete!
+.\"
+.It Cm string-delete! No (\ str idx -- val\ )
+Delete and return character at position
+.Ar idx
+from
+.Ar str ;
+negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in range of string.
+.\"
+.\" string-downcase
+.\" string-downcase!
+.\"
+.It Cm string-downcase No (\ str1 -- str2\ )
+Return new string with all characters lowercase.
+.It Cm string-downcase! No (\ str -- str\(aq\ )
+Return
+.Ar str
+changed to all characters lowercase.
+.\"
+.\" string-eval
+.\"
+.It Cm string-eval No (\ str -- ??\ )
+Evaluate
+.Ar str ;
+values already on stack can be accessed, resulting values remain on
+stack.
+.Bd -literal -offset indent -compact
+7 \(dq3 4 + +\(dq string-eval \(rA 14
+.Ed
+.\"
+.\" string-eval-with-status
+.\"
+.It Cm string-eval-with-status No (\ str -- ?? status\ )
+Evaluate
+.Ar str
+and return eval-status on top of stack; values already on stack can be
+accessed, resulting values remain on stack.  Eval-status can be one of
+the following constants:
+.Bl -tag -offset MMMMM -width MMMMMMMMMMMM -compact
+.It Er BREAK
+Ficl Break.
+.It Er ERROR_EXIT
+Ficl Error Exit.
+.It Er INNER_EXIT
+Ficl Inner Exit.
+.It Er OUT_OF_TEXT
+Ficl Out of Text.
+.It Er RESTART
+Ficl Restart.
+.It Er USER_EXIT
+Ficl User Exit.
+.El
+.\"
+.\" string-fill
+.\"
+.It Cm string-fill No (\ str char -- str\(aq\ )
+Fill
+.Ar str
+with
+.Ar char
+and return changed string object.
+.\"
+.\" string-find
+.\"
+.It Cm string-find No (\ str1 key -- str2\(ba#f\ )
+Return match if string or regexp
+.Ar key
+exist in
+.Ar str ,
+otherwise #f.
+.Bd -literal -offset indent -compact
+\(dqhello world\(dq \(dql\(dq string-find \(rA \(dqllo world\(dq
+\(dqhello world\(dq /ell/ string-find \(rA \(dqlo world\(dq
+.Ed
+.\"
+.\" string-format
+.\"
+.It Cm string-format No (\ fmt args --\ )
+.Ar fmt
+is a
+.Xr sprintf 3
+format string and
+.Ar args
+the needed arguments which may be an array, a single argument or #f.
+.Bd -literal -offset indent -compact
+\(dq%04d %8.2f %b %X %o\(dq  #( 128 pi 255 255 255 ) string-format
+  \(rA \(dq0128     3.14 11111111 FF 377\(dq
+.Ed
+.\" %[+-][0*[[:digits:]]][.][*[[:digits:]]][#l[l]z][dbBoOxXuUcfFeEgGaApsS]
+The format string can have zero or more of the following flags:
+.Bl -tag -offset indent -width MMMMMMMM -compact
+.It Sq Cm #
+The value will be converted to an alternate form.  For
+.Cm b ,
+.Cm B ,
+.Cm o
+and
+.Cm O
+conversions prepend a zero before output, for
+.Cm x
+and
+.Cm X
+conversions prepend a
+.Sq 0x
+respective
+.Sq 0X
+before output.  For
+.Cm a ,
+.Cm A ,
+.Cm e ,
+.Cm E ,
+.Cm f ,
+.Cm F ,
+.Cm g
+and
+.Cm G
+conversions the result will always have a decimal point.
+.It Sq Cm -
+Flush output left.
+.It So Cm 0 Sc No (zero)
+Padding with
+.Sq 0
+(zero) rather than blank.
+.El
+The following conversion specifiers are known:
+.Bl -tag -offset indent -width MMMMMMMM -compact
+.It Cm %
+A
+.Sq %
+is written.
+.It Cm aAeEfFgG
+Floating point output like
+.Sx sprintf 3 .
+.It Cm c
+Single character output.
+.It Cm bdouxX
+Integer output in binary, decimal, octal, unsigned and hexadecimal form.
+.It Cm p
+Inspect string output of any Forth object with
+.Cm object-inspect .
+.It Cm s
+String representation of any Forth object with
+.Cm object->string .
+.It Cm S
+Dump string output of any Forth object with
+.Cm object-dump .
+.El
+.\"
+.\" string-index
+.\"
+.It Cm string-index No (\ str key -- idx\ )
+Return index of string
+.Ar key
+in
+.Ar str
+or -1 if not found.
+.Bd -literal -offset indent -compact
+\(dqhello world\(dq \(dqorl\(dq string-index \(rA 7
+.Ed
+.\"
+.\" string-insert!
+.\"
+.It Cm string-insert! No (\ str idx val -- str\(aq\ )
+Insert string representation of
+.Ar val
+to
+.Ar str
+at position
+.Ar idx ;
+negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in range of string.
+.\"
+.\" string-length
+.\"
+.It Cm string-length No (\ str -- len\ )
+If
+.Ar str
+is a string object, return its length, otherwise -1.
+.\"
+.\" string-member?
+.\"
+.It Cm string-member? No (\ str key -- f\ )
+Return #t if string
+.Ar key
+exist in
+.Ar str ,
+otherwise #f.
+.Bd -literal -offset indent -compact
+\(dqhello world\(dq \(dqell\(dq string-member? \(rA #t
+.Ed
+.\"
+.\" string-pop
+.\"
+.It Cm string-pop No (\ str -- char\ )
+Remove and return last character.  If
+.Ar str
+is empty, return #f.
+.\"
+.\" string-push
+.\"
+.It Cm string-push No (\ str val -- str\(aq\ )
+Append string representation of
+.Ar val
+to
+.Ar str
+and return changed string object.
+.\"
+.\" string-ref
+.\"
+.It Cm string-ref No (\ str idx -- val\ )
+Return character at position
+.Ar idx ;
+negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in range of string.
+.\"
+.\" string-replace
+.\" string-replace!
+.\"
+.It Cm string-replace No (\ str1 from to -- str2\ )
+Return new string object with string
+.Ar from
+replaced by string
+.Ar to .
+.It Cm string-replace! No (\ str from to -- str\(aq\ )
+Return changed
+.Ar str
+with string
+.Ar from
+replaced by string
+.Ar to .
+.\"
+.\" string-reverse
+.\" string-reverse!
+.\"
+.It Cm string-reverse No (\ str1-- str2\ )
+Return
+.Ar str1
+reversed as new string object.
+.It Cm string-reverse! No (\ str -- str\(aq\ )
+Return
+.Ar str
+reversed.
+.\"
+.\" string-set!
+.\"
+.It Cm string-set! No (\ str idx val --\ )
+Store character
+.Ar char
+at index
+.Ar idx ;
+negative index counts from backward.  Raise
+.Ar out-of-range
+exception if index is not in range of string.
+.\"
+.\" string-shift
+.\"
+.It Cm string-shift No (\ str -- char\ )
+Remove and return first character.  If
+.Ar str
+is empty, return #f.
+.\"
+.\" string-split
+.\"
+.It Cm string-split No (\ str sep -- ary\ )
+Split
+.Ar str
+using
+.Ar sep
+as delimiter and return result as array of strings.  If
+.Ar sep
+is not a string or regexp, delimiter is space.
+.Bd -literal -offset indent -compact
+\(dqfoo:bar:baz\(dq \(eq:\(dq string-split
+  \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq )
+.Ed
+.\"
+.\" string-substring
+.\"
+.It Cm string-substring No (\ str1 start end -- str2\ )
+Return new string from
+.Ar str1
+index
+.Ar start
+to but excluding index
+.Ar end .
+If index
+.Ar end
+is not an integer,
+.Ar end
+will be set to length of
+.Ar str1 ;
+negative index counts from backward.  Raise
+.Ar out-of-range
+exception if
+.Ar start
+is not in range of string.
+.Bd -literal -offset indent -compact
+\(dqhello world\(dq 2 4 string-substring \(rA \(dqll\(dq
+\(dqhello world\(dq -4 -2 string-substring \(rA \(dqor\(dq
+\(dqhello world\(dq -4 nil string-substring \(rA \(dqorld\(dq
+.Ed
+.\"
+.\" string-unshift
+.\"
+.It Cm string-unshift No (\ str val -- str\(aq\ )
+Prepend string representation of
+.Ar val
+to
+.Ar str
+and return changed string object.
+.\"
+.\" string-upcase
+.\" string-upcase!
+.\"
+.It Cm string-upcase No (\ str1 -- str2\ )
+Return new string with all characters uppercase.
+.It Cm string-upcase! No (\ str -- str\(aq\ )
+Return
+.Ar str
+changed to all characters uppercase.
+.\"
+.\" string<
+.\"
+.It Cm string< No (\ str1 str2 -- f\ )
+Return #t if
+.Ar str1
+is lexicographically lesser than
+.Ar str2 ,
+otherwise #f.
+.\"
+.\" string<>
+.\"
+.It Cm string<> No (\ str1 str2 -- f\ )
+Return #t if strings are not equal, otherwise #f.
+.\"
+.\" string=
+.\"
+.It Cm string= No (\ str1 str2 -- f\ )
+Return #t if strings are equal, otherwise #f.
+.\"
+.\" string>
+.\"
+.It Cm string> No (\ str1 str2 -- f\ )
+Return #t if
+.Ar str1
+is lexicographically greater than
+.Ar str2 ,
+otherwise #f.
+.\"
+.\" string>$
+.\"
+.It Cm string>$ No (\ str -- addr len\ )
+Return string object
+.Ar str
+converted to a Forth string with
+.Ar addr len .
+Standard words like
+.Cm type
+and
+.Cm evaluate
+require this kind of string.
+.\"
+.\" string?
+.\"
+.It Cm string? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a string object, otherwise #f.
+.\"
+.\" warn
+.\"
+.It Cm warn No (\ str --\ ) alias for Sx warning
+.\"
+.\" warning
+.\"
+.It Cm warning No (\ str --\ )
+Print
+.Ar str
+wrappen in
+.Ic #<warning: ...>
+to current stderr.
+.El
+.\"
+.\" Symbols (symbol.c)
+.\"
+.Ss Symbols
+.Bl -tag -width MMM -compact
+.\"
+.\" .symbol
+.\"
+.It Cm .symbol No (\ sym --\ )
+Print symbol
+.Ar sym
+to current output.
+.\"
+.\" create-symbol
+.\"
+.It Cm create-symbol No (\ \(dqname\(dq --\ )
+Create symbol
+.Ar name
+prepended by \(oq\(aq\(cq.  Symbols are actually values (variables)
+named
+.Ar \(aqname .
+.Bd -literal -offset indent -compact
+create-symbol new-symbol \(rA create symbol \(aqnew-symbol
+.Ed
+.\"
+.\" make-symbol
+.\"
+.It Cm make-symbol No (\ name -- sym\ )
+Return symbol
+.Ar name
+prepended by \(oq\(aq\(cq.  Symbols are actually values (variables)
+named
+.Ar \(aqname .
+.Bd -literal -offset indent -compact
+\(dqnew-symbol\(dq make-symbol \(rA \(aqnew-symbol
+.Ed
+.\"
+.\" symbol-name
+.\"
+.It Cm symbol-name No (\ sym -- str\ )
+Return name of symbol
+.Ar sym .
+.Bd -literal -offset indent -compact
+\(aqnew-symbol symbol-name \(rA \(dqnew-symbol\(dq
+.Ed
+.\"
+.\" symbol=
+.\"
+.It Cm symbol= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are symbols with identical name, otherwise #f.
+.\"
+.\" symbol?
+.\"
+.It Cm symbol? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a symbol, otherwise #f.
+.El
+.\"
+.\" Keywords (symbol.c)
+.\"
+.Ss Keywords
+.Bl -tag -width MMM -compact
+.\"
+.\" .keyword
+.\"
+.It Cm .keyword No (\ kw --\ )
+Print keyword
+.Ar kw
+to current output.
+.\"
+.\" create-keyword
+.\"
+.It Cm create-keyword No (\ \(dqname\(dq --\ )
+Create keyword
+.Ar name
+prepended by \(oq:\(cq.  Keywords are actually values (variables) named
+.Ar :name .
+.Bd -literal -offset indent -compact
+create-keyword new-keyword \(rA create keyword :new-keyword
+.Ed
+.\"
+.\" keyword-name
+.\"
+.It Cm keyword-name No (\ kw -- name\ )
+Return name of keyword
+.Ar kw .
+.Bd -literal -offset indent -compact
+:new-keyword keyword-name \(rA \(dqnew-keyword\(dq
+.Ed
+.\"
+.\" keyword=
+.\"
+.It Cm keyword= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are keywords with identical name, otherwise #f.
+.\"
+.\" keyword?
+.\"
+.It Cm keyword? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a keyword, otherwise #f.
+.\"
+.\" make-keyword
+.\"
+.It Cm make-keyword No (\ name -- kw\ )
+Return keyword
+.Ar name
+prepended by \(oq:\(cq.  Keywords are actually values (variables) named
+.Ar :name .
+.Bd -literal -offset indent -compact
+\(dqnew-keyword\(dq make-keyword \(rA :new-keyword
+.Ed
+.El
+.\"
+.\" Exceptions (symbol.c)
+.\"
+.Ss Exceptions
+.Bl -tag -width MMM -compact
+.\"
+.\" *last-exception*
+.\"
+.It Dv *last-exception*
+Hold last raised exception.
+.\"
+.\" .exception
+.\"
+.It Cm .exception No (\ ex --\ )
+Print exception
+.Ar ex
+to current output.
+.\"
+.\" create-exception
+.\"
+.It Cm create-exception No (\ msg \(dqname\(dq --\ )
+Create exception named
+.Ar name
+with message
+.Ar msg ,
+.Ar msg
+can be #f.  The exception has a symbol name, that means it has prefix
+\(oq\(aq\(cq before
+.Ar name .
+.Bd -literal -offset indent -compact
+\(dqNew test exception\(dq create-exception new-exception
+  \(rA create \(aqnew-exception
+.Ed
+.\"
+.\" exception-last-message-ref
+.\"
+.It Cm exception-last-message-ref No (\ ex -- msg\ )
+Return last message of exception
+.Ar ex .
+Last message was set after an exception was thrown with e.g.
+.Cm fth-throw
+or
+.Cm fth-raise .
+.\"
+.\" exception-last-message-set!
+.\"
+.It Cm exception-last-message-set! No (\ ex msg --\ )
+Set
+.Ar msg ,
+a string or #f, as last message of exception
+.Ar ex .
+This will be set automatically after an exception was thrown with e.g.
+.Cm fth-throw
+or
+.Cm fth-raise .
+.\"
+.\" exception-message-ref
+.\"
+.It Cm exception-message-ref No (\ ex -- msg\ )
+Return message of exception
+.Ar ex .
+.\"
+.\" exception-message-set!
+.\"
+.It Cm exception-message-set! No (\ ex msg --\ )
+Set
+.Ar msg ,
+a string or #f to exception
+.Ar ex .
+.\"
+.\" exception-name
+.\"
+.It Cm exception-name No (\ ex -- name\ )
+Return name of exception
+.Ar ex .
+.Bd -literal -offset indent -compact
+\(aqnew-exception exception-name \(rA \(dqnew-exception\(dq
+.Ed
+.\"
+.\" exception=
+.\"
+.It Cm exception= No (\ obj1 obj2 -- f\ )
+Return #t if
+.Ar obj1
+and
+.Ar obj2
+are exeptions with identical name, otherwise #f.
+.\"
+.\" exception?
+.\"
+.It Cm exception? No (\ obj -- f\ )
+Return #t if
+.Ar obj
+is a exception, otherwise #f.
+.\"
+.\" make-exception
+.\"
+.It Cm make-exception No (\ name msg -- ex\ )
+Return exception named
+.Ar name
+with message
+.Ar msg ,
+.Ar msg
+can be #f.  The exception has a symbol name, that means it has prefix
+\(oq\(aq\(cq before
+.Ar name .
+.Bd -literal -offset indent -compact
+\(dqNew test exception\(dq create-exception new-exception
+  \(rA create \(aqnew-exception
+.Ed
+.\"
+.\" symbol->exception
+.\"
+.It Cm symbol->exception No (\ sym -- ex\ )
+Return symbol
+.Ar sym
+as exception.
+.El
+.\"
+.\" ENVIRONMENT
+.\"
+.Sh ENVIRONMENT
+.Bl -tag -width MMM -compact
+.It Ev FTH_DICTIONARY_SIZE
+Overwrite default dictionary size (1024 * 1024).
+.It Ev FTH_LOCALS_SIZE
+Overwrite default number of locals (2048).
+.It Ev FTH_RETURN_SIZE
+Overwrite default size of return stack (1024).
+.It Ev FTH_STACK_SIZE
+Overwrite default size of parameter stack (8192).
+.It Ev FTH_FTHPATH
+A colon separated list of paths pointing to Forth script files.  These
+paths will be prepended to
+.Dv *load-path* .
+.It Ev FTH_HISTORY
+Overwrite default history file name
+.Pa ~/.fth-history .
+.It Ev FTH_HISTORY_LENGTH
+Overwrite default history file length (20).
+.It Ev FTH_INIT_FILE
+Overwrite default initialization file name
+.Pa ~/.fthrc .
+.It Ev FTH_LIBPATH
+A colon separated list of paths pointing to C extension libraries.
+These paths will be prepended to
+.Dv *load-lib-path* .
+.El
+.\"
+.\" FILES
+.\"
+.Sh FILES
+.Bl -tag -width MMM -compact
+.It Pa /usr/local/etc/fthrc
+Global initialization file for system wide configuration.
+.It Pa ~/.fthrc
+Local initialization file for user configuration.  The name can be
+changed with
+.Ev FTH_INIT_FILE .
+.It Pa ~/.fth-history
+Local history file.  The name can be changed with
+.Ev FTH_HISTORY .
+.El
+.\"
+.\" EXIT STATUS
+.\"
+.Sh EXIT STATUS
+.Ex -std
+.\"
+.\" EXAMPLES
+.\"
+.Sh EXAMPLES
+The following are examples of typical usage of the
+.Nm
+command:
+.Pp
+Print 32 Fahrenheit as Celsius (0.0)
+.Pp
+.Dl % fth -e Qq 32 f2c\ . cr
+.Pp
+Load C extension library
+.Ar libxm
+with initialization function
+.Fn Init_libxm
+and Forth source file
+.Ar motif-script.fs
+with at least one word
+.Cm main
+defined in it, execute word
+.Cm main
+and exit if finished
+.Pp
+.Dl % fth -S Qo libxm Init_libxm Qc -e Qo main Qc motif-script.fs
+.Pp
+Prepend path
+.Ar ~/share/forth
+to
+.Dv *load-path* ,
+load Forth source file
+.Ar sound-script.fs
+and start the repl showing a prompt.  Initialization files
+.Pa /usr/local/etc/fthrc
+and
+.Pa ~/.fthrc
+are loaded if they exist
+.Pp
+.Dl % fth -I ~/share/forth sound-script.fs
+.Pp
+Run Forth script
+.Ar check.fth
+and provide options
+.Fl ab Ar 10
+to the script which should handle at least these two; exit if finished
+.Pp
+.Dl % fth -s check.fth -ab 10
+.Pp
+Rename
+.Pa config.h
+to
+.Pa config.h.orig
+and read it line by line.  If a line with
+.Dl #define HAVE_COMPLEX_DOUBLE
+occures, replace it with
+.Dl /* #undef HAVE_COMPLEX_DOUBLE */
+otherwise write original to
+.Pa config.h .
+The first
+.Fl e
+set the global Forth variable
+.Dv reg
+to a regexp object, the second
+.Fl e
+uses this variable for testing.  The
+.Ar pattern
+of the first
+.Fl e
+is evaluated in interpret state before reading file while the
+.Ar pattern
+of the second
+.Fl e
+is evaluated in compile state in a nameless
+.Ic lambda: <{}> pattern\ ;
+word during reading file line by line.
+.Bd -literal
+% fth -ni.orig -e \(aq/#define HAVE_COMPLEX_DOUBLE/ value reg\(aq \e
+	       -e \(aqreg *line* re= if \e
+		     \(dq/* #undef HAVE_COMPLEX_DOUBLE */\en\(dq \e
+		   else \e
+		     *line* \e
+		   then\(aq config.h
+.Ed
+.Pp
+Stand-alone executable Forth scripts have a first line of at least
+.Dl #! /usr/local/bin/fth -s
+but may have more options; adjust the path to the interpreter.  Note the
+space after
+.Cm #! .
+It's a Forth word starting a comment and must be separated by at least
+one space.
+.Bd -literal
+% cat hello-world.fth
+#! /usr/local/bin/fth -s
+\(pc\(dq Hello, World!\(dq cr
+.Ed
+.Pp
+Add option
+.Fl v
+to turn on verbose mode.
+.Em Note:
+Option
+.Fl s
+must be the last;
+.Nm
+doesn't process options after
+.Fl s ,
+they are transfered to the script and can be processed there with Forth
+word
+.Cm getopt ,
+see below.
+.Bd -literal
+% cat hello-world.fth
+#! /usr/local/bin/fth -Ds
+\(pc\(dq Hello, World!\(dq cr
+.Ed
+.Pp
+The
+.Xr getopt 3
+example in Forth:
+.Bd -literal
+% cat getopt-test.fth
+#! /usr/local/bin/fth -Ds
+: main ( -- )
+	#f #f { bflag ffile }
+	#t to opterr	\e getopt prints error messages
+	begin
+		*argv* \(dqbf:\(dq getopt ( ch ) dup
+	while ( ch )
+		case
+			<char> b of #t     to bflag endof
+			<char> f of optarg to ffile endof
+			<char> ? of
+				\(dqusage: [-b] [-f file]\en\(dq #()
+				    fth-print
+				1 (bye) \e exit with return code 1
+			endof
+		endcase
+	repeat ( ch ) drop
+	optind 0 ?do *argv* array-shift drop loop
+	*argv* array-length to *argc*
+	\(dq-b: %s, -f: %s\en\(dq #( bflag ffile ) fth-print
+;
+main
+0 (bye)			\e exit with return code 0
+% ./getopt-test.fth
+-b: #f, -f: #f
+% ./getopt-test.fth -b
+-b: #t, -f: #f
+% ./getopt-test.fth -bf outfile
+-b: #t, -f: outfile
+% ./getopt-test.fth -f
+fth: option requires an argument -- f
+usage: [-b] [-f file]
+% ./getopt-test.fth -h
+fth: illegal option -- h
+usage: [-b] [-f file]
+.Ed
+.\"
+.\" DIAGNOSTICS
+.\"
+.Sh DIAGNOSTICS
+The command may fail for one of the following reasons:
+.Bl -diag
+.It bad-arity
+Arity doesn't match for a given proc object.
+.It bad-syntax
+Paren mismatch for array, list or hash objects.
+.It bignum-error
+Bignum error.
+.It catch-error
+Catch-throw mismatch.
+.It eval-error
+Evaluation error.
+.It ficl-error
+Ficl evaluation error.
+.It forth-error
+Forth error.
+.It load-error
+Error while loading a Forth file.
+.It math-error
+Math error occured.
+.It null-string
+Empty string occured.
+.It no-memory-error
+Memory exhausted.
+.It optkey-error
+Error while evaluating option key functions.
+.It out-of-range
+Argument is out of range.
+.It regexp-error
+Regexp error occured.
+.It signal-caught
+Signal received.
+.It socket-error
+Error while processing sockets.
+.It so-file-error
+Dynamic library load error.
+.It system-error
+General system function error occured.
+.It wrong-number-of-args
+Wrong number of arguments provided.
+.It wrong-type-arg
+Wrong argument type provided.
+.El
+.\"
+.\" COMPATIBILITY
+.\"
+.Sh COMPATIBILITY
+.Nm
+conforms only partly to
+.Em ANS Forth .
+The double word set doesn't take two stack entries and is actually of
+type
+.Ft ficl2Integer .
+.Pp
+.Nm
+has no extra floating point stack; floats are of type
+.Ft ficlFloat .
+.\"
+.\" SEE ALSO
+.\"
+.Sh SEE ALSO
+.Xr snd 1 ,
+.Xr tcsh 1 ,
+.Xr vi 1 ,
+.Xr accept 2 ,
+.Xr bind 2 ,
+.Xr connect 2 ,
+.Xr listen 2 ,
+.Xr recv 2 ,
+.Xr recvfrom 2 ,
+.Xr send 2 ,
+.Xr sendto 2 ,
+.Xr shutdown 2 ,
+.Xr socket 2 ,
+.Xr fopen 3 ,
+.Xr getopt 3 ,
+.Xr getservbyname 3 ,
+.Xr getservbyport 3 ,
+.Xr libfth 3 ,
+.Xr realpath 3 ,
+.Xr regex 3 ,
+.Xr sethostname 3 ,
+.Xr sprintf 3 ,
+.Xr strftime 3 ,
+.Xr time 3 ,
+.Xr times 3 ,
+.Xr tecla 7
+.\"
+.\" STANDARDS
+.\"
+.Sh STANDARDS
+.Nm
+conforms only partly to
+.Em ANS Forth ;
+see
+.Sx COMPATIBILITY .
+.\"
+.\" HISTORY
+.\"
+.Sh HISTORY
+This manual page describes version 1.3.5.
+.Nm
+is based on
+.Em Ficl , Forth-inspired command language ,
+version 4.0.31 written by
+.An John Sadler .
+.\"
+.\" AUTHORS
+.\"
+.Sh AUTHORS
+.Nm
+and this manual page was written by
+.An Michael Scholz Aq mi-scholz@users.sourceforge.net .
+.\"
+.\" BUGS
+.\"
+.Sh BUGS
+Please report bugs to the author.
+.\"
+.\" fth.1 ends here
+.\"

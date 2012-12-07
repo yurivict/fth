@@ -1,0 +1,13 @@
+2009-10-25  mi-scholz  <mi-scholz@pumpkin.fth-devel.net>
+
+	* test-utils.fs: New file.
+
+2009-05-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* symbol-test.fs, string-test.fs, regexp-test.fs, proc-test.fs,	numbers-test.fs, misc-test.fs, list-test.fs, io-test.fs, hook-test.fs, hash-test.fs, file-test.fs, array-test.fs:
+	All take an new test function test-expr.
+
+2006-03-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* testsuite.at, Makefile.am, atlocal.in, ChangeLog, array-test.fs, symbol-test.fs, regexp-test.fs, string-test.fs, hook-test.fs, proc-test.fs, number-test.fs, list-test.fs, lib-test.fs, file-test.fs, io-test.fs, hash-test.fs: New file.
+

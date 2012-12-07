@@ -1,0 +1,198 @@
+# @configure_input@
+
+# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# Ident: $Id: Makefile.in,v 1.81 2012/09/28 20:52:01 mi-scholz Exp $
+
+srcdir		= @srcdir@
+VPATH		= @srcdir@
+SHELL		= @SHELL@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+libdir		= @libdir@
+top_srcdir	= @top_srcdir@
+top_builddir	= @top_builddir@
+# for ../common.mk
+ficldir		= ${top_srcdir}/ficl
+comdir		= ${top_srcdir}/lib
+fthdir		= ${srcdir}
+ficlbuilddir	= ${top_builddir}/ficl
+
+prog_name	= @prog_name@
+DEFS		= @DEFS@
+CC		= @CC@
+AR		= @AR@
+ARFLAGS		= cr
+RANLIB		= @RANLIB@
+INSTALL		= @INSTALL@
+STRIP		= @STRIP@
+SO_LD		= @SO_LD@
+CFLAGS		= @CFLAGS@
+
+FTH_PROG	= @FTH_PROG@
+FTH_LIB		= @FTH_LIB@
+FTH_A_LIB	= lib${prog_name}.a
+FTH_SO_LIB	= lib${prog_name}.so
+
+L_OBJS		= @LIBOBJS@
+LIB_OBJS	= \
+	`if test "X${L_OBJS}" = "X"; then \
+		echo ""; \
+	else \
+		echo ${top_builddir}/lib/*.o; \
+	fi`
+LDFLAGS		= @LDFLAGS@
+SO_LDFLAGS	= @SO_LDFLAGS@ ${LDFLAGS}
+LIBS		= @LIBS@
+
+MISC_EXTRA	= \
+	-DFTH_PREFIX_PATH=\"${prefix}\" \
+	-DFTH_PROG_NAME=\"${prog_name}\"
+
+FTH_OBJECTS = \
+	array.o \
+	file.o \
+	hash.o \
+	hook.o \
+	io.o \
+	misc.o \
+	numbers.o \
+	object.o \
+	printf.o \
+	port.o \
+	proc.o \
+	regexp.o \
+	string.o \
+	symbol.o \
+	utils.o
+
+FICL_OBJECTS = \
+	${ficlbuilddir}/dictionary.o \
+	${ficlbuilddir}/extras.o \
+	${ficlbuilddir}/fileaccess.o \
+	${ficlbuilddir}/hash.o \
+	${ficlbuilddir}/prefix.o \
+	${ficlbuilddir}/primitives.o \
+	${ficlbuilddir}/search.o \
+	${ficlbuilddir}/stack.o \
+	${ficlbuilddir}/system.o \
+	${ficlbuilddir}/tools.o \
+	${ficlbuilddir}/unix.o \
+	${ficlbuilddir}/utility.o \
+	${ficlbuilddir}/vm.o \
+	${ficlbuilddir}/word.o
+
+all: Makefile fth
+
+include ${top_srcdir}/common.mk
+
+fth: ${FTH_LIB}
+	${MAKE} ${FTH_PROG}
+	cp ${FTH_PROG} $@
+
+fth-shared: ${FTH_SO_LIB}
+	${CC} ${LDFLAGS} -o $@ fth.o ${FTH_SO_LIB} -lm
+
+fth-static: ${FTH_A_LIB}
+	${CC} ${LDFLAGS} -o $@ fth.o ${FTH_A_LIB} ${LIBS}
+
+${FTH_A_LIB}: fth.o ${FTH_OBJECTS} ${FICL_OBJECTS}
+	${RM} $@
+	${AR} ${ARFLAGS} $@ ${FTH_OBJECTS} ${FICL_OBJECTS} ${LIB_OBJS}
+	${RANLIB} $@
+
+${FTH_SO_LIB}: fth.o ${FTH_OBJECTS} ${FICL_OBJECTS} ${FTH_A_LIB}
+	${SO_LD} ${SO_LDFLAGS} ${FTH_OBJECTS} ${FICL_OBJECTS} \
+	    ${LIB_OBJS} -o $@ ${LIBS}
+
+${FICL_OBJECTS}:
+	(cd ${ficlbuilddir} && ${MAKE} all)
+
+misc.o: ${srcdir}/misc.c ${src_common}
+	${CC} ${DEFS} ${MISC_EXTRA} ${FTH_CFLAGS} -c $<
+
+install: all
+	${SHELL} ${top_srcdir}/mkinstalldirs ${bindir}
+	${INSTALL} ${FTH_PROG} ${bindir}/${prog_name}
+	if test -f ${FTH_A_LIB}; then \
+		${INSTALL} ${FTH_A_LIB} ${libdir}/${FTH_A_LIB}; \
+		${RANLIB} ${libdir}/${FTH_A_LIB}; \
+	fi
+	if test -f ${FTH_SO_LIB}; then \
+		${RM} ${libdir}/${FTH_SO_LIB}*; \
+		${INSTALL} ${FTH_SO_LIB} ${libdir}/${FTH_SO_LIB}; \
+	fi
+
+install-shared: all fth-shared
+	${INSTALL} fth-shared ${bindir}/${prog_name}
+	if test -f ${FTH_SO_LIB}; then \
+		${RM} ${libdir}/${FTH_SO_LIB}*; \
+		${INSTALL} ${FTH_SO_LIB} ${libdir}/${FTH_SO_LIB}; \
+	fi
+
+install-static: all fth-static
+	${INSTALL} fth-static ${bindir}/${prog_name}
+	if test -f ${FTH_A_LIB}; then \
+		${INSTALL} ${FTH_A_LIB} ${libdir}/${FTH_A_LIB}; \
+		${RANLIB} ${libdir}/${FTH_A_LIB}; \
+	fi
+
+install-strip: all
+	${STRIP} fth ${FTH_PROG}
+	if test -f ${FTH_A_LIB}; then \
+		${STRIP} ${FTH_A_LIB}; \
+	fi
+	if test -f ${FTH_SO_LIB}; then \
+		${STRIP} ${FTH_SO_LIB}; \
+	fi
+
+dist: Makefile
+
+uninstall: Makefile
+	${RM} ${bindir}/${prog_name}
+	${RM} ${bindir}/fth-shared
+	${RM} ${bindir}/fth-static
+	${RM} ${libdir}/${FTH_A_LIB}
+	${RM} ${libdir}/${FTH_SO_LIB}*
+
+fth.o:     ${srcdir}/fth.c     ${src_common}
+array.o:   ${srcdir}/array.c   ${src_common}
+file.o:    ${srcdir}/file.c    ${src_common}
+hash.o:    ${srcdir}/hash.c    ${src_common}
+hook.o:    ${srcdir}/hook.c    ${src_common}
+io.o:      ${srcdir}/io.c      ${src_common}
+misc.o:    ${srcdir}/misc.c    ${src_common}
+numbers.o: ${srcdir}/numbers.c ${src_common}
+object.o:  ${srcdir}/object.c  ${src_common}
+port.o:    ${srcdir}/port.c    ${src_common}
+printf.o:  ${srcdir}/printf.c  ${src_common}
+proc.o:    ${srcdir}/proc.c    ${src_common}
+regexp.o:  ${srcdir}/regexp.c  ${src_common}
+string.o:  ${srcdir}/string.c  ${src_common}
+symbol.o:  ${srcdir}/symbol.c  ${src_common}
+utils.o:   ${srcdir}/utils.c   ${src_common}
+
+# Makefile.in ends here.

@@ -1,0 +1,2432 @@
+2012-11-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.3.6
+
+2012-11-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c: New object types Boolean and Nil for #f, #t, nil,
+	and undef.
+
+2012-11-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs (create-struct,
+	create-instance-struct): Words added.
+
+2012-11-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_word_create_co): New word, a variation of
+	create-does.
+
+2012-11-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_init_locals): New private function which
+	removes a local variable bug.  If the first local variable of a
+	word definition was created in a loop, it wasn't handled
+	correctly.
+
+	* src/misc.c (*fth-backtrace-lines*): Global variable removed.
+
+	* src/symbol.c (*exception-list*): Global variable added.
+
+2012-11-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (ficl_io_reopen): Remove longstanding bug and set
+	original io pointer to 'closed'.
+
+2012-11-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_gc_mark|unmark): Changed to void functions;
+	return values are not really required here.
+
+	* src/utils.c (fth_throw_error): New function.
+
+2012-11-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_throw_list): Function simplified.
+
+	* src/misc.c (ficl_throw): Argument handling has changed because
+	of changes in fth_throw_list.
+
+2012-11-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_lambda_create_co): Word lambda-create
+	removed.
+
+2012-10-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs: Bracket loops enhanced.
+
+2012-10-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c: Bracket loops moved to examples/fth-lib/fth.fs.
+
+2012-10-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Configure option --enable-fth-debug removed.
+
+	* examples/fth-lib/prefix.fr (start-prefixes, end-prefixes):
+	Moved to ficl/prefix.c.
+
+2012-10-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth.supp: File removed.
+
+2012-10-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_strcpy, fth_strncpy, fth_strcat,
+	fth_strncat): New utility functions.
+
+2012-10-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New configure option --enable-warnings
+	for some C compiler warning flags.
+
+2012-10-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_make_ficl): Arguments changed from int to
+	unsigned int.
+
+2012-09-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_make_array|list_var): First argument changed
+	from ficlInteger to int.
+
+	* src/proc.c (ficl_extended_args_co_im): Fix in_lst bug in opt_p
+	part.
+
+2012-09-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c: Environment variable names have changed:
+	DEFAULT_DICTIONARY_SIZE becomes FTH_DICTIONARY_SIZE,
+	DEFAULT_LOCALS_SIZE becomes FTH_LOCALS_SIZE,
+	DEFAULT_RETURN_SIZE becomes FTH_RETURN_SIZE,
+	DEFAULT_STACK_SIZE becomes FTH_STACK_SIZE.
+
+	* .gdbinit: File removed.
+
+2012-09-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (ficl_bmin, ficl_bmax, ficl_btwostart,
+	ficl_btwoslash, ficl_blshift, ficl_brshift): Words added.
+
+2012-09-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/printf.c (doprnt): Fix format bug for %m.ns.
+
+	* src/printf.c (string_doprnt): Add format width and precision
+	for %m.n[psS].
+
+2012-09-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (fth_uoff_t_p): Renamed to fth_ullong_p.
+	* src/numbers.c (fth_make_off_t): Renamed to fth_make_llong.
+	* src/numbers.c (fth_make_uoff_t): Renamed to fth_make_ullong.
+	* src/numbers.c (fth_off_t_copy): Renamed to fth_llong_copy.
+	Old names remain as defines in fth.h.
+
+	* src/numbers.c (OFF_T/off_t): Replace internal number type
+	off_t with llong.
+
+2012-09-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c: Add support for rational numbers.
+
+2012-09-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c: Add support for arbitrary precision arithmetic
+	via bn(3) from openssl.
+
+	* src/numbers.c: Drop support for libgmp.
+
+2012-07-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/hooks.fs (optimization-hook): Hook removed.
+
+2012-07-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/effects.fs (vct_map!): Replaced with map!
+
+2012-07-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs (compand-*, smooth-channel-via-ptree,
+	ring-modulate-channel): PTREE-CHANNEL-related functions
+	removed.
+
+2012-05-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/hooks.fs (print-hook): Hook removed.
+
+2012-05-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Default value for *fth-verbose* is #t
+	in interactive mode.
+
+	* src/utils.c (fth_repl): Add also erroneous history entries.
+
+2012-05-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_repl): Add all history entries, don't
+	skip duplicated lines.  Duplicates can be removed with
+	after-repl-hook.
+
+2012-04-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.h (forth_init, forth_init_before_load): Prototypes
+	moved to src/utils.h.
+
+	* src/misc.c (forth_init_before_load): Argmument list has
+	changed.
+
+	* doc/ (.cvsignore, Makefile.in, fth.info): Files removed.
+
+2012-04-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (rl-initialize, readline, set-completion-proc,
+	using-history, add-history, remove-history, clear-history,
+	stifle-history, unstifle-history, read-history, write-history,
+	history-truncate-file, readline-version): Words removed.
+
+2012-04-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_repl):  Fth uses now the tecla library
+	for command-line editing.
+
+2012-03-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/ (array.texi, fth.texi, interpreter.texi, introduction.texi)
+	(mdate-sh, texinfo.tex, version.texi) Files remove.
+
+2012-03-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/file.texi: File removed.
+
+2012-03-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/hook.texi, doc/hash.texi: Files removed.
+
+2012-03-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/io.texi: File removed.
+
+2012-03-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/misc.texi: File removed.
+
+2012-03-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/numbers.texi: File removed.
+
+2012-03-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/ (a-index.texi, a-license.texi, object.texi): Files removed.
+
+2012-03-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/ (a-macros.texi, a-words.texi, gc.texi, properties.texi):
+	Files removed.
+
+2012-03-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* README.man: New file.
+
+2012-03-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/a-autoconf.texi: File removed.
+
+2012-03-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/ (a-snd.texi, exception.texi, keyword.texi, proc.texi)
+	(symbol.text): Files removed.
+
+2012-03-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/ (a-install.texi, a-optargs.texi, extension.texi)
+	(string.texi): Files removed.
+
+2012-03-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (ficl_history_expansion_char)
+	(ficl_set_history_expansion_char, ficl_history_no_expand_chars)
+	(ficl_set_history_no_expand_chars)
+	(ficl_history_quotes_inhibit_expansion)
+	(ficl_set_history_quotes_inhibit_expansion)
+	(ficl_history_search_delimiter_chars)
+	(ficl_set_history_search_delimiter_chars)
+	(ficl_history_word_delimiters, ficl_set_history_word_delimiters)
+	(ficl_emacs_editing_mode, ficl_vi_editing_mode)
+	(ficl_append_history, ficl_history_to_array): Words removed.
+
+	* libfth.3: New file.
+
+	* doc/regexp.texi: File removed.
+
+2012-03-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fdl.texi: File removed.
+
+2012-03-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/dbm/fth-dbm.c, examples/dbm/Makefile.in: New files.
+
+	* examples/gdbm: Directory removed.
+
+2012-03-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.3.1
+
+2012-02-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: configure option --without-complex removed.
+
+2012-02-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs (switch-to-buffer): Removed; Snd
+	removed prompt-in-minibuffer.
+
+	* examples/site-lib/extensions.fs (yes-or-no?): Removed; Snd
+	removed prompt-in-minibuffer.
+
+	* examples/site-lib/snd-forth-init.fs (C-x x eval over selection):
+	Removed; Snd removed prompt-in-minibuffer.
+
+	* lib/strsignal.c, lib/strftime.c, lib/snprintf.c: New files;
+	strsignal, strftime and snprintf moved from src/utils.c in
+	separate files to lib/ again.
+
+2012-02-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* lib/asprintf.c: File removed.
+
+	* src/proc.c (fth_formatted): Moved from src/utils.c; it's no
+	longer a public function.
+
+	* lib/regex.h, lib/regex.c: Files removed.
+
+	* src/regexp.c (ficl_re_match_2, ficl_re_search_2): Words
+	re-match-2 and re-search-2 removed.
+
+2012-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* lib/strsep.c, lib/strsep.3, lib/getopt_long.c,
+	lib/getopt_long.3, lib/asprintf.c, lib/getopt.h, lib/getopt.c,
+	lib/getopt.3: New files.
+
+2012-02-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* INSTALL, lib/alloca.c, lib/getopt.h, lib/getopt.c, lib/getopt1.h:
+	Files removed.
+
+	* configure.ac (HELP2MAN): Test removed.
+
+2012-02-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* lib/obstack.h, lib/obstack.c: Files removed.
+
+	* configure.ac (AC_PROG_LN_S): Test removed.
+
+	* src/printf.c: New file.
+
+2012-02-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/regexp.c (fth_regexp_replace): Replace obstack with string
+	functions.
+
+	* src/string.c (fth_string_format): Replace obstack with string
+	functions.
+
+	* src/utils.c (fth_throw, fth_throw_list): Replace obstack with
+	string functions.
+
+	* src/proc.c (word_documentation, ficl_word_to_source)
+	(fth_word_to_source, ficl_extended_args_co_im, fth_word_inspect):
+	Replace obstack with string functions.
+
+	* src/numbers.c (fl_inspect): Replace obstack with string
+	functions.
+
+	* src/io.c (io_inspect): Replace obstack with string functions.
+
+	* src/hook.c (hk_inspect, hk_dump): Replace obstack with string
+	functions.
+
+	* src/hash.c (hs_inspect, hs_to_string, hs_dump): Replace obstack
+	with string functions.
+
+	* src/file.c (ficl_file_shell): Replace obstack with string
+	functions.
+
+	* src/array.c (ary_inspect, ary_to_string, ary_dump): Replace
+	obstack with string functions.
+
+	* src/string.c (fth_string_vsformat): New public function.
+
+	* ficl/vm.c (ficlVmThrowErrorVararg): Replace obstack with string
+	functions.
+
+	* configure.ac: New version number: 1.3.0
+
+2012-02-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/snd-xm.fs: Load only if gtk3 is provided.
+
+2012-01-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/snd-xm.fs (white-pixel black-pixel): Removed
+	from Gtk-part (missing GdkColor).
+
+2012-01-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* Makefile.in: Creation of man/cat1 removed.
+
+2012-01-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (h_io_nopen_read|write): io-nopen-read and
+	io-nopen-write removed.
+	(fth_io_nopen): 4th option fam removed.
+
+2012-01-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (fth_io_sopen): If fam contains FICL_FAM_APPEND, set
+	string index at end of string.
+	(ficl_io_pos_ref): io-pos renamed to io-pos-ref.
+	(ficl_io_pos_set): set-io-pos renamed to io-pos-set!.
+
+2012-01-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (io_keyword_args_ref): Wrong fam keyword in soft-port
+	part removed.
+
+2012-01-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/regexp.c (fth_regexp_replace): Bug removed in case of
+	replacement string is "".  First occurrence of search regex has to
+	be removed (ie. replaced by "").
+
+	* src/string.c (fth_string_replace): Bug removed in case of
+	replacement string is "".  Any occurrences of search string have
+	to be removed (ie. replaced by "").
+
+2011-12-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_format): Format accepts minus sign for
+	left adjusted string: "%-10s" '( "hello" ) string-format => "hello    "
+
+2011-10-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (socket_open): First argument 'host' removed.
+
+2011-10-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/effects.fs: Fgtk_table_* replaced by
+	Fgtk_grid_*.
+
+2011-07-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/xm-enved.fs: draw-axes requires a cairo_t
+	object with GTK.
+
+	* examples/site-lib/effects.fs (add-sliders, add-target-main): GTK
+	part added (see 2011-06-22).
+
+	* examples/site-lib/snd-xm.fs (add-main-pain): GTK part added (see
+	2011-06-22).
+
+2011-07-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c: history and readline HAVE_DECL_...s added.
+
+	* configure.ac (history_expansion_char)
+	(history_search_delimiter_chars, history_no_expand_chars)
+	(history_quotes_inhibit_expansion, rl_explicit_arg): Checks added.
+
+2011-07-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_getopt, ficl_getopt_long): argc, optc length
+	bug removed.
+
+2011-06-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/effects.fs (add-sliders, add-target-main): GTK
+	part removed.
+
+	* examples/site-lib/snd-xm.fs (add-main-pain): GTK part removed.
+
+2011-05-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c, src/file.c, src/misc.c: Several #ifndef _WIN32
+	added thanks to Amy Lear.
+
+2011-05-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.h: File removed.
+
+2011-05-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (HAVE_SOCKET): added
+
+	* configure.ac (asprintf, vasprintf, strsep): Function checks
+	added.
+
+	* config.h.in (HAVE_ASPRINTF, HAVE_VASPRINTF, HAVE_STRSEP): Added.
+
+	* src/utils.c (vasprintf, asprintf): Added again; some non-POSIX
+	systems seems to lack them.
+	(strsep): Required on non-POSIX systems.
+
+	* common.mk (FTH_CFLAGS): ${CFLAGS} have to be last entry in
+	list.
+
+2011-05-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (AC_SEARCH_LIBS): Test for dlopen in libdl.so if
+	not found in libc.so.
+
+	* ficl/vm.c (ficlVmInnerLoop): ficlInstructionDup CHECK_STACK
+	corrected.
+
+2011-04-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/scripts/xg.fth.in: Updated to current libxg.
+
+2011-03-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/extensions.fs (prefs-activate-initial-bounds)
+	(prefs-deactivate-initial-bounds, set-global-sync)
+	(show-selection): Removed; replaced by Snd functions.
+
+2011-02-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/snd-xm.fs (show-smpte-label): Removed;
+	replaced by Snd function.
+
+2011-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs (ws-interrupt): Removed.
+
+	* examples/site-lib/extensions.fs (check-for-unsaved-edits)
+	(remember-sound-state): Removed; replaced by Snd functions.
+
+2011-02-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/hooks.fs (mark-drag-triangle-hook): Removed.
+
+
+	* examples/site-lib/examp.fs (sync-all): Renamed to sync-everything.
+
+2010-12-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/scripts/play-sound.fth.in: Use getopt-long for handling
+	command line options.
+
+	* examples/site-lib/clm.fs (*clm-search-list*): Array filled with
+	content of $CLM_SEARCH_PATH or current dir.
+
+2010-12-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_mktime): ficlStackPush2Integer replaced by
+	ficlStackPush2Unsigned.
+
+2010-12-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_time_to_string, ficl_strftime)
+	(ficl_localtime, ficl_gmtime): Replace fth_long_long_ref by
+	ficlStackPop2Unsigned.
+
+2010-10-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_map): Public function added.
+
+	* ficl/primitives.c (ficlPrimitiveFPlusToValue): New word.
+
+2010-10-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/hash.c (hash-each, hash-map): New words.
+
+2010-10-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (fth_ratio_floor): Function reimplemented; it's
+	required by fth.m4 to set FTH_HAVE_RATIO=yes.
+
+2010-08-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.2.9
+
+	* src/file.c (fth_re_file_basename): Public function removed.
+
+	* src/regexp.c (fth_regexp_ref): Public function removed.
+
+2010-08-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): New option -l, --line-end, added.  Removes
+	line ending '\n' when used with -n|-p.
+	(main): Option -p prints entire *line* instead of result of eval.
+
+2010-08-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (init_utils): Global variable *fname* added holding
+	current file name with options -n|-p.
+
+	* src/misc.c (fth_catch_exec): New public function.
+
+2010-08-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (init_utils): Global variables *rs*, *ors*, *ofs*
+	removed.
+	(init_utils): Global variable *farray* added holding auto-splitted
+	array of current input line with option -a and -p|-n.
+
+2010-08-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/file.c (fth_file_install): New public function and word.
+	(ficl_file_system): Returns #t on success, #f otherwise.  The
+	previous behavior, returning exit status if no success, is
+	dropped.  One can check the word EXIT-STATUS after calling
+	file-system.
+
+2010-08-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_split): SEP can be -- in addition to
+	regexp and string -- #f or nil.  In the latter cases, a space is
+	used as SEP.
+
+	* src/array.c (h_array_join): SEP can be -- in addition to string
+	-- #f or nil.  In the latter cases, a space is used as SEP.
+
+2010-07-31  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/snd-forth-init.fs:
+	* examples/site-lib/effects.fs: *-button-color removed.
+
+2010-06-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Treat file "-" as stdin.
+
+2010-06-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/snd-forth-init.fs:
+	window-property-changed-hook removed.
+
+	* examples/site-lib/hooks.fs: window-property-changed-hook
+	removed.
+
+	* examples/site-lib/examp.fs: title-with-data removed.
+
+2010-05-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs (floor->s, fceil->s): New words.
+	* examples/fth-lib/fth.fs (secs->hh:mm:ss): Rounding error
+	removed.
+
+2010-04-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/mix.fs (color-mixes, set-mixes-tag-y)
+	(mixes-maxamp): Not available with snd-nogui.
+
+2010-01-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (ficl_warning, ficl_error, ficl_die): Moved from
+	misc.c to string.c.
+	(ficl_fth_format, ficl_fth_print, ficl_fth_warning)
+	(ficl_fth_error, ficl_fth_die): Moved from Forth (fth.fs) to
+	C (string.c).
+
+2010-01-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (ficl_with_input_port, ficl_with_input_from_port):
+	First argument may be a proc-or-xt or nil.
+	(ficl_with_output_port, ficl_with_output_to_port)
+	(ficl_with_error_to_port): First argument may be a proc-or-xt or a
+	string.  Functions leave NO value on stack.
+
+	* src/io.c (fth_io_read_line): Function is public.
+
+2009-12-31  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_word_p): word? tests for proc and xt.
+
+2009-12-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/peak-env.fs: File no longer necessary.
+
+2009-11-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_load_global_init_file): New public function.
+
+2009-11-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.2.8
+
+	* src/fth.h: nls support discontinued.
+
+2009-11-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (fth_port_getc, fth_port_gets, fth_port_putc): New
+	public functions.
+
+	* src/regexp.c (fth_regexp_replace): Replaces only the 1st
+	occurrence of match.
+
+2009-10-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: --enable-ans-numbers removed.
+
+
+2009-10-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_gc_protect_set): New public function.
+
+2009-10-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.2.7
+
+	* src/fth.h: type ficl2Float renamed to ficlFloat.
+
+2009-10-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (fth_word_inspect, fth_word_to_string)
+	(fth_word_dump): Moved from object.c to proc.c.
+	(fth_defined_p, fth_define, fth_define_constant)
+	(fth_define_variable, fth_variable_ref, fth_variable_set)
+	(fth_var_ref, fth_var_set, fth_trace_var, fth_untrace_var)
+	(fth_trace_var_execute): Moved from misc.c to proc.c.
+
+2009-10-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_repl): Removes duplicated history entries from
+	the beginning instead of the end from history list.
+
+	* src/misc.c (fth_load_init_file): Moved from utils.c to misc.c.
+	Looks first for global init file ${prefix}/etc/fth.conf and than
+	for given or default (~/.fthrc) init file.
+
+2009-10-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.h: FTH_LONG_LONG_P is an alias for FTH_INTEGER_P.
+
+	* src/numbers.c (fth_int_ref, fth_long_long_ref)
+	(fth_unsigned_ref, fth_ulong_long_ref): If value is too big or too
+	small, return *LONG_MAX|MIN instead.
+
+	* src/misc.c (fth_long_long_p): Function removed.
+
+2009-09-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_getenv): New public function.
+
+	* configure.ac: Test for realpath added.
+
+	* config.h.in: HAVE_REALPATH constant added.
+
+	* src/file.c (fth_file_realpath): New public function.
+
+2009-07-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Test for issetugid added.
+
+	* config.h.in: HAVE_ISSETUGID constant added.
+
+2009-07-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.2.6
+
+2009-07-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_reverse_bang): Function renamed to
+	fth_string_reverse.
+	(fth_string_upcase_bang): Function renamed to fth_string_upcase.
+	(fth_string_downcase_bang): Function renamed to
+	fth_string_downcase.
+	(fth_string_capitalize_bang): Function renamed to
+	fth_string_capitalize.
+	(fth_string_replace_bang): Function renamed to fth_string_replace.
+	(fth_string_chomp_bang): Function renamed to fth_string_chomp.
+
+	* src/array.c (fth_array_insert_bang): Function renamed to
+	fth_array_insert.
+	(fth_array_reverse_bang): Function renamed to fth_array_reverse.
+	(fth_array_reject_bang): Function renamed to fth_array_reject.
+	(fth_array_compact_bang): Function renamed to fth_array_compact.
+	(fth_array_uniq_bang): Function renamed to fth_array_uniq.
+	(fth_array_sort_bang): Function renamed to fth_array_sort.
+
+2009-06-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_c_char_ref, fth_string_c_char_fast_ref)
+	(fth_string_c_char_set, fth_string_c_char_fast_set): New public
+	functions.
+
+	* src/string.c (fth_string_push, fth_string_unshift)
+	(fth_string_insert): The to be added argument may be of any
+	object, not only a string object.
+
+	* src/io.c (fth_io_sopen): Rewritten.  String-IO uses now FTH
+	strings instead of char*.
+
+2009-06-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac:  FTH_VERSION_TEENY becomes 5 (fth 1.2.5).
+
+2009-06-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_acell_key, fth_acell_value, fth_make_acell):
+	New public functions.
+
+	* src/object.c (fth_object_mark): Removed.  Use fth_gc_mark
+	instead.
+
+2009-06-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/hash.c (fth_word_property_set): Property object is now
+	gc_permanent.
+
+	* src/symbol.c (fth_exception_last_message_ref): Returns now FTH.
+	(fth_exception_last_message_set): msg is now FTH.
+	(fth_exception_message_ref): Returns now FTH.
+	(fth_exception_message_set): msg is now FTH.
+	(fth_exception_name): Removed.  Use fth_exception_ref instead.
+
+2009-05-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Load only init file if stay_in_repl is true.
+
+2009-05-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: FTH_VERSION_TEENY becomes 4 (fth 1.2.4).
+
+	* tests/*.fs: All take a new test function test-expr.
+
+2009-04-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_assoc): New public function.  Builds a sorted
+	associative Array for fth_array_assoc_... functions.
+
+2009-04-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (make_object_type_from): New intern function for
+	creating objects derived from others.  Defaults all functions to
+	base object's.
+	(fth_make_object_type_from): New public function corresponding to
+	the above one.
+
+2009-04-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (fth_init_soft_port_procs)
+	(fth_set_soft_port_from_optkey): New public auxiliary functions
+	for fth_make_soft_port.
+
+2009-04-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_make_permanent_instance): Function removed.
+	
+	* src/hash.c (fth_make_permanent_hash): Function removed.
+	
+	* src/array.c (fth_array_delete_key): New public function.
+
+2009-04-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/regexp.c (init_regexp): fth_set_object_apply() must appear
+	in init_regexp() not in init_regexp_type().
+
+	* src/hash.c (hs_mark): FTH_HASH_ARRAY(self) must be marked too.
+
+2009-03-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (ficl_object_debug_hook): New Ficl word.  Every
+	object can set this hook.  If set, it will be called on inspecting
+	the object with the inspect string as first argument.
+
+	* ficl/vm.c: Forgotten #include <locale.h> added.
+
+2009-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_push, fth_array_pop, fth_array_unshift)
+	(fth_array_shift, fth_array_insert_bang, fth_array_delete): A bug
+	concerning the correct new array length, introduced with new array
+	struct member ary->top and detected by Bill, removed.
+
+2008-12-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/symbol.c (make_symbol): Symbols, keywords, and exceptions
+	are no longer object types, instead they are forth constants.
+
+	* src/list.c: List object type removed.
+	(fth_cons, fth_cons_2, fth_car, fth_cdr)
+	(fth_list_length, fth_list_ref, fth_list_set, fth_list_reverse)
+	(fth_list_copy, fth_list_append, fth_list_member_p)
+	(fth_list_assoc, fth_list_assoc_ref, fth_list_assoc_set)
+	(fth_list_assoc_remove): These functions still exist, working
+	actually with arrays.
+
+2008-12-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/file.c (fth_file_match_dir): Argument types have changed,
+	takes now two FTH args, a directory and an regexp.
+
+2008-12-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h (fth_strlen): New macro added to replace strlen.
+
+2008-12-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/hash.c (fth_make_hash_len): Has only one option, the
+	hashsize.
+	(fth_make_permanent_hash): New function.
+
+2008-12-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/file.c (ficl_file_jail): jail struct member names have
+	changed since FBSD 800057: ip_number is now ip4s.
+	(fth_file_basename, fth_re_file_basename, fth_file_dirname): These
+	functions return now FTH and no longer char*.
+
+2008-12-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (make_array): Checks sequence buffer length instead
+	of actual array length for overflow.
+	(fth_array_push, fth_array_unshift, fth_array_insert_bang): Check
+	sequence buffer length for overflow.
+
+	* src/misc.c (fth_add_load_lib_path, fth_unshift_load_lib_path):
+	New functions added.
+	(fth_load_lib_path): New global array variable added.
+	(fth_dl_load): Function looks in fth_load_lib_path if the library
+	name exists.
+
+	* src/utils.h (FTH_ENV_FTHPATH, FTH_ENV_LIBPATH): New environment
+	variables added.
+
+	* src/fth.c (main): New option -C (--libpath) added.
+
+	* doc/interpreter.texi (Invoking fth): Documentation concerning
+	load-lib-path added.
+
+2008-11-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* numbers.c:
+	Aliases added for f** (fpow), ** (pow) r** (rpow), b** (bpow), and c**
+	(cpow).
+
+	* examples/fbsd-ports-lang-fth.shar: New file.
+
+	* Makefile.in: New file fbsd-ports-lang-fth.shar included in tar files.
+
+	* configure.ac: Minor changes.
+	FTH_VERSION_TEENY becomes 2 (fth 1.2.2).
+
+2008-10-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Minor changes.
+	FTH_VERSION_TEENY becomes 1 (fth 1.2.1).
+
+2008-10-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/scripts/.cvsignore: New file.
+
+	* configure.ac: New version number: 1.2.0
+
+2008-05-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_make_permanent_array_len): Removed.
+
+2007-10-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/file.c (ficl_file_truncate): New public function.
+
+	* configure.ac (AC_CHECK_FUNCS): Check for truncate added.
+
+2007-09-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs: fth-warning|fth-warn, fth-error, and
+	fth-die added; they take all a format string and a list of objects
+	like fth-print.
+
+2007-09-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_reject|fth_array_reject_bang):
+	Documentation error removed.
+
+2007-08-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/gdbm/fth-gdbm.c (fth_gdbm_set): Keys and values must be
+	converted to C-strings not to C-dump.
+
+2007-08-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/interpreter.texi (Debugging Tools): Cross reference fixed.
+
+2007-07-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/file.c (ficl_file_jail): New word added (jail(2)).
+
+	* src/misc.c (ficl_fork, ficl_exec): Documentation corrected.
+
+2007-07-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Test for headers sys/param.h, sys/jail.h and
+	functions jail, jail_attach added.
+
+2007-07-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (init_port): A bunch of AF_ constants added.
+
+2007-06-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Version number incremented: FTH 1.1.0.
+
+2007-05-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): fth option -I or --include no longer appends
+	the path but prepends it before the first entry of *load-path*.
+
+2007-05-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/stack.c (fth_stack_check): New function for the fth part of
+	the code which raises a 'wrong-number-of-args exception in
+	contrary to ficl's ficlStackCheck which raises a 'stack-underflow
+	exception.
+
+2007-04-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (--enable-ans-numbers): New configure option added.
+
+	* src/port.c (fth_obstack_vprintf): Bug removed on format
+	specifier %s: It must use macro ADD_CHAR_PTR (with asprintf)
+	instead of ADD_VA_TYPE (with snprintf and only a 512 byte buffer).
+
+2007-04-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/mix.fs (mix-property): List object replaces
+	the hash property list.
+	(set-mix-property): ditto.
+
+2007-04-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): New option -B, --backtrace-lines added.
+
+2007-04-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_make_permanent_instance): New public function
+	for creating instances outside the GC-chain-list.
+
+2007-04-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Boehm's GC library stuff removed.
+
+	* src/hash.c (hs_free): FItem entries must be freed!
+	(hash_key_to_val): Simplified.
+
+	* src/regexp.c (fth_make_regexp): Eats NULL string too.
+
+	* src/utils.c (ficl_set_completion_proc): New public word.  You
+	may replace the default readline completion function with this
+	word.
+
+2007-04-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/symbol.c (init_symbol): ANS exceptions turned to really
+	exceptions and integrated in src/*.c where necessary.
+
+2007-04-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/ficl.h (FICL_VM_STATUS_STACK_OVERFLOW...): All ANS
+	exceptions provided as C and Forth constants.  Ficl code throws
+	now some ANS exceptions.
+
+2007-04-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/tools.c (ficlPrimitiveSkipFile): New primitive added to
+	skip loading of not needed files.
+
+	* ficl/ficl.h (FICL_VM_STATUS_SKIP_FILE): New Ficl exception added.
+
+2007-04-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_rl_ficl_abort): If readline library exists, C-g
+	aborts interpreter and stops on top level.
+
+2007-04-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs: read-eval-loop added for Snd's
+	read-hook/listener input.
+	
+
+2007-03-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c: GNU Readline and GNU History interface words added.
+
+2007-03-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/primitives.c (ficlPrimitiveSDot, ficlPrimitivePrecision)
+	(ficlPrimitiveSetPrecision, ficlPrimitiveToFloat)
+	(ficlPrimitiveFProximate, ficlPrimitiveMStarSlash)
+	(ficlPrimitiveMPlus, ficlPrimitiveSaveInput)
+	(ficlPrimitiveRestoreInput, ficlPrimitiveUnused): New primitives
+	added.
+
+2007-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/tools.c|search.c|primitive.c|fileaccess.c|extras.c: Online
+	help added for most of the Ficl primitives.
+
+2007-03-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c: All socket word names prepended by `net-' (because
+	ACCEPT is a core word): net-socket, net-bind, net-listen,
+	net-shutdown, net-accept, net-connect, net-send, net-recv,
+	net-sendto, net-recvfrom
+
+
+2007-03-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_getopt): New word.
+	(ficl_getopt_long): New word.
+
+2007-03-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_strptime): New word.
+
+	* src/file.c (ficl_file_touch): New word.
+
+2007-03-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (--dictionary-size, --stack-size, --return-size, --locals-size):
+	New command line options added.
+	
+2007-03-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (fth_make_bigfloat): ficlBigfloat added.
+
+2007-03-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (ficl_string_length): New word.
+	* src/array.c (ficl_array_length): New word.
+	* src/list.c (ficl_list_length): New word.
+
+2007-02-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c (fth_make_soft_port): New public function.
+	(make_file_io): Moved from io.c to port.c.
+	(make_pipe_io): Moved from io.c to port.c.
+	(make_string_io): Moved from io.c to port.c.
+	(make_socket_io): Moved from io.c to port.c.  Port object type
+	removed, functionality integrated to IO object type.
+
+2007-02-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: FTH_VERSION_MAJOR|MINOR|TEENY introduced.
+	Tiny version number incremented: 1.0.8
+
+	* src/port.c (fth_make_soft_port): New function.
+	(ficl_with_input_port, ficl_with_output_port)
+	(ficl_with_input_from_port, ficl_with_output_to_port)
+	(ficl_with_error_to_port): New words added.
+
+2007-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (file_version_rename): io_open(_write) have a new
+	keyword option: :if-exists.  One can choose :rename or :error,
+	default nothing.  If :rename, the global variable version-control
+	is read which can have #t for numbering old files, nil for
+	numbering if already numbered, otherwise single backup (appending
+	a ~), #f for single backup, and undef for no backup.
+
+2007-02-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/port.c: New object type port.  printf functions and friends
+	moved from utils.c to port.c.
+
+	* src/file.c: File functions moved from io.c to new file file.c
+
+	* src/hash.c: Property functions moved from misc.c to hash.c.
+
+2007-02-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_printf, fth_vprintf, fth_fprintf, fth_vfprintf,
+	fth_ioprintf, fth_vioprintf, fth_sprintf, fth_vsprintf,
+	fth_snprintf, fth_vsnprintf, fth_asprintf, fth_vasprintf,
+	fth_obstack_printf, fth_obstack_vprintf): New, renamed or
+	rewritten printf set.
+
+2007-02-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_utime): getrusage removed.
+
+2007-02-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_catch): Third argument may now a proc or xt.
+
+	* src/proc.c (fth_proc_call, fth_proc_apply): More than one return
+	values will be returned as a list.
+
+2007-02-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (ficl_probab_prime_p, ficl_gmp_rand_init)
+	(ficl_gmp_rand_seed, ficl_gmp_irandom, ficl_gmp_frandom): New words.
+
+	* src/io.c (ficl_io_open, ficl_io_reopen, ficl_io_fdopen)
+	(ficl_io_popen, ficl_io_sopen, ficl_io_nopen)
+	(ficl_io_nopen_read, ficl_io_nopen_write, ficl_io_seek, ficl_file_basename)
+	* src/list.c (ficl_make_list, ficl_list_slice)
+	(ficl_list_slice_bang)
+	* src/array.c (ficl_make_array)
+	* src/regexp.c (ficl_regexp_search)
+	* src/string.c (ficl_make_string): Optional args replaced by keywords.
+
+	* src/array.c|string.c (ficl_array_subarray, ficl_string_substring):
+	Range is now from index BEG up to but excluding END.
+
+2007-01-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (fth_get_optkey): New public function.
+	(fth_get_optarg): New public function.
+
+2007-01-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h (FTH_MALLOC): All memory functions (xmalloc etc)
+	have new names: FTH_MALLOC etc.  For libgc tests.
+
+	* configure.ac: Option --with-gc added.
+
+2007-01-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_wordlist_each): New public function added.
+	(fth_apropos): New public word added.
+
+2007-01-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/list.c (fth_list_delete_bang): New public function.
+	(fth_list_slice_bang): New public function.
+
+2007-01-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_reject_bang): New public function.
+	(fth_array_compact): New public function.
+	(fth_array_compact_bang): New public function.
+
+2007-01-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_reject): New public function.
+
+2007-01-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_set_xt): set-xt ( xt -- set-xt )
+	returns an xt constructed from set-XT.
+
+2007-01-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_tick_set_im): <'set!> ( "name" -- set-xt )
+	returns an xt constructed from set-NAME.
+
+2007-01-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/dsp.fs: More translations.
+
+2007-01-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_config_prefix): Word added.
+	(ficl_config_src): Word added.
+	(ficl_config_cflags): Word added.
+	(ficl_config_libs): Word added.
+
+2007-01-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (h_xmobj_p): Word added.
+
+2007-01-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Interepret and Compile Time): New section
+	describing ', ['], and the new <'>.
+
+2007-01-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (load_file): fth_add_loaded_files must come before
+	loading a script to prevent recursive calls.  If something went
+	wrong, remove the file name from the array.
+
+2007-01-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/dsp.fs: More translations.
+	* examples/site-lib/examp.fs:  More translations.
+	* examples/site-lib/extensions.fs:  More translations.
+	* examples/site-lib/env.fs:  More translations.
+
+2007-01-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_format): Format flags have changed: %S
+	is now object-dump (formerly object-inspect), %m (also
+	object-dump) exists for backward compatibility.
+
+2006-12-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/regexp.c (fth_make_regexp): re_syntax_options bug removed.
+
+	* configure.ac: Increment micro version number: 1.0.4
+
+2006-12-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Snd and Fth): New chapter (appendix) describing
+	Snd, CLM and Fth in more detail.
+
+2006-12-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_properties): Takes now one argument, an object.
+
+	* examples/fth-lib/fth.fs (set|get-local-variables,
+	display-variables): New words added.
+
+2006-12-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_fast_ref|set): New public functions.
+
+2006-12-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/hash.c (fth_hash_to_array): New public function.
+
+2006-12-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_local_variables_paren): New function
+	local-variables.  Returns an array with local variable names and
+	values of a word up to the location where LOCAL-VARIABLES appears.
+	For debugging.
+
+	* src/hash.c (fth_hash_each): New public C function added.
+	(fth_hash_map): New public C function added.
+
+2006-12-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (make_proc): Handles XTs as well as C functions and
+	replaces the old define_procedure functions.
+	(fth_define_procedure): Creates a proc object through make_proc.
+	(h_extended_args_co_im, <{...}>): Implements a new variable
+	scanning mechanism.  Colon definitions using this word will be
+	automatically turned to proc objects.
+
+2006-12-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/dsp.fs: More functions translated.
+
+2006-12-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_insert, fth_array_insert_bang,
+	fth_array_delete, fth_array_index, fth_array_subarray):
+	* src/list.c (fth_list_insert, fth_list_slice, fth_list_head,
+	fth_list_tail):
+	* src/string.c (fth_string_insert, fth_string_delete,
+	fth_string_substring):
+	* src/regexp.c (fth_regexp_match, fth_regexp_search):
+
+	Anything that looks like an index is ficlInteger now instead of
+	FTH.
+
+	* src/proc.c (ficl_help_add): Function added.
+
+2006-12-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_subarray): Public function added.
+
+2006-12-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c: Gforth' naming convention for log (fln) and
+	log10 (flog) replaced by C libm convention: fln -> flog, flnp1 ->
+	flogp1, flog -> flog10.
+	(ficl_flog2): New flog2 word added.
+
+2006-12-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs (<{ }>): New local variable word added.
+	Handles two keywords, :key and :optional.  Mainly for word
+	argument scanning.
+
+2006-12-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs (get-optkey, get-optarg) Added.
+	(get-optkeys, get-optargs) Added.
+
+2006-12-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm-ins.fs: More instruments translated.
+
+2006-12-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_xt_p): xt? added.
+
+2006-12-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/vm.c: All compare words (>, <, ...) return now #f or #t,
+	nothing else.
+
+	* examples/site-lib/clm.fs (with-offset, scaled-by, scaled-to):
+	with-sound functions added.
+
+2006-12-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/mix.fs: open-sound-file replace by
+	mus-sound-open-output.
+	close-sound-file replaced by mus-sound-close-output.
+	vct->sound-file replaced by mus-sound-write.
+
+2006-11-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_time_reset): Added.
+	(ficl_utime): Utilizes getrusage if available.
+
+2006-11-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/spectr.fs: New file.
+
+	* examples/site-lib/clm-ins.fs: More instruments translated.
+
+2006-11-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm-ins.fs: More instruments translated.
+
+2006-11-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h: FInstance member level, word, file, line
+	removed.
+
+	* src/object.c (fth_object_origin): Public function removed.
+
+2006-11-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Two new options added: --verbose and --debug.
+
+	* ficl/ficl.h (struct ficlWord): current_file and current_line
+	added.
+
+2006-11-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/dsp.fs: More functions translated from
+	dsp.scm.
+
+	* src/numbers.c (ficl_magnitude): magnitude added.
+
+2006-11-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.c (ficl_complex_reciprocal): 1/c added.
+
+	* src/misc.c (fth_run_procedure): Removed.
+
+	* src/io.c (io_open_write_file): New internal function for opening
+	files with file mode 0644 for writing.
+
+	* examples/site-lib/clm-ins.fs: Instruments added from clm-ins.rb.
+
+2006-11-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (define_procedure, define_void_procedure): ARGS array
+	must be permanent.
+
+2006-11-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_catch_eval): Argument number has changed, now it
+	has only a single argument, a string.
+	(fth_eval): Argument number has changed, it has only a single
+	argument, a string.
+
+	* src/io.c (ficl_file_dir): Checks for dirent members d_namlen and
+	d_ion/d_fileno.
+
+	* configure.ac (AC_CHECK_MEMBERS()): Tests for struct
+	dirent.d_ino, struct dirent.d_fileno, struct dirent.d_namlen
+	added.
+
+	* src/object.c (fth_set_backtrace): If word is a colon definition,
+	print its source up to the location of trouble in addition to the
+	backtrace.
+
+2006-11-15  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (forth_init): *fth-verbose* is FTH_FALSE by default.
+
+	* examples/site-lib/popup.fs (change-color-xt): Renamed to
+	change-color-col-xt.  The name exists already in snd-xm.fs.
+
+	* examples/site-lib/effects.fs: Name bug for envelope@|! removed,
+	name exists already in enved.fs.
+
+	* src/object.c (fth_set_backtrace): Backtrace is now a bit more
+	useful than before.
+	
+	* src/misc.c (load_file): fth_readlines replaces standard IO
+	library fopen etc.
+
+	* src/io.c (io_open): Reading files with low-level io functions.
+
+2006-11-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/ficl.h (struct ficlWord): Member primitive_p added.
+
+2006-11-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): in-place backup file handling behaves like the
+	documentation says; backup file is the original one, original name
+	contains new content.
+
+	* src/io.c (ficl_file_dir): New function.
+	(fth_file_rename): New function.
+
+2006-11-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (io_open, string_close): popen replaced bye
+	pipe (otherwise hangs in Snd).
+
+	* ficl/extras.c (ficlPrimitiveChDir): CD handles `~' as an
+	abbreviation for home directory.  If no path was specified,
+	changes to $HOME.
+
+	* src/io.c (fth_file_chdir): CHDIR handles `~' as an abbreviation
+	for home directory.  If no path was specified, changes to $HOME.
+
+2006-11-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/Makefile.in (EDITION): New version: 0.6.2.
+
+	* src/utils.h (_): This macro calls now dgettext("fth", string).
+
+	* src/misc.c (forth_init): Call textdomain only if no other
+	package in use.
+
+	* doc/fth.texi: Spelling corrections etc.
+
+2006-10-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: New version number: 1.0.0.
+
+	* all: GNU license replaced by BSD license.
+
+2006-10-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/hooks.fs: selection-changed-hook removed.
+
+	* examples/site-lib/effects.fs: selection-changed-hook removed.
+
+2006-10-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_make_string): Object type string doesn't use
+	any longer obstacks.
+
+	* src/hash.c (hs_dump): Simplified.
+
+	* src/array.c (ary_dump): Simplified.
+
+	* src/io.c: Member `buffer' from struct FIO removed.
+
+	* src/misc.c (ficl_current_time): time-count renamed to current-time.
+	(ficl_localtime): New public function.
+	(ficl_gmtime): New public function.
+	(ficl_mktime): New public function.
+
+	* src/numbers.c (fth_number_less_p): Nonexistent Complex < Complex
+	is Float < Float (Complex coerced to Float).
+	(fth_number_greater_p): Nonexistent Complex > Complex is Float >
+	Float (Complex coerced to Float).
+
+2006-09-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/vm.c (ficlVmInnerLoop): The run time code of VALUE
+	unprotects old value.  See below.
+
+	* ficl/primitives.c (ficlPrimitiveToValue): Compile-state: word
+	params must not be unprotected.  We do that correctly now in
+	ficlInnerLoop.  So AMD64 builds and runs Fth.
+
+2006-09-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (strdup): Moved from lib/strdup.c.
+	(strerror): Moved from lib/strerror.c.
+	(strftime): Moved from lib/strftime.c.
+	(snprintf): Moved from lib/strsignal.c.
+	(vasprintf): Moved from lib/vasprintf.c.
+	* lib/strdup.c|h: Removed.
+	* lib/strerror.c: Removed.
+	* lib/strftime.c: Removed.
+	* lib/strsignal.c: Removed.
+	* lib/snprintf.c: Removed.
+	* lib/vasprintf.c|h: Removed.
+
+2006-09-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* fth.sh.in: New file.  Starts fth with dynamic library in
+	${abs_top_builddir}/src.
+
+2006-08-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Options --(no-)verbose and --(no-)gc-verbose
+	removed.  Option --quiet sets now the global variable
+	*fth-verbose* to #f if specified, *fth-verbose* is default #t and
+	prints a short backtrace in case of exceptions.
+
+	* configure.ac: New option --without-complex.
+
+2006-08-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (FTH_CONFIGURE_ARGS): New preprocessor macro.
+
+	* src/string.c (ficl_string_eval): New word.
+
+	* configure.ac (LDSO_FLAGS, SO_FLAGS, SO_LD, SO_INSTALL): New
+	macros.
+	New option --without-gmp.
+
+	* ficl/ficllocal.h: ficlInteger is now ficlInteger32 (int) and
+	ficlUnsigned is now ficlUnsigned32 (unsigned int).
+
+	* examples/site-lib/clm.fs (sound-let): New with-sound word.
+
+2006-08-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs (with-mix): New with-sound word.
+
+	* src/regexp.c (fth_regexp_replace): Argument list and behavior has
+	changed.  The second argument is now the search string and an
+	explicit previous regexp-search is not longer necessary except one
+	needs the regex-variables for replacing.  See NEWS and fth.texi
+	for more.
+
+2006-08-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_sformat): fth_string_printf renamed to
+	fth_string_sformat.
+
+	* src/hook.c (fth_make_hook): hook->data is no longer a hash but
+	an array.
+
+	* configure.ac (AM_MAINTAINER_MODE, AC_ARG_PROGRAM): New macros
+	for --enable-maintainer-mode and --program-suffix etc.
+
+2006-08-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm-ins.fs (pluck, vox, fofins, fm-trumpet,
+	pqw-vox): New instruments from snd/clm-ins.*.
+
+	* examples/site-lib/clm.fs (normalize-partials): New word.
+
+2006-08-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/fth.fs (object-sort<, object-sort>): New words,
+	compare arrays and the like by numbers and strings.
+
+	* configure.ac: Obsolete macros removed (autoconf 2.60).
+	New release 0.10.4.
+
+2006-08-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (fth_string_split_2): New function, it doesn't
+	remove the split string or regexp.
+
+2006-08-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c (main): Handles now the getopt stuff before starting
+	fth_repl.
+
+	* src/misc.c (ficl_sleep): New word.
+
+2006-08-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/gdbm/fth-gdbm.c (gdbm_inspect): Includes the database
+	file name.
+
+	* src/fth.h: Type FTH changed from ficlUnsigned to ficlInteger.
+
+2006-08-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (ficl_file_system): New word.
+
+	* src/proc.c (ficl_proc_name): New word.
+
+	* examples/fth-lib/fth.fs (load-init-file): New word.
+
+	* src/list.c (fth_null_p): New public function.  Returns true if
+	obj is nil or '().
+
+	* src/misc.c (F_ARGS, fth_args): If rest args and last arg is '()
+	or nil, it will be taken as rest args, otherwise collection of
+	args from stack.
+
+2006-08-09  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_object_apply): Now args can be nil (added),
+	a list, or a single arg.
+
+2006-08-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_get_help): Formatting failure removed.
+
+2006-07-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/effects.fs: average renamed to moving-average.
+
+2006-07-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Array): Chapter edited.
+
+	* src/array.c (fth_array_to_list): Function moved from list.c to
+	array.c.
+	(fth_array_insert_bang): New public function.
+	(fth_array_sort_bang): New public function.
+
+2006-07-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Catch-Throw): Documentation for fth_throw_list
+	added.
+
+	* src/misc.c (signal_check): If die_on_signal then
+	ficl_backtrace() on SIGILL, SIGSEGV, and SIGBUS.
+
+2006-06-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (signal_check): Set signal handler to SIG_DFL before
+	testing for signals and reset to toplevel handler afterwards.
+
+2006-06-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_init): New global variable fth_interactive_p for
+	Ctrl-C signal.
+
+	* src/utils.c (fth_repl): New global variable fth_interactive_p.
+
+2006-06-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_exit): Don't kill the VM, at_exit() needs a
+	working VM system!
+
+	* src/Makefile.in (misc.o): Dump misc.o rule.  (Victim of a long
+	hot summer night.)  Corrected.
+
+	* ficl/stack.c (ficlStackCheck): Running word name should only be
+	searched for when stack depth mismatch occured.
+
+	* src/misc.c (ficl_at_exit): RUNNING_WORD_VM() replaced by
+	c__FUNCTION__ because vm->runningWord may be corrupted.  Seems to
+	solve tests/io-test.fs failure.
+
+2006-06-24  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs (record-sound): Audio format (input) is
+	distinct from data format (output) and can be set via
+	*clm-data-format*.
+
+	* src/Makefile.in: Dependencies for object files added.
+
+	* lib/Makefile.in: Dependencies for object files added.
+
+	* ficl/Makefile.in: Dependencies for object files added.
+
+2006-06-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Autoconf and Libtool removed.
+
+	* ficl/fileaccess.c All Forth words check the stack now.
+
+2006-06-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/ficllocal.h Typedefed ficlInteger to long and ficlUnsigned
+	to unsigned long.
+
+2006-06-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c: New macro WITH_READLINE.
+
+	* ficl/system.c (ficlSystemCreate): Test for ficlInteger == *ptr
+	and ficlUnsigned == *ptr removed.
+
+	* configure.ac: New command line option --without-readline.
+
+2006-06-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c: New words gethostname, sethostname, getservbyname,
+	getservbyport.
+
+2006-06-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c: New socket related words: socket, bind, listen,
+	shutdown, accept, connect, send, recv, sendto, recvfrom.
+
+	* src/misc.c: New signal and process words: signal, kill, wait,
+	waitpid, fork, exec.
+
+2006-06-07  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (fth_io_fdopen): New public function.
+	IO object type handles now sockets.
+	(fth_io_nopen): New public function.
+	(fth_io_nopen_read): New public function.
+	(fth_io_nopen_write): New public function.
+
+2006-06-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c: IO object type handles now string IO.
+	(fth_io_sopen): New public function.
+	(fth_io_sopen_read): New public function.
+	(fth_io_sopen_write): New public function.
+
+2006-06-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_cycle_pos_ref): New public function.
+	(fth_cycle_pos_set): New public function.
+	(fth_cycle_pos_0): New public function.
+	(fth_object_cycle_ref): New public function.
+	(fth_object_cycle_set): New public function.
+
+	* src/numbers.h (FTH_FLOAT_POSITIVE_P): New macro.
+
+	* src/numbers.c (fth_ratio_neg): New public function.
+	(fth_ratio_inv): Renamed from fth_ration_inverse and simplified.
+	(fth_odd_p): New public function.
+	(fth_even_p): New public function.
+	(fth_prime_p): New public function.
+	(fth_next_prime): New public function.
+	(fth_gcd): New public function.
+	(fth_lcm): New public function.
+	(fth_invert): New public function.
+	(fth_jacobi): New public function.
+	(fth_legendre): New public function.
+	(fth_kronecker): New public function.
+	(fth_factorial): New public function.
+	(fth_binomial): New public function.
+	(fth_fibonacci): New public function.
+	(fth_lucas): New public function.
+
+	* doc/fth.texi (Bignum Numbers): Documentation for the above
+	mentioned functions added.
+
+2006-06-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.h (FTH_FLOAT_ZERO_P): Macro uses GMP's mpf_sgn() for
+	testing, if available.
+	(FTH_FLOAT_EQUAL_P): Macro uses GMP's mpf_cmp_d() for testing, if
+	available.
+
+2006-05-31  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: AC_HEADER_SYS_WAIT added.
+
+2006-05-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (fth_set_exit_status): New function.  It sets the
+	global variable fth_exit_status.
+
+2006-05-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_dot_lversion): New function.
+
+2006-05-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Numbers): Standard Forth number words with short
+	description.
+
+	* src/object.c (ficl_to_fth2): New function, used in
+	ficl/ficllocal.h to correct (Forth) double words.
+
+	* ficl/vm.c (ficlVmInnerLoop): Bugs in (Forth) double numbers
+	removed.
+
+2006-05-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (FTH_LOCALEDIR, FTH_PREFIX_PATH): Constants moved
+	to the Makefile again.
+
+	* src/proc.c (ficl_get_help): Help output corrected.
+
+	* src/utils.c (fth_initialize_readline): rl_initialize should come
+	after setting global rl_* variables.
+
+2006-05-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/gdbm/init-ext (usage): Makefile variables CC, CFLAGS,
+	and LDFLAGS can be set on command line.
+
+2006-05-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (File): Documentation for new functions added.
+
+	* src/io.c (io_read_delim): New intern function for
+	fth_io_read().  Replaces call to fgets().
+	(ficl_file_chroot): New function.
+	(fth_file_mkdir): New public function.
+	(fth_file_mkfifo): New public function.
+	(fth_file_symlink): New public function.
+
+	* src/string.c (fth_string_format): Conversion specifications %g,
+	%G, %e, %E, and %F added.
+
+2006-05-13  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/object.c (fth_false_or_null_p): New function.
+
+2006-05-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/io.c (fth_file_chmod): New public function.
+	(fth_file_mtime): New public function.
+	(fth_file_block_p): New public function.
+	(fth_file_character_p): New public function.
+	(fth_file_directory_p): New public function.
+	(fth_file_exists_p): Rewritten.
+	(fth_file_fifo_p): New public function.
+	(fth_file_symlink_p): New public function.
+	(fth_file_socket_p): New public function.
+	(fth_file_executable_p): New public function.
+	(fth_file_readable_p): New public function.
+	(fth_file_writable_p): New public function.
+	(fth_file_owned_p): New public function.
+	(fth_file_grpowned_p): New public function.
+	(fth_file_setuid_p): New public function.
+	(fth_file_setgid_p): New public function.
+	(fth_file_sticky_p): New public function.
+	(fth_file_zero_p): New public function.
+	(fth_file_length): New public function.
+	(fth_file_atime): New public function.
+	(fth_file_ctime): New public function.
+	(fth_file_mtime): New public function.
+
+2006-05-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (AC_CHECK_FUNC(lstat)): Added.
+
+	* src/utils.h: Prototype of file_exists_p() moved from fth.h.
+
+	* src/utils.c (fth_load_init_file): Function fth_file_exists_p
+	renamed to file_exists_p.
+	(fth_feed_history): Ditto.
+	* src/misc.c (fth_load_file): Ditto.
+	(forth_init): Ditto.
+	(fth_install_file): Ditto.
+
+2006-05-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/numbers.h (FTH_FLOAT_ERR, FTH_FLOAT_ZERO, FTH_FLOAT_ZERO_P,
+	FTH_FLOAT_NOT_ZERO_P, FTH_FLOAT_EQUAL_P, FTH_FLOAT_NOT_EQUAL_P):
+	New macros.
+	
+2006-05-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac Test for sensible $prefix value before setting
+	FTH_PREFIX_PATH.
+
+2006-05-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_reset): New public function.
+	(signal_check): New function.
+	(fth_catch_eval): Catches signals like fth_repl. 
+
+	* src/utils.c (fth_repl): Signal handling changed.
+
+	* examples/gdbm/fth-gdbm.c (fth_gdbm_version): It's a void
+	function now returning lib gdbm's version string.
+
+2006-05-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/array.c (fth_array_join): New public function.
+	(fth_make_empty_array): New public function.
+
+	* doc/fth.texi (file-basename): Documentation updated.
+
+	* src/io.c (fth_file_basename): Use
+	fth_string_split/fth_regexp_search to find the correct basename.
+
+2006-04-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (FTH_CHECK_FUNC(strsignal)): Added.
+
+	* src/misc.c (fth_init): More signals will be caught: SIGILL,
+	SIGBUS, SIGFPE, SIGQUIT, SIGABRT.
+
+	* src/numbers.c (ficl_complex_pow): New.
+
+	* src/utils.c (repl_sigint_handler): New.
+	(fth_repl): Repl breaks on C-c (SIGINT).
+
+2006-04-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac: Check for sizeof long and long long.
+
+	* src/fth-lib.h (RUNNING_WORD_VM, PRIMITIVE_SET): Each have now a
+	GNU extension and a plain C version.
+
+	* src/misc.c (fth_array_p etc.): Several predicate functions added
+	for plain C predicate macros.
+
+	* src/fth.h (FTH_ARRAY_P etc.): Each predicate macro has now a GNU
+	extension and plain C version.
+
+2006-04-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (readline-prefix, gmp-prefix): Two new command line
+	options added for providing prefix paths to libreadline and
+	libgmp.
+
+2006-04-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h (readline): Both header and lib must be available.
+	(bool): Is true/false defined?.
+	(_Complex_I): Declaration changed.
+
+	* configure.ac (HAVE_1_0_FI, HAVE_COMPLEX_I): Test changed from
+	AC_LINK_IFELSE to AC_RUN_IFELSE.
+
+	* ficl/Makefile.am (libficl_la_SOURCES): libficl.a --> libficl.la
+	* lib/Makefile.am (libgnulib_la_LIBADD): libgnulib.a --> libgnulib.la
+
+2006-04-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure.ac (AC_CHECK_FUNCS(cpow)): Added.
+
+	* src/fth-complex.c, src/fth-complex.h (cpow): New public
+	function.
+
+	* src/fth-lib.h: Test for _Complex_I changed.
+
+	* configure.ac (AC_CHECK_SIZEOF(ptrdiff_t)): Added.
+	(AC_CHECK_FUNCS(qsort)): Added.
+
+	* src/numbers.c (init_number): Several ratio functions are
+	defined, whether HAVE_LIBGMP is defined or not.
+
+	* src/utils.c (xmalloc, xrealloc, xcalloc, xfree): Moved from
+	lib/xmalloc.c.
+
+	* src/io.c (fth_file_exists_p): New constants HAVE_ACCESS,
+	HAVE_EACCESS, and FTH_ACCESS_P.
+
+	* src/fth-lib.h (HAVE_LIBREADLINE): If this constant is defined,
+	readline.h and history.h will be included, otherwise not.
+
+	* src/fth-complex.h (_Complex_I): Declaration changed.
+
+	* src/array.c (fth_array_sort): New constant HAVE_QSORT.
+
+	* lib/Makefile.am (noinst_LIBRARIES): Renamed to libgnulib.a.
+
+	* ficl/ficllocal.h (FICL_PLATFORM_ALIGNMENT): Is now
+	SIZEOF_PTRDIFF_T.
+	(FICL_PLATFORM_HAS_FTRUNCATE): Is now HAVE_FTRUNCATE.
+
+2006-04-17  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi (Ratio Numbers): Doc for fth_ratio_pow and r**
+	removed.
+	(Bignum Numbers): Doc for fth_number_pow and b** added.
+
+	* src/fth.h, src/numbers.c (fth_ratio_pow): Removed.
+
+	* src/numbers.c (cpow): New internal function.
+	(fth_number_pow): New public function.
+	(number_math): Numb_POW added to all number types.
+	(float_to_c_string): gmp_asprintf() for bignum as well as for
+	double.
+	(fth_number_cstr): Ratio uses gmp's mpq_get_str().
+
+2006-04-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (ficl_forth_string_to_string): Str must be freed.
+
+	* src/proc.c (ficl_source_to): Src must be freed.
+	(ficl_doc_to): Doc must be freed.
+
+	* src/io.c (ficl_open_pipe): Cmd must be freed.
+
+	* src/regexp.c (fth_regexp_search): Typos.
+
+	* doc/fth.texi (Top): Working on documentation.
+
+	* configure.ac: Increment version from 0.8.8 to 0.8.9.
+
+	* src/string.c (fth_string_printf): alloca and vnsprintf replaced
+	by vasprintf.
+
+2006-04-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* lib/error.c: Bugs.
+
+2006-04-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h, src/fth.h, src/io.c, src/misc.c, src/numbers.c, src/numbers.h, src/regexp.c, src/utils.c, lib/Makefile.am, lib/Makefile.in, lib/alloca.c, lib/vasprintf.c, lib/xmalloc.c, po/de.po, po/fth.pot, .cvsignore, Makefile.am, Makefile.in, README, configure, configure.ac, doc/.cvsignore, doc/fdl.texi, doc/fth.texi, doc/stamp-vti, doc/version.texi, examples/fth-lib/fth.fs, ficl/ficl.h, ficl/system.c, fth-config.h.in: Bugs.
+
+2006-03-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* configure, configure.ac, src/fth-complex.h, ficl/Makefile.in, ficl/vm.c, lib/vasprintf.c, src/Makefile.am, src/Makefile.in, src/fth-complex.c, src/fth-lib.h, src/fth.h, src/io.c, src/misc.c, src/numbers.c, src/numbers.h, src/object.c, src/string.c, src/symbol.c, src/utils.c, ficl/Makefile.am, fth-config.h.in, Makefile.am: Bugs.
+
+2006-03-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* doc/fth.texi, doc/stamp-vti, doc/version.texi, examples/Makefile.am, examples/site-lib/README, po/de.po, po/fth.pot, src/misc.c, .cvsignore, Makefile.am, Makefile.in, configure:
+	shared/fth/site-lib renamed to shared/fth/site-fth.
+
+2006-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/.cvsignore, src/fth.c, src/utils.c: Imported Sources.
+
+	* src/.cvsignore, src/fth.c, src/utils.c: New file.
+
+	* src/symbol.c: Imported Sources.
+
+	* src/symbol.c: New file.
+
+	* src/string.c: Imported Sources.
+
+	* src/string.c: New file.
+
+	* src/regexp.c: Imported Sources.
+
+	* src/regexp.c: New file.
+
+	* src/proc.c: Imported Sources.
+
+	* src/proc.c: New file.
+
+	* src/object.c: Imported Sources.
+
+	* src/object.c: New file.
+
+	* src/numbers.c: Imported Sources.
+
+	* src/numbers.c: New file.
+
+	* src/fth-complex.c, src/misc.c: Imported Sources.
+
+	* src/fth-complex.c, src/misc.c: New file.
+
+	* src/list.c: Imported Sources.
+
+	* src/list.c: New file.
+
+	* src/io.c: Imported Sources.
+
+	* src/io.c: New file.
+
+	* src/hook.c: Imported Sources.
+
+	* src/hook.c: New file.
+
+	* src/hash.c: Imported Sources.
+
+	* src/hash.c: New file.
+
+	* src/array.c: Imported Sources.
+
+	* src/array.c: New file.
+
+	* src/Makefile.in: Imported Sources.
+
+	* src/Makefile.in: New file.
+
+	* src/Makefile.am: Imported Sources.
+
+	* src/Makefile.am: New file.
+
+	* src/fth-lib.h, src/fth.h: Imported Sources.
+
+	* src/fth-lib.h, src/fth.h: New file.
+
+	* lib/.cvsignore, lib/xmalloc.c, src/fth-complex.h, src/numbers.h, src/utils.h:
+	Imported Sources.
+
+	* lib/.cvsignore, lib/xmalloc.c, src/fth-complex.h, src/numbers.h, src/utils.h:
+	New file.
+
+	* lib/regex.c, lib/snprintf.c, lib/strdup.c, lib/strdup.h, lib/strerror.c, lib/vasprintf.c, lib/vasprintf.h:
+	Imported Sources.
+
+	* lib/regex.c, lib/snprintf.c, lib/strdup.c, lib/strdup.h, lib/strerror.c, lib/vasprintf.c, lib/vasprintf.h:
+	New file.
+
+	* lib/regex.h: Imported Sources.
+
+	* lib/regex.h: New file.
+
+	* lib/getopt.c, lib/getopt1.c: Imported Sources.
+
+	* lib/getopt.c, lib/getopt1.c: New file.
+
+	* lib/getopt_int.h, lib/gettext.h: Imported Sources.
+
+	* lib/getopt_int.h, lib/gettext.h: New file.
+
+	* lib/error.c, lib/getopt.h, lib/strtod.c: Imported Sources.
+
+	* lib/error.c, lib/getopt.h, lib/strtod.c: New file.
+
+	* lib/obstack.h: Imported Sources.
+
+	* lib/obstack.h: New file.
+
+	* lib/obstack.c: Imported Sources.
+
+	* lib/obstack.c: New file.
+
+	* lib/malloc.c: Imported Sources.
+
+	* lib/malloc.c: New file.
+
+	* lib/alloca.c: Imported Sources.
+
+	* lib/alloca.c: New file.
+
+	* lib/Makefile.in: Imported Sources.
+
+	* lib/Makefile.in: New file.
+
+	* ficl/softcore/classes.fr, ficl/softcore/ficllocal.fr, ficl/softcore/fileaccess.fr, ficl/softcore/string.fr, lib/Makefile.am:
+	Imported Sources.
+
+	* ficl/softcore/classes.fr, ficl/softcore/ficllocal.fr, ficl/softcore/fileaccess.fr, ficl/softcore/string.fr, lib/Makefile.am:
+	New file.
+
+	* ficl/softcore/oo.fr: Imported Sources.
+
+	* ficl/softcore/oo.fr: New file.
+
+	* ficl/softcore/ficl.fr, ficl/softcore/jhlocal.fr, ficl/softcore/marker.fr, ficl/softcore/prefix.fr:
+	Imported Sources.
+
+	* ficl/softcore/ficl.fr, ficl/softcore/jhlocal.fr, ficl/softcore/marker.fr, ficl/softcore/prefix.fr:
+	New file.
+
+	* ficl/.cvsignore, ficl/ReadMe.txt, ficl/softcore/ifbrack.fr, ficl/softcore/makesoftcore.c, ficl/softcore/softcore.fr, ficl/word.c:
+	Imported Sources.
+
+	* ficl/.cvsignore, ficl/ReadMe.txt, ficl/softcore/ifbrack.fr, ficl/softcore/makesoftcore.c, ficl/softcore/softcore.fr, ficl/word.c:
+	New file.
+
+	* ficl/vm.c: Imported Sources.
+
+	* ficl/vm.c: New file.
+
+	* ficl/tools.c, ficl/utility.c: Imported Sources.
+
+	* ficl/tools.c, ficl/utility.c: New file.
+
+	* ficl/system.c: Imported Sources.
+
+	* ficl/system.c: New file.
+
+	* ficl/search.c, ficl/stack.c: Imported Sources.
+
+	* ficl/search.c, ficl/stack.c: New file.
+
+	* ficl/primitives.c: Imported Sources.
+
+	* ficl/primitives.c: New file.
+
+	* ficl/lzcompress.c, ficl/lzuncompress.c, ficl/prefix.c:
+	Imported Sources.
+
+	* ficl/lzcompress.c, ficl/lzuncompress.c, ficl/prefix.c: New file.
+
+	* ficl/float.c, ficl/hash.c: Imported Sources.
+
+	* ficl/float.c, ficl/hash.c: New file.
+
+	* ficl/extras.c, ficl/fileaccess.c, ficl/unix.c: Imported Sources.
+
+	* ficl/extras.c, ficl/fileaccess.c, ficl/unix.c: New file.
+
+	* ficl/double.c: Imported Sources.
+
+	* ficl/double.c: New file.
+
+	* ficl/dictionary.c: Imported Sources.
+
+	* ficl/dictionary.c: New file.
+
+	* ficl/Makefile.in, ficl/bit.c, ficl/callback.c: Imported Sources.
+
+	* ficl/Makefile.in, ficl/bit.c, ficl/callback.c: New file.
+
+	* ficl/Makefile.am, ficl/ficltokens.h: Imported Sources.
+
+	* ficl/Makefile.am, ficl/ficltokens.h: New file.
+
+	* ficl/ficllocal.h: Imported Sources.
+
+	* ficl/ficllocal.h: New file.
+
+	* ficl/ficl.h: Imported Sources.
+
+	* ficl/ficl.h: New file.
+
+	* examples/scripts/fth-test.fth, examples/site-lib/README:
+	Imported Sources.
+
+	* examples/scripts/fth-test.fth, examples/site-lib/README: New file.
+
+	* examples/gdbm/fth-gdbm.c, examples/gdbm/init-ext: Imported Sources.
+
+	* examples/gdbm/fth-gdbm.c, examples/gdbm/init-ext: New file.
+
+	* examples/fth-lib/fth.fs, examples/gdbm/fth-gdbm.h: Imported Sources.
+
+	* examples/fth-lib/fth.fs, examples/gdbm/fth-gdbm.h: New file.
+
+	* examples/Makefile.in, examples/fth-lib/assert.fs, examples/fth-lib/compat.fs:
+	Imported Sources.
+
+	* examples/Makefile.in, examples/fth-lib/assert.fs, examples/fth-lib/compat.fs:
+	New file.
+
+	* doc/.cvsignore, doc/fdl.texi, examples/Makefile.am: Imported Sources.
+
+	* doc/.cvsignore, doc/fdl.texi, examples/Makefile.am: New file.
+
+	* doc/fth.texi: Imported Sources.
+
+	* doc/fth.texi: New file.
+
+	* doc/texinfo.tex: Imported Sources.
+
+	* doc/texinfo.tex: New file.
+
+	* doc/mdate-sh: Imported Sources.
+
+	* doc/mdate-sh: New file.
+
+	* doc/Makefile.am, doc/Makefile.in, doc/stamp-vti, doc/version.texi:
+	Imported Sources.
+
+	* doc/Makefile.am, doc/Makefile.in, doc/stamp-vti, doc/version.texi:
+	New file.
+
+	* tests/.cvsignore, tests/ChangeLog, tests/string-test.fs, tests/symbol-test.fs:
+	Imported Sources.
+
+	* tests/.cvsignore, tests/ChangeLog, tests/string-test.fs, tests/symbol-test.fs:
+	New file.
+
+	* tests/numbers-test.fs, tests/proc-test.fs, tests/regexp-test.fs:
+	Imported Sources.
+
+	* tests/numbers-test.fs, tests/proc-test.fs, tests/regexp-test.fs:
+	New file.
+
+	* tests/misc-test.fs: Imported Sources.
+
+	* tests/misc-test.fs: New file.
+
+	* tests/list-test.fs: Imported Sources.
+
+	* tests/list-test.fs: New file.
+
+	* tests/hash-test.fs, tests/hook-test.fs, tests/io-test.fs:
+	Imported Sources.
+
+	* tests/hash-test.fs, tests/hook-test.fs, tests/io-test.fs: New file.
+
+	* tests/array-test.fs, tests/file-test.fs, tests/package.m4, tests/testsuite:
+	Imported Sources.
+
+	* tests/array-test.fs, tests/file-test.fs, tests/package.m4, tests/testsuite:
+	New file.
+
+	* tests/Makefile.in, tests/atlocal.in: Imported Sources.
+
+	* tests/Makefile.in, tests/atlocal.in: New file.
+
+	* po/.cvsignore, po/ChangeLog, po/LINGUAS, po/de.po, tests/Makefile.am:
+	Imported Sources.
+
+	* po/.cvsignore, po/ChangeLog, po/LINGUAS, po/de.po, tests/Makefile.am:
+	New file.
+
+	* po/fth.pot: Imported Sources.
+
+	* po/fth.pot: New file.
+
+	* po/Makevars, po/POTFILES.in, po/Rules-quot, po/insert-header.sin:
+	Imported Sources.
+
+	* po/Makevars, po/POTFILES.in, po/Rules-quot, po/insert-header.sin:
+	New file.
+
+	* po/Makefile.in.in, po/boldquot.sed, po/en@boldquot.header, po/en@quot.header, po/quot.sed, po/remove-potcdate.sin:
+	Imported Sources.
+
+	* po/Makefile.in.in, po/boldquot.sed, po/en@boldquot.header, po/en@quot.header, po/quot.sed, po/remove-potcdate.sin:
+	New file.
+
+	* m4/.cvsignore, m4/inttypes-pri.m4, m4/isc-posix.m4, m4/lcmessage.m4, m4/longdouble.m4, m4/longlong.m4, m4/printf-posix.m4, m4/signed.m4, m4/size_max.m4, m4/stdint_h.m4, m4/uintmax_t.m4, m4/ulonglong.m4, m4/wchar_t.m4, m4/wint_t.m4, m4/xsize.m4:
+	Imported Sources.
+
+	* m4/.cvsignore, m4/inttypes-pri.m4, m4/isc-posix.m4, m4/lcmessage.m4, m4/longdouble.m4, m4/longlong.m4, m4/printf-posix.m4, m4/signed.m4, m4/size_max.m4, m4/stdint_h.m4, m4/uintmax_t.m4, m4/ulonglong.m4, m4/wchar_t.m4, m4/wint_t.m4, m4/xsize.m4:
+	New file.
+
+	* m4/ChangeLog, m4/Makefile.in, m4/codeset.m4, m4/glibc21.m4, m4/intdiv0.m4, m4/intmax.m4, m4/inttypes.m4, m4/inttypes_h.m4:
+	Imported Sources.
+
+	* m4/ChangeLog, m4/Makefile.in, m4/codeset.m4, m4/glibc21.m4, m4/intdiv0.m4, m4/intmax.m4, m4/inttypes.m4, m4/inttypes_h.m4:
+	New file.
+
+	* m4/Makefile.am, m4/po.m4, m4/progtest.m4: Imported Sources.
+
+	* m4/Makefile.am, m4/po.m4, m4/progtest.m4: New file.
+
+	* m4/lib-link.m4, m4/lib-prefix.m4, m4/nls.m4: Imported Sources.
+
+	* m4/lib-link.m4, m4/lib-prefix.m4, m4/nls.m4: New file.
+
+	* m4/gettext.m4, m4/iconv.m4, m4/lib-ld.m4: Imported Sources.
+
+	* m4/gettext.m4, m4/iconv.m4, m4/lib-ld.m4: New file.
+
+	* .cvsignore, fth.m4: Imported Sources.
+
+	* .cvsignore, fth.m4: New file.
+
+	* missing, mkinstalldirs: Imported Sources.
+
+	* missing, mkinstalldirs: New file.
+
+	* ltmain.sh: Imported Sources.
+
+	* ltmain.sh: New file.
+
+	* depcomp, install-sh: Imported Sources.
+
+	* depcomp, install-sh: New file.
+
+	* config.sub: Imported Sources.
+
+	* config.sub: New file.
+
+	* config.rpath: Imported Sources.
+
+	* config.rpath: New file.
+
+	* config.guess: Imported Sources.
+
+	* config.guess: New file.
+
+	* COPYING.LIB, ChangeLog, INSTALL, NEWS, compile: Imported Sources.
+
+	* COPYING.LIB, ChangeLog, INSTALL, NEWS, compile: New file.
+
+	* COPYING: Imported Sources.
+
+	* COPYING: New file.
+
+	* ABOUT-NLS, AUTHORS: Imported Sources.
+
+	* ABOUT-NLS, AUTHORS: New file.
+
+	* configure: Imported Sources.
+
+	* configure: New file.
+
+	* Makefile.in, fth-config.h.in: Imported Sources.
+
+	* Makefile.in, fth-config.h.in: New file.
+
+	* Makefile.am, aclocal.m4: Imported Sources.
+
+	* Makefile.am, aclocal.m4: New file.
+
+	* README, configure.ac: Imported Sources.
+
+	* README, configure.ac: New file.
+
+2006-02-21  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.am (SUBDIRS): Add m4.
+	(ACLOCAL_AMFLAGS): New variable.
+	(EXTRA_DIST): New variable.
+	* configure.ac (AC_CONFIG_FILES): Add po/Makefile.in,
+
