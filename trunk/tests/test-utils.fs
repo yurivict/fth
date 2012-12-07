@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \ 
-\ Ident: $Id: test-utils.fs,v 1.9 2012/11/09 02:28:31 mi-scholz Exp $
+\ Ident: $Id$
 
 [ifundef] *fth-test-count*
 	100 value *fth-test-count*

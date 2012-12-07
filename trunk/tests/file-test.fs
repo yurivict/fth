@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id: file-test.fs,v 1.25 2012/11/20 01:05:32 mi-scholz Exp $
+\ Ident: $Id$
 
 require test-utils.fs
 

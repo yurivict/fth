@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" Ident: $Id: README.man,v 1.22 2012/11/29 05:00:52 mi-scholz Exp $
+.\" Ident: $Id$
 .\"
 .Dd December 07, 2012
 .Dt README

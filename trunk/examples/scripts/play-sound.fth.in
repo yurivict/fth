@@ -25,7 +25,7 @@
 \ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \
-\ Ident: $Id: play-sound.fth.in,v 1.14 2012/04/17 01:16:34 mi-scholz Exp $
+\ Ident: $Id$
 
 *filename* nil file-basename constant *script-name*
 "This is %s v%s, (c) 2006-2012 Michael Scholz" '( *script-name* string-upcase

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: utils.c,v 1.207 2012/11/28 14:40:48 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #if defined(HAVE_CONFIG_H)

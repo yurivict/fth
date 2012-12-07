@@ -26,7 +26,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id: fth-test.fth.in,v 1.32 2012/11/14 04:59:09 mi-scholz Exp $
+\ Ident: $Id$
 
 \ Commentary:
 \

@@ -56,7 +56,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: printf.c,v 1.21 2012/12/07 00:21:50 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #if defined(HAVE_CONFIG_H)

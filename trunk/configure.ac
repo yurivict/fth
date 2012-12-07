@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl Ident: $Id: configure.ac,v 1.174 2012/11/29 05:00:52 mi-scholz Exp $
+dnl Ident: $Id$
 dnl
 dnl Process this file with autoconf to produce configure.
 

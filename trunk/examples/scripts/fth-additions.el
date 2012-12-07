@@ -24,7 +24,7 @@
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
 ;;
-;; Ident: $Id: fth-additions.el,v 1.7 2012/02/17 02:18:34 mi-scholz Exp $
+;; Ident: $Id$
 
 ;;; Commentary:
 

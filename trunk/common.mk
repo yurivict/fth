@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# Ident: $Id: common.mk,v 1.23 2012/09/28 20:52:01 mi-scholz Exp $
+# Ident: $Id$
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id: misc.c,v 1.611 2012/12/07 00:21:50 mi-scholz Exp $
+ * Ident: $Id$
  */
 
 #define FTH_DATE                        "07-Dec-2012"
