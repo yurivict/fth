@@ -1,0 +1,11 @@
+You can place your own scripts here.  You may install your scripts by:
+
+    fth -ve "install your-script.fs"
+
+This command installs *.fs scripts in ${prefix}/share/fth/site-fth.
+`make install' creates an empty directory with that name.  This path
+is included in fth's search path.
+
+The current *.fs files here are scripts for Bill Schottstaedt's sound
+editor Snd.  You can install them by calling install.fth.  All *.fs
+files will be installed in ${prefix}/share/fth/site-fth.

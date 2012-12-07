@@ -1,0 +1,329 @@
+# @configure_input@
+
+# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# Ident: $Id: Makefile.in,v 1.126 2012/11/29 05:00:52 mi-scholz Exp $
+
+@SET_MAKE@
+srcdir		= @srcdir@
+VPATH		= @srcdir@
+SHELL		= @SHELL@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+datarootdir	= @datarootdir@
+libdir		= @libdir@
+mandir		= @mandir@
+top_srcdir	= @top_srcdir@
+top_builddir	= @top_builddir@
+prog_name	= @prog_name@
+pkgdatadir	= ${datarootdir}/${prog_name}
+pkglibdir	= @libdir@/${prog_name}
+pkgincludedir	= @includedir@/${prog_name}
+distfile	= @PACKAGE_TARNAME@-@PACKAGE_VERSION@
+distdir		= @abs_top_builddir@/${distfile}
+aclocaldir	= ${datarootdir}/aclocal
+
+fthficldir	= ${top_srcdir}/ficl
+fthlibdir	= ${top_srcdir}/lib
+fthsrcdir	= ${top_srcdir}/src
+fthlib		= ${top_srcdir}/examples/fth-lib
+fthdbm		= ${top_srcdir}/examples/dbm
+fthscripts	= ${top_srcdir}/examples/scripts
+fthsite		= ${top_srcdir}/examples/site-lib
+
+INSTALL		= @INSTALL@
+INSTALL_DATA	= ${INSTALL} -m 0644
+MANDOC		= @MANDOC@
+CP		= cp -p
+CPD		= cp -pR
+RM		= rm -f
+RMD		= rm -fr
+
+SUBDIRS = \
+	${top_builddir}/ficl \
+	${top_builddir}/lib \
+	${top_builddir}/src \
+	${top_builddir}/examples/dbm
+CLEAN_SUBDIRS = ${SUBDIRS} ${top_builddir}/tests
+
+HEADERS = \
+	${top_builddir}/fth-config.h \
+	${fthficldir}/ficl.h \
+	${fthficldir}/ficllocal.h \
+	${fthficldir}/ficltokens.h \
+	${fthsrcdir}/fth.h \
+	${fthsrcdir}/fth-lib.h
+FS_LIB = \
+	assert.fs \
+	compat.fs \
+	fth.fs \
+	ficl.fr \
+	ficllocal.fr \
+	fileaccess.fr \
+	ifbrack.fr \
+	jhlocal.fr \
+	marker.fr \
+	prefix.fr \
+	softcore.fr
+SITE_LIB = \
+	bird.fsm \
+	clm-ins.fs \
+	clm.fs \
+	draw.fs \
+	dsp.fs \
+	effects.fs \
+	env.fs \
+	enved.fs \
+	examp.fs \
+	extensions.fs \
+	hooks.fs \
+	marks.fs \
+	mix.fs \
+	popup.fs \
+	rgb.fs \
+	rubber.fs \
+	snd-forth-init.fs \
+	snd-xm.fs \
+	spectr.fs \
+	xm-enved.fs
+
+all: all-dep
+	for f in ${SUBDIRS}; do \
+		(cd $${f} && ${MAKE} all); \
+	done
+
+all-dep: Makefile fth-config.h config.h ${top_srcdir}/common.mk
+
+install: all
+	${SHELL} ${top_srcdir}/mkinstalldirs ${libdir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${mandir}/man1
+	${SHELL} ${top_srcdir}/mkinstalldirs ${mandir}/man3
+	${SHELL} ${top_srcdir}/mkinstalldirs ${aclocaldir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgincludedir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${pkglibdir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgdatadir}/fth-lib
+	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgdatadir}/site-fth
+	for f in ${SUBDIRS}; do \
+		(cd $${f} && ${MAKE} install); \
+	done
+	${RM} ${pkgincludedir}/*
+	for f in ${HEADERS}; do \
+		${INSTALL_DATA} $${f} ${pkgincludedir}/; \
+	done
+	for f in ${FS_LIB}; do \
+		${INSTALL_DATA} ${fthlib}/$${f} ${pkgdatadir}/fth-lib/$${f}; \
+	done
+	for f in ${SITE_LIB}; do \
+		${INSTALL_DATA} ${fthsite}/$${f} ${pkgdatadir}/site-fth/$${f}; \
+	done
+	${INSTALL_DATA} ${top_srcdir}/fth.m4 ${aclocaldir}/fth.m4
+	${INSTALL_DATA} ${top_srcdir}/fth.1 ${mandir}/man1/fth.1
+	${INSTALL_DATA} ${top_srcdir}/libfth.3 ${mandir}/man3/libfth.3
+	gzip -f ${mandir}/man1/fth.1
+	gzip -f ${mandir}/man3/libfth.3
+
+install-site-fth: install
+
+fth-shared: all
+	(cd ${top_builddir}/src && ${MAKE} fth-shared)
+
+fth-static: all
+	(cd ${top_builddir}/src && ${MAKE} fth-static)
+
+install-shared: install
+	(cd ${top_builddir}/src && ${MAKE} install-shared)
+
+install-static: install
+	(cd ${top_builddir}/src && ${MAKE} install-static)
+
+install-strip:
+	(cd ${top_builddir}/src && ${MAKE} install-strip)
+	${MAKE} install
+
+uninstall:
+	for f in ${SUBDIRS}; do \
+		(cd $${f} && ${MAKE} uninstall); \
+	done
+	${RM} ${aclocaldir}/fth.m4
+	${RM} ${mandir}/man1/fth.*
+	${RM} ${pkgincludedir}/*
+	for f in ${FS_LIB};  do \
+		${RM} ${pkgdatadir}/fth-lib/$${f}; \
+	done
+	for f in ${SITE_LIB}; do \
+		${RM} ${pkgdatadir}/site-fth/$${f}; \
+	done
+
+distpaths = \
+	examples/fth-lib \
+	examples/dbm \
+	examples/scripts \
+	examples/site-lib \
+	ficl \
+	lib \
+	src \
+	tests
+DIST_FILES = \
+	AUTHORS \
+	COPYING \
+	ChangeLog \
+	Makefile.in \
+	NEWS \
+	README \
+	README.man \
+	aclocal.m4 \
+	common.mk \
+	config.guess \
+	config.sub \
+	configure \
+	configure.ac \
+	fth-config.h.in \
+	config.h.in \
+	fth.1 \
+	libfth.3 \
+	fth.m4 \
+	fth.sh.in \
+	install-sh \
+	mkinstalldirs \
+	stamp-h.in
+DBM_DIST = Makefile.in fth-dbm.c
+SCR_DIST = \
+	README \
+	fth-test.fth.in \
+	install.fth.in \
+	play-sound.fth.in \
+	xm.fth.in \
+	xg.fth.in \
+	fth-additions.el \
+	coretest.fth \
+	tester.fs
+SITE_LIB_DIST = \
+	${SITE_LIB} \
+	README \
+	install.fth
+
+dist: all-dep ${top_srcdir}/README
+	${RMD} ${distdir}*
+	for f in ${distpaths}; do \
+		${SHELL} ${top_srcdir}/mkinstalldirs ${distdir}/$${f}; \
+	done
+	for f in ${DIST_FILES}; do \
+		${CP} ${top_srcdir}/$${f} ${distdir}/$${f}; \
+	done
+	for f in ${FS_LIB}; do \
+		${CP} ${fthlib}/$${f} ${distdir}/examples/fth-lib/$${f}; \
+	done
+	for f in ${DBM_DIST}; do \
+		${CP} ${fthdbm}/$${f} ${distdir}/examples/dbm/$${f}; \
+	done
+	for f in ${SCR_DIST}; do \
+		${CP} ${fthscripts}/$${f} ${distdir}/examples/scripts/$${f}; \
+	done
+	for f in ${SITE_LIB_DIST}; do \
+		${CP} ${fthsite}/$${f} ${distdir}/examples/site-lib/$${f}; \
+	done
+	for f in ${CLEAN_SUBDIRS}; do \
+		(cd $${f} && ${MAKE} dist); \
+	done
+	(cd ${top_srcdir}/ficl && \
+	    ${CP} *.[ch] *.in ReadMe.txt ${distdir}/ficl/)
+	(cd ${top_srcdir}/tests && \
+	    ${CP} *.[fim]? testsuite testsuite.at Ch* ${distdir}/tests/)
+	(cd ${top_srcdir}/lib && \
+	    ${CP} *.[ch3] *.in ${distdir}/lib/)
+	(cd ${top_srcdir}/src && \
+	    ${CP} *.[ch] *.in ${distdir}/src/)
+	tar -cof - ${distfile} | bzip2 -9c > ${distfile}.tar.bz2
+	${RMD} ${distdir}
+
+test: all
+	(cd ${top_builddir}/tests && ${MAKE} test)
+
+clean:
+	for f in ${CLEAN_SUBDIRS}; do \
+		(cd $${f} && ${MAKE} clean); \
+	done
+
+distclean: clean
+	for f in ${CLEAN_SUBDIRS}; do \
+		(cd $${f} && ${MAKE} distclean); \
+	done
+	${RM} Makefile config.[lc]* config.st* stamp-h \
+	    fth-config.h config.h fth.sh TAGS tags
+
+maintainer-clean: clean
+	for f in ${CLEAN_SUBDIRS}; do \
+		(cd $${f} && ${MAKE} maintainer-clean); \
+	done
+	${RM} Makefile config.[lc]* config.st* stamp-h \
+	    fth-config.h config.h fth.sh TAGS tags
+	${RMD} *~ ${distdir}*
+	find ${top_srcdir} -name "*~" -exec rm {} ';'
+
+depend:
+	env MKDEP_CPP="${CC} -E" MKDEP_CPP_OPTS=-MM mkdep \
+	    -DHAVE_CONFIG_H -I${prefix}/include -I${top_builddir} \
+	    -I${srcdir}/ficl -I${srcdir}/lib -I${srcdir}/src \
+	    ${srcdir}/ficl/*.c ${srcdir}/src/*.c
+
+ctags:
+	(cd ${top_srcdir} && ctags -dw ./ficl/*.[ch] ./src/*.[ch])
+
+${top_srcdir}/aclocal.m4: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac
+	(cd ${top_srcdir} && aclocal)
+
+# From autoconf.info.
+${top_srcdir}/configure: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac \
+	    ${top_srcdir}/aclocal.m4
+	(cd ${top_srcdir} && autoconf)
+
+${top_srcdir}/fth-config.h.in: ${top_srcdir}/stamp-h.in
+${top_srcdir}/config.h.in: ${top_srcdir}/stamp-h.in
+${top_srcdir}/stamp-h.in: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac \
+	    ${top_srcdir}/aclocal.m4
+	(cd ${top_srcdir} && echo timestamp > stamp-h.in)
+
+${top_builddir}/fth-config.h: ${top_builddir}/stamp-h
+${top_builddir}/config.h: ${top_builddir}/stamp-h
+${top_builddir}/stamp-h: ${top_srcdir}/fth-config.h.in \
+	    ${top_srcdir}/config.h.in ${top_builddir}/config.status
+	(cd ${top_builddir} && ${SHELL} ./config.status)
+
+Makefile: ${srcdir}/Makefile.in ${top_builddir}/config.status
+	(cd ${top_builddir} && ${SHELL} ./config.status)
+
+${top_builddir}/config.status: ${top_srcdir}/configure
+	(cd ${top_builddir} && ${SHELL} ./config.status --recheck)
+
+${top_srcdir}/README: ${top_srcdir}/README.man
+	${MANDOC} -Tascii ${top_srcdir}/README.man | \
+	col -b | \
+	sed -n '3,/apple-darwin/p' > $@
+
+.PHONY: all install fth-shared fth-static install-shared install-static \
+	install-strip install-site-fth uninstall \
+	dist test clean distclean maintainer-clean depend
+
+# Makefile.in ends here.

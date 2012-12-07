@@ -1,0 +1,189 @@
+NAME
+     README -- installation information for the Fth package
+
+INTRODUCTION
+     Fth is a software package which includes the interpreter fth and the
+     extension library libfth.	You can write Forth scripts and interpret them
+     by the interpreter fth or you can link libfth into an application to use
+     it as an extension language.
+
+     Fth's core language is Ficl, a Forth dialect written by John Sadler.  The
+     Ficl source is included in the Fth source tree and is slightly changed to
+     fit with Fth.  Ficl is more or less ANS compatible.  The Fth library
+     contains object type extensions like arrays, hashs, strings, regexp etc.
+     A GC tries to handle memory management of object types.  Fth is known to
+     build with clang(1) as well as with gcc(1).
+
+WHERE IS FTH LOCATED?
+     You can get the latest archive from http://sourceforge.net/projects/fth/.
+     If you prefer cvs, you can get the sources from fth.cvs.sourceforge.net.
+     The first time type
+     % setenv CVSROOT :pserver:anonymous@fth.cvs.sourceforge.net:/cvsroot/fth
+     % cvs -z3 co -P fth
+     for source tree updating type
+     % cvs -q update -CdP
+     in the new fth directory.
+
+REQUIREMENTS
+     The interactive Fth interpreter supports tcsh-like command-line editing
+     with the tecla(7) library.  You can find a copy at
+     http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.2.tar.gz.  If you
+     won't use tecla(7), you can configure Fth without it, see CONFIGURE FTH.
+
+     Bignumbers are supported by bn(3) from openssl.
+
+   64-Bit-NetBSD and Tecla
+     The libtecla package on NetBSD provides a static library libtecla.a.  On
+     64-bit machines this package should be compiled with:
+	   cd /usr/pkgsrc/devel/libtecla
+	   env CFLAGS=-fPIC make install clean
+
+CONFIGURE FTH
+     There are a few additional configure options which may be of interest.
+     --disable-shared
+	  Disable shared library support.
+     --enable-warnings
+	  Enable C compiler warning flags.
+     --enable-maintainer-mode
+	  `make maintainer-clean' removes files which need special developer
+	  utilities.  Use this option with caution.
+     --program-prefix
+     --program-suffix
+     --program-transform-name
+	  More than one version of fth may be installed at the same time.  You
+	  can manipulate the name to achieve this, for example:
+		% ./configure --program-suffix=-1.3
+		% make test install
+	  installs the interpreter as fth-1.3, the library as libfth-1.3.so,
+	  creates a library path /usr/local/lib/fth-1.3 for local dynamic libs
+	  and installs the header files in /usr/local/include/fth-1.3:
+	  /usr/local/bin/fth-1.3
+	  /usr/local/lib/libfth-1.3.so
+	  /usr/local/lib/fth-1.3/
+	  /usr/local/include/fth-1.3/
+     --with-tecla-prefix[=DIR]
+	  If the tecla(7) command-line editing library is installed in other
+	  places than $prefix/{include,lib} or /usr/{include,lib}, take this
+	  configure option.  configure will add -IDIR/include to $(CFLAGS) and
+	  -LDIR/lib to $(LDFLAGS).
+     --without-tecla
+	  Don't use the tecla(7) command-line editing library.
+
+     Makefile knows the following targets:
+
+     all
+     clean
+     distclean
+     fth-shared
+     fth-static
+     install
+     install-shared
+     install-static
+     install-strip
+     maintainer-clean
+     test
+     uninstall
+
+INSTALL FTH
+     The usual way to configure and install Fth is:
+     % ./configure CFLAGS="-g -O2 -Wall"
+     % make
+     % make test # optional
+     % make install
+     Or with options mentioned above and a single make command line:
+     % ./configure --with-tecla-prefix=/my/tecla/prefix CFLAGS="-g -O2"
+     % make test install
+     While testing (make test) two environment variables are checked:
+     FTH_TEST_IO
+     FTH_TEST_FILE
+     If set, the IO and File test will be executed.  These two tests may bear
+     problems so they are disabled by default.
+
+AUTOCONF MACRO FTH_CHECK_LIB
+     An application using the Fth package as extension language can detect
+     program and library using the autoconf macro FTH_CHECK_LIB which is
+     located in fth.m4.  This macro tests if the interpreter fth can be found
+     in $PATH.	If so, it tests if libfth contains complex and rational
+     numbers.  Eventually it substitutes six variables for configure.ac.
+
+     After including FTH_CHECK_LIB in configure.ac call aclocal && autoconf to
+     update aclocal.m4.
+     FTH  Set to full path of the interpreter or "no", e.g.
+	  "/usr/local/bin/fth".
+     FTH_VERSION
+	  Set to version number of the Fth package or "no", e.g.  "1.3.1".
+     FTH_CFLAGS
+	  Set to include path or "no", e.g. "-I/usr/local/include/fth".
+     FTH_LIBS
+	  Set to library path or "no", e.g. "-L/usr/local/lib -lfth".
+     FTH_HAVE_COMPLEX
+	  Set to "yes" or "no".
+     FTH_HAVE_RATIO
+	  Set to "yes" or "no".
+
+   Short configure.ac Example
+     AC_ARG_WITH([forth],
+		 [AS_HELP_STRING([--with-forth],
+				 [try to use Forth as the extension language])],
+		 [if test "$withval" = yes ; then
+		     FTH_CHECK_LIB([AC_DEFINE([HAVE_FORTH])])
+		 fi])
+
+
+   Long configure.as Example
+     AC_ARG_WITH([forth],
+		 [AS_HELP_STRING([--with-forth],
+				 [use Forth as the extension language])],
+		 [if test "$withval" = yes ; then
+		     FTH_CHECK_LIB([AC_DEFINE([HAVE_FORTH])
+				    AC_DEFINE([HAVE_EXTENSION_LANGUAGE])
+				    if test "$FTH_HAVE_COMPLEX" = yes ; then
+				       AC_DEFINE([HAVE_COMPLEX_TRIG])
+				       AC_DEFINE([HAVE_MAKE_COMPLEX])
+				       AC_DEFINE([HAVE_MAKE_RECTANGULAR])
+				    fi
+				    if test "$FTH_HAVE_RATIO" = yes ; then
+				       AC_DEFINE([HAVE_MAKE_RATIO])
+				    fi
+				    AC_SUBST(XEN_CFLAGS, $FTH_CFLAGS)
+				    AC_SUBST(XEN_LIBS,	 $FTH_LIBS)
+				    LOCAL_LANGUAGE="Forth"
+				    ac_snd_have_extension_language=yes])
+		 fi])
+
+RUNNING FTH
+     Fth builds and runs on these systems:
+
+   Current builds
+     FTH 1.3.5 (28-Nov-2012) [amd64-portbld-freebsd9.1]
+     FTH 1.3.5 (28-Nov-2012) [i386-portbld-freebsd8.3]
+     FTH 1.3.5 (28-Nov-2012) [i386-mnet-freebsd9.0] (m-net.arbornet.org)
+     FTH 1.3.5 (28-Nov-2012) [i386-intel-openbsd5.0] (grex.org)
+     FTH 1.3.5 (28-Nov-2012) [x86_64-debian-linux-gnu2.6.32] (freeshell.de)
+     FTH 1.3.5 (16-Oct-2012) [amd64-sdf-netbsd4.0.1] (sdf.org)
+
+   VirtualBox
+     FTH 1.3.5 (28-Nov-2012) [amd64-vbox-freebsd10.0]
+     FTH 1.3.5 (28-Nov-2012) [amd64-vbox-netbsd6.99.15]
+     FTH 1.3.5 (28-Nov-2012) [amd64-vbox-openbsd5.2]
+     FTH 1.3.5 (28-Nov-2012) [x86_64-vboxdebian-linux-gnu3.2.0]
+     #
+     FTH 1.3.0 (01-Mar-2012) [i686-vbox-minix3.1.8]
+     FTH 1.3.0 (01-Mar-2012) [i686-ubuntu-linux-gnu3.0.0]
+     FTH 1.3.0 (01-Mar-2012) [i686-centos-linux-gnu2.6.32]
+
+   More machines
+     With much help from Bill Schottstaedt, the author of the sound editor
+     Snd, Fth could be tested on these machines:
+
+     FTH 0.12.00 (13-Oct-06) [sparc-sun-solaris2.9]	 okay
+     FTH 0.12.00 (13-Sep-06) [i386-pc-solaris2.10]	 okay
+     FTH 0.10.22 (13-Sep-06) [i386-pc-solaris2.9]	 okay
+     FTH 0.10.22 (13-Sep-06) [i686-pc-linux-gnu]	 okay
+     FTH 0.10.22 (13-Sep-06) [powerpc64-linux-gnu]	 okay
+     FTH 0.10.22 (13-Sep-06) [x86_64-linux-gnu] 	 okay
+     FTH 0.10.22 (13-Sep-06) [alphaev67-linux-gnu]	 not yet
+     FTH 0.10.22 (13-Sep-06) [i386-freebsd5.4]		 okay
+     FTH 0.10.22 (13-Sep-06) [i386-netbsdelf2.0.2]	 okay
+     FTH 0.10.22 (13-Sep-06) [i386-openbsd3.8]		 okay
+     FTH 0.10.20 (04-Sep-06) [i686-apple-darwin8.7.1]	 okay

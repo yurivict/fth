@@ -1,0 +1,19 @@
+Executable script examples.
+
+install.fth installs play-sound.fth to ${prefix}/bin/play-sound
+
+play-sound.fth   - Play and record sound files
+                   requires sndlib.so 
+                   from ftp://ccrma-ftp.stanford.edu/pub/Lisp/sndlib.tar.gz
+xm.fth           - Short Motif example from libxm
+                   requires libxm.so 
+                   from ftp://ccrma-ftp.stanford.edu/pub/Lisp/libxm.tar.gz
+xg.fth           - Short Gtk example from libxm
+                   requires libxg.so 
+                   from ftp://ccrma-ftp.stanford.edu/pub/Lisp/libxm.tar.gz
+
+fth-additions.el - Additions for ~/.emacs.
+
+From Charles Turner:
+coretest.fth     - ANS Forth core tests
+tester.fs        - test utilities

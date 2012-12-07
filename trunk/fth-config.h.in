@@ -1,0 +1,106 @@
+/*-
+ * Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * Ident: $Id: fth-config.h.in,v 1.87 2012/10/25 22:57:20 mi-scholz Exp $
+ */
+
+#undef FTH_ALIGNOF_VOID_P
+#undef FTH_CONFIGURE_ARGS
+#undef FTH_LIBS
+#undef FTH_PACKAGE_NAME
+#undef FTH_PACKAGE_VERSION
+#undef FTH_SIZEOF_LONG
+#undef FTH_SIZEOF_LONG_LONG
+#undef FTH_SIZEOF_VOID_P
+#undef FTH_STATIC
+#undef FTH_TARGET
+#undef FTH_TARGET_CPU
+#undef FTH_TARGET_OS
+#undef FTH_TARGET_VENDOR
+
+#undef HAVE_1_0_FI
+#undef HAVE_CABS
+#undef HAVE_CABS2
+#undef HAVE_CACOS
+#undef HAVE_CACOSH
+#undef HAVE_CARG
+#undef HAVE_CASIN
+#undef HAVE_CASINH
+#undef HAVE_CATAN
+#undef HAVE_CATAN2
+#undef HAVE_CATANH
+#undef HAVE_CCOS
+#undef HAVE_CCOSH
+#undef HAVE_CEIL
+#undef HAVE_CEXP
+#undef HAVE_CLOG
+#undef HAVE_CLOG10
+#undef HAVE_COMPLEX_H
+#undef HAVE_COMPLEX_I
+#undef HAVE_CONJ
+#undef HAVE_CPOW
+#undef HAVE_CSIN
+#undef HAVE_CSINH
+#undef HAVE_CSQRT
+#undef HAVE_CTAN
+#undef HAVE_CTANH
+#undef HAVE_ERRNO_H
+#undef HAVE_FLOAT_H
+#undef HAVE_LIMITS_H
+#undef HAVE_LONG_LONG
+#undef HAVE_MEMORY_H
+#undef HAVE_OPENSSL_BN_H
+#undef HAVE_OPENSSL_ERR_H
+#undef HAVE_SETJMP_H
+#undef HAVE_STDARG_H
+#undef HAVE_STDBOOL_H
+#undef HAVE_STRINGS_H
+#undef HAVE_STRING_H
+#undef HAVE_STRNCASECMP
+#undef HAVE_SYS_TYPES_H
+#undef HAVE_UNISTD_H
+#undef HAVE__BOOL
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+/* Define to `int' if <sys/types.h> does not define. */
+#undef mode_t
+/* Define to `long int' if <sys/types.h> does not define. */
+#undef off_t
+/* Define to `int' if <sys/types.h> does not define. */
+#undef pid_t
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t
+
+/*
+ * fth-config.h.in ends here
+ */

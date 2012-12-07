@@ -1,0 +1,26 @@
+\ ** 
+\ ** File Access words for ficl
+\ ** submitted by Larry Hastings, larry@hastings.org
+\ **
+
+\ begin of changes [ms]
+\ : r/o 1 ;
+\ : r/w 3 ; 
+\ : w/o 2 ; 
+: bin 8 or ; 
+
+1 constant r/o				\ "r"
+2 constant w/o				\ "w"
+4 constant a/o				\ "a"
+r/o w/o or constant r/w			\ "r+"
+a/o r/o or constant r/a			\ "a+"
+: included
+    r/o bin open-file 0= if
+        include-file
+    else
+        drop
+    endif
+    ;
+
+\ : include parse-word included ;
+\ end of changes [ms]

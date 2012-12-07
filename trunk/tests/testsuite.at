@@ -1,0 +1,62 @@
+# testsuite.at -- testsuite for fth -*- Autotest -*-
+
+# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# Ident: $Id: testsuite.at,v 1.12 2012/02/17 01:58:36 mi-scholz Exp $
+
+#
+# AT_CHECK_FTH(name, check)
+#
+m4_define([AT_CHECK_FTH],
+  [AT_SETUP([$1])
+   AT_CHECK([$2], [0], [stdout], [stderr])
+   AT_CLEANUP])
+
+#
+# Start FTH test
+#
+# exit 77 means skip test
+#
+# If environment variable FTH_TEST_IO   is not set, skip IO test.
+# If environment variable FTH_TEST_FILE is not set, skip File test.
+#
+AT_INIT([primitive])
+
+AT_CHECK_FTH([array ...],   [${fth_prog} array-test.fs])
+AT_CHECK_FTH([list ...],    [${fth_prog} list-test.fs])
+AT_CHECK_FTH([hash ...],    [${fth_prog} hash-test.fs])
+AT_CHECK_FTH([IO ...],
+	     [if test -z ${FTH_TEST_IO}; then exit 77; else ${fth_prog} io-test.fs; fi])
+AT_CHECK_FTH([file ...],
+	     [if test -z ${FTH_TEST_FILE}; then exit 77; else ${fth_prog} file-test.fs; fi])
+AT_CHECK_FTH([misc ...],    [${fth_prog} misc-test.fs])
+AT_CHECK_FTH([numbers ...], [${fth_prog} numbers-test.fs])
+AT_CHECK_FTH([proc ...],    [${fth_prog} proc-test.fs])
+AT_CHECK_FTH([hook ...],    [${fth_prog} hook-test.fs])
+AT_CHECK_FTH([string ...],  [${fth_prog} string-test.fs])
+AT_CHECK_FTH([regexp ...],  [${fth_prog} regexp-test.fs])
+AT_CHECK_FTH([symbol, keyword, exception ...],  [${fth_prog} symbol-test.fs])
+
+# testsuite.at ends here

@@ -1,0 +1,86 @@
+# @configure_input@
+
+# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# Ident: $Id: Makefile.in,v 1.44 2012/09/28 20:52:01 mi-scholz Exp $
+
+srcdir		= @srcdir@
+VPATH		= @srcdir@
+SHELL		= @SHELL@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+top_srcdir	= @top_srcdir@
+top_builddir	= @top_builddir@
+# for ../common.mk
+ficldir		= ${srcdir}
+comdir		= ${top_srcdir}/lib
+fthdir		= ${top_srcdir}/src
+ficlbuilddir	= @builddir@
+
+DEFS		= @DEFS@
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+
+FICL_OBJECTS = \
+	dictionary.o  \
+	extras.o \
+	fileaccess.o \
+	hash.o \
+	prefix.o \
+	primitives.o \
+	search.o \
+	stack.o \
+	system.o \
+	tools.o \
+	unix.o \
+	utility.o \
+	vm.o \
+	word.o
+
+all: Makefile ${FICL_OBJECTS}
+install:
+uninstall:
+test:
+check:
+dist: Makefile
+
+include ${top_srcdir}/common.mk
+
+dictionary.o: ${srcdir}/dictionary.c ${ficl_full}
+extras.o:     ${srcdir}/extras.c     ${ficl_full}
+fileaccess.o: ${srcdir}/fileaccess.c ${ficl_full}
+hash.o:       ${srcdir}/hash.c       ${ficl_common}
+prefix.o:     ${srcdir}/prefix.c     ${ficl_full}
+primitives.o: ${srcdir}/primitives.c ${ficl_full}
+search.o:     ${srcdir}/search.c     ${ficl_full}
+stack.o:      ${srcdir}/stack.c      ${ficl_full}
+system.o:     ${srcdir}/system.c     ${ficl_full}
+tools.o:      ${srcdir}/tools.c      ${ficl_full}
+unix.o:       ${srcdir}/unix.c       ${ficl_full}
+utility.o:    ${srcdir}/utility.c    ${ficl_common}
+vm.o:         ${srcdir}/vm.c         ${ficl_full}
+word.o:       ${srcdir}/word.c       ${ficl_common}
+
+# Makefile.in ends here.
