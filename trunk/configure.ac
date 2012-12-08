@@ -135,12 +135,8 @@ AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h openssl/bn.h openssl/err.h])
-AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/param.h sys/socket.h])
+AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
-AC_CHECK_HEADERS([sys/jail.h], [], [], [
-@%:@if HAVE_SYS_PARAM_H
-@%:@ include <sys/param.h>
-@%:@endif])
 
 dnl
 dnl Check for type sizes, typdefs, structs etc.
@@ -184,13 +180,6 @@ AC_CHECK_MEMBERS([struct dirent.d_ino,
 @%:@if HAVE_DIRENT_H
 @%:@ include <dirent.h>
 @%:@endif])
-AC_CHECK_MEMBERS([struct jail.ip4s], [], [], [
-@%:@if HAVE_SYS_PARAM_H
-@%:@ include <sys/param.h>
-@%:@endif
-@%:@if HAVE_SYS_JAIL_H
-@%:@ include <sys/jail.h>
-@%:@endif])
 
 dnl
 dnl Check for libraries.
@@ -215,7 +204,7 @@ AC_CHECK_FUNCS([access ceil chdir chmod chroot])
 AC_CHECK_FUNCS([execlp execvp floor fork frexp ftruncate])
 AC_CHECK_FUNCS([getegid getenv geteuid getgid gethostname getlogin getpid])
 AC_CHECK_FUNCS([getppid getservbyname getservbyport gettimeofday getuid])
-AC_CHECK_FUNCS([issetugid jail jail_attach kill labs ldexp log2 lstat])
+AC_CHECK_FUNCS([issetugid kill labs ldexp log2 lstat])
 AC_CHECK_FUNCS([mkdir mkfifo opendir pow psignal qsort qsort_r])
 AC_CHECK_FUNCS([realpath rename rint rmdir setegid setenv seteuid setgid])
 AC_CHECK_FUNCS([sethostname setlocale setuid sleep strncasecmp strerror])
