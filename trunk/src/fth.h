@@ -418,19 +418,18 @@ enum {
 	FTH_OUT_OF_BOUNDS_ERROR(Pos, Arg, "out of range")
 
 /*
- * This is special for Snd.  DESC may contain ~A and ~S format signs,
- * fth_throw_list replaces them.
+ * This is special for Snd:
+ *	(char *Caller, int Pos, FTH Arg, char *Desc)
  */
 #define FTH_OUT_OF_RANGE_ERROR(Caller, Pos, Arg, Desc)			\
-	fth_throw_list(FTH_OUT_OF_RANGE,				\
-	    FTH_LIST_2(fth_make_string_format(				\
-			   "%s (%s) arg %d: %S is out of range (%s)",	\
-			   (Caller),					\
-			   c__FUNCTION__,				\
-			   (int)(Pos),					\
-			   (Arg),					\
-			   (Desc)),					\
-			(Arg)))
+	fth_throw(FTH_OUT_OF_RANGE,					\
+	    "%s (%s) arg %d: %S is out of range (%s)",			\
+	    (Caller),							\
+	    c__FUNCTION__,						\
+	    (int)(Pos),							\
+	    (Arg),							\
+	    (Desc))
+
 
 #define FTH_BAD_ARITY_ERROR(Pos, Arg, Desc)				\
 	fth_throw(FTH_BAD_ARITY,					\
