@@ -326,20 +326,6 @@ push_cstring(ficlVm *vm, char *s)
 	ficlStackPushFTH(vm->dataStack, fth_make_string(s));
 }
 
-/* returned string must be freed */
-char *
-pop_forth_string(ficlVm *vm)
-{
-	size_t len;
-	char *str;
-
-	len = (size_t)ficlStackPopInteger(vm->dataStack);
-	str = ficlStackPopPointer(vm->dataStack);
-	if (len > 0)
-		return (strncpy(FTH_CALLOC(len + 1, sizeof(char)), str, len));
-	return (NULL);
-}
-
 void
 push_forth_string(ficlVm *vm, char *string)
 {
@@ -927,7 +913,7 @@ repl_command_generator(WordCompletion *cpl,
 	return (0);
 }
 
-static char hist_file[MAXPATHLEN];
+static char	hist_file[MAXPATHLEN];
 
 static int
 repl_init_history(void)
@@ -1085,7 +1071,7 @@ fth_repl(int argc, char **argv)
 
 #else				/* !HAVE_LIBTECLA */
 
-static char utils_readline_buffer[BUFSIZ];
+static char	utils_readline_buffer[BUFSIZ];
 
 static char *
 readline(char *prompt)

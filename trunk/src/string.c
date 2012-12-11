@@ -1950,11 +1950,12 @@ Return Forth string ADDR LEN as string object.  \
 Standard words like TYPE and EVALUATE require this kind of string.\n\
 See also string>$."
 	char *str;
+	size_t len;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	str = pop_forth_string(vm);	/* returned string must be freed */
-	push_cstring(vm, str);
-	FTH_FREE(str);
+	len = (size_t)ficlStackPopUnsigned(vm->dataStack);
+	str = ficlStackPopPointer(vm->dataStack);
+	ficlStackPushFTH(vm->dataStack, fth_make_string_len(str, len));
 }
 
 static ficlWord *string_immutable_paren;

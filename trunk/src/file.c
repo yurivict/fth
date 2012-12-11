@@ -934,15 +934,17 @@ FP close-pipe throw\n\
 Forth-like word.\n\
 See also close-pipe, open-file, close-file."
 	ficlInteger fam;
-	char *mode, *cmd;
+	size_t len;
+	char *mode, *cmd, *str;
 	FILE *fp;
 
 	FTH_STACK_CHECK(vm, 3, 2);
 	fam = ficlStackPopInteger(vm->dataStack);
-	cmd = pop_forth_string(vm);	/* returned string must be freed */
-	if (cmd == NULL) {
-		FTH_ASSERT_STRING(cmd);
-		/* NOTREACHED */
+	len = (size_t)ficlStackPopUnsigned(vm->dataStack);
+	str = ficlStackPopPointer(vm->dataStack);
+	if (len == 0) {
+		ficlStackPushPointer(vm->dataStack, NULL);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger)EINVAL);
 		return;
 	}
 	switch (FICL_FAM_OPEN_MODE(fam)) {
@@ -955,10 +957,11 @@ See also close-pipe, open-file, close-file."
 	default:
 		ficlStackPushPointer(vm->dataStack, NULL);
 		ficlStackPushInteger(vm->dataStack, (ficlInteger)EINVAL);
-		FTH_FREE(cmd);
 		return;
 		break;
 	}
+	cmd = FTH_CALLOC(len + 1, sizeof(char));
+	strncpy(cmd, str, len);
 	fp = popen(cmd, mode);
 	if (fp == NULL) {
 		perror("popen");
