@@ -3267,17 +3267,21 @@ floating-point number in the syntax below, its value r and true are \
 returned.  If the string does not represent a valid floating-point number \
 only false is returned.\n\
 A string of blanks should be treated as a special case representing zero."
-  char *buf, *test;
+  char *buf, *str, *test;
+  size_t len;
   
   FICL_STACK_CHECK(vm->dataStack, 2, 1);
-  buf = pop_forth_string(vm);	/* returned string must be freed */
-  if (buf == NULL)
+  len = (size_t)ficlStackPopUnsigned(vm->dataStack);
+  str = ficlStackPopPointer(vm->dataStack);
+  if (len == 0)
   {
     ficlStackPushFloat(vm->dataStack, 0.0f);
     ficlStackPushBoolean(vm->dataStack, true);
   }
   else
   {
+    buf = FTH_CALLOC(len + 1, sizeof(char));
+    strncpy(buf, str, len);
     ficlFloat r = strtod(buf, &test);
 
     if (*test == '\0' || errno != ERANGE)
@@ -3287,8 +3291,8 @@ A string of blanks should be treated as a special case representing zero."
     }
     else
       ficlStackPushBoolean(vm->dataStack, false);
+    FTH_FREE(buf);
   }
-  FTH_FREE(buf);
 }
 
 static void ficlPrimitiveFProximate(ficlVm *vm)

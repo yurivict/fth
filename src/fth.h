@@ -1081,9 +1081,7 @@ void		fth_throw (FTH exc, const char *fmt,...);
 void		fth_throw_error(FTH exc, FTH args);
 void		fth_throw_list(FTH exc, FTH args);
 char           *pop_cstring(ficlVm *vm);
-char           *pop_forth_string(ficlVm *vm);
 void		push_cstring(ficlVm *vm, char *s);
-void		push_forth_string(ficlVm *vm, char *string);
 
 __END_DECLS
 

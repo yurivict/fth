@@ -352,6 +352,8 @@ simple_array   *simple_array_clear(simple_array *ary);
 void		simple_array_free(simple_array *ary);
 FTH		simple_array_to_array(simple_array *ary);
 
+void		push_forth_string(ficlVm *vm, char *string);
+
 char           *parse_input_buffer(ficlVm *vm, char *delimiter);
 char           *parse_tib_with_restart(ficlVm *, char *, int,
 		    ficlString (*) (ficlVm *, int));
