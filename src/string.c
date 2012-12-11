@@ -1952,7 +1952,7 @@ See also string>$."
 	char *str;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	str = pop_forth_string(vm);
+	str = pop_forth_string(vm);	/* returned string must be freed */
 	push_cstring(vm, str);
 	FTH_FREE(str);
 }
