@@ -3270,8 +3270,7 @@ A string of blanks should be treated as a special case representing zero."
   char *buf, *test;
   
   FICL_STACK_CHECK(vm->dataStack, 2, 1);
-  buf = pop_forth_string(vm);
-
+  buf = pop_forth_string(vm);	/* returned string must be freed */
   if (buf == NULL)
   {
     ficlStackPushFloat(vm->dataStack, 0.0f);
@@ -3289,6 +3288,7 @@ A string of blanks should be treated as a special case representing zero."
     else
       ficlStackPushBoolean(vm->dataStack, false);
   }
+  FTH_FREE(buf);
 }
 
 static void ficlPrimitiveFProximate(ficlVm *vm)
