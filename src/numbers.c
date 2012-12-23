@@ -40,6 +40,13 @@
 #include "fth.h"
 #include "utils.h"
 
+#if defined(HAVE_MISSING_COMPLEX_H)
+#include <missing_complex.h>
+#endif
+#if defined(HAVE_MISSING_MATH_H)
+#include <missing_math.h>
+#endif
+
 static FTH	llong_tag;
 static FTH	float_tag;
 

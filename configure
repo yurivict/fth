@@ -4798,7 +4798,7 @@ fi
 
 done
 
-for ac_header in regex.h setjmp.h signal.h stdarg.h sys/socket.h
+for ac_header in regex.h setjmp.h signal.h stdarg.h sys/param.h sys/socket.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4815,6 +4815,22 @@ for ac_header in sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+# Special FreeBSD library 'libmissing'
+# added to ports/math/libmissing (2012/12/20).
+for ac_header in missing_math.h missing_complex.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "#include <complex.h>
+"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
@@ -5396,6 +5412,53 @@ if test "x$ac_cv_lib_crypto_BN_new" = xyes; then :
 _ACEOF
 
   LIBS="-lcrypto $LIBS"
+
+fi
+
+# Special FreeBSD library 'libmissing'
+# added to ports/math/libmissing (2012/12/20).
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for acoshl in -lmissing" >&5
+$as_echo_n "checking for acoshl in -lmissing... " >&6; }
+if ${ac_cv_lib_missing_acoshl+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmissing  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char acoshl ();
+int
+main ()
+{
+return acoshl ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_missing_acoshl=yes
+else
+  ac_cv_lib_missing_acoshl=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_missing_acoshl" >&5
+$as_echo "$ac_cv_lib_missing_acoshl" >&6; }
+if test "x$ac_cv_lib_missing_acoshl" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMISSING 1
+_ACEOF
+
+  LIBS="-lmissing $LIBS"
 
 fi
 
