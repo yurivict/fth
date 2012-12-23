@@ -268,6 +268,16 @@ enum {
 #undef HAVE_1_0_FI
 #endif
 
+#if defined(HAVE_COMPLEX_H)
+#include <complex.h>
+#endif
+#if defined(HAVE_MISSING_COMPLEX_H)
+#include <missing_complex.h>
+#endif
+#if defined(HAVE_MISSING_MATH_H)
+#include <missing_math.h>
+#endif
+
 #if defined(HAVE_FLOAT_H)
 #include <float.h>
 #endif
