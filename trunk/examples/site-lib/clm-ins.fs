@@ -2,7 +2,7 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Fri Feb 03 10:36:51 CET 2006
-\ Changed: Sat Dec 22 01:33:00 CET 2012
+\ Changed: Sun Dec 23 01:09:16 CET 2012
 
 \ Commentary:
 \ 
@@ -3215,26 +3215,18 @@ instrument: clm-expsrc <{ start dur in-file exp-ratio src-ratio amp :optional
 	:input exA clm-src-cb :srate src-ratio make-src { srcA }
 	in-file channels 2 = *output* channels 2 = && { two-chans }
 	*reverb* rev && { revit }
-	revit if
-		two-chans if
-			rev f2/
-		else
-			rev
-		then
-	else
-		0.0
-	then { rev-amp }
 	two-chans if
 		:file in-file :channel 1 :start stf make-readin { fdB }
 		:input fdB readin-cb :expansion exp-ratio make-granulate { exB }
 		:input exB clm-src-cb :srate src-ratio make-src { srcB }
 		revit if
+			rev f2/ to rev
 			start dur run
 				srcA 0.0 undef src amp f* { valA }
 				srcB 0.0 undef src amp f* { valB }
 				i valA *output* outa drop
 				i valB *output* outb drop
-				i valA valB f+ rev-amp f* *reverb* outa drop
+				i valA valB f+ rev f* *reverb* outa drop
 			loop
 		else
 			start dur run
@@ -3247,7 +3239,7 @@ instrument: clm-expsrc <{ start dur in-file exp-ratio src-ratio amp :optional
 			start dur run
 				srcA 0.0 undef src amp f* { valA }
 				i valA *output* outa drop
-				i valA rev-amp f* *reverb* outa drop
+				i valA rev f* *reverb* outa drop
 			loop
 		else
 			start dur run
