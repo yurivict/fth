@@ -135,8 +135,12 @@ AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h openssl/bn.h openssl/err.h])
-AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
+AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/param.h sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
+# Special FreeBSD library 'libmissing'
+# added to ports/math/libmissing (2012/12/20).
+AC_CHECK_HEADERS([missing_math.h missing_complex.h],
+    [], [], [@%:@include <complex.h>])
 
 dnl
 dnl Check for type sizes, typdefs, structs etc.
@@ -187,6 +191,9 @@ dnl
 AC_CHECK_LIB([c], [main])
 AC_CHECK_LIB([m], [main])
 AC_CHECK_LIB([crypto], [BN_new])
+# Special FreeBSD library 'libmissing'
+# added to ports/math/libmissing (2012/12/20).
+AC_CHECK_LIB([missing], [acoshl])
 AC_SEARCH_LIBS([socket], [socket])
 AC_SEARCH_LIBS([gethostbyname], [nsl])
 AC_SEARCH_LIBS([dlopen], [c dl], [AC_DEFINE([HAVE_DLOPEN], [1],
