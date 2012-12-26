@@ -222,8 +222,8 @@ dnl
 dnl Check for --with-tecla.
 dnl
 if test "X${with_tecla}" != "Xno"; then
-	AC_CHECK_HEADERS([libtecla.h],
-	    [AC_CHECK_LIB([tecla], [new_GetLine])])
+	AC_CHECK_HEADERS([libtecla.h])
+	AC_CHECK_LIB([tecla], [new_GetLine])
 fi
 
 dnl
@@ -277,10 +277,10 @@ dnl Extensions in examples/.
 dnl
 # dbm(3)
 SO_DBM_LIB=""
-AC_CHECK_HEADERS([ndbm.h],
-    [AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
-	[SO_DBM_LIB="dbm.so"
-	 AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])])
+AC_CHECK_HEADERS([ndbm.h])
+AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
+    [SO_DBM_LIB="dbm.so"
+     AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])
 
 dnl
 dnl From sndlib/autoconf.ac.
