@@ -222,9 +222,9 @@ dnl
 dnl Check for --with-tecla.
 dnl
 if test "X${with_tecla}" != "Xno"; then
-	AC_CHECK_HEADERS([libtecla.h])
-	AC_SEARCH_LIBS([tputs], [curses ncurses])
-	AC_CHECK_LIB([tecla], [new_GetLine])
+	AC_CHECK_HEADERS([libtecla.h],
+	    [AC_SEARCH_LIBS([tputs], [curses ncurses])
+	     AC_CHECK_LIB([tecla], [new_GetLine])])
 fi
 
 dnl
@@ -258,8 +258,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([
 @%:@endif],
     [return (creal(1.0 + 1.0 * _Complex_I) != 1.0);])],
     [AC_MSG_RESULT([yes])
-     AC_DEFINE([HAVE_COMPLEX_I], [1],
-         [Define to 1 if you have `_Complex_I'.])],
+     AC_DEFINE([HAVE_COMPLEX_I], [1], [Define to 1 if you have `_Complex_I'.])],
     [AC_MSG_RESULT([no])])
 AC_MSG_CHECKING([for 1.0fi])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([
@@ -268,8 +267,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([
 @%:@endif],
     [return (creal(1.0 + 1.0 * 1.0fi) != 1.0);])],
     [AC_MSG_RESULT([yes])
-     AC_DEFINE([HAVE_1_0_FI], [1],
-         [Define to 1 if compiler accepts `1.0fi'.])],
+     AC_DEFINE([HAVE_1_0_FI], [1], [Define to 1 if compiler accepts `1.0fi'.])],
     [AC_MSG_RESULT([no])])
 AC_CHECK_FUNCS([cabs cabs2 cacos cacosh carg casin casinh])
 AC_CHECK_FUNCS([catan catan2 catanh ccos ccosh cexp clog clog10])
@@ -280,10 +278,10 @@ dnl Extensions in examples/.
 dnl
 # dbm(3)
 SO_DBM_LIB=""
-AC_CHECK_HEADERS([ndbm.h])
-AC_SEARCH_LIBS([dbm_open], [c dbm ndbm gdbm gdbm_compat],
-    [SO_DBM_LIB="dbm.so" AC_DEFINE([HAVE_DBM], [1],
-    [Define to 1 if you have libdbm.])])
+AC_CHECK_HEADERS([ndbm.h],
+    [AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
+	[SO_DBM_LIB="dbm.so"
+	 AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])])
 
 dnl
 dnl From sndlib/autoconf.ac.
