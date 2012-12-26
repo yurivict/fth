@@ -5856,12 +5856,7 @@ if test "x$ac_cv_header_libtecla_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBTECLA_H 1
 _ACEOF
-
-fi
-
-done
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tputs" >&5
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tputs" >&5
 $as_echo_n "checking for library containing tputs... " >&6; }
 if ${ac_cv_search_tputs+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5917,7 +5912,7 @@ if test "$ac_res" != no; then :
 
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for new_GetLine in -ltecla" >&5
+	     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for new_GetLine in -ltecla" >&5
 $as_echo_n "checking for new_GetLine in -ltecla... " >&6; }
 if ${ac_cv_lib_tecla_new_GetLine+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5961,6 +5956,10 @@ _ACEOF
   LIBS="-ltecla $LIBS"
 
 fi
+
+fi
+
+done
 
 fi
 
@@ -6170,12 +6169,7 @@ if test "x$ac_cv_header_ndbm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NDBM_H 1
 _ACEOF
-
-fi
-
-done
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dbm_open" >&5
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dbm_open" >&5
 $as_echo_n "checking for library containing dbm_open... " >&6; }
 if ${ac_cv_search_dbm_open+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -6199,7 +6193,7 @@ return dbm_open ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' c dbm ndbm gdbm gdbm_compat; do
+for ac_lib in '' c dbm ndbm; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -6229,9 +6223,14 @@ ac_res=$ac_cv_search_dbm_open
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   SO_DBM_LIB="dbm.so"
+
 $as_echo "#define HAVE_DBM 1" >>confdefs.h
 
 fi
+
+fi
+
+done
 
 
 # If prefix isn't set in the environment eg. via prefix=/home/mike etc,
