@@ -223,6 +223,8 @@ dnl Check for --with-tecla.
 dnl
 if test "X${with_tecla}" != "Xno"; then
 	AC_CHECK_HEADERS([libtecla.h])
+	# This is required if only a static library exists (libtecla.a).
+	AC_SEARCH_LIBS([tputs], [curses ncurses])
 	AC_CHECK_LIB([tecla], [new_GetLine])
 fi
 
