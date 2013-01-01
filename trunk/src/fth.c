@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2012 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2013 Michael Scholz"
 
 static FTH	 eval_with_error_exit(void *p, int kind);
 static void	 repl_in_place(char *in, FTH out, ficlWord *word,
