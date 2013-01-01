@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * Ident: $Id$
  */
 
-#define FTH_DATE                        "27-Dec-2012"
+#define FTH_DATE                        "01-Jan-2013"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
