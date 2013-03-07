@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@ dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -316,6 +316,11 @@ case "${host}" in
 		CFLAGS="-fPIC ${CFLAGS}"
 		SO_LDFLAGS="-shared -fPIC"
 		LDFLAGS="${LDFLAGS} -Wl,-E"
+		;;
+	# Fri Mar  8 00:20:24 CET 2013 [ms]
+	# Advised by Hannu Vuolasaho <vuokkosetae@gmail.com>
+	*-mingw*)
+		# no -fPIC
 		;;
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
