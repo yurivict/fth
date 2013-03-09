@@ -1,6 +1,6 @@
 2013-03-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
-	configure.ac: *-mingw* case added to suppress -fPIC in CFLAGS.
+	* configure.ac: *-mingw* case added to suppress -fPIC in CFLAGS.
 
 2012-12-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
