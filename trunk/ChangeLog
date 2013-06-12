@@ -1,3 +1,14 @@
+2013-06-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs (voiced->unvoiced): Adjust to new
+	make-formant-bank.
+
+	* examples/site-lib/hooks.fs (view-files-select-hook): Hook
+	removed.
+
+	* examples/site-lib/snd-forth-init.fs: Adjust to new Snd
+	behavior (removed view-files-dialog etc).
+
 2013-03-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* configure.ac: *-mingw* case added to suppress -fPIC in CFLAGS.
