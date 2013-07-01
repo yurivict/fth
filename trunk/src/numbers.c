@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1688,7 +1688,6 @@ format_double(char *buf, size_t size, ficlFloat f)
 #endif
 
 static char numbers_scratch[BUFSIZ];
-static char numbers_scratch_02[BUFSIZ];
 
 static FTH
 fl_inspect(FTH self)
@@ -2026,6 +2025,8 @@ casin     cacos     catan     catan2\n\
 csinh     ccosh     ctanh\n\
 casinh    cacosh    catanh\n\
 See also long-long and float."
+
+static char numbers_scratch_02[BUFSIZ];
 
 static FTH
 cp_inspect(FTH self)

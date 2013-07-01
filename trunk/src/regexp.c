@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -817,6 +817,38 @@ fth_regexp_replace(FTH regexp, FTH string, FTH replace)
 {
 	return (string);
 }
+
+static void
+ficl_make_regexp_im(ficlVm *vm)
+{
+	char *buf;
+	FTH rs;
+
+	buf = parse_input_buffer(vm, "/");
+	rs = fth_make_regexp(buf);
+	FTH_FREE(buf);
+	if (vm->state == FICL_VM_STATE_COMPILE) {
+		ficlDictionary *dict;
+
+		dict = ficlVmGetDictionary(vm);
+		ficlDictionaryAppendUnsigned(dict,
+		    (ficlUnsigned)ficlInstructionLiteralParen);
+		ficlDictionaryAppendFTH(dict, rs);
+	} else
+		ficlStackPushFTH(vm->dataStack, rs);
+}
+
+void
+init_regexp_type(void)
+{
+}
+
+void
+init_regexp(void)
+{
+	FTH_PRIM_IM("re/", ficl_make_regexp_im, NULL);
+}
+
 
 #endif				/* HAVE_POSIX_REGEX */
 
