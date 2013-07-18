@@ -157,7 +157,9 @@ AC_DEFINE_UNQUOTED([FTH_SIZEOF_VOID_P], [${ac_cv_sizeof_void_p}],
     [The size of `void *', as computed by sizeof.])
 AC_DEFINE_UNQUOTED([FTH_ALIGNOF_VOID_P], [${ac_cv_alignof_void_p}],
     [The normal alignment of `void *', in bytes.])
+
 AC_STRUCT_TM
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.tm_zone])
 AC_C_INLINE
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
@@ -165,24 +167,31 @@ AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_SIGNAL
-AC_CHECK_TYPES([long long])
-AC_CHECK_TYPES([struct tms], [], [], [
-@%:@if HAVE_SYS_TIMES_H
-@%:@ include <sys/times.h>
+AC_CHECK_MEMBERS([struct dirent.d_ino,
+    struct dirent.d_fileno, struct dirent.d_namlen], [], [], [
+@%:@if HAVE_DIRENT_H
+@%:@include <dirent.h>
 @%:@endif])
+AC_CHECK_TYPES([long long])
 AC_CHECK_TYPES([sig_t], [], [], [
 @%:@if HAVE_SIGNAL_H
 @%:@include <signal.h>
 @%:@endif])
+AC_CHECK_TYPES([struct sockaddr_un], [], [], [
+@%:@if HAVE_SYS_UN_H
+@%:@include <sys/un.h>
+@%:@endif])
+AC_CHECK_MEMBERS([struct sockaddr_un.sun_len], [], [], [
+@%:@if HAVE_SYS_UN_H
+@%:@include <sys/un.h>
+@%:@endif])
+AC_CHECK_TYPES([struct tms], [], [], [
+@%:@if HAVE_SYS_TIMES_H
+@%:@include <sys/times.h>
+@%:@endif])
 AC_CHECK_DECLS([sys_siglist], [], [], [
 @%:@if HAVE_SIGNAL_H
 @%:@include <signal.h>
-@%:@endif])
-AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.tm_zone])
-AC_CHECK_MEMBERS([struct dirent.d_ino,
-    struct dirent.d_fileno, struct dirent.d_namlen], [], [], [
-@%:@if HAVE_DIRENT_H
-@%:@ include <dirent.h>
 @%:@endif])
 
 dnl
@@ -255,7 +264,7 @@ dnl
 AC_MSG_CHECKING([for _Complex_I])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([
 @%:@if HAVE_COMPLEX_H
-@%:@ include <complex.h>
+@%:@include <complex.h>
 @%:@endif],
     [return (creal(1.0 + 1.0 * _Complex_I) != 1.0);])],
     [AC_MSG_RESULT([yes])
@@ -264,7 +273,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([
 AC_MSG_CHECKING([for 1.0fi])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([
 @%:@if HAVE_COMPLEX_H
-@%:@ include <complex.h>
+@%:@include <complex.h>
 @%:@endif],
     [return (creal(1.0 + 1.0 * 1.0fi) != 1.0);])],
     [AC_MSG_RESULT([yes])

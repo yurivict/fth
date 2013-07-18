@@ -1967,52 +1967,6 @@ rm -f conftest.val
 
 } # ac_fn_c_compute_int
 
-# ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
-# ---------------------------------------------
-# Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
-# accordingly.
-ac_fn_c_check_decl ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  as_decl_name=`echo $2|sed 's/ *(.*//'`
-  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
-$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main ()
-{
-#ifndef $as_decl_name
-#ifdef __cplusplus
-  (void) $as_decl_use;
-#else
-  (void) $as_decl_name;
-#endif
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$3=yes"
-else
-  eval "$3=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_decl
-
 # ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
 # ----------------------------------------------------
 # Tries to find if the field MEMBER exists in type AGGR, after including
@@ -2069,6 +2023,52 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_member
+
+# ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
+# ---------------------------------------------
+# Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
+# accordingly.
+ac_fn_c_check_decl ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_decl
 
 # ac_fn_c_try_link LINENO
 # -----------------------
@@ -4995,6 +4995,7 @@ cat >>confdefs.h <<_ACEOF
 #define FTH_ALIGNOF_VOID_P ${ac_cv_alignof_void_p}
 _ACEOF
 
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether struct tm is in sys/time.h or time.h" >&5
 $as_echo_n "checking whether struct tm is in sys/time.h or time.h... " >&6; }
 if ${ac_cv_struct_tm+:} false; then :
@@ -5027,6 +5028,25 @@ $as_echo "$ac_cv_struct_tm" >&6; }
 if test $ac_cv_struct_tm = sys/time.h; then
 
 $as_echo "#define TM_IN_SYS_TIME 1" >>confdefs.h
+
+fi
+
+ac_fn_c_check_member "$LINENO" "struct tm" "tm_gmtoff" "ac_cv_member_struct_tm_tm_gmtoff" "$ac_includes_default"
+if test "x$ac_cv_member_struct_tm_tm_gmtoff" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_TM_TM_GMTOFF 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct tm" "tm_zone" "ac_cv_member_struct_tm_tm_zone" "$ac_includes_default"
+if test "x$ac_cv_member_struct_tm_tm_zone" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_TM_TM_ZONE 1
+_ACEOF
+
 
 fi
 
@@ -5179,25 +5199,51 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
-if test "x$ac_cv_type_long_long" = xyes; then :
+ac_fn_c_check_member "$LINENO" "struct dirent" "d_ino" "ac_cv_member_struct_dirent_d_ino" "
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+"
+if test "x$ac_cv_member_struct_dirent_d_ino" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_LONG_LONG 1
+#define HAVE_STRUCT_DIRENT_D_INO 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct dirent" "d_fileno" "ac_cv_member_struct_dirent_d_fileno" "
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+"
+if test "x$ac_cv_member_struct_dirent_d_fileno" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_DIRENT_D_FILENO 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct dirent" "d_namlen" "ac_cv_member_struct_dirent_d_namlen" "
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+"
+if test "x$ac_cv_member_struct_dirent_d_namlen" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_DIRENT_D_NAMLEN 1
 _ACEOF
 
 
 fi
 
-ac_fn_c_check_type "$LINENO" "struct tms" "ac_cv_type_struct_tms" "
-#if HAVE_SYS_TIMES_H
-# include <sys/times.h>
-#endif
-"
-if test "x$ac_cv_type_struct_tms" = xyes; then :
+ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
+if test "x$ac_cv_type_long_long" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TMS 1
+#define HAVE_LONG_LONG 1
 _ACEOF
 
 
@@ -5217,6 +5263,48 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "struct sockaddr_un" "ac_cv_type_struct_sockaddr_un" "
+#if HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+"
+if test "x$ac_cv_type_struct_sockaddr_un" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_UN 1
+_ACEOF
+
+
+fi
+
+ac_fn_c_check_member "$LINENO" "struct sockaddr_un" "sun_len" "ac_cv_member_struct_sockaddr_un_sun_len" "
+#if HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+"
+if test "x$ac_cv_member_struct_sockaddr_un_sun_len" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_UN_SUN_LEN 1
+_ACEOF
+
+
+fi
+
+ac_fn_c_check_type "$LINENO" "struct tms" "ac_cv_type_struct_tms" "
+#if HAVE_SYS_TIMES_H
+#include <sys/times.h>
+#endif
+"
+if test "x$ac_cv_type_struct_tms" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_TMS 1
+_ACEOF
+
+
+fi
+
 ac_fn_c_check_decl "$LINENO" "sys_siglist" "ac_cv_have_decl_sys_siglist" "
 #if HAVE_SIGNAL_H
 #include <signal.h>
@@ -5231,65 +5319,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_SYS_SIGLIST $ac_have_decl
 _ACEOF
-
-ac_fn_c_check_member "$LINENO" "struct tm" "tm_gmtoff" "ac_cv_member_struct_tm_tm_gmtoff" "$ac_includes_default"
-if test "x$ac_cv_member_struct_tm_tm_gmtoff" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TM_TM_GMTOFF 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct tm" "tm_zone" "ac_cv_member_struct_tm_tm_zone" "$ac_includes_default"
-if test "x$ac_cv_member_struct_tm_tm_zone" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TM_TM_ZONE 1
-_ACEOF
-
-
-fi
-
-ac_fn_c_check_member "$LINENO" "struct dirent" "d_ino" "ac_cv_member_struct_dirent_d_ino" "
-#if HAVE_DIRENT_H
-# include <dirent.h>
-#endif
-"
-if test "x$ac_cv_member_struct_dirent_d_ino" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_DIRENT_D_INO 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct dirent" "d_fileno" "ac_cv_member_struct_dirent_d_fileno" "
-#if HAVE_DIRENT_H
-# include <dirent.h>
-#endif
-"
-if test "x$ac_cv_member_struct_dirent_d_fileno" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_DIRENT_D_FILENO 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct dirent" "d_namlen" "ac_cv_member_struct_dirent_d_namlen" "
-#if HAVE_DIRENT_H
-# include <dirent.h>
-#endif
-"
-if test "x$ac_cv_member_struct_dirent_d_namlen" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_DIRENT_D_NAMLEN 1
-_ACEOF
-
-
-fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lc" >&5
@@ -6065,7 +6094,7 @@ else
 /* end confdefs.h.  */
 
 #if HAVE_COMPLEX_H
-# include <complex.h>
+#include <complex.h>
 #endif
 int
 main ()
@@ -6101,7 +6130,7 @@ else
 /* end confdefs.h.  */
 
 #if HAVE_COMPLEX_H
-# include <complex.h>
+#include <complex.h>
 #endif
 int
 main ()
