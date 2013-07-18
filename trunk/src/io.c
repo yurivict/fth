@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1632,7 +1632,35 @@ socket_close(void *ptr)
 	socket_unlink(IO_STRING_REF(FTH_IO_SOCKET_HOST(ptr)));
 }
 
-#if (defined(__linux__) || defined(_MINIX)) && !defined(_HAVE_SA_LEN)
+#if defined(HAVE_STRUCT_SOCKADDR_UN_SUN_LEN)
+#define IO_SOCKADDR(Addr, Host, Port, Domain, Len) do {			\
+	if (Domain == AF_UNIX) {					\
+		struct sockaddr_un sun;					\
+									\
+		Addr = (struct sockaddr *)&sun;				\
+		sun.sun_family = (sa_family_t)AF_UNIX;			\
+		sun.sun_path[0] = '\0';					\
+		fth_strcat(sun.sun_path, sizeof(sun.sun_path), Host);	\
+		Len = (socklen_t)(sizeof(sun.sun_family) +		\
+		    fth_strlen(sun.sun_path));				\
+		sun.sun_len = (unsigned char)Len;			\
+	} else {							\
+		struct sockaddr_in sin;					\
+		struct hostent *hp;					\
+									\
+		Addr = (struct sockaddr *)&sin;				\
+		sin.sin_family = (sa_family_t)AF_INET;			\
+		sin.sin_port = (in_port_t)htons((in_port_t)Port);	\
+		Len = sin.sin_len = (socklen_t)sizeof(sin);		\
+		hp = gethostbyname(Host);				\
+		if (hp != NULL)						\
+			memmove(&sin.sin_addr, hp->h_addr,		\
+			    (size_t)hp->h_length);			\
+		else							\
+			IO_SOCKET_ERROR_ARG(gethostbyname, Host);	\
+	}								\
+} while (0)
+#else /* !HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
 #define IO_SOCKADDR(Addr, Host, Port, Domain, Len) do {			\
 	if (Domain == AF_UNIX) {					\
 		struct sockaddr_un sun;					\
@@ -1659,35 +1687,7 @@ socket_close(void *ptr)
 			IO_SOCKET_ERROR_ARG(gethostbyname, Host);	\
 	}								\
 } while (0)
-#else
-#define IO_SOCKADDR(Addr, Host, Port, Domain, Len) do {			\
-	if (Domain == AF_UNIX) {					\
-		struct sockaddr_un sun;					\
-									\
-		Addr = (struct sockaddr *)&sun;				\
-		sun.sun_family = (sa_family_t)AF_UNIX;			\
-		sun.sun_path[0] = '\0';					\
-		fth_strcat(sun.sun_path, sizeof(sun.sun_path), Host);	\
-		Len = (socklen_t)(sizeof(sun.sun_family) +		\
-		fth_strlen(sun.sun_path));				\
-		sun.sun_len = (unsigned char)Len;			\
-	} else {							\
-		struct sockaddr_in sin;					\
-		struct hostent *hp;					\
-									\
-		Addr = (struct sockaddr *)&sin;				\
-		sin.sin_family = (sa_family_t)AF_INET;			\
-		sin.sin_port = (in_port_t)htons((in_port_t)Port);	\
-		Len = sin.sin_len = (socklen_t)sizeof(sin);		\
-		hp = gethostbyname(Host);				\
-		if (hp != NULL)						\
-			memmove(&sin.sin_addr, hp->h_addr,		\
-			    (size_t)hp->h_length);			\
-		else							\
-			IO_SOCKET_ERROR_ARG(gethostbyname, Host);	\
-	}								\
-} while (0)
-#endif
+#endif /* HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
 
 static int
 socket_bind(const char *host, int port, int domain, int fd)

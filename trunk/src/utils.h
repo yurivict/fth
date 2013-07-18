@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,7 +138,7 @@ typedef struct {
 #include <sys/uio.h>
 #endif
 
-#if defined(_WIN32)
+#if !defined(HAVE_STRUCT_SOCKADDR_UN) || defined(_WIN32)
 #define HAVE_SOCKET		false
 #define FTH_DEFAULT_ADDRFAM	0
 #else				/* !_WIN32 */
