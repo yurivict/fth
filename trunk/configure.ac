@@ -61,7 +61,7 @@ dnl AC_INIT arg   4: PACKAGE_TARNAME
 dnl AC_INIT arg   5: PACKAGE_URL
 dnl
 AC_INIT([FTH],
-    [1.3.6],
+    [1.3.7],
     [mi-scholz@users.sourceforge.net],
     [fth],
     [fth.sourceforge.net])

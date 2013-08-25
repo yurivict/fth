@@ -26,7 +26,7 @@
  * Ident: $Id$
  */
 
-#define FTH_DATE                        "25-Aug-2013"
+#define FTH_DATE                        "26-Aug-2013"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
