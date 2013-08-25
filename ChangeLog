@@ -1,3 +1,8 @@
+2013-08-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (fth_repl): gl_prompt_style changed from
+	GL_LITERAL_PROMPT to GL_FORMAT_PROMPT.
+
 2013-07-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* configure.ac (HAVE_STRUCT_SOCKADDR_UN,

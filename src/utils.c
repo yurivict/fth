@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -968,7 +968,7 @@ fth_repl(int argc, char **argv)
 	gl_load_history(gl, hist_file, "\\");
 	gl_automatic_history(gl, 0);
 	gl_customize_completion(gl, NULL, repl_command_generator);
-	gl_prompt_style(gl, GL_LITERAL_PROMPT);
+	gl_prompt_style(gl, GL_FORMAT_PROMPT);
 	fth_set_argv(0, argc, argv);
 	/*
 	 * Call hook before starting repl.
