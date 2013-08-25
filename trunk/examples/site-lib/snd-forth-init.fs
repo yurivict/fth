@@ -167,7 +167,8 @@ require examp
 	\
 	before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
 		"%I:%M%p" current-time strftime string-downcase! { tm }
-		"[%s %s] (%d) ok " #( *short-hostname* tm pos ) string-format
+		"%%S[%s %s] (%d)%%s %%Bok%%b "
+		    #( *short-hostname* tm pos ) string-format
 	; add-hook!
 [else]				\ snd-motif|gtk
 	read-hook lambda: <{ text -- flag }>

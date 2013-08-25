@@ -24,7 +24,7 @@
 .\"
 .\" Ident: $Id$
 .\"
-.Dd July 09, 2013
+.Dd August 25, 2013
 .Dt FTH 1
 .Os
 .\"
@@ -524,7 +524,15 @@ is the
 argument for the next hook procedure if any.
 .Bd -literal -offset indent -compact
 before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
-	\(dqfth (%d)> \(dq #( pos ) string-format
+	\(dqfth (%d) ok \(dq #( pos ) string-format
+; add-hook!
+.Ed
+Or with standout and bold mode (see
+.Xr libtecla 3 ,
+optional prompt formatting):
+.Bd -literal -offset indent -compact
+before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
+	\(dq%%Sfth (%d)%%s %%Bok%%b \(dq #( pos ) string-format
 ; add-hook!
 .Ed
 .El
@@ -8340,6 +8348,7 @@ has no extra floating point stack; floats are of type
 .Xr getservbyname 3 ,
 .Xr getservbyport 3 ,
 .Xr libfth 3 ,
+.Xr libtecla 3 ,
 .Xr realpath 3 ,
 .Xr regex 3 ,
 .Xr sethostname 3 ,
