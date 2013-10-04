@@ -23,10 +23,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)misc.c	1.610 9/13/13
+ * @(#)misc.c	1.613 10/5/13
  */
 
-#define FTH_DATE                        "13-Sep-2013"
+#define FTH_DATE                        "2013/10/05"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
