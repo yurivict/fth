@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2012-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id$
+ * @(#)fth-dbm.c	1.13 10/5/13
  *
  * Commentary:
  *
@@ -68,6 +68,10 @@
  *   ...
  * end-each
  */
+
+#if !defined(lint)
+const char sccsid[] = "@(#)fth-dbm.c	1.13 10/5/13";
+#endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
