@@ -2,7 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Fri Feb 03 10:36:51 CET 2006
-\ Changed: Sun Dec 23 01:09:16 CET 2012
+\ Changed: Fri Oct  4 23:26:34 CEST 2013
+\
+\ @(#)clm-ins.fs	1.48 10/4/13
 
 \ Commentary:
 \ 

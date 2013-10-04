@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Tue Dec 27 19:22:06 CET 2005
-\ Changed: Wed Nov 21 19:52:34 CET 2012
+\ Changed: Fri Oct  4 23:28:21 CEST 2013
+\
+\ @(#)marks.fs	1.26 10/4/13
 
 \ Commentary:
 \

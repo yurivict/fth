@@ -2,7 +2,9 @@
 
 \ Translator: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Thu Nov 18 15:26:46 CET 2004
-\ Changed: Fri Mar 23 22:51:31 CET 2012
+\ Changed: Fri Oct  4 23:29:38 CEST 2013
+\
+\ @(#)spectr.fs	1.4 10/4/13
 
 \ Commentary:
 

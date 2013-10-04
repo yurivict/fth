@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Sun Dec 18 23:36:09 CET 2005
-\ Changed: Tue Apr 17 00:51:23 CEST 2012
+\ Changed: Fri Oct  4 23:27:06 CEST 2013
+\
+\ @(#)draw.fs	1.18 10/4/13
 
 \ Commentary:
 

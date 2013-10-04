@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Mon Mar 15 19:25:58 CET 2004
-\ Changed: Tue Nov 27 17:47:28 CET 2012
+\ Changed: Fri Oct  4 23:26:58 CEST 2013
+\
+\ @(#)clm.fs	1.109 10/4/13
 
 \ Commentary:
 \
