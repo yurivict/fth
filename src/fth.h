@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id$
+ * @(#)fth.h	1.209 9/13/13
  */
 
 #if !defined(_FTH_H_)

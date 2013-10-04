@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * Ident: $Id$
+ * @(#)numbers.c	1.162 9/13/13
  */
 
 #if defined(HAVE_CONFIG_H)
