@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id$
+ * @(#)port.c	1.61 9/13/13
  */
 
 #if defined(HAVE_CONFIG_H)

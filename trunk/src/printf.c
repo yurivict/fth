@@ -56,7 +56,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id$
+ * @(#)printf.c	1.20 9/13/13
  */
 
 #if defined(HAVE_CONFIG_H)
