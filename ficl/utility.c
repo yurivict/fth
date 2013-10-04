@@ -8,7 +8,7 @@
  ** Created: 25 January 1998
  ** Rev 2.03: Support for 128 bit DP math. This file really ouught to
  ** be renamed!
- ** $Id$
+ ** @(#)utility.c	1.24 9/13/13
  *******************************************************************/
 /*
 ** Copyright (c) 1997-2001 John Sadler (john_sadler@alum.mit.edu)
