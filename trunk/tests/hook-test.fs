@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ Ident: $Id$
+\ @(#)hook-test.fs	1.18 9/13/13
 
 require test-utils.fs
 

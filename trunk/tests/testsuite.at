@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# Ident: $Id$
+# @(#)testsuite.at	1.12 9/13/13
 
 #
 # AT_CHECK_FTH(name, check)
