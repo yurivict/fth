@@ -22,7 +22,7 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##
-## Ident: $Id$
+## @(#)fth.m4	1.10 9/13/13
 
 # FTH_CHECK_LIB(action-if-found, [action-if-not-found])
 # 

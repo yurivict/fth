@@ -26,7 +26,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# Ident: $Id$
+# @(#)fth.sh.in	1.5 9/13/13
 
 fthsrcdir=@abs_top_builddir@/src
 LD_LIBRARY_PATH="${fthsrcdir}:${LD_LIBRARY_PATH}"

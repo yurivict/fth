@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Ident: $Id$
+ * @(#)fth-config.h.in	1.88 9/13/13
  */
 
 #undef FTH_ALIGNOF_VOID_P

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# Ident: $Id$
+# @(#)common.mk	1.23 9/13/13
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib
