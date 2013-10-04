@@ -24,7 +24,7 @@
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
 ;;
-;; Ident: $Id$
+;; @(#)fth-additions.el	1.7 9/13/13
 
 ;;; Commentary:
 
