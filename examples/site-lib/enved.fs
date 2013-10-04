@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Sun Nov 13 13:59:42 CET 2005
-\ Changed: Mon Nov 19 06:06:33 CET 2012
+\ Changed: Fri Oct  4 23:27:42 CEST 2013
+\
+\ @(#)enved.fs	1.18 10/4/13
 
 \ Commentary:
 

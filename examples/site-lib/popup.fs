@@ -2,7 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Fri Dec 23 00:28:28 CET 2005
-\ Changed: Sat Dec  1 19:08:39 CET 2012
+\ Changed: Fri Oct  4 23:28:37 CEST 2013
+\
+\ @(#)popup.fs	1.40 10/4/13
 
 \ Commentary:
 

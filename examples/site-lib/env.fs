@@ -2,7 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Thu Oct 27 04:51:42 CEST 2005
-\ Changed: Thu Nov 22 01:26:23 CET 2012
+\ Changed: Fri Oct  4 23:27:34 CEST 2013
+\
+\ @(#)env.fs	1.24 10/4/13
 
 \ Commentary:
 \

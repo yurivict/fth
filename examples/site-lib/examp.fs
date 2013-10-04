@@ -2,7 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Tue Jul 05 13:09:37 CEST 2005
-\ Changed: Thu Jun 13 18:47:47 CEST 2013
+\ Changed: Fri Oct  4 23:27:51 CEST 2013
+\
+\ @(#)examp.fs	1.60 10/4/13
 
 \ Commentary:
 \

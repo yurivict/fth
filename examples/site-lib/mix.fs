@@ -2,7 +2,9 @@
 
 \ Translator: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Tue Oct 11 18:23:12 CEST 2005
-\ Changed: Wed Nov 21 19:50:54 CET 2012
+\ Changed: Fri Oct  4 23:28:30 CEST 2013
+\
+\ @(#)mix.fs	1.34 10/4/13
 
 \ Commentary:
 \

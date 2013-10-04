@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Mon Dec 26 22:36:46 CET 2005
-\ Changed: Tue Dec 11 01:55:54 CET 2012
+\ Changed: Fri Oct  4 23:29:31 CEST 2013
+\
+\ @(#)snd-xm.fs	1.39 10/4/13
 
 \ Commentary:
 \

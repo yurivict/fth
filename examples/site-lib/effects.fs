@@ -2,7 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Sun Oct 16 23:04:30 CEST 2005
-\ Changed: Thu Jun 13 18:45:16 CEST 2013
+\ Changed: Fri Oct  4 23:27:23 CEST 2013
+\
+\ @(#)effects.fs	1.55 10/4/13
 
 \ Commentary:
 \

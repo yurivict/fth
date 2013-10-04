@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Fri Dec 30 04:52:13 CET 2005
-\ Changed: Fri Nov 23 03:50:20 CET 2012
+\ Changed: Fri Oct  4 23:27:13 CEST 2013
+\
+\ @(#)dsp.fs	1.50 10/4/13
 
 \ src-duration			( en -- dur )
 \ src-fit-envelope		( e1 target-dur -- e2 )

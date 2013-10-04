@@ -1,4 +1,7 @@
 \ .snd_forth -- start up file for Snd/Forth
+\
+\ %W% %G%
+\
 
 \ You can install the *.fs scripts with:
 \ 

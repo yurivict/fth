@@ -2,7 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: Fri Aug 18 16:57:43 CEST 2006
-\ Changed: Fri Mar 23 22:50:07 CET 2012
+\ Changed: Fri Oct  4 23:28:51 CEST 2013
+\
+\ @(#)rgb.fs	1.8 10/4/13
 
 \ Commentary:
 \
