@@ -4,7 +4,7 @@
  ** Author: John Sadler (john_sadler@alum.mit.edu)
  ** Created: 19 July 1997
  ** Dedicated to RHS, in loving memory
- ** $Id$
+ ** @(#)ficl.h	1.84 9/13/13
  ********************************************************************
  **
  ** Copyright (c) 1997 John Sadler (john_sadler@alum.mit.edu)
