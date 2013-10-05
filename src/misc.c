@@ -22,9 +22,11 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * @(#)misc.c	1.613 10/5/13
  */
+
+#if !defined(lint)
+const char sccsid[] = "@(#)misc.c	1.614 10/5/13";
+#endif /* not lint */
 
 #define FTH_DATE                        "2013/10/05"
 
