@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-dbm.c	1.13 10/5/13
+ * @(#)fth-dbm.c	1.14 10/17/13
  *
  * Commentary:
  *
@@ -70,7 +70,7 @@
  */
 
 #if !defined(lint)
-const char sccsid[] = "@(#)fth-dbm.c	1.13 10/5/13";
+const char dbm_sccsid[] = "@(#)fth-dbm.c	1.14 10/17/13";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
