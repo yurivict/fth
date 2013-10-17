@@ -1,15 +1,17 @@
-/* From double.c. */
+/* 
+ * From ficl/double.c [ms]
+ */
 /*******************************************************************
- ** m a t h 6 4 . c
- ** Forth Inspired Command Language - 64 bit math support routines
- ** Authors: Michael A. Gauland (gaulandm@mdhost.cse.tek.com)
- **          Larry Hastings (larry@hastings.org)
- **          John Sadler (john_sadler@alum.mit.edu)
- ** Created: 25 January 1998
- ** Rev 2.03: Support for 128 bit DP math. This file really ouught to
- ** be renamed!
- ** @(#)utility.c	1.24 9/13/13
- *******************************************************************/
+** m a t h 6 4 . c
+** Forth Inspired Command Language - 64 bit math support routines
+** Authors: Michael A. Gauland (gaulandm@mdhost.cse.tek.com)
+**          Larry Hastings (larry@hastings.org)
+**          John Sadler (john_sadler@alum.mit.edu)
+** Created: 25 January 1998
+** Rev 2.03: Support for 128 bit DP math. This file really ouught to
+** be renamed!
+** $Id: double.c,v 1.2 2010/09/12 15:18:07 asau Exp $
+*******************************************************************/
 /*
 ** Copyright (c) 1997-2001 John Sadler (john_sadler@alum.mit.edu)
 ** All rights reserved.
@@ -45,13 +47,34 @@
 ** SUCH DAMAGE.
 */
 
-/*
- * Adapted to work with FTH:
+/*-
+ * Adapted to work with FTH
  *
- * Copyright (c) 2004-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * All rights reserved.
  *
- * This file is part of FTH.
- * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * @(#)utility.c	1.25 10/17/13
  */
 
 #if defined(HAVE_CONFIG_H)
