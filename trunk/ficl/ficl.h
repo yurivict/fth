@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.85 10/17/13
+ * @(#)ficl.h	1.86 10/24/13
  */
 
 #if !defined (__FICL_H__)
@@ -772,6 +772,7 @@ typedef enum
 
 struct ficlVm
 {
+  void		*context;
   ficlCallback   callback;
   ficlVm        *link;	           /* Ficl keeps a VM list for simple teardown */
   jmp_buf       *exceptionHandler; /* crude exception mechanism...     */
@@ -1367,6 +1368,7 @@ struct ficlSystemInformation
 
 struct ficlSystem
 {
+  void		 *context;
   ficlCallback   callback;
   ficlSystem     *link;
   ficlVm         *vmList;
