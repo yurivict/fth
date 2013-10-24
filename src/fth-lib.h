@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.127 9/13/13
+ * @(#)fth-lib.h	1.129 10/24/13
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -618,18 +618,19 @@ typedef struct FInstance {
 	ficl_to_fth(FICL_WORD_PARAM(Obj))
 
 #define FTH_STACK_CHECK(Vm, Pop, Push) do {				\
-	ficlInteger _depth_, _req_;					\
-	ficlStack *_stack_;						\
+	ficlInteger _depth;						\
+	ficlInteger _req;						\
+	ficlStack *_stack;						\
 									\
-	_stack_ = (Vm)->dataStack;					\
-	_req_ = (ficlInteger)(Pop);					\
-	_depth_ = (_stack_->top - _stack_->base) + 1;			\
-	if (_req_ > _depth_)						\
+	_stack = (Vm)->dataStack;					\
+	_req = (ficlInteger)(Pop);					\
+	_depth = (_stack->top - _stack->base) + 1;			\
+	if (_req > _depth)						\
 		fth_throw(FTH_WRONG_NUMBER_OF_ARGS,			\
 		    "%s: not enough arguments, %ld instead of %ld",	\
-		    RUNNING_WORD_VM(vm),				\
-		    _depth_,						\
-		    _req_);						\
+		    RUNNING_WORD_VM(Vm),				\
+		    _depth,						\
+		    _req);						\
 } while (0)
 
 #define FTH_STACK_DEPTH(Vm)						\
