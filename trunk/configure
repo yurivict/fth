@@ -6288,7 +6288,6 @@ case "${host}" in
 	*-*-netbsd*)
 		CFLAGS="-fPIC ${CFLAGS}"
 		SO_LDFLAGS="-shared"
-		LDFLAGS="-rpath=/usr/pkg/lib -L/usr/pkg/lib"
 		;;
 	*-*-openbsd*)
 		CFLAGS="-fPIC ${CFLAGS}"

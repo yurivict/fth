@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.175 9/13/13
+dnl @(#)configure.ac	1.176 11/15/13
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -319,7 +319,6 @@ case "${host}" in
 	*-*-netbsd*)
 		CFLAGS="-fPIC ${CFLAGS}"
 		SO_LDFLAGS="-shared"
-		LDFLAGS="-rpath=/usr/pkg/lib -L/usr/pkg/lib"
 		;;
 	*-*-openbsd*)
 		CFLAGS="-fPIC ${CFLAGS}"
