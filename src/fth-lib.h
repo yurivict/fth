@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.129 10/24/13
+ * @(#)fth-lib.h	1.130 11/20/13
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -262,20 +262,6 @@ enum {
 #define FTH_PROG_NAME		"fth"
 #define FTH_PREFIX_PATH		"/usr/local"
 #define FTH_LOCALEDIR		FTH_PREFIX_PATH "/share/locale"
-/* numbers.c */
-#undef HAVE_COMPLEX_H
-#undef HAVE_COMPLEX_I
-#undef HAVE_1_0_FI
-#endif
-
-#if defined(HAVE_COMPLEX_H)
-#include <complex.h>
-#endif
-#if defined(HAVE_MISSING_COMPLEX_H)
-#include <missing_complex.h>
-#endif
-#if defined(HAVE_MISSING_MATH_H)
-#include <missing_math.h>
 #endif
 
 #if defined(HAVE_FLOAT_H)
@@ -285,55 +271,17 @@ enum {
 #define DBL_MANT_DIG		53
 #endif
 
-#if defined(HAVE_OPENSSL_BN_H)
-#include <openssl/bn.h>
-#define HAVE_BN		1
-/* bn(3) */
-typedef BIGNUM * ficlBignum;
-
-typedef struct {
-	ficlBignum num;
-	ficlBignum den;
-} FRatio;
-typedef FRatio * ficlRatio;
-#else
-#define HAVE_BN		0
-#endif
-
-#if defined(HAVE_1_0_FI)
-#define HAVE_COMPLEX	1
-/*
- * Minix doesn't have complex.h.
- * With gcc Minix provides 1.0fi, cimag() and creal().
- */
-#if defined(HAVE_COMPLEX_H)
-#include <complex.h>
-#elif !defined(HAVE_COMPLEX_I)
-/* snippet from /usr/include/complex.h */
-#if defined(__GNUC__)
-#if __STDC_VERSION__ < 199901
-#define	_Complex	__complex__
-#endif
-#define	_Complex_I	1.0fi
-#endif
-
-#define	complex		_Complex
-#define	I		_Complex_I
-
-double		cimag(double complex);
-double		creal(double complex);
-/* end /usr/include/complex.h */
-#endif
-#else				/* !HAVE_1_0_FI */
-#define HAVE_COMPLEX	0
-#endif				/* HAVE_1_0_FI */
-
 #if HAVE_COMPLEX
-typedef complex double ficlComplex;
-
+#if defined(HAVE_MISSING_COMPLEX_H)
+#include <missing_complex.h>
+#endif
+#if defined(HAVE_MISSING_MATH_H)
+#include <missing_math.h>
+#endif
 /*
  * While NetBSD/OpenBSD/GNU libc do provide complex trigonometric
- * functions, others like FreeBSD/Minix don't.
+ * functions, others like FreeBSD/Minix don't (but FBSD's
+ * ports/math/libmissing fills the gap).
  */
 
 /* Trigonometric functions.  */

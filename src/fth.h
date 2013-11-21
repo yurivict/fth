@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.209 9/13/13
+ * @(#)fth.h	1.210 11/20/13
  */
 
 #if !defined(_FTH_H_)
@@ -261,6 +261,7 @@ extern exit_cb	fth_exit_hook;
 	fth_instance_flag_p(Obj, Type)
 #define FTH_INSTANCE_TYPE_P(Obj, Type)					\
 	fth_instance_type_p(Obj, Type)
+
 #define FTH_CHAR_P(Obj)		fth_char_p(Obj)
 #define FTH_EXACT_P(Obj)	fth_exact_p(Obj)
 #define FTH_FIXNUM_P(Obj)	fth_fixnum_p(Obj)
