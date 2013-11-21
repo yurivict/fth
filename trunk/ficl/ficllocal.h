@@ -66,7 +66,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficllocal.h	1.67 10/17/13
+ * @(#)ficllocal.h	1.68 11/20/13
  */
 
 #if !defined(_FICLLOCAL_H_)
@@ -106,6 +106,62 @@ typedef ficlUnsigned64 ficl2Unsigned;
 typedef double ficlFloat;
 typedef ficlPointer FTH;
 typedef ficlSignedPointer SIGNED_FTH;
+
+#if defined(lint)
+/* numbers.c */
+#undef HAVE_COMPLEX_H
+#undef HAVE_COMPLEX_I
+#undef HAVE_1_0_FI
+#endif
+
+#if defined(HAVE_COMPLEX_H)
+#include <complex.h>
+#endif
+
+#if defined(HAVE_1_0_FI)
+#define HAVE_COMPLEX	1
+/*
+ * Minix doesn't have complex.h.
+ * With gcc Minix provides 1.0fi, cimag(), and creal().
+ */
+#if !defined(HAVE_COMPLEX_I)
+/* snippet from /usr/include/complex.h */
+#if defined(__GNUC__)
+#if __STDC_VERSION__ < 199901
+#define	_Complex	__complex__
+#endif
+#define	_Complex_I	1.0fi
+#endif /* __GNUC__ */
+
+#define	complex		_Complex
+#define	I		_Complex_I
+
+double		cimag(double complex);
+double		creal(double complex);
+/* end /usr/include/complex.h */
+#endif /* !HAVE_COMPLEX_I */
+#else				/* !HAVE_1_0_FI */
+#define HAVE_COMPLEX	0
+#endif				/* HAVE_1_0_FI */
+
+#if HAVE_COMPLEX
+typedef complex double ficlComplex;
+#endif
+
+#if defined(HAVE_OPENSSL_BN_H)
+#include <openssl/bn.h>
+#define HAVE_BN		1
+/* bn(3) */
+typedef BIGNUM * ficlBignum;
+
+typedef struct {
+	ficlBignum num;
+	ficlBignum den;
+} FRatio;
+typedef FRatio * ficlRatio;
+#else
+#define HAVE_BN		0
+#endif
 
 #if defined(HAVE_STDBOOL_H)
 #include <stdbool.h>

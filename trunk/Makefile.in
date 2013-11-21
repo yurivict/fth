@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2006-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.127 9/13/13
+# @(#)Makefile.in	1.128 11/21/13
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -271,14 +271,14 @@ distclean: clean
 		(cd $${f} && ${MAKE} distclean); \
 	done
 	${RM} Makefile config.[lc]* config.st* stamp-h \
-	    fth-config.h config.h fth.sh TAGS tags
+	    fth-config.h config.h fth.sh tags
 
 maintainer-clean: clean
 	for f in ${CLEAN_SUBDIRS}; do \
 		(cd $${f} && ${MAKE} maintainer-clean); \
 	done
 	${RM} Makefile config.[lc]* config.st* stamp-h \
-	    fth-config.h config.h fth.sh TAGS tags
+	    fth-config.h config.h fth.sh tags
 	${RMD} *~ ${distdir}*
 	find ${top_srcdir} -name "*~" -exec rm {} ';'
 

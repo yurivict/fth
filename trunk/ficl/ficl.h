@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.86 10/24/13
+ * @(#)ficl.h	1.88 11/21/13
  */
 
 #if !defined (__FICL_H__)
@@ -169,8 +169,8 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #if defined(__cplusplus)
-#define __BEGIN_DECLS                   extern "C" {
-#define __END_DECLS                     }
+#define __BEGIN_DECLS		extern "C" {
+#define __END_DECLS		}
 #else
 #define __BEGIN_DECLS
 #define __END_DECLS
@@ -198,15 +198,15 @@
 ** These indicate attributes about the local platform.
 */
 
-#define FICL_NAME       "ficl"
-#define FICL_VERSION    "4.0.31"
+#define FICL_NAME		"ficl"
+#define FICL_VERSION		"4.0.31"
 
 /*
 ** 
 ** Forth name.
 */
 #if !defined (FICL_FORTH_NAME)
-#define FICL_FORTH_NAME               FICL_NAME
+#define FICL_FORTH_NAME		FICL_NAME
 #endif
 
 /*
@@ -214,7 +214,7 @@
 ** Forth version.
 */
 #if !defined (FICL_FORTH_VERSION)
-#define FICL_FORTH_VERSION            FICL_VERSION
+#define FICL_FORTH_VERSION	FICL_VERSION
 #endif
 
 /*
@@ -222,7 +222,7 @@
 ** String constant describing the current hardware architecture.
 */
 #if !defined (FICL_PLATFORM_ARCHITECTURE)
-#define FICL_PLATFORM_ARCHITECTURE    FTH_TARGET_CPU
+#define FICL_PLATFORM_ARCHITECTURE FTH_TARGET_CPU
 #endif
 
 /*
@@ -230,7 +230,7 @@
 ** String constant describing the current operating system.
 */
 #if !defined (FICL_PLATFORM_OS)
-#define FICL_PLATFORM_OS              FTH_TARGET_OS
+#define FICL_PLATFORM_OS	FTH_TARGET_OS
 #endif
 
 /*
@@ -238,7 +238,7 @@
 ** String constant describing the current vendor.
 */
 #if !defined (FICL_PLATFORM_VENDOR)
-#define FICL_PLATFORM_VENDOR          FTH_TARGET_VENDOR
+#define FICL_PLATFORM_VENDOR	FTH_TARGET_VENDOR
 #endif
 
 /*
@@ -248,6 +248,8 @@
 ** You should only have to fiddle with this setting if
 ** you're not using an ANSI-compliant compiler, in which
 ** case, good luck!
+**
+** [ms] FICL_EXTERN removed
 */
 #if !defined (FICL_EXTERN)
 #define FICL_EXTERN extern
@@ -287,7 +289,7 @@ typedef float ficlFloat;
 ** create time.
 */
 #if !defined (FICL_DEFAULT_STACK_SIZE)
-#define FICL_DEFAULT_STACK_SIZE (128)
+#define FICL_DEFAULT_STACK_SIZE	(128)
 #endif
 
 /*
@@ -313,7 +315,7 @@ typedef float ficlFloat;
 ** (file://dpans16.htm#16.3.3)
 */
 #if !defined (FICL_MAX_WORDLISTS)
-#define FICL_MAX_WORDLISTS (16)
+#define FICL_MAX_WORDLISTS	(16)
 #endif
 
 /*
@@ -323,7 +325,7 @@ typedef float ficlFloat;
 ** will probably exact a nasty performance penalty.
 */
 #if !defined (FICL_MAX_PARSE_STEPS)
-#define FICL_MAX_PARSE_STEPS (8)
+#define FICL_MAX_PARSE_STEPS	(8)
 #endif
 
 /*
@@ -333,7 +335,7 @@ typedef float ficlFloat;
 ** doesn't make sense to be a piker here.
 */
 #if !defined (FICL_MAX_LOCALS)
-#define FICL_MAX_LOCALS (64)
+#define FICL_MAX_LOCALS		(64)
 #endif
 
 /*
@@ -341,14 +343,14 @@ typedef float ficlFloat;
 ** requires it to hold at least 84 characters.
 */
 #if !defined (FICL_PAD_SIZE)
-#define FICL_PAD_SIZE (256)
+#define FICL_PAD_SIZE		(256)
 #endif
 
 /* 
 ** ANS Forth requires that a word's name contain {1..31} characters.
 */
 #if !defined (FICL_NAME_LENGTH)
-#define FICL_NAME_LENGTH       (31)
+#define FICL_NAME_LENGTH	(31)
 #endif
 
 /*
@@ -356,14 +358,14 @@ typedef float ficlFloat;
 ** performance, use a prime number!
 */
 #if !defined (FICL_HASH_SIZE)
-#define FICL_HASH_SIZE (241)
+#define FICL_HASH_SIZE		(241)
 #endif
 
 /*
 ** Default number of USER flags.
 */
 #if !defined (FICL_USER_CELLS)
-#define FICL_USER_CELLS (16)
+#define FICL_USER_CELLS		(16)
 #endif
 
 /*
@@ -398,11 +400,12 @@ __BEGIN_DECLS
 **   default output device - used for system error messages.
 **
 ** ficlMalloc(), ficlRealloc() and ficlFree() have the same semantics
-**   as the functions malloc(), realloc(), and free() from the standard C library.
+**   as the functions malloc(), realloc(), and free()
+**   from the standard C library.
 */
-FICL_EXTERN char *ficlCallbackDefaultTextIn(ficlCallback *callback);
-FICL_EXTERN void  ficlCallbackDefaultTextOut(ficlCallback *callback, char *text);
-FICL_EXTERN void  ficlCallbackDefaultErrorOut(ficlCallback *callback, char *text);
+char           *ficlCallbackDefaultTextIn(ficlCallback *);
+void		ficlCallbackDefaultTextOut(ficlCallback *, char *);
+void		ficlCallbackDefaultErrorOut(ficlCallback *, char *);
 
 /* 
 ** the Good Stuff starts here...
@@ -413,25 +416,25 @@ FICL_EXTERN void  ficlCallbackDefaultErrorOut(ficlCallback *callback, char *text
 ** complement of false... that unifies logical and bitwise operations
 ** nicely.
 */
-#define FICL_TRUE                       (-1)
-#define FICL_FALSE                      (0)
-#define FICL_BOOL(x)                    ((x) ? FICL_TRUE : FICL_FALSE)
+#define FICL_TRUE		(-1)
+#define FICL_FALSE		(0)
+#define FICL_BOOL(x)		((x) ? FICL_TRUE : FICL_FALSE)
 
 #if !defined (NULL)
-#define NULL ((void *)0)
+#define NULL			((void *)0)
 #endif
 
 /*
 ** These structures represent the result of division.
 */
 typedef struct {
-  ficl2Unsigned quotient;
-  ficlUnsigned remainder;
+	ficl2Unsigned	quotient;
+	ficlUnsigned	remainder;
 } ficl2UnsignedQR;
 
 typedef struct {
-  ficl2Integer quotient;
-  ficlInteger remainder;
+	ficl2Integer	quotient;
+	ficlInteger	remainder;
 } ficl2IntegerQR;
 
 /*
@@ -441,8 +444,157 @@ typedef struct {
 ** on a 32 bit CPU than in C, which usually doesn't support 
 ** the double length result (but it should).
 */
-FICL_EXTERN ficl2IntegerQR  ficl2IntegerDivideSymmetric(ficl2Integer num, ficlInteger den);
-FICL_EXTERN ficl2UnsignedQR ficl2UnsignedDivide(ficl2Unsigned q, ficlUnsigned y);
+ficl2IntegerQR	ficl2IntegerDivideSymmetric(ficl2Integer, ficlInteger);
+ficl2UnsignedQR	ficl2UnsignedDivide(ficl2Unsigned, ficlUnsigned);
+
+#if defined(NEW_CELL)
+
+enum {
+	CELL_INT_T,
+	CELL_UINT_T,
+	CELL_2INT_T,
+	CELL_2UINT_T,
+	CELL_FLOAT_T,
+	CELL_COMPLEX_T,
+	CELL_BIGNUM_T,
+	CELL_RATIO_T,
+	CELL_FTH_T,
+	CELL_VOIDP_T,
+	CELL_FN_T,
+	CELL_UNDEFINED_T
+};
+
+typedef union {
+	struct {
+		int type;
+	} ct;
+	struct {
+		int type;
+		ficlInteger i;
+	} ci;
+	struct {
+		int type;
+		ficlUnsigned u;
+	} cu;
+	struct {
+		int type;
+		ficl2Integer di;
+	} cdi;
+	struct {
+		int type;
+		ficl2Unsigned ud;
+	} cud;
+	struct {
+		int type;
+		ficlFloat f;
+	} cf;
+#if HAVE_COMPLEX
+	struct {
+		int type;
+		ficlComplex cp;
+	} ccp;
+#endif
+#if HAVE_BN
+	struct {
+		int type;
+		ficlBignum b;
+	} cb;
+	struct {
+		int type;
+		ficlRatio r;
+	} cr;
+#endif
+	struct {
+		int type;
+		FTH fp;
+	} cfp;
+	struct {
+		int type;
+		void *p;
+	} cp;
+	struct {
+		int type;
+		void (*fn)(void);
+	} cfn;
+} ficlCell;
+
+#define CELL_REF(Obj)		((ficlCell *)(Obj))
+#define CELL_TYPE_REF(Obj)	CELL_REF(Obj)->ct.type
+#define CELL_TYPE_SET(Obj, Tp)	CELL_TYPE_REF(Obj) = (Tp)
+
+#define CELL_INT_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_INT_T)
+#define CELL_UINT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_UINT_T)
+#define CELL_2INT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_2INT_T)
+#define CELL_2UINT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_2UINT_T)
+#define CELL_FLOAT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_FLOAT_T)
+#if HAVE_COMPLEX
+#define CELL_COMPLEX_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_COMPLEX_T)
+#endif
+#if HAVE_BN
+#define CELL_BIGNUM_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_BIGNUM_T)
+#define CELL_RATIO_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_RATIO_T)
+#endif
+#define CELL_FTH_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_FTH_T)
+#define CELL_VOIDP_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_VOIDP_T)
+#define CELL_FN_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_FN_T)
+
+#define CELL_INT_REF(Obj)	CELL_REF(Obj)->ci.i
+#define CELL_UINT_REF(Obj)	CELL_REF(Obj)->cu.u
+#define CELL_LONG_REF(Obj)	CELL_REF(Obj)->cdi.di
+#define CELL_ULONG_REF(Obj)	CELL_REF(Obj)->cud.ud
+#define CELL_FLOAT_REF(Obj)	CELL_REF(Obj)->cf.f
+#if HAVE_COMPLEX
+#define CELL_COMPLEX_REF(Obj)	CELL_REF(Obj)->ccp.cp
+#endif
+#if HAVE_BN
+#define CELL_BIGNUM_REF(Obj)	CELL_REF(Obj)->cb.b
+#define CELL_RATIO_REF(Obj)	CELL_REF(Obj)->cr.r
+#endif
+#define CELL_FTH_REF(Obj)	CELL_REF(Obj)->cfp.fp
+#define CELL_VOIDP_REF(Obj)	CELL_REF(Obj)->cp.p
+#define CELL_FN_REF(Obj)	CELL_REF(Obj)->cfn.fn
+#define CELL_BOOL_REF(Obj)	FTH_TO_BOOL((CELL_FTH_REF(Obj)))
+
+#define CELL_INT_SET(Obj, Val)						\
+	CELL_TYPE_SET(Obj, CELL_INT_T);					\
+	CELL_REF(Obj)->ci.i = (ficlInteger)(Val)
+#define CELL_UINT_SET(Obj, Val)						\
+	CELL_TYPE_SET(Obj, CELL_UINT_T);				\
+	CELL_REF(Obj)->cu.u = (ficlUnsigned)(Val)
+#define CELL_LONG_SET(Obj, Val)						\
+	CELL_TYPE_SET(Obj, CELL_2INT_T);				\
+	CELL_REF(Obj)->cdi.di = (ficl2Integer)(Val)
+#define CELL_ULONG_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_2UINT_T);				\
+	CELL_REF(Obj)->cud.ud = (ficl2Unsigned)(Val)
+#define CELL_FLOAT_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_FLOAT_T);				\
+	CELL_REF(Obj)->cf.f = (ficlFloat)(Val)
+#if HAVE_COMPLEX
+#define	CELL_COMPLEX_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_COMPLEX_T);				\
+	CELL_REF(Obj)->ccp.cp = (ficlComplex)(Val)
+#endif
+#if HAVE_BN
+#define CELL_BIGNUM_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_BIGNUM_T);				\
+	CELL_REF(Obj)->cb.b = (ficlBignum)(Val)
+#define CELL_RATIO_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_RATIO_T);				\
+	CELL_REF(Obj)->cr.r = (ficlRatio)(Val)
+#endif
+#define CELL_FTH_SET(Obj, Val)						\
+	CELL_TYPE_SET(Obj, CELL_FTH_T);					\
+	CELL_REF(Obj)->cfp.fp = (FTH)(Val)
+#define CELL_VOIDP_SET(Obj, Val)					\
+	CELL_TYPE_SET(Obj, CELL_VOIDP_T);				\
+	CELL_REF(Obj)->cp.p = (void *)(Val)
+#define CELL_FN_SET(Obj, Val)						\
+	CELL_TYPE_SET(Obj, CELL_FN_T);					\
+	CELL_REF(Obj)->cfn.fn = (void (*)(void))(Val)
+#define CELL_BOOL_SET(Obj, Val)	CELL_FTH_REF(Obj) = BOOL_TO_FTH(Val)
+
+#else /* !NEW_CELL */
 
 /*
 ** A ficlCell is the main storage type. It must be large enough
@@ -456,36 +608,48 @@ FICL_EXTERN ficl2UnsignedQR ficl2UnsignedDivide(ficl2Unsigned q, ficlUnsigned y)
 */
 
 typedef union {
-  ficlInteger  i;
-  ficlUnsigned u;
-  FTH          fp;
-  void         *p;
-  void         (*fn)(void);
+	ficlInteger	i;
+	ficlUnsigned	u;
+	FTH		fp;
+	void           *p;
+	void            (*fn) (void);
 } ficlCell;
 
-#define CELL_REF(Obj)                   ((ficlCell *)(Obj))
+#define CELL_REF(Obj)		((ficlCell *)(Obj))
+#define CELL_FICL_TO_FTH(Obj)	ficl_to_fth(CELL_FTH_REF(Obj))
 
-#define CELL_INT_REF(Obj)               CELL_REF(Obj)->i
-#define CELL_UINT_REF(Obj)              CELL_REF(Obj)->u
-#define CELL_FTH_REF(Obj)               CELL_REF(Obj)->fp
-#define CELL_VOIDP_REF(Obj)             CELL_REF(Obj)->p
-#define CELL_FN_REF(Obj)                CELL_REF(Obj)->fn
-#define CELL_LONG_REF(Obj)              fth_long_long_ref(ficl_to_fth(CELL_FTH_REF(Obj)))
-#define CELL_ULONG_REF(Obj)             fth_ulong_long_ref(ficl_to_fth(CELL_FTH_REF(Obj)))
-#define CELL_FLOAT_REF(Obj)             fth_float_ref(ficl_to_fth(CELL_FTH_REF(Obj)))
-#define CELL_BOOL_REF(Obj)              (FTH_TO_BOOL((CELL_FTH_REF(Obj))))
+#define CELL_INT_REF(Obj)	CELL_REF(Obj)->i
+#define CELL_UINT_REF(Obj)	CELL_REF(Obj)->u
+#define CELL_FTH_REF(Obj)	CELL_REF(Obj)->fp
+#define CELL_VOIDP_REF(Obj)	CELL_REF(Obj)->p
+#define CELL_FN_REF(Obj)	CELL_REF(Obj)->fn
+#define CELL_LONG_REF(Obj)	fth_long_long_ref(CELL_FICL_TO_FTH(Obj))
+#define CELL_ULONG_REF(Obj)	fth_ulong_long_ref(CELL_FICL_TO_FTH(Obj))
+#define CELL_FLOAT_REF(Obj)	fth_float_ref(CELL_FICL_TO_FTH(Obj))
+#define CELL_BOOL_REF(Obj)	(FTH_TO_BOOL((CELL_FTH_REF(Obj))))
 
-#define CELL_INT_SET(Obj, Val)          (CELL_INT_REF(Obj)   = (ficlInteger)(Val))
-#define CELL_UINT_SET(Obj, Val)         (CELL_UINT_REF(Obj)  = (ficlUnsigned)(Val))
-#define CELL_FTH_SET(Obj, Val)          (CELL_FTH_REF(Obj)   = (FTH)(Val))
-#define CELL_VOIDP_SET(Obj, Val)        (CELL_VOIDP_REF(Obj) = (void *)(Val))
-#define CELL_FN_SET(Obj, Val)           (CELL_FN_REF(Obj)    = (void (*fn)(void))(Val))
-#define CELL_LONG_SET(Obj, Val)         (CELL_FTH_REF(Obj) = fth_make_llong((ficl2Integer)(Val)))
-#define CELL_ULONG_SET(Obj, Val)        (CELL_FTH_REF(Obj) = fth_make_ullong((ficl2Unsigned)(Val)))
-#define CELL_FLOAT_SET(Obj, Val)        (CELL_FTH_REF(Obj) = fth_make_float((ficlFloat)(Val)))
-#define CELL_BOOL_SET(Obj, Val)         (CELL_FTH_REF(Obj) = BOOL_TO_FTH(Val))
+#define CELL_INT_SET(Obj, Val)						\
+	CELL_INT_REF(Obj) = (ficlInteger)(Val)
+#define CELL_UINT_SET(Obj, Val)						\
+	CELL_UINT_REF(Obj) = (ficlUnsigned)(Val)
+#define CELL_FTH_SET(Obj, Val)						\
+	CELL_FTH_REF(Obj) = (FTH)(Val)
+#define CELL_VOIDP_SET(Obj, Val)					\
+	CELL_VOIDP_REF(Obj) = (void *)(Val)
+#define CELL_FN_SET(Obj, Val)						\
+	CELL_FN_REF(Obj) = (void (*fn)(void))(Val)
+#define CELL_LONG_SET(Obj, Val)						\
+	CELL_FTH_REF(Obj) = fth_make_llong((ficl2Integer)(Val))
+#define CELL_ULONG_SET(Obj, Val)					\
+	CELL_FTH_REF(Obj) = fth_make_ullong((ficl2Unsigned)(Val))
+#define CELL_FLOAT_SET(Obj, Val)					\
+	CELL_FTH_REF(Obj) = fth_make_float((ficlFloat)(Val))
+#define CELL_BOOL_SET(Obj, Val)						\
+	CELL_FTH_REF(Obj) = BOOL_TO_FTH(Val)
 
-#define FICL_BITS_PER_CELL  (sizeof(ficlCell) * 8)
+#endif /* NEW_CELL */
+
+#define FICL_BITS_PER_CELL	(sizeof(ficlCell) * 8)
 
 /*
 ** FICL_PLATFORM_ALIGNMENT is the number of bytes to which
@@ -495,7 +659,7 @@ typedef union {
 ** machine.  8 would be appropriate for a 64 bit machine.
 */
 #if !defined (FICL_PLATFORM_ALIGNMENT)
-#define FICL_PLATFORM_ALIGNMENT FTH_ALIGNOF_VOID_P
+#define FICL_PLATFORM_ALIGNMENT	FTH_ALIGNOF_VOID_P
 #endif
 
 /*
@@ -504,14 +668,14 @@ typedef union {
 ** address) to CELL. Remember that constants and casts are NOT
 ** themselves lvalues!
 */
-#define FICL_LVALUE_TO_CELL(v) (*(ficlCell *)&(v))
+#define FICL_LVALUE_TO_CELL(v)	(*(ficlCell *)&(v))
 
 /*
 ** PTRtoCELL is a cast through void * intended to satisfy the
 ** most outrageously pedantic compiler... (I won't mention 
 ** its name)
 */
-#define FICL_POINTER_TO_CELL(p)    ((ficlCell *)(void *)p)
+#define FICL_POINTER_TO_CELL(p)	((ficlCell *)(void *)p)
 
 /*
 ** FORTH defines the "counted string" data type.  This is
@@ -538,34 +702,38 @@ typedef union {
  */
 #define FICL_COUNTED_STRING_MAX  (FICL_PAD_SIZE)
 
-struct ficlCountedString
-{
-  ficlUnsigned length;
-  char text[FICL_COUNTED_STRING_MAX + 1];
+struct ficlCountedString {
+	ficlUnsigned	length;
+	char		text[FICL_COUNTED_STRING_MAX + 1];
 };
 
 #define FICL_COUNTED_STRING_GET_LENGTH(cs)  ((cs).length)
 #define FICL_COUNTED_STRING_GET_POINTER(cs) ((cs).text)
 
-#define FICL_POINTER_TO_COUNTED_STRING(p)   ((ficlCountedString *)(void *)p)
+#define FICL_POINTER_TO_COUNTED_STRING(p)   ((ficlCountedString *)(void *)(p))
 
-struct ficlString
-{
-  ficlUnsigned length;
-  char *text;
+struct ficlString {
+	ficlUnsigned	length;
+	char           *text;
 };
 
-#define FICL_STRING_GET_LENGTH(fs)       ((fs).length)
-#define FICL_STRING_GET_POINTER(fs)      ((fs).text)
-#define FICL_STRING_SET_LENGTH(fs, l)    ((fs).length = (ficlUnsigned)(l))
-#define FICL_STRING_SET_POINTER(fs, p)   ((fs).text = (char *)(p))
+#define FICL_STRING_GET_LENGTH(fs)	((fs).length)
+#define FICL_STRING_GET_POINTER(fs)	((fs).text)
+#define FICL_STRING_SET_LENGTH(fs, l)	((fs).length = (ficlUnsigned)(l))
+#define FICL_STRING_SET_POINTER(fs, p)	((fs).text = (char *)(p))
 #define FICL_STRING_SET_FROM_COUNTED_STRING(string, countedstring)	\
-  {(string).text = (countedstring).text; (string).length = (countedstring).length;}
+	{								\
+		(string).text = (countedstring).text;			\
+		(string).length = (countedstring).length;		\
+	}
 /* 
 ** Init a FICL_STRING from a pointer to a zero-terminated string
 */
 #define FICL_STRING_SET_FROM_CSTRING(string, cstring)			\
-  {(string).text = ((char *)(cstring)); (string).length = (ficlUnsigned)fth_strlen(cstring);}
+	{								\
+		(string).text = ((char *)(cstring));			\
+		(string).length = (ficlUnsigned)fth_strlen(cstring);	\
+	}
 
 /*
 ** Ficl uses this little structure to hold the address of 
@@ -582,9 +750,9 @@ struct ficlString
 ** so it might just be moved to ficlVm instead. (sobral)
 */
 typedef struct {
-  ficlInteger index;
-  char *end;
-  char *text;
+	ficlInteger	index;
+	char           *end;
+	char           *text;
 } ficlTIB;
 
 /*
@@ -600,109 +768,109 @@ typedef struct {
 /* [ms] */
 
 typedef struct {
-  ficlUnsigned size; /* size of the stack, in cells */
-  ficlCell *frame;   /* link reg for stack frame */
-  ficlCell *top;     /* stack pointer */
-  ficlVm *vm;        /* used for debugging */
-  char *name;        /* used for debugging */
-  ficlCell base[1];  /* Top of stack */
+	ficlUnsigned	size;	/* size of the stack, in cells */
+	ficlCell       *frame;	/* link reg for stack frame */
+	ficlCell       *top;	/* stack pointer */
+	ficlVm         *vm;	/* used for debugging */
+	char           *name;	/* used for debugging */
+	ficlCell	base[1];/* Top of stack */
 } ficlStack;
 
-#define STACK_REF(Obj)                  ((ficlStack *)(Obj))
-#define STACK_TOP_REF(Obj)              STACK_REF(Obj)->top
-#define STACK_FRAME_REF(Obj)            STACK_REF(Obj)->frame
-#define STACK_BASE_REF(Obj)             STACK_REF(Obj)->base[1]
+#define STACK_REF(Obj)		((ficlStack *)(Obj))
+#define STACK_TOP_REF(Obj)	STACK_REF(Obj)->top
+#define STACK_FRAME_REF(Obj)	STACK_REF(Obj)->frame
+#define STACK_BASE_REF(Obj)	STACK_REF(Obj)->base[1]
 
-#define STACK_INT_REF(Obj)              CELL_INT_REF(STACK_TOP_REF(Obj))
-#define STACK_UINT_REF(Obj)             CELL_UINT_REF(STACK_TOP_REF(Obj))
-#define STACK_FTH_REF(Obj)              CELL_FTH_REF(STACK_TOP_REF(Obj))
-#define STACK_VOIDP_REF(Obj)            CELL_VOIDP_REF(STACK_TOP_REF(Obj))
-#define STACK_FN_REF(Obj)               CELL_FN_REF(STACK_TOP_REF(Obj))
-#define STACK_LONG_REF(Obj)             CELL_LONG_REF(STACK_TOP_REF(Obj))
-#define STACK_ULONG_REF(Obj)            CELL_ULONG_REF(STACK_TOP_REF(Obj))
-#define STACK_FLOAT_REF(Obj)            CELL_FLOAT_REF(STACK_TOP_REF(Obj))
-#define STACK_BOOL_REF(Obj)             CELL_BOOL_REF(STACK_TOP_REF(Obj))
+#define STACK_INT_REF(Obj)	CELL_INT_REF(STACK_TOP_REF(Obj))
+#define STACK_UINT_REF(Obj)	CELL_UINT_REF(STACK_TOP_REF(Obj))
+#define STACK_FTH_REF(Obj)	CELL_FTH_REF(STACK_TOP_REF(Obj))
+#define STACK_VOIDP_REF(Obj)	CELL_VOIDP_REF(STACK_TOP_REF(Obj))
+#define STACK_FN_REF(Obj)	CELL_FN_REF(STACK_TOP_REF(Obj))
+#define STACK_LONG_REF(Obj)	CELL_LONG_REF(STACK_TOP_REF(Obj))
+#define STACK_ULONG_REF(Obj)	CELL_ULONG_REF(STACK_TOP_REF(Obj))
+#define STACK_FLOAT_REF(Obj)	CELL_FLOAT_REF(STACK_TOP_REF(Obj))
+#define STACK_BOOL_REF(Obj)	CELL_BOOL_REF(STACK_TOP_REF(Obj))
 
-#define STACK_INT_SET(Obj, Val)         CELL_INT_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_UINT_SET(Obj, Val)        CELL_UINT_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_LONG_SET(Obj, Val)        CELL_LONG_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_ULONG_SET(Obj, Val)       CELL_ULONG_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_FLOAT_SET(Obj, Val)       CELL_FLOAT_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_FTH_SET(Obj, Val)         CELL_FTH_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_VOIDP_SET(Obj, Val)       CELL_VOIDP_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_FN_SET(Obj, Val)          CELL_FN_SET(STACK_TOP_REF(Obj), Val)
-#define STACK_BOOL_SET(Obj, Val)        CELL_BOOL_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_INT_SET(Obj, Val)	CELL_INT_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_UINT_SET(Obj, Val) CELL_UINT_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_LONG_SET(Obj, Val) CELL_LONG_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_ULONG_SET(Obj, Val) CELL_ULONG_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_FLOAT_SET(Obj, Val) CELL_FLOAT_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_FTH_SET(Obj, Val)	CELL_FTH_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_VOIDP_SET(Obj, Val) CELL_VOIDP_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_FN_SET(Obj, Val)	CELL_FN_SET(STACK_TOP_REF(Obj), Val)
+#define STACK_BOOL_SET(Obj, Val) CELL_BOOL_SET(STACK_TOP_REF(Obj), Val)
 
-#define VM_STACK_INT_REF(Obj)           CELL_INT_REF(Obj)
-#define VM_STACK_UINT_REF(Obj)          CELL_UINT_REF(Obj)
-#define VM_STACK_FTH_REF(Obj)           CELL_FTH_REF(Obj)
-#define VM_STACK_VOIDP_REF(Obj)         CELL_VOIDP_REF(Obj)
-#define VM_STACK_LONG_REF(Obj)          CELL_LONG_REF(Obj)
-#define VM_STACK_ULONG_REF(Obj)         CELL_ULONG_REF(Obj)
-#define VM_STACK_FLOAT_REF(Obj)         CELL_FLOAT_REF(Obj)
-#define VM_STACK_BOOL_REF(Obj)          CELL_BOOL_REF(Obj)
+#define VM_STACK_INT_REF(Obj)	CELL_INT_REF(Obj)
+#define VM_STACK_UINT_REF(Obj)	CELL_UINT_REF(Obj)
+#define VM_STACK_FTH_REF(Obj)	CELL_FTH_REF(Obj)
+#define VM_STACK_VOIDP_REF(Obj)	CELL_VOIDP_REF(Obj)
+#define VM_STACK_LONG_REF(Obj)	CELL_LONG_REF(Obj)
+#define VM_STACK_ULONG_REF(Obj)	CELL_ULONG_REF(Obj)
+#define VM_STACK_FLOAT_REF(Obj)	CELL_FLOAT_REF(Obj)
+#define VM_STACK_BOOL_REF(Obj)	CELL_BOOL_REF(Obj)
 
-#define VM_STACK_INT_SET(Obj, Val)      CELL_INT_SET(Obj, Val)
-#define VM_STACK_UINT_SET(Obj, Val)     CELL_UINT_SET(Obj, Val)
-#define VM_STACK_FTH_SET(Obj, Val)      CELL_FTH_SET(Obj, Val)
-#define VM_STACK_VOIDP_SET(Obj, Val)    CELL_VOIDP_SET(Obj, Val)
-#define VM_STACK_LONG_SET(Obj, Val)     CELL_LONG_SET(Obj, Val)
-#define VM_STACK_ULONG_SET(Obj, Val)    CELL_ULONG_SET(Obj, Val)
-#define VM_STACK_FLOAT_SET(Obj, Val)    CELL_FLOAT_SET(Obj, Val)
-#define VM_STACK_BOOL_SET(Obj, Val)     CELL_BOOL_SET(Obj, Val)
+#define VM_STACK_INT_SET(Obj, Val)	CELL_INT_SET(Obj, Val)
+#define VM_STACK_UINT_SET(Obj, Val)	CELL_UINT_SET(Obj, Val)
+#define VM_STACK_FTH_SET(Obj, Val)	CELL_FTH_SET(Obj, Val)
+#define VM_STACK_VOIDP_SET(Obj, Val)	CELL_VOIDP_SET(Obj, Val)
+#define VM_STACK_LONG_SET(Obj, Val)	CELL_LONG_SET(Obj, Val)
+#define VM_STACK_ULONG_SET(Obj, Val)	CELL_ULONG_SET(Obj, Val)
+#define VM_STACK_FLOAT_SET(Obj, Val)	CELL_FLOAT_SET(Obj, Val)
+#define VM_STACK_BOOL_SET(Obj, Val)	CELL_BOOL_SET(Obj, Val)
 
-#define STACK_FTH_INDEX_REF(Stack, Idx) CELL_FTH_REF(&STACK_REF(Stack)->top[-Idx])
-#define STACK_FTH_INDEX_SET(Stack, Idx, Val) CELL_FTH_SET(&STACK_REF(Stack)->top[-Idx], Val)
+#define STACK_FTH_INDEX_REF(Stack, Idx)					\
+	CELL_FTH_REF(&STACK_REF(Stack)->top[-Idx])
+#define STACK_FTH_INDEX_SET(Stack, Idx, Val)				\
+	CELL_FTH_SET(&STACK_REF(Stack)->top[-Idx], Val)
 
 /*
 ** Stack methods... many map closely to required Forth words.
 */
 
-FICL_EXTERN ficlStack    *ficlStackCreate       (ficlVm *vm, char *name, unsigned nCells);
-FICL_EXTERN int           ficlStackDepth        (ficlStack *stack);
-FICL_EXTERN void          ficlStackDrop         (ficlStack *stack, int n);
-FICL_EXTERN ficlCell      ficlStackFetch        (ficlStack *stack, int n);
-FICL_EXTERN ficlCell      ficlStackGetTop       (ficlStack *stack);
-FICL_EXTERN void          ficlStackPick         (ficlStack *stack, int n);
-FICL_EXTERN void          ficlStackReset        (ficlStack *stack);
-FICL_EXTERN void          ficlStackRoll         (ficlStack *stack, int n);
-FICL_EXTERN void          ficlStackSetTop       (ficlStack *stack, ficlCell c);
-FICL_EXTERN void          ficlStackStore        (ficlStack *stack, int n, ficlCell c);
-FICL_EXTERN void          ficlStackLink         (ficlStack *stack, int nCells);
-FICL_EXTERN void          ficlStackUnlink       (ficlStack *stack);
-FICL_EXTERN void          ficlStackCheck(ficlStack *stack, int popCells, int pushCells);
-FICL_EXTERN ficlCell      ficlStackPop          (ficlStack *stack);
-FICL_EXTERN ficlInteger   ficlStackPopInteger   (ficlStack *stack);
-FICL_EXTERN ficlUnsigned  ficlStackPopUnsigned  (ficlStack *stack);
-FICL_EXTERN ficl2Unsigned ficlStackPop2Unsigned (ficlStack *stack);
-FICL_EXTERN ficl2Integer  ficlStackPop2Integer  (ficlStack *stack);
-FICL_EXTERN bool          ficlStackPopBoolean   (ficlStack *stack);
-FICL_EXTERN void         *ficlStackPopPointer   (ficlStack *stack);
-FICL_EXTERN FTH           ficlStackPopFTH       (ficlStack *stack);
-FICL_EXTERN ficlFloat     ficlStackPopFloat     (ficlStack *stack);
+ficlStack      *ficlStackCreate(ficlVm *, char *, unsigned);
+int		ficlStackDepth(ficlStack *);
+void		ficlStackDrop(ficlStack *, int);
+ficlCell	ficlStackFetch(ficlStack *, int);
+ficlCell	ficlStackGetTop(ficlStack *);
+void		ficlStackPick(ficlStack *, int);
+void		ficlStackReset(ficlStack *);
+void		ficlStackRoll(ficlStack *, int);
+void		ficlStackSetTop(ficlStack *, ficlCell);
+void		ficlStackStore(ficlStack *, int, ficlCell);
+void		ficlStackLink(ficlStack *, int);
+void		ficlStackUnlink(ficlStack *);
+void		ficlStackCheck(ficlStack *, int, int);
+ficlCell	ficlStackPop(ficlStack *);
+ficlInteger	ficlStackPopInteger(ficlStack *);
+ficlUnsigned	ficlStackPopUnsigned(ficlStack *);
+ficl2Unsigned	ficlStackPop2Unsigned(ficlStack *);
+ficl2Integer	ficlStackPop2Integer(ficlStack *);
+bool		ficlStackPopBoolean(ficlStack *);
+void           *ficlStackPopPointer(ficlStack *);
+FTH		ficlStackPopFTH(ficlStack *);
+ficlFloat	ficlStackPopFloat(ficlStack *);
 
-FICL_EXTERN void          ficlStackPush         (ficlStack *stack, ficlCell c);
-FICL_EXTERN void          ficlStackPushInteger  (ficlStack *stack, ficlInteger i);
-FICL_EXTERN void          ficlStackPushUnsigned (ficlStack *stack, ficlUnsigned u);
-FICL_EXTERN void          ficlStackPush2Integer (ficlStack *stack, ficl2Integer di);
-FICL_EXTERN void          ficlStackPush2Unsigned(ficlStack *stack, ficl2Unsigned ud);
-FICL_EXTERN void          ficlStackPushBoolean  (ficlStack *stack, bool b);
-FICL_EXTERN void          ficlStackPushPointer  (ficlStack *stack, void *p);
-FICL_EXTERN void          ficlStackPushFTH      (ficlStack *stack, FTH fp);
-FICL_EXTERN void          ficlStackPushFloat    (ficlStack *stack, ficlFloat f);
+void		ficlStackPush(ficlStack *, ficlCell);
+void		ficlStackPushInteger(ficlStack *, ficlInteger);
+void		ficlStackPushUnsigned(ficlStack *, ficlUnsigned);
+void		ficlStackPush2Integer(ficlStack *, ficl2Integer);
+void		ficlStackPush2Unsigned(ficlStack *, ficl2Unsigned);
+void		ficlStackPushBoolean(ficlStack *, bool);
+void		ficlStackPushPointer(ficlStack *, void *);
+void		ficlStackPushFTH(ficlStack *, FTH);
+void		ficlStackPushFloat(ficlStack *, ficlFloat);
 
-#define FICL_STACK_CHECK(stack, popCells, pushCells)  ficlStackCheck(stack, popCells, pushCells)
+#define FICL_STACK_CHECK(stack, popCells, pushCells)			\
+	ficlStackCheck(stack, popCells, pushCells)
 
 typedef ficlInteger (*ficlStackWalkFunction)(void *constant, ficlCell *cell);
-FICL_EXTERN void ficlStackWalk(ficlStack *stack,
-					ficlStackWalkFunction callback,
-					void *context,
-					ficlInteger bottomToTop);
-FICL_EXTERN void ficlStackDisplay(ficlStack *stack,
-					   ficlStackWalkFunction callback,
-					   void *context);
 
-typedef ficlWord **ficlIp; /* the VM's instruction pointer */
+void		ficlStackWalk(ficlStack *,
+		    ficlStackWalkFunction, void *, ficlInteger);
+void		ficlStackDisplay(ficlStack *, ficlStackWalkFunction, void *);
+
+typedef ficlWord **ficlIp;	/* the VM's instruction pointer */
 typedef void (*ficlPrimitive)(ficlVm *vm);
 typedef char *(*ficlInputFunction)(ficlCallback *callback);
 typedef void (*ficlOutputFunction)(ficlCallback *callback, char *text);
@@ -716,23 +884,22 @@ typedef void (*ficlOutputFunction)(ficlCallback *callback, char *text);
 ** You can also set a specific handler just for errors.
 ** If you don't specify one, it defaults to using textOut.
 */
-struct ficlCallback
-{
-  void *context;
-  ficlInputFunction  textIn;
-  ficlOutputFunction textOut;
-  ficlOutputFunction errorOut;
-  ficlSystem *system;
-  ficlVm *vm;
-  FTH port_in;
-  FTH port_out;
-  FTH port_err;
-  int stdin_fileno;
-  int stdout_fileno;
-  int stderr_fileno;
-  FILE *stdin_ptr;
-  FILE *stdout_ptr;
-  FILE *stderr_ptr;
+struct ficlCallback {
+	void           *context;
+	ficlInputFunction textIn;
+	ficlOutputFunction textOut;
+	ficlOutputFunction errorOut;
+	ficlSystem     *system;
+	ficlVm         *vm;
+	FTH		port_in;
+	FTH		port_out;
+	FTH		port_err;
+	int		stdin_fileno;
+	int		stdout_fileno;
+	int		stderr_fileno;
+	FILE           *stdin_ptr;
+	FILE           *stdout_ptr;
+	FILE           *stderr_ptr;
 };
 
 /*
@@ -741,18 +908,17 @@ struct ficlCallback
 ** and words are (more or less) arrays of these constants.  In Ficl
 ** these constants are an enumerated type called ficlInstruction.
 */
-typedef enum
-{
+typedef enum {
 #define FICL_TOKEN(token, description)                    token,
 #define FICL_INSTRUCTION_TOKEN(token, description, flags) token,
 #include "ficltokens.h"
 #undef FICL_TOKEN
 #undef FICL_INSTRUCTION_TOKEN
-  ficlInstructionLast,
+	ficlInstructionLast,
 #if (FTH_SIZEOF_LONG == 4)
-  ficlInstructionFourByteTrick  = 0x10000000
+	ficlInstructionFourByteTrick = 0x10000000
 #else
-  ficlInstructionEightByteTrick = 0x1000000010000000
+	ficlInstructionEightByteTrick = 0x1000000010000000
 #endif
 } ficlInstruction;
 
@@ -768,30 +934,34 @@ typedef enum
 ** Throw an exception
 */
 
-#define GC_FRAME_SIZE                   128
+#define GC_FRAME_SIZE		128
 
-struct ficlVm
-{
-  void		*context;
-  ficlCallback   callback;
-  ficlVm        *link;	           /* Ficl keeps a VM list for simple teardown */
-  jmp_buf       *exceptionHandler; /* crude exception mechanism...     */
-  short          restart;	   /* Set TRUE to restart runningWord  */
-  ficlIp         ip;		   /* instruction pointer              */
-  ficlWord      *runningWord;      /* address of currently running word (often just *(ip-1) ) */
-  ficlUnsigned   state;		   /* compiling or interpreting        */
-  ficlUnsigned   base;		   /* number conversion base           */
-  ficlStack     *dataStack;
-  ficlStack     *returnStack;	   /* return stack                     */
-  int            fth_catch_p;	   /* are we in fth-catch? [ms]        */
-  int            gc_frame_level;   /* [ms] gc_push/pop                 */
-  ficlCell       sourceId;         /* -1 if EVALUATE, 0 if normal input, >0 if a file */
-  ficlTIB        tib;		   /* address of incoming text string  */
-  ficlCell       user[FICL_USER_CELLS];
-  ficlWord      *gc_word[GC_FRAME_SIZE]; /* [ms] gc_push/pop           */
-  void          *gc_inst[GC_FRAME_SIZE]; /* [ms] gc_push/pop           */
-  char           pad_eval[FICL_PAD_SIZE + 1]; /* second scratch area (for ficlVmEvaluate) */
-  char           pad[FICL_PAD_SIZE + 1];  /* the scratch area (see above)  */
+struct ficlVm {
+	void           *context;
+	ficlCallback	callback;
+	ficlVm         *link;	/* Ficl keeps a VM list for simple teardown */
+	jmp_buf        *exceptionHandler;	/* crude exception
+						 * mechanism... */
+	short		restart;/* Set TRUE to restart runningWord */
+	ficlIp		ip;	/* instruction pointer */
+	ficlWord       *runningWord;	/* address of currently running word
+					 * (often just *(ip-1) ) */
+	ficlUnsigned	state;	/* compiling or interpreting */
+	ficlUnsigned	base;	/* number conversion base */
+	ficlStack      *dataStack;
+	ficlStack      *returnStack;	/* return stack */
+	int		fth_catch_p;	/* are we in fth-catch? [ms] */
+	int		gc_frame_level;	/* [ms] gc_push/pop */
+	ficlCell	sourceId;	/* -1 if EVALUATE, 0 if normal input,
+					 * >0 if a file */
+	ficlTIB		tib;	/* address of incoming text string */
+	ficlCell	user[FICL_USER_CELLS];
+	ficlWord       *gc_word[GC_FRAME_SIZE];	/* [ms] gc_push/pop */
+	void           *gc_inst[GC_FRAME_SIZE];	/* [ms] gc_push/pop */
+	char		pad_eval[FICL_PAD_SIZE + 1]; /* second scratch area
+						      * (for ficlVmEvaluate) */
+	char		pad[FICL_PAD_SIZE + 1];	/* the scratch area (see
+						 * above)  */
 };
 
 /*
@@ -802,133 +972,163 @@ struct ficlVm
 ** (known as IMMEDIATE) are executed in the compile state, too.
 */
 /* values of STATE */
-#define FICL_VM_STATE_INTERPRET (0)
-#define FICL_VM_STATE_COMPILE   (1)
+#define FICL_VM_STATE_INTERPRET	(0)
+#define FICL_VM_STATE_COMPILE	(1)
 
 /*
 ** Exit codes for vmThrow
 */
-#define FICL_VM_STATUS_OFFSET           256
-#define FICL_VM_STATUS_INNER_EXIT       (-(FICL_VM_STATUS_OFFSET + 0)) /* tell ficlVmExecuteXT
-									* to exit inner loop */
-#define FICL_VM_STATUS_OUT_OF_TEXT  	(-(FICL_VM_STATUS_OFFSET + 1)) /* hungry - normal exit */
-#define FICL_VM_STATUS_RESTART      	(-(FICL_VM_STATUS_OFFSET + 2)) /* word needs more text
-									* to succeed -- re-run it */
-#define FICL_VM_STATUS_USER_EXIT    	(-(FICL_VM_STATUS_OFFSET + 3)) /* user wants to quit */
-#define FICL_VM_STATUS_ERROR_EXIT   	(-(FICL_VM_STATUS_OFFSET + 4)) /* interpreter found
-									* an error */
-#define FICL_VM_STATUS_BREAK        	(-(FICL_VM_STATUS_OFFSET + 5)) /* debugger breakpoint */
-#define FICL_VM_STATUS_SKIP_FILE    	(-(FICL_VM_STATUS_OFFSET + 6)) /* [ms] skip loading file */
-#define FICL_VM_STATUS_LAST_FICL_ERROR  (-(FICL_VM_STATUS_OFFSET + 7))
-#define FICL_VM_STATUS_LAST_FICL        (-FICL_VM_STATUS_LAST_FICL_ERROR - FICL_VM_STATUS_OFFSET)
+#define FICL_VM_STATUS_OFFSET	256
+#define FICL_VM_STATUS_INNER_EXIT					\
+	(-(FICL_VM_STATUS_OFFSET + 0)) /* tell ficlVmExecuteXT
+					* to exit inner loop */
+#define FICL_VM_STATUS_OUT_OF_TEXT					\
+	(-(FICL_VM_STATUS_OFFSET + 1)) /* hungry - normal exit */
+#define FICL_VM_STATUS_RESTART						\
+	(-(FICL_VM_STATUS_OFFSET + 2)) /* word needs more text
+					* to succeed -- re-run it */
+#define FICL_VM_STATUS_USER_EXIT					\
+	(-(FICL_VM_STATUS_OFFSET + 3)) /* user wants to quit */
+#define FICL_VM_STATUS_ERROR_EXIT					\
+	(-(FICL_VM_STATUS_OFFSET + 4)) /* interpreter found
+					* an error */
+#define FICL_VM_STATUS_BREAK						\
+	(-(FICL_VM_STATUS_OFFSET + 5)) /* debugger breakpoint */
+#define FICL_VM_STATUS_SKIP_FILE					\
+	(-(FICL_VM_STATUS_OFFSET + 6)) /* [ms] skip loading file */
+#define FICL_VM_STATUS_LAST_FICL_ERROR					\
+	(-(FICL_VM_STATUS_OFFSET + 7))
+#define FICL_VM_STATUS_LAST_FICL					\
+	(-FICL_VM_STATUS_LAST_FICL_ERROR - FICL_VM_STATUS_OFFSET)
 
 
 /* [ms] Access to the ANS exception strings. */
-char *ficl_ans_exc_name                 (int exc);
-char *ficl_ans_exc_msg                  (int exc);
+char           *ficl_ans_exc_name(int);
+char           *ficl_ans_exc_msg(int);
 
 /* [ms] Full list of ANS exceptions. */
-#define FICL_VM_STATUS_ABORT        	(  -1) /* like FICL_VM_STATUS_ERROR_EXIT -- abort */
-#define FICL_VM_STATUS_ABORTQ       	(  -2) /* like FICL_VM_STATUS_ERROR_EXIT -- abort" */
-#define FICL_VM_STATUS_STACK_OVERFLOW   (  -3) /* stack overflow */
-#define FICL_VM_STATUS_STACK_UNDERFLOW  (  -4) /* stack underflow */
-#define FICL_VM_STATUS_RSTACK_OVERFLOW  (  -5) /* return stack overflow */
-#define FICL_VM_STATUS_RSTACK_UNDERFLOW (  -6) /* return stack underflow */
-#define FICL_VM_STATUS_TOO_DEEP         (  -7) /* do-loops nested too deeply during execution */
-#define FICL_VM_STATUS_DICT_OVERFLOW    (  -8) /* dictionary overflow */
-#define FICL_VM_STATUS_MEMORY_ACCESS    (  -9) /* invalid memory address */
-#define FICL_VM_STATUS_DIVISION_BY_ZERO ( -10) /* division by zero */
-#define FICL_VM_STATUS_RANGE_ERROR      ( -11) /* result out of range */
-#define FICL_VM_STATUS_ARGUMENT_ERROR   ( -12) /* argument type mismatch */
-#define FICL_VM_STATUS_UNDEFINED        ( -13) /* undefined word */
-#define FICL_VM_STATUS_COMPILE_ONLY     ( -14) /* interpreting a compile-only word */
-#define FICL_VM_STATUS_INVALID_FORGET   ( -15) /* invalid FORGET */
-#define FICL_VM_STATUS_ZERO_STRING      ( -16) /* attempt to use zero-length string as a name */
-#define FICL_VM_STATUS_PNO_OVERFLOW     ( -17) /* pictured numeric output string overflow */
-#define FICL_VM_STATUS_PARSE_OVERFLOW   ( -18) /* parsed string overflow */
-#define FICL_VM_STATUS_NAME_TOO_LONG    ( -19) /* definition name too long */
-#define FICL_VM_STATUS_MEMORY_WRITE_ERROR (-20)/* write to a read-only location */
-#define FICL_VM_STATUS_NOT_IMPLEMENTED  ( -21) /* unsupported operation */
-#define FICL_VM_STATUS_CONTROL_MISMATCH ( -22) /* control structure mismatch */
-#define FICL_VM_STATUS_ALIGNMENT_ERROR  ( -23) /* address alignment exception */
+#define FICL_VM_STATUS_ABORT		(-1) /* like FICL_VM_STATUS_ERROR_EXIT
+					      * -- abort */
+#define FICL_VM_STATUS_ABORTQ		(-2) /* like FICL_VM_STATUS_ERROR_EXIT
+					      * -- abort" */
+#define FICL_VM_STATUS_STACK_OVERFLOW	(-3) /* stack overflow */
+#define FICL_VM_STATUS_STACK_UNDERFLOW	(-4) /* stack underflow */
+#define FICL_VM_STATUS_RSTACK_OVERFLOW	(-5) /* return stack overflow */
+#define FICL_VM_STATUS_RSTACK_UNDERFLOW	(-6) /* return stack underflow */
+#define FICL_VM_STATUS_TOO_DEEP		(-7) /* do-loops nested too deeply
+					      * during execution */
+#define FICL_VM_STATUS_DICT_OVERFLOW	(-8) /* dictionary overflow */
+#define FICL_VM_STATUS_MEMORY_ACCESS	(-9) /* invalid memory address */
+#define FICL_VM_STATUS_DIVISION_BY_ZERO	(-10) /* division by zero */
+#define FICL_VM_STATUS_RANGE_ERROR	(-11) /* result out of range */
+#define FICL_VM_STATUS_ARGUMENT_ERROR	(-12) /* argument type mismatch */
+#define FICL_VM_STATUS_UNDEFINED	(-13) /* undefined word */
+#define FICL_VM_STATUS_COMPILE_ONLY	(-14) /* interpreting a compile-only
+					       * word */
+#define FICL_VM_STATUS_INVALID_FORGET	(-15) /* invalid FORGET */
+#define FICL_VM_STATUS_ZERO_STRING	(-16) /* attempt to use zero-length
+					       * string as a name */
+#define FICL_VM_STATUS_PNO_OVERFLOW	(-17) /* pictured numeric output
+					       * string overflow */
+#define FICL_VM_STATUS_PARSE_OVERFLOW	(-18) /* parsed string overflow */
+#define FICL_VM_STATUS_NAME_TOO_LONG	(-19) /* definition name too long */
+#define FICL_VM_STATUS_MEMORY_WRITE_ERROR (-20) /* write to a read-only
+                                                 * location */
+#define FICL_VM_STATUS_NOT_IMPLEMENTED	(-21) /* unsupported operation */
+#define FICL_VM_STATUS_CONTROL_MISMATCH	(-22) /* control structure mismatch */
+#define FICL_VM_STATUS_ALIGNMENT_ERROR	(-23) /* address alignment exception */
 #define FICL_VM_STATUS_NUMERIC_ARG_ERROR (-24) /* invalid numeric argument */
-#define FICL_VM_STATUS_RSTACK_IMBALANCE ( -25) /* return stack imbalance */
-#define FICL_VM_STATUS_MISSING_LPARAMETER (-26)/* loop parameters unavailable */
-#define FICL_VM_STATUS_RECURSION_ERROR  ( -27) /* invalid recursion */
-#define FICL_VM_STATUS_INTERRUPT        ( -28) /* user interrupt */
-#define FICL_VM_STATUS_COMPILER_NESTING ( -29) /* compiler nesting */
-#define FICL_VM_STATUS_OBSOLETE         ( -30) /* obsolescent feature */
-#define FICL_VM_STATUS_TO_BODY_ERROR    ( -31) /* >BODY used on non-CREATEd definition */
-#define FICL_VM_STATUS_NAME_ARG_ERROR   ( -32) /* invalid name argument (e.g., TO xxx) */
-#define FICL_VM_STATUS_BREAD_ERROR      ( -33) /* block read exception */
-#define FICL_VM_STATUS_BWRITE_ERROR     ( -34) /* block write exception */
-#define FICL_VM_STATUS_BNUMBER_ERROR    ( -35) /* invalid block number */
-#define FICL_VM_STATUS_FPOSITION_ERROR  ( -36) /* invalid file position */
-#define FICL_VM_STATUS_FILE_IO_ERROR    ( -37) /* file I/O exception */
-#define FICL_VM_STATUS_NO_SUCH_FILE     ( -38) /* non-existent file */
-#define FICL_VM_STATUS_EOF_ERROR        ( -39) /* unexpected end of file */
-#define FICL_VM_STATUS_FBASE_ERROR      ( -40) /* invalid BASE for floating point conversion */
-#define FICL_VM_STATUS_PRECISION_ERROR  ( -41) /* loss of precision */
-#define FICL_VM_STATUS_FDIVIDE_BY_ZERO  ( -42) /* floating-point divide by zero */
-#define FICL_VM_STATUS_FRANGE_ERROR     ( -43) /* floating-point result out of range */
-#define FICL_VM_STATUS_FSTACK_OVERFLOW  ( -44) /* floating-point stack overflow */
-#define FICL_VM_STATUS_FSTACK_UNDERFLOW ( -45) /* floating-point stack underflow */
-#define FICL_VM_STATUS_FNUMBER_ERROR    ( -46) /* floating-point invalid argument */
-#define FICL_VM_STATUS_WORD_LIST_ERROR  ( -47) /* compilation word list deleted */
-#define FICL_VM_STATUS_POSTPONE_ERROR   ( -48) /* invalid POSTPONE */
-#define FICL_VM_STATUS_SEARCH_OVERFLOW  ( -49) /* search-order overflow */
-#define FICL_VM_STATUS_SEARCH_UNDERFLOW ( -50) /* search-order underflow */
-#define FICL_VM_STATUS_WORD_LIST_CHANGED (-51) /* compilation word list changed */
-#define FICL_VM_STATUS_CS_OVERFLOW      ( -52) /* control-flow stack overflow */
-#define FICL_VM_STATUS_ES_OVERFLOW      ( -53) /* exception stack overflow */
-#define FICL_VM_STATUS_FP_UNDERFLOW     ( -54) /* floating-point underflow */
-#define FICL_VM_STATUS_FP_ERROR         ( -55) /* floating-point unidentified fault */
-#define FICL_VM_STATUS_QUIT             ( -56) /* like FICL_VM_STATUS_ERROR_EXIT,
-						  but leave dataStack & base alone */
-#define FICL_VM_STATUS_CHAR_ERROR       ( -57) /* exception in sending or receiving a character */
-#define FICL_VM_STATUS_BRANCH_ERROR     ( -58) /* [IF], [ELSE], or [THEN] exception */
-#define FICL_VM_STATUS_LAST_ERROR       ( -59)
-#define FICL_VM_STATUS_LAST_ANS         ( -FICL_VM_STATUS_LAST_ERROR)
+#define FICL_VM_STATUS_RSTACK_IMBALANCE	(-25) /* return stack imbalance */
+#define FICL_VM_STATUS_MISSING_LPARAMETER (-26) /* loop parameters
+						 * unavailable */
+#define FICL_VM_STATUS_RECURSION_ERROR	(-27) /* invalid recursion */
+#define FICL_VM_STATUS_INTERRUPT	(-28) /* user interrupt */
+#define FICL_VM_STATUS_COMPILER_NESTING	(-29) /* compiler nesting */
+#define FICL_VM_STATUS_OBSOLETE		(-30) /* obsolescent feature */
+#define FICL_VM_STATUS_TO_BODY_ERROR	(-31) /* >BODY used on non-CREATEd
+					       * definition */
+#define FICL_VM_STATUS_NAME_ARG_ERROR	(-32) /* invalid name argument
+					       * (e.g., TO xxx) */
+#define FICL_VM_STATUS_BREAD_ERROR	(-33) /* block read exception */
+#define FICL_VM_STATUS_BWRITE_ERROR	(-34) /* block write exception */
+#define FICL_VM_STATUS_BNUMBER_ERROR	(-35) /* invalid block number */
+#define FICL_VM_STATUS_FPOSITION_ERROR	(-36) /* invalid file position */
+#define FICL_VM_STATUS_FILE_IO_ERROR	(-37) /* file I/O exception */
+#define FICL_VM_STATUS_NO_SUCH_FILE	(-38) /* non-existent file */
+#define FICL_VM_STATUS_EOF_ERROR	(-39) /* unexpected end of file */
+#define FICL_VM_STATUS_FBASE_ERROR	(-40) /* invalid BASE for
+					       * floating point conversion */
+#define FICL_VM_STATUS_PRECISION_ERROR	(-41) /* loss of precision */
+#define FICL_VM_STATUS_FDIVIDE_BY_ZERO	(-42) /* floating-point divide
+					       * by zero */
+#define FICL_VM_STATUS_FRANGE_ERROR	(-43) /* floating-point result
+					       * out of range */
+#define FICL_VM_STATUS_FSTACK_OVERFLOW	(-44) /* floating-point stack
+					       * overflow */
+#define FICL_VM_STATUS_FSTACK_UNDERFLOW	(-45) /* floating-point stack underflow */
+#define FICL_VM_STATUS_FNUMBER_ERROR	(-46) /* floating-point invalid
+					       * argument */
+#define FICL_VM_STATUS_WORD_LIST_ERROR	(-47) /* compilation word list
+					       * deleted */
+#define FICL_VM_STATUS_POSTPONE_ERROR	(-48) /* invalid POSTPONE */
+#define FICL_VM_STATUS_SEARCH_OVERFLOW	(-49) /* search-order overflow */
+#define FICL_VM_STATUS_SEARCH_UNDERFLOW	(-50) /* search-order underflow */
+#define FICL_VM_STATUS_WORD_LIST_CHANGED (-51) /* compilation word list
+						* changed */
+#define FICL_VM_STATUS_CS_OVERFLOW	(-52) /* control-flow stack overflow */
+#define FICL_VM_STATUS_ES_OVERFLOW	(-53) /* exception stack overflow */
+#define FICL_VM_STATUS_FP_UNDERFLOW	(-54) /* floating-point underflow */
+#define FICL_VM_STATUS_FP_ERROR		(-55) /* floating-point unidentified
+					       * fault */
+#define FICL_VM_STATUS_QUIT		(-56) /* like FICL_VM_STATUS_ERROR_EXIT,
+					       * but leave dataStack &
+					       * base alone */
+#define FICL_VM_STATUS_CHAR_ERROR	(-57) /* exception in sending or
+					       * receiving a character */
+#define FICL_VM_STATUS_BRANCH_ERROR	(-58) /* [IF], [ELSE], or [THEN]
+					       * exception */
+#define FICL_VM_STATUS_LAST_ERROR	(-59)
+#define FICL_VM_STATUS_LAST_ANS		(-FICL_VM_STATUS_LAST_ERROR)
 
-FICL_EXTERN void       ficlVmBranchRelative(ficlVm *vm, int offset);
-FICL_EXTERN ficlVm *   ficlVmCreate       (ficlVm *vm, unsigned nPStack, unsigned nRStack);
-FICL_EXTERN void       ficlVmDestroy      (ficlVm *vm);
-FICL_EXTERN ficlDictionary *ficlVmGetDictionary(ficlVm *vm);
-FICL_EXTERN char * ficlVmGetString(ficlVm *vm, ficlCountedString *dest, char d);
-FICL_EXTERN ficlString ficlVmGetWord      (ficlVm *vm);
-FICL_EXTERN ficlString ficlVmGetWord0     (ficlVm *vm);
-FICL_EXTERN int        ficlVmGetWordToPad (ficlVm *vm);
-FICL_EXTERN void       ficlVmInnerLoop    (ficlVm *vm, ficlWord *volatile word);
-FICL_EXTERN ficlString ficlVmParseString  (ficlVm *vm, char delimiter);
-FICL_EXTERN ficlString ficlVmParseStringEx(ficlVm *vm, char delimiter, int fSkipLeading);
-FICL_EXTERN ficlCell   ficlVmPop          (ficlVm *vm);
-FICL_EXTERN void       ficlVmPush         (ficlVm *vm, ficlCell c);
-FICL_EXTERN void       ficlVmPopIP        (ficlVm *vm);
-FICL_EXTERN void       ficlVmPushIP       (ficlVm *vm, ficlIp newIP);
-FICL_EXTERN void       ficlVmQuit         (ficlVm *vm);
-FICL_EXTERN void       ficlVmReset        (ficlVm *vm);
-FICL_EXTERN void       ficlVmSetTextIn    (ficlVm *vm, ficlInputFunction textIn);
-FICL_EXTERN void       ficlVmSetTextOut   (ficlVm *vm, ficlOutputFunction textOut);
-FICL_EXTERN void       ficlVmSetErrorOut  (ficlVm *vm, ficlOutputFunction errorOut);
-FICL_EXTERN void       ficlVmThrow        (ficlVm *vm, int except);
-FICL_EXTERN void       ficlVmThrowError   (ficlVm *vm, const char *fmt, ...);
-FICL_EXTERN void       ficlVmThrowErrorVararg(ficlVm *vm, int e, const char *f, va_list a);
+void		ficlVmBranchRelative(ficlVm *, int);
+ficlVm         *ficlVmCreate(ficlVm *, unsigned, unsigned);
+void		ficlVmDestroy(ficlVm *);
+ficlDictionary *ficlVmGetDictionary(ficlVm *);
+char           *ficlVmGetString(ficlVm *, ficlCountedString *, char);
+ficlString	ficlVmGetWord(ficlVm *);
+ficlString	ficlVmGetWord0(ficlVm *);
+int		ficlVmGetWordToPad(ficlVm *);
+void		ficlVmInnerLoop(ficlVm *, ficlWord *volatile);
+ficlString	ficlVmParseString(ficlVm *, char);
+ficlString	ficlVmParseStringEx(ficlVm *, char, int);
+ficlCell	ficlVmPop(ficlVm *);
+void		ficlVmPush(ficlVm *, ficlCell);
+void		ficlVmPopIP(ficlVm *);
+void		ficlVmPushIP(ficlVm *, ficlIp);
+void		ficlVmQuit(ficlVm *);
+void		ficlVmReset(ficlVm *);
+void		ficlVmSetTextIn(ficlVm *, ficlInputFunction);
+void		ficlVmSetTextOut(ficlVm *, ficlOutputFunction);
+void		ficlVmSetErrorOut(ficlVm *, ficlOutputFunction);
+void		ficlVmThrow(ficlVm *, int);
+void		ficlVmThrowError(ficlVm *, const char *,...);
+void		ficlVmThrowErrorVararg(ficlVm *, int, const char *, va_list);
 /* [ms]*/
-FICL_EXTERN void       ficlVmThrowException(ficlVm *vm, int exc, const char *fmt, ...);
-FICL_EXTERN char      *ficlVmTextIn       (ficlVm *vm);
-FICL_EXTERN void       ficlVmTextOut      (ficlVm *vm, char *text);
-FICL_EXTERN void       ficlVmErrorOut     (ficlVm *vm, char *text);
+void		ficlVmThrowException(ficlVm *, int, const char *,...);
+char           *ficlVmTextIn(ficlVm *);
+void		ficlVmTextOut(ficlVm *, char *);
+void		ficlVmErrorOut(ficlVm *, char *);
 
-#define ficlVmGetContext(vm)                      ((vm)->context)
-#define ficlVmGetDataStack(vm)                    ((vm)->dataStack)
-#define ficlVmGetFloatStack(vm)                   ((vm)->dataStack)
-#define ficlVmGetReturnStack(vm)                  ((vm)->returnStack)
-#define ficlVmGetRunningWord(vm)                  ((vm)->runningWord)
+#define ficlVmGetContext(vm)	((vm)->context)
+#define ficlVmGetDataStack(vm)	((vm)->dataStack)
+#define ficlVmGetFloatStack(vm)	((vm)->dataStack)
+#define ficlVmGetReturnStack(vm) ((vm)->returnStack)
+#define ficlVmGetRunningWord(vm) ((vm)->runningWord)
 
-FICL_EXTERN char *ficl_running_word            (ficlVm *vm);
-FICL_EXTERN void ficlVmDisplayDataStack        (ficlVm *vm);
-FICL_EXTERN void ficlVmDisplayDataStackSimple  (ficlVm *vm);
-FICL_EXTERN void ficlVmDisplayReturnStack      (ficlVm *vm);
+char           *ficl_running_word(ficlVm *);
+void		ficlVmDisplayDataStack(ficlVm *);
+void		ficlVmDisplayDataStackSimple(ficlVm *);
+void		ficlVmDisplayReturnStack(ficlVm *);
 
 /*
 ** f i c l E v a l u a t e
@@ -938,7 +1138,7 @@ FICL_EXTERN void ficlVmDisplayReturnStack      (ficlVm *vm);
 ** PLEASE USE THIS FUNCTION when throwing a hard-coded
 ** string to the Ficl interpreter.
 */
-FICL_EXTERN int        ficlVmEvaluate(ficlVm *vm, char *s);
+int		ficlVmEvaluate(ficlVm *, char *);
 
 /*
 ** f i c l V m E x e c *
@@ -950,15 +1150,15 @@ FICL_EXTERN int        ficlVmEvaluate(ficlVm *vm, char *s);
 ** or an error occurs.
 ** Returns one of the FICL_VM_STATUS_... codes defined in ficl.h:
 ** FICL_VM_STATUS_OUT_OF_TEXT is the normal exit condition
-** FICL_VM_STATUS_ERROR_EXIT means that the interpreter encountered a syntax error
-**      and the vm has been reset to recover (some or all
+** FICL_VM_STATUS_ERROR_EXIT means that the interpreter encountered a
+**      syntax error and the vm has been reset to recover (some or all
 **      of the text block got ignored
 ** FICL_VM_STATUS_USER_EXIT means that the user executed the "bye" command
 **      to shut down the interpreter. This would be a good
 **      time to delete the vm, etc -- or you can ignore this
 **      signal.
-** FICL_VM_STATUS_ABORT and FICL_VM_STATUS_ABORTQ are generated by 'abort' and 'abort"'
-**      commands.
+** FICL_VM_STATUS_ABORT and FICL_VM_STATUS_ABORTQ are generated by
+**      'abort' and 'abort"' commands.
 ** Preconditions: successful execution of ficlInitSystem,
 **      Successful creation and init of the VM by ficlNewVM (or equivalent)
 **
@@ -966,17 +1166,17 @@ FICL_EXTERN int        ficlVmEvaluate(ficlVm *vm, char *s);
 ** ensure vm->sourceId was set to a sensible value.
 ** ficlExec() explicitly DOES NOT manage SOURCE-ID for you.
 */
-FICL_EXTERN int  ficlVmExecuteString         (ficlVm *vm, ficlString s);
-FICL_EXTERN int  ficlVmExecuteXT             (ficlVm *vm, ficlWord *pWord);
-FICL_EXTERN void ficlVmExecuteInstruction    (ficlVm *vm, ficlInstruction i);
+int		ficlVmExecuteString(ficlVm *, ficlString);
+int		ficlVmExecuteXT(ficlVm *, ficlWord *);
+void		ficlVmExecuteInstruction(ficlVm *, ficlInstruction);
 #if 1
 #define ficlVmExecuteWord(vm, word) ficlVmInnerLoop(vm, word)
 #else
-FICL_EXTERN void ficlVmExecuteWord           (ficlVm *vm, ficlWord *word);
+void		ficlVmExecuteWord(ficlVm *, ficlWord *);
 #endif
-FICL_EXTERN void ficlVmDictionaryAllot       (ficlDictionary *dictionary, int n);
-FICL_EXTERN void ficlVmDictionaryAllotCells  (ficlDictionary *dictionary, int cells);
-FICL_EXTERN int  ficlVmParseWord             (ficlVm *vm, ficlString s);
+void		ficlVmDictionaryAllot(ficlDictionary *, int);
+void		ficlVmDictionaryAllotCells(ficlDictionary *, int);
+int		ficlVmParseWord(ficlVm *, ficlString);
 
 /*
 ** TIB access routines...
@@ -988,21 +1188,19 @@ FICL_EXTERN int  ficlVmParseWord             (ficlVm *vm, ficlString s);
 ** PopTib restores the TIB state given a saved TIB from PushTib
 ** GetInBuf returns a pointer to the next unused char of the TIB
 */
-FICL_EXTERN void ficlVmPushTib  (ficlVm *vm,
-					  char *text,
-					  ficlInteger nChars,
-					  ficlTIB *pSaveTib);
-FICL_EXTERN void ficlVmPopTib   (ficlVm *vm, ficlTIB *pTib);
-#define ficlVmGetInBuf(vm)       ((vm)->tib.text + (vm)->tib.index)
-#define ficlVmGetInBufLen(vm)    ((vm)->tib.end - (vm)->tib.text)
-#define ficlVmGetInBufEnd(vm)    ((vm)->tib.end)
-#define ficlVmGetTibIndex(vm)    ((vm)->tib.index)
+void		ficlVmPushTib(ficlVm *, char *, ficlInteger, ficlTIB *);
+void		ficlVmPopTib(ficlVm *, ficlTIB *);
+
+#define ficlVmGetInBuf(vm)	((vm)->tib.text + (vm)->tib.index)
+#define ficlVmGetInBufLen(vm)	((vm)->tib.end - (vm)->tib.text)
+#define ficlVmGetInBufEnd(vm)	((vm)->tib.end)
+#define ficlVmGetTibIndex(vm)	((vm)->tib.index)
 #define ficlVmSetTibIndex(vm, i) ((vm)->tib.index = i)
 #define ficlVmUpdateTib(vm, str) ((vm)->tib.index = (str) - (vm)->tib.text)
 
-FICL_EXTERN void        ficlVmDictionaryCheck(ficlDictionary *dictionary, int n);
-FICL_EXTERN void        ficlVmDictionarySimpleCheck(ficlDictionary *dictionary, int n);
-FICL_EXTERN void        ficlPrimitiveLiteralIm(ficlVm *vm);
+void		ficlVmDictionaryCheck(ficlDictionary *, int);
+void		ficlVmDictionarySimpleCheck(ficlDictionary *, int);
+void		ficlPrimitiveLiteralIm(ficlVm *);
 
 /*
 ** A FICL_CODE points to a function that gets called to help execute
@@ -1025,30 +1223,31 @@ FICL_EXTERN void        ficlPrimitiveLiteralIm(ficlVm *vm);
 ** a fixed size array for each name.
 */
 
-struct ficlWord
-{
-  struct ficlWord *link;    /* Previous word in the dictionary      */
-  struct ficlWord *current_word; /* word where ficlWord is used [ms]*/
-  ficlPrimitive code;       /* Native code to execute the word      */
-  ficlInstruction semiParen;/* native code to execute the word      */
-  char *name;		    /* First nFICLNAME chars of word name   */
-  void (*vfunc)();          /* void function to use [ms]            */
-  FTH  (*func)();           /* function to use [ms]                 */
-  FTH properties;           /* property-hash [ms]                   */
-  FTH current_file;         /* file where ficlWord is used [ms]     */
-  FTH file;	            /* origin file of word [ms]             */
-  int primitive_p;	    /* C-primitive or not [ms]              */
-  int req;                  /* required args [ms]                   */
-  int opt;                  /* optional args [ms]                   */
-  int rest;                 /* 1 if rest args, 0 otherwise [ms]     */
-  int argc;                 /* number of all args [ms]              */
-  int kind;                 /* word, proc, symbol, keyword, exception [ms] */
-  ficlInteger current_line; /* line where ficlWord is used [ms]     */
-  ficlInteger line;	    /* line in source [ms]                  */
-  ficlUnsigned flags;       /* Immediate, Smudge, Compile-only, IsOjbect, Instruction */
-  ficlUnsigned length;      /* Number of chars in word name         */
-  ficlUnsigned hash;
-  ficlCell param[1];        /* First data cell of the word          */
+struct ficlWord {
+	struct ficlWord *link;	/* Previous word in the dictionary      */
+	struct ficlWord *current_word;	/* word where ficlWord is used [ms] */
+	ficlPrimitive	code;	/* Native code to execute the word      */
+	ficlInstruction	semiParen;	/* native code to execute the word */
+	char           *name;	/* First nFICLNAME chars of word name   */
+	void            (*vfunc) ();	/* void function to use [ms]    */
+	FTH             (*func) ();	/* function to use [ms]         */
+	FTH		properties;	/* property-hash [ms]           */
+	FTH		current_file;	/* file where ficlWord is used [ms] */
+	FTH		file;	/* origin file of word [ms]             */
+	int		primitive_p;	/* C-primitive or not [ms]      */
+	int		req;	/* required args [ms]                   */
+	int		opt;	/* optional args [ms]                   */
+	int		rest;	/* 1 if rest args, 0 otherwise [ms]     */
+	int		argc;	/* number of all args [ms]              */
+	int		kind;	/* word, proc, symbol, keyword, exception
+				 * [ms] */
+	ficlInteger	current_line;	/* line where ficlWord is used [ms] */
+	ficlInteger	line;	/* line in source [ms]                  */
+	ficlUnsigned	flags;	/* Immediate, Smudge, Compile-only, IsOjbect,
+				 * Instruction */
+	ficlUnsigned	length;	/* Number of chars in word name         */
+	ficlUnsigned	hash;
+	ficlCell	param[1];	/* First data cell of the word  */
 };
 
 /*
@@ -1060,7 +1259,7 @@ struct ficlWord
 ** This word is always executed immediately when
 ** encountered, even when compiling.
 */
-#define FICL_WORD_IMMEDIATE    ( 1UL)
+#define FICL_WORD_IMMEDIATE	(1UL)
 
 /*
 ** FICL_WORD_COMPILE_ONLY:
@@ -1068,7 +1267,7 @@ struct ficlWord
 ** Ficl will throw a runtime error if this word executed
 ** while not compiling.
 */
-#define FICL_WORD_COMPILE_ONLY ( 2UL)
+#define FICL_WORD_COMPILE_ONLY	(2UL)
 
 /*
 ** FICL_WORD_SMUDGED
@@ -1076,14 +1275,14 @@ struct ficlWord
 ** The word is hidden from dictionary lookups
 ** until it is "un-smudged".
 */
-#define FICL_WORD_SMUDGED      ( 4UL)
+#define FICL_WORD_SMUDGED	(4UL)
 
 /*
 ** FICL_WORD_OBJECT
 ** This word is an object or object member variable.
 ** (Currently only used by "my=[".)
 */
-#define FICL_WORD_OBJECT       ( 8UL)
+#define FICL_WORD_OBJECT	(8UL)
 
 /*
 ** FICL_WORD_INSTRUCTION
@@ -1095,31 +1294,33 @@ struct ficlWord
 ** (Do *not* use this flag for words that need their PFA pushed
 ** before executing!)
 */
-#define FICL_WORD_INSTRUCTION  (16UL)
+#define FICL_WORD_INSTRUCTION	(16UL)
 
 /*
 ** FICL_WORD_COMPILE_ONLY_IMMEDIATE
 ** Most words that are "immediate" are also
 ** "compile-only".
 */
-#define FICL_WORD_COMPILE_ONLY_IMMEDIATE    (FICL_WORD_IMMEDIATE | FICL_WORD_COMPILE_ONLY)
-#define FICL_WORD_DEFAULT      ( 0UL)
+#define FICL_WORD_COMPILE_ONLY_IMMEDIATE				\
+	(FICL_WORD_IMMEDIATE | FICL_WORD_COMPILE_ONLY)
+#define FICL_WORD_DEFAULT	(0UL)
 
 /*
 ** Worst-case size of a word header: FICL_NAME_LENGTH chars in name
 */
 #define FICL_CELLS_PER_WORD						\
-  ((sizeof (ficlWord) + FICL_NAME_LENGTH + sizeof (ficlCell)) / (sizeof (ficlCell)))
+	((sizeof(ficlWord) + FICL_NAME_LENGTH + sizeof(ficlCell)) /	\
+	(sizeof(ficlCell)))
 
-FICL_EXTERN int ficlWordIsImmediate(ficlWord *word);
-FICL_EXTERN int ficlWordIsCompileOnly(ficlWord *word);
+int		ficlWordIsImmediate(ficlWord *);
+int		ficlWordIsCompileOnly(ficlWord *);
 
-FICL_EXTERN void ficlCallbackAssert(int expression, char *expr, char *file, int line);
+void ficlCallbackAssert(int expression, char *expr, char *file, int line);
 /*
  * XXX: FICL_ASSERT()
  */
 #if 0
-#define FICL_ASSERT(Expr) ficlCallbackAssert(((int)(Expr)), #Expr, __FILE__, __LINE__)
+#define FICL_ASSERT(Expr)						\		ficlCallbackAssert(((int)(Expr)), #Expr, __FILE__, __LINE__)
 #else
 #define FICL_ASSERT(Expr)	/* empty */
 #endif
@@ -1129,23 +1330,23 @@ FICL_EXTERN void ficlCallbackAssert(int expression, char *expr, char *file, int 
 ** ltoa complements strtol
 */
 
-FICL_EXTERN int  ficlIsPowerOfTwo    (ficlUnsigned u);
-FICL_EXTERN char *ficlLtoa           (ficlInteger value, char *string, int radix );
-FICL_EXTERN char *ficlUltoa          (ficlUnsigned value, char *string, int radix );
-FICL_EXTERN char ficlDigitToCharacter(int value);
-FICL_EXTERN char *ficlStringReverse  (char *string );
-FICL_EXTERN char *ficlStringSkipSpace(char *s, char *end);
-FICL_EXTERN char *ficlStringCaseFold (char *s);
-FICL_EXTERN void *ficlAlignPointer   (void *ptr);
-FICL_EXTERN int  intern_ficlStrincmp (char *s1, char *s2, ficlUnsigned length);
+int		ficlIsPowerOfTwo(ficlUnsigned);
+char           *ficlLtoa(ficlInteger, char *, int);
+char           *ficlUltoa(ficlUnsigned, char *, int);
+char		ficlDigitToCharacter(int);
+char           *ficlStringReverse(char *);
+char           *ficlStringSkipSpace(char *, char *);
+char           *ficlStringCaseFold(char *);
+void           *ficlAlignPointer(void *);
+int		intern_ficlStrincmp(char *, char *, ficlUnsigned);
 
 #if defined(HAVE_STRNCASECMP)
 #if defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
-#define ficlStrincmp(s1, s2, len)      strncasecmp(s1, s2, len)
+#define ficlStrincmp(s1, s2, len)	strncasecmp(s1, s2, len)
 #else
-#define ficlStrincmp(s1, s2, len)      intern_ficlStrincmp(s1, s2, len)
+#define ficlStrincmp(s1, s2, len)	intern_ficlStrincmp(s1, s2, len)
 #endif
 
 /*
@@ -1156,19 +1357,18 @@ FICL_EXTERN int  intern_ficlStrincmp (char *s1, char *s2, ficlUnsigned length);
 ** just a pointer to a FICL_HASH in this implementation.
 */
 typedef struct ficlHash {
-  struct ficlHash *link;   /* link to parent class wordlist for OO */
-  char      *name;         /* optional pointer to \0 terminated wordlist name */
-  unsigned   size;         /* number of buckets in the hash */
-  ficlWord *table[1];
+	struct ficlHash *link;	/* link to parent class wordlist for OO */
+	char           *name;	/* optional pointer to \0 terminated wordlist
+				 * name */
+	unsigned	size;	/* number of buckets in the hash */
+	ficlWord       *table[1];
 } ficlHash;
 
-FICL_EXTERN void           ficlHashForget    (ficlHash *hash, void *where);
-FICL_EXTERN ficlUnsigned   ficlHashCode      (ficlString s);
-FICL_EXTERN void           ficlHashInsertWord(ficlHash *hash, ficlWord *word);
-FICL_EXTERN ficlWord       *ficlHashLookup   (ficlHash *hash,
-                                              ficlString s,
-					      ficlUnsigned hashCode);
-FICL_EXTERN void           ficlHashReset     (ficlHash *hash);
+void		ficlHashForget(ficlHash *, void *);
+ficlUnsigned	ficlHashCode(ficlString);
+void		ficlHashInsertWord(ficlHash *, ficlWord *);
+ficlWord       *ficlHashLookup(ficlHash *, ficlString, ficlUnsigned);
+void		ficlHashReset(ficlHash *);
 
 /*
 ** A Dictionary is a linked list of FICL_WORDs. It is also Ficl's
@@ -1192,115 +1392,88 @@ FICL_EXTERN void           ficlHashReset     (ficlHash *hash);
 **      This is the initial compilation list, and contains all
 **      Ficl's precompiled words.
 **
-** compilationWordlist -- compilation wordlist - initially equal to forthWordlist
+** compilationWordlist -- compilation wordlist -
+**      initially equal to forthWordlist
 ** wordlists  -- array of pointers to wordlists. Managed as a stack.
 **      Highest index is the first list in the search order.
-** wordlistCount   -- number of lists in wordlists. wordlistCount-1 is the highest 
+** wordlistCount   -- number of lists in wordlists.
+**      wordlistCount-1 is the highest 
 **      filled slot in wordlists, and points to the first wordlist
 **      in the search order
 ** size -- number of cells in the dictionary (total)
 ** base -- start of data area. Must be at the end of the struct.
 */
-struct ficlDictionary
-{
-  ficlCell *here;
-  void     *context; /* for your use, particularly with ficlDictionaryLock() */
-  ficlWord *smudge;
-  ficlHash *forthWordlist;
-  ficlHash *compilationWordlist;
-  ficlHash *wordlists[FICL_MAX_WORDLISTS];
-  ficlInteger wordlistCount;
-  ficlUnsigned size;    /* Number of cells in dictionary (total)*/
-  ficlSystem *system;     /* used for debugging */
-  ficlCell base[1]; /* Base of dictionary memory      */
+struct ficlDictionary {
+	ficlCell       *here;
+	void           *context;/* for your use, particularly with
+				 * ficlDictionaryLock() */
+	ficlWord       *smudge;
+	ficlHash       *forthWordlist;
+	ficlHash       *compilationWordlist;
+	ficlHash       *wordlists[FICL_MAX_WORDLISTS];
+	ficlInteger	wordlistCount;
+	ficlUnsigned	size;	/* Number of cells in dictionary (total) */
+	ficlSystem     *system;	/* used for debugging */
+	ficlCell	base[1];	/* Base of dictionary memory */
 };
 
-FICL_EXTERN void ficlDictionaryAbortDefinition(ficlDictionary *dict);
-FICL_EXTERN void ficlDictionaryAlign          (ficlDictionary *dict);
-FICL_EXTERN void ficlDictionaryAllot          (ficlDictionary *dict, int n);
-FICL_EXTERN void ficlDictionaryAllotCells     (ficlDictionary *dict, int nCells);
-FICL_EXTERN void ficlDictionaryAppendCell     (ficlDictionary *dict, ficlCell c);
-FICL_EXTERN void ficlDictionaryAppendPointer  (ficlDictionary *dict, void *p);
-FICL_EXTERN void ficlDictionaryAppendInteger  (ficlDictionary *dict, ficlInteger i);
-FICL_EXTERN void ficlDictionaryAppendFTH      (ficlDictionary *dict, FTH obj);
-FICL_EXTERN void ficlDictionaryAppendCharacter(ficlDictionary *dict, char c);
-FICL_EXTERN void ficlDictionaryAppendUnsigned (ficlDictionary *dict, ficlUnsigned u);
-FICL_EXTERN void *ficlDictionaryAppendData    (ficlDictionary *dict,
-					       void *data,
-					       ficlInteger length);
-FICL_EXTERN char *ficlDictionaryAppendString  (ficlDictionary *dict, ficlString s);
-FICL_EXTERN ficlWord *ficlDictionaryAppendWord(ficlDictionary *dict, 
-					       ficlString name, 
-					       ficlPrimitive pCode, 
-					       ficlUnsigned flags);
-FICL_EXTERN ficlWord *ficlDictionaryAppendPrimitive(ficlDictionary *dict, 
-						    char *name, 
-						    ficlPrimitive pCode, 
-						    ficlUnsigned flags);
-FICL_EXTERN ficlWord *ficlDictionaryAppendInstruction(ficlDictionary *dict,
-						      char *name,
-						      ficlInstruction i,
-						      ficlUnsigned flags);
-FICL_EXTERN ficlWord *ficlDictionaryAppendConstantInstruction(ficlDictionary *dict,
-							      ficlString name,
-							      ficlInstruction inst,
-							      ficlInteger value);
-FICL_EXTERN ficlWord *ficlDictionaryAppendConstant(ficlDictionary *dict,
-						   char *name,
-						   ficlInteger value);
-FICL_EXTERN ficlWord *ficlDictionaryAppendPointerConstant(ficlDictionary *dict,
-							  char *name,
-							  void *value);
-FICL_EXTERN ficlWord *ficlDictionaryAppendFTHConstant(ficlDictionary *dict,
-						      char *name,
-						      FTH value);
-FICL_EXTERN ficlWord *ficlDictionarySetConstantInstruction(ficlDictionary *dict,
-							   ficlString name,
-							   ficlInstruction inst,
-							   ficlInteger value);
-FICL_EXTERN ficlWord *ficlDictionarySetConstant(ficlDictionary *dict,
-						char *name,
-						ficlInteger value);
-FICL_EXTERN ficlWord *ficlDictionaryAppendFTHConstantInstruction(ficlDictionary *dict,
-								 ficlString name,
-								 ficlInstruction inst,
-								 FTH obj);
-FICL_EXTERN ficlWord *ficlDictionarySetFTHConstantInstruction(ficlDictionary *dict,
-							      ficlString name,
-							      ficlInstruction inst,
-							      FTH obj);
-FICL_EXTERN ficlWord *ficlDictionarySetFTHConstant(ficlDictionary *dict,
-						   char *name,
-						   FTH obj);
-FICL_EXTERN ficlWord *ficlDictionarySetPrimitive(ficlDictionary *dict, 
-						 char *name, 
-						 ficlPrimitive code,
-						 ficlUnsigned flags);
-FICL_EXTERN ficlWord *ficlDictionarySetInstruction(ficlDictionary *dict, 
-						   char *name, 
-						   ficlInstruction i,
-						   ficlUnsigned flags);
-FICL_EXTERN int  ficlDictionaryCellsAvailable   (ficlDictionary *dict);
-FICL_EXTERN int  ficlDictionaryCellsUsed        (ficlDictionary *dict);
-FICL_EXTERN ficlDictionary *ficlDictionaryCreate(ficlSystem *system, unsigned nCELLS);
-FICL_EXTERN ficlDictionary *ficlDictionaryCreateHashed(ficlSystem *system,
-								unsigned nCells,
-								unsigned nHash);
-FICL_EXTERN ficlHash *ficlDictionaryCreateWordlist(ficlDictionary *dict, int nBuckets);
-FICL_EXTERN void ficlDictionaryDestroy           (ficlDictionary *dict);
-FICL_EXTERN void ficlDictionaryEmpty             (ficlDictionary *dict, unsigned nHash);
-FICL_EXTERN int  ficlDictionaryIncludes          (ficlDictionary *dict, void *p);
-FICL_EXTERN ficlWord *ficlDictionaryLookup       (ficlDictionary *dict, ficlString name);
-FICL_EXTERN void ficlDictionaryResetSearchOrder  (ficlDictionary *dict);
-FICL_EXTERN void ficlDictionarySetFlags          (ficlDictionary *dict, ficlUnsigned set);
-FICL_EXTERN void ficlDictionaryClearFlags        (ficlDictionary *d, ficlUnsigned clear);
-FICL_EXTERN void ficlDictionarySetImmediate      (ficlDictionary *dict);
-FICL_EXTERN void ficlDictionaryUnsmudge          (ficlDictionary *dict);
-FICL_EXTERN ficlCell *ficlDictionaryWhere        (ficlDictionary *dict);
+void		ficlDictionaryAbortDefinition(ficlDictionary *);
+void		ficlDictionaryAlign(ficlDictionary *);
+void		ficlDictionaryAllot(ficlDictionary *, int);
+void		ficlDictionaryAllotCells(ficlDictionary *, int);
+void		ficlDictionaryAppendCell(ficlDictionary *, ficlCell);
+void		ficlDictionaryAppendPointer(ficlDictionary *, void *);
+void		ficlDictionaryAppendInteger(ficlDictionary *, ficlInteger);
+void		ficlDictionaryAppendFTH(ficlDictionary *, FTH);
+void		ficlDictionaryAppendCharacter(ficlDictionary *, char);
+void		ficlDictionaryAppendUnsigned(ficlDictionary *, ficlUnsigned);
+void           *ficlDictionaryAppendData(ficlDictionary *, void *, ficlInteger);
+char           *ficlDictionaryAppendString(ficlDictionary *, ficlString);
+ficlWord       *ficlDictionaryAppendWord(ficlDictionary *,
+		    ficlString, ficlPrimitive, ficlUnsigned);
+ficlWord       *ficlDictionaryAppendPrimitive(ficlDictionary *, char *,
+		    ficlPrimitive, ficlUnsigned);
+ficlWord       *ficlDictionaryAppendInstruction(ficlDictionary *, char *,
+		    ficlInstruction, ficlUnsigned);
+ficlWord       *ficlDictionaryAppendConstantInstruction(ficlDictionary *,
+		    ficlString, ficlInstruction, ficlInteger);
+ficlWord       *ficlDictionaryAppendConstant(ficlDictionary *, char *,
+		    ficlInteger);
+ficlWord       *ficlDictionaryAppendPointerConstant(ficlDictionary *,
+		    char *, void *);
+ficlWord       *ficlDictionaryAppendFTHConstant(ficlDictionary *, char *, FTH);
+ficlWord       *ficlDictionarySetConstantInstruction(ficlDictionary *,
+		    ficlString, ficlInstruction, ficlInteger);
+ficlWord       *ficlDictionarySetConstant(ficlDictionary *,
+		    char *, ficlInteger);
+ficlWord       *ficlDictionaryAppendFTHConstantInstruction(ficlDictionary *,
+		    ficlString, ficlInstruction, FTH);
+ficlWord       *ficlDictionarySetFTHConstantInstruction(ficlDictionary *,
+		    ficlString, ficlInstruction, FTH);
+ficlWord       *ficlDictionarySetFTHConstant(ficlDictionary *, char *, FTH);
+ficlWord       *ficlDictionarySetPrimitive(ficlDictionary *, char *,
+		    ficlPrimitive, ficlUnsigned);
+ficlWord       *ficlDictionarySetInstruction(ficlDictionary *, char *,
+		    ficlInstruction, ficlUnsigned);
+int		ficlDictionaryCellsAvailable(ficlDictionary *);
+int		ficlDictionaryCellsUsed(ficlDictionary *);
+ficlDictionary *ficlDictionaryCreate(ficlSystem *, unsigned);
+ficlDictionary *ficlDictionaryCreateHashed(ficlSystem *, unsigned, unsigned);
+ficlHash       *ficlDictionaryCreateWordlist(ficlDictionary *, int);
+void		ficlDictionaryDestroy(ficlDictionary *);
+void		ficlDictionaryEmpty(ficlDictionary *, unsigned);
+int		ficlDictionaryIncludes(ficlDictionary *, void *);
+ficlWord       *ficlDictionaryLookup(ficlDictionary *, ficlString);
+void		ficlDictionaryResetSearchOrder(ficlDictionary *);
+void		ficlDictionarySetFlags(ficlDictionary *, ficlUnsigned);
+void		ficlDictionaryClearFlags(ficlDictionary *, ficlUnsigned);
+void		ficlDictionarySetImmediate(ficlDictionary *);
+void		ficlDictionaryUnsmudge(ficlDictionary *);
+ficlCell       *ficlDictionaryWhere(ficlDictionary *);
 
-FICL_EXTERN int  ficlDictionaryIsAWord           (ficlDictionary *dict, ficlWord *word);
-FICL_EXTERN void ficlDictionarySee(ficlDictionary *dict, ficlWord *word);
-FICL_EXTERN ficlWord *ficlDictionaryFindEnclosingWord(ficlDictionary *dict, ficlCell *c);
+int		ficlDictionaryIsAWord(ficlDictionary *, ficlWord *);
+void		ficlDictionarySee(ficlDictionary *, ficlWord *);
+ficlWord       *ficlDictionaryFindEnclosingWord(ficlDictionary *, ficlCell *);
 
 /* 
 ** P A R S E   S T E P
@@ -1309,12 +1482,13 @@ FICL_EXTERN ficlWord *ficlDictionaryFindEnclosingWord(ficlDictionary *dict, ficl
 ** By default, Ficl goes through two attempts to parse each token from its input
 ** stream: it first attempts to match it with a word in the dictionary, and
 ** if that fails, it attempts to convert it into a number. This mechanism is now
-** extensible by additional steps. This allows extensions like floating point and 
-** double number support to be factored cleanly.
+** extensible by additional steps. This allows extensions like floating point
+** and double number support to be factored cleanly.
 **
-** Each parse step is a function that receives the next input token as a STRINGINFO.
-** If the parse step matches the token, it must apply semantics to the token appropriate
-** to the present value of VM.state (compiling or interpreting), and return FICL_TRUE.
+** Each parse step is a function that receives the next input token as a
+** STRINGINFO.  If the parse step matches the token, it must apply semantics
+** to the token appropriate to the present value of VM.state
+** (compiling or interpreting), and return FICL_TRUE.
 ** Otherwise it returns FICL_FALSE. See words.c: isNumber for an example
 **
 ** Note: for the sake of efficiency, it's a good idea both to limit the number
@@ -1344,50 +1518,53 @@ typedef struct {
 ** virtual machines with their corresponding dictionaries. Ficl 3.0 added
 ** support for multiple Ficl systems, allowing multiple concurrent sessions 
 ** to separate dictionaries with some constraints. 
-** Note: the context pointer is there to provide context for applications. It is copied
-** to each VM's context field as that VM is created.
+** Note: the context pointer is there to provide context for applications.
+** It is copied to each VM's context field as that VM is created.
 */
-struct ficlSystemInformation
-{
-  int size;		        /* structure size tag for versioning */
-  void *context;                /* Initializes VM's context pointer -
-				 * for application use */
-  unsigned int dictionarySize;  /* Size of system's Dictionary, in cells */
-  unsigned int environmentSize; /* Size of Environment dictionary, in cells */
-  unsigned int stackSize;       /* Size of all stacks created, in cells */
-  unsigned int returnSize;	/* [ms] */
-  unsigned int localsSize;	/* [ms] */
-  ficlInputFunction textIn;	/* default textIn function [ms] */
-  ficlOutputFunction textOut;	/* default textOut function */
-  ficlOutputFunction errorOut;	/* textOut function used for errors */
+struct ficlSystemInformation {
+	int		size;	/* structure size tag for versioning */
+	void           *context;/* Initializes VM's context pointer - for
+				 * application use */
+	unsigned int	dictionarySize;	/* Size of system's Dictionary, in
+					 * cells */
+	unsigned int	environmentSize;	/* Size of Environment
+						 * dictionary, in cells */
+	unsigned int	stackSize;	/* Size of all stacks created, in
+					 * cells */
+	unsigned int	returnSize;	/* [ms] */
+	unsigned int	localsSize;	/* [ms] */
+	ficlInputFunction textIn;	/* default textIn function [ms] */
+	ficlOutputFunction textOut;	/* default textOut function */
+	ficlOutputFunction errorOut;	/* textOut function used for errors */
 };
 
-#define ficlSystemInformationInitialize(x)		\
-  { memset((x), 0, sizeof(ficlSystemInformation));	\
-    (x)->size = (int)sizeof(ficlSystemInformation); }
+#define ficlSystemInformationInitialize(x)				\
+	{								\
+		memset((x), 0, sizeof(ficlSystemInformation));		\
+		(x)->size = (int)sizeof(ficlSystemInformation);		\
+	}
 
-struct ficlSystem
-{
-  void		 *context;
-  ficlCallback   callback;
-  ficlSystem     *link;
-  ficlVm         *vmList;
-  ficlDictionary *dictionary;
-  ficlDictionary *environment;
-  ficlDictionary *symbols;	/* [ms] */
-  ficlWord       *interpreterLoop[3];
-  ficlWord       *parseList[FICL_MAX_PARSE_STEPS];
-  ficlWord       *exitInnerWord;
-  ficlWord       *interpretWord;
-  ficlDictionary *locals;
-  ficlInteger    localsCount;
-  ficlCell       *localsFixup;
-  unsigned       stackSize;
-  unsigned       returnSize;	/* [ms] */
-  ficlBreakpoint breakpoint;
+struct ficlSystem {
+	void           *context;
+	ficlCallback	callback;
+	ficlSystem     *link;
+	ficlVm         *vmList;
+	ficlDictionary *dictionary;
+	ficlDictionary *environment;
+	ficlDictionary *symbols;/* [ms] */
+	ficlWord       *interpreterLoop[3];
+	ficlWord       *parseList[FICL_MAX_PARSE_STEPS];
+	ficlWord       *exitInnerWord;
+	ficlWord       *interpretWord;
+	ficlDictionary *locals;
+	ficlInteger	localsCount;
+	ficlCell       *localsFixup;
+	unsigned	stackSize;
+	unsigned	returnSize;	/* [ms] */
+	ficlBreakpoint	breakpoint;
 };
 
-#define ficlSystemGetContext(system) ((system)->context)
+#define ficlSystemGetContext(system)	((system)->context)
 
 /*
 ** External interface to Ficl...
@@ -1405,7 +1582,7 @@ struct ficlSystem
 ** precompiled part. Try 1K cells minimum. Use "words" to find
 ** out how much of the dictionary is used at any time.
 */
-FICL_EXTERN ficlSystem *ficlSystemCreate(ficlSystemInformation *fsi);
+ficlSystem     *ficlSystemCreate(ficlSystemInformation *);
 
 /*
 ** f i c l S y s t e m D e s t r o y
@@ -1413,7 +1590,7 @@ FICL_EXTERN ficlSystem *ficlSystemCreate(ficlSystemInformation *fsi);
 ** were created with ficlNewVM (see below). Call this function to
 ** reclaim all memory used by the dictionary and VMs.
 */
-FICL_EXTERN void       ficlSystemDestroy(ficlSystem *system);
+void		ficlSystemDestroy(ficlSystem *);
 
 /*
 ** Create a new VM from the heap, and link it into the system VM list.
@@ -1421,7 +1598,7 @@ FICL_EXTERN void       ficlSystemDestroy(ficlSystem *system);
 ** address of the VM, or NULL if an error occurs.
 ** Precondition: successful execution of ficlInitSystem
 */
-FICL_EXTERN ficlVm   *ficlSystemCreateVm(ficlSystem *system);
+ficlVm         *ficlSystemCreateVm(ficlSystem *);
 
 /*
 ** Force deletion of a VM. You do not need to do this 
@@ -1430,49 +1607,49 @@ FICL_EXTERN ficlVm   *ficlSystemCreateVm(ficlSystem *system);
 ** of the system, ficltermSystem takes care of VM cleanup
 ** automatically.
 */
-FICL_EXTERN void ficlSystemDestroyVm(ficlVm *vm);
+void		ficlSystemDestroyVm(ficlVm *);
 
 /*
 ** Returns the address of the most recently defined word in the system
 ** dictionary with the given name, or NULL if no match.
 ** Precondition: successful execution of ficlInitSystem
 */
-FICL_EXTERN ficlWord *ficlSystemLookup(ficlSystem *system, char *name);
+ficlWord       *ficlSystemLookup(ficlSystem *, char *);
 
 /*
 ** f i c l G e t D i c t
 ** Utility function - returns the address of the system dictionary.
 ** Precondition: successful execution of ficlInitSystem
 */
-ficlDictionary *ficlSystemGetDictionary(ficlSystem *system);
-ficlDictionary *ficlSystemGetEnvironment(ficlSystem *system);
-ficlDictionary *ficlSystemGetLocals(ficlSystem *system);
-ficlDictionary *ficlSystemGetSymbols(ficlSystem *system); /* [ms] */
+ficlDictionary *ficlSystemGetDictionary(ficlSystem *);
+ficlDictionary *ficlSystemGetEnvironment(ficlSystem *);
+ficlDictionary *ficlSystemGetLocals(ficlSystem *);
+ficlDictionary *ficlSystemGetSymbols(ficlSystem *);	/* [ms] */
 
 /* 
 ** f i c l C o m p i l e C o r e
 ** Builds the ANS CORE wordset into the dictionary - called by
 ** ficlInitSystem - no need to waste dictionary space by doing it again.
 */
-FICL_EXTERN void       ficlSystemCompileCore(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompilePrefix(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompileSearch(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompileSoftCore(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompileTools(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompileFile(ficlSystem *system);
-FICL_EXTERN int        ficlVmParseFloatNumber(ficlVm *vm, ficlString s);
-FICL_EXTERN void       ficlSystemCompilePlatform(ficlSystem *system);
-FICL_EXTERN void       ficlSystemCompileExtras(ficlSystem *system);
+void		ficlSystemCompileCore(ficlSystem *);
+void		ficlSystemCompilePrefix(ficlSystem *);
+void		ficlSystemCompileSearch(ficlSystem *);
+void		ficlSystemCompileSoftCore(ficlSystem *);
+void		ficlSystemCompileTools(ficlSystem *);
+void		ficlSystemCompileFile(ficlSystem *);
+int		ficlVmParseFloatNumber(ficlVm *, ficlString);
+void		ficlSystemCompilePlatform(ficlSystem *);
+void		ficlSystemCompileExtras(ficlSystem *);
 
-FICL_EXTERN int        ficlVmParsePrefix(ficlVm *vm, ficlString s);
-FICL_EXTERN ficlWord  *ficlSystemLookupLocal(ficlSystem *system, ficlString name);
+int		ficlVmParsePrefix(ficlVm *, ficlString);
+ficlWord       *ficlSystemLookupLocal(ficlSystem *, ficlString);
 
 /*
 ** from words.c...
 */
-FICL_EXTERN int        ficlVmParseNumber(ficlVm *vm, ficlString s);
-FICL_EXTERN void       ficlPrimitiveTick(ficlVm *vm);
-FICL_EXTERN void       ficlPrimitiveParseStepParen(ficlVm *vm);
+int		ficlVmParseNumber(ficlVm *, ficlString);
+void		ficlPrimitiveTick(ficlVm *);
+void		ficlPrimitiveParseStepParen(ficlVm *);
 
 /*
 ** Appends a parse step function to the end of the parse list (see 
@@ -1481,10 +1658,9 @@ FICL_EXTERN void       ficlPrimitiveParseStepParen(ficlVm *vm);
 ** the dictionary. Precompiled parse steps can use (PARSE-STEP) as their 
 ** CFA - see parenParseStep in words.c.
 */
-FICL_EXTERN int  ficlSystemAddParseStep(ficlSystem *system, ficlWord *word); /* ficl.c */
-FICL_EXTERN void ficlSystemAddPrimitiveParseStep(ficlSystem *system,
-							  char *name,
-							  ficlParseStep pStep);
+int		ficlSystemAddParseStep(ficlSystem *, ficlWord *); /* ficl.c */
+void		ficlSystemAddPrimitiveParseStep(ficlSystem *,
+		    char *, ficlParseStep);
 
 /*
 ** From tools.c
@@ -1493,57 +1669,57 @@ FICL_EXTERN void ficlSystemAddPrimitiveParseStep(ficlSystem *system,
 /* 
 ** The following supports SEE and the debugger.
 */
-typedef enum  
-{
-  FICL_WORDKIND_BRANCH,
-  FICL_WORDKIND_BRANCH0,
-  FICL_WORDKIND_COLON, 
-  FICL_WORDKIND_CONSTANT, 
-  FICL_WORDKIND_2CONSTANT,
-  FICL_WORDKIND_CREATE,
-  FICL_WORDKIND_DO,
-  FICL_WORDKIND_DOES, 
-  FICL_WORDKIND_LITERAL,
-  FICL_WORDKIND_2LITERAL,
-  FICL_WORDKIND_LOOP,
-  FICL_WORDKIND_OF,
-  FICL_WORDKIND_PLOOP,
-  FICL_WORDKIND_PRIMITIVE,
-  FICL_WORDKIND_QDO,
-  FICL_WORDKIND_STRING_LITERAL,
-  FICL_WORDKIND_CSTRING_LITERAL,
-  FICL_WORDKIND_USER,
-  FICL_WORDKIND_VARIABLE,
-  FICL_WORDKIND_INSTRUCTION,
-  FICL_WORDKIND_INSTRUCTION_WORD,
-  FICL_WORDKIND_INSTRUCTION_WITH_ARGUMENT
-} ficlWordKind;
+typedef enum {
+	FICL_WORDKIND_BRANCH,
+	FICL_WORDKIND_BRANCH0,
+	FICL_WORDKIND_COLON,
+	FICL_WORDKIND_CONSTANT,
+	FICL_WORDKIND_2CONSTANT,
+	FICL_WORDKIND_CREATE,
+	FICL_WORDKIND_DO,
+	FICL_WORDKIND_DOES,
+	FICL_WORDKIND_LITERAL,
+	FICL_WORDKIND_2LITERAL,
+	FICL_WORDKIND_LOOP,
+	FICL_WORDKIND_OF,
+	FICL_WORDKIND_PLOOP,
+	FICL_WORDKIND_PRIMITIVE,
+	FICL_WORDKIND_QDO,
+	FICL_WORDKIND_STRING_LITERAL,
+	FICL_WORDKIND_CSTRING_LITERAL,
+	FICL_WORDKIND_USER,
+	FICL_WORDKIND_VARIABLE,
+	FICL_WORDKIND_INSTRUCTION,
+	FICL_WORDKIND_INSTRUCTION_WORD,
+	FICL_WORDKIND_INSTRUCTION_WITH_ARGUMENT
+}		ficlWordKind;
 
-ficlWordKind ficlWordClassify(ficlWord *word);
+ficlWordKind ficlWordClassify(ficlWord *);
 
 /*
 ** Used with File-Access wordset.
 */
-#define FICL_FAM_READ	1
-#define FICL_FAM_WRITE	2
-#define FICL_FAM_APPEND	4
-#define FICL_FAM_BINARY	8
+#define FICL_FAM_READ		1
+#define FICL_FAM_WRITE		2
+#define FICL_FAM_APPEND		4
+#define FICL_FAM_BINARY		8
 
-#define FICL_FAM_OPEN_MODE(fam)	((fam) & (FICL_FAM_READ | FICL_FAM_WRITE | FICL_FAM_APPEND))
+#define FICL_FAM_OPEN_MODE(fam)						\
+	((fam) & (FICL_FAM_READ | FICL_FAM_WRITE | FICL_FAM_APPEND))
 
-#define FICL_MAXPATHLEN 1024
+#define FICL_MAXPATHLEN		1024
 
 typedef struct {
-  FILE *f;
-  char filename[FICL_MAXPATHLEN];
+	FILE           *f;
+	char		filename[FICL_MAXPATHLEN];
 } ficlFile;
 
-FICL_EXTERN int ficlFileTruncate(ficlFile *ff, ficlUnsigned size);
-FICL_EXTERN int ficlFileStatus(char *filename, int *status);
-FICL_EXTERN ficl2Integer ficlFileSize(ficlFile *ff);
+int		ficlFileTruncate(ficlFile *, ficlUnsigned);
+int		ficlFileStatus(char *, int *);
+ficl2Integer	ficlFileSize(ficlFile *);
 
-#define FICL_MIN(a, b)  (((a) < (b)) ? (a) : (b))
-#define FICL_MAX(a, b)  (((a) > (b)) ? (a) : (b))
+#define FICL_MIN(a, b)		(((a) < (b)) ? (a) : (b))
+#define FICL_MAX(a, b)		(((a) > (b)) ? (a) : (b))
 
 __END_DECLS
 
