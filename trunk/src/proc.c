@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.154 9/13/13
+ * %W% %G%
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2041,9 +2041,13 @@ ficl_init_locals(ficlVm *vm, ficlDictionary *dict)
 	 * s" ___dummy___" (local)
 	 * 0 0 (local)
 	 */
+	/*
+	 * FIXME
+	 * Doesn't work with NEW_CELL
+	 */
 	ficlDictionaryAppendUnsigned(dict,
 	    (ficlUnsigned)ficlInstructionLiteralParen);
-	ficlDictionaryAppendUnsigned(dict, 0L);
+	ficlDictionaryAppendUnsigned(dict, 0UL);
 	push_forth_string(vm, locals_dummy);
 	ficlVmExecuteXT(vm, local_paren);
 	ficlStackPushInteger(vm->dataStack, 0L);

@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)primitives.c	1.106 10/17/13
+ * %W% %G%
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -89,16 +89,16 @@
 ** strings' addresses as markers on the stack to 
 ** check for structure completion.
 */
-static char doTag[]    = "do";
+static char doTag[] = "do";
 static char colonTag[] = "colon";
 static char leaveTag[] = "leave";
 
-static char destTag[]  = "target";
-static char origTag[]  = "origin";
+static char destTag[] = "target";
+static char origTag[] = "origin";
 
-static char caseTag[]  = "case";
-static char ofTag[]  = "of";
-static char fallthroughTag[]  = "fallthrough";
+static char caseTag[] = "case";
+static char ofTag[] = "of";
+static char fallthroughTag[] = "fallthrough";
 
 #define PRIMITIVE_APPEND_UNSIGNED(Dict, Inst)				\
 	ficlDictionaryAppendUnsigned(Dict, (ficlUnsigned)(Inst))
@@ -123,15 +123,14 @@ static void matchControlTag(ficlVm *vm, char *wantTag)
 {
   char *tag;
 
-  FICL_STACK_CHECK(vm->dataStack, 1, 0);
-
   tag = (char *)ficlStackPopPointer(vm->dataStack);
   /*
   ** Changed the code below to compare the pointers first (by popular demand)
   */
   if ((tag != wantTag) && tag && *tag && strcmp(tag, wantTag))
-    ficlVmThrowException(vm, FICL_VM_STATUS_CONTROL_MISMATCH,
-			 "unmatched control structure \"%s\"", wantTag);
+    ficlVmThrowException(vm,
+	FICL_VM_STATUS_CONTROL_MISMATCH,
+	"unmatched control structure \"%s\"", wantTag);
 }
 
 /*
@@ -178,15 +177,15 @@ static void resolveAbsBranch(ficlDictionary *dict, ficlVm *vm, char *wantTag)
   ficlCell *patchAddr;
   char *tag;
 
-  FICL_STACK_CHECK(vm->dataStack, 2, 0);
   tag = ficlStackPopPointer(vm->dataStack);
   /*
-  ** Changed the comparison below to compare the pointers first (by popular demand)
+  ** Changed the comparison below to compare the pointers first (by
+  ** popular demand)
   */
   if ((tag != wantTag) && tag && *tag && strcmp(tag, wantTag))
-    ficlVmThrowException(vm, FICL_VM_STATUS_CONTROL_MISMATCH,
-			 "unmatched control structure \"%s\"", wantTag);
-
+    ficlVmThrowException(vm,
+	FICL_VM_STATUS_CONTROL_MISMATCH,
+	"unmatched control structure \"%s\"", wantTag);
   patchAddr = (ficlCell *)ficlStackPopPointer(vm->dataStack);
   CELL_VOIDP_SET(patchAddr, dict->here);
 }
@@ -205,30 +204,34 @@ Code to begin compiling a colon definition.  \
 This function sets the state to FICL_VM_STATE_COMPILE, then creates a \
 new word whose name is the next word in the input stream \
 and whose code is colonParen."
-  ficlDictionary *dict = ficlVmGetDictionary(vm);
-  ficlString s = ficlVmGetWord(vm);
+  ficlDictionary *dict;
+  ficlString s;
 
+  dict = ficlVmGetDictionary(vm);
+  s = ficlVmGetWord(vm);
   vm->state = FICL_VM_STATE_COMPILE;
   markControlTag(vm, colonTag);
-  ficlDictionaryAppendWord(dict, s, (ficlPrimitive)ficlInstructionColonParen,
-			   (ficlUnsigned)FICL_WORD_DEFAULT | FICL_WORD_SMUDGED);
+  ficlDictionaryAppendWord(dict,
+      s,
+      (ficlPrimitive)ficlInstructionColonParen,
+      (ficlUnsigned)(FICL_WORD_DEFAULT | FICL_WORD_SMUDGED));
   vm->callback.system->localsCount = 0;
 }
 
 static void ficlPrimitiveSemicolonCoIm(ficlVm *vm)
 {
-  ficlDictionary *dict = ficlVmGetDictionary(vm);
+  ficlDictionary *dict;
 
+  dict = ficlVmGetDictionary(vm);
   matchControlTag(vm, colonTag);
-
   if (vm->callback.system->localsCount > 0)
   {
-    ficlDictionary *locals = ficlSystemGetLocals(vm->callback.system);
+    ficlDictionary *locals;
 
+    locals = ficlSystemGetLocals(vm->callback.system);
     ficlDictionaryEmpty(locals, locals->forthWordlist->size);
     PRIMITIVE_APPEND_UNSIGNED(dict, ficlInstructionUnlinkParen);
   }
-
   vm->callback.system->localsCount = 0;
   PRIMITIVE_APPEND_UNSIGNED(dict, ficlInstructionSemiParen);
   vm->state = FICL_VM_STATE_INTERPRET;
@@ -941,9 +944,11 @@ Runtime for a precompiled parse step---pop a counted string off the \
 stack, run the parse step against it, and push the result flag (FICL_TRUE \
 if success, FICL_FALSE otherwise)."
   ficlString s;
-  ficlWord *word = vm->runningWord;
-  ficlParseStep pStep = (ficlParseStep)CELL_FN_REF(word->param);
+  ficlWord *word;
+  ficlParseStep pStep;
 
+  word = vm->runningWord;
+  pStep = (ficlParseStep)CELL_FN_REF(word->param);
   FICL_STRING_SET_LENGTH(s, ficlStackPopInteger(vm->dataStack));
   FICL_STRING_SET_POINTER(s, ficlStackPopPointer(vm->dataStack));
   ficlStackPushInteger(vm->dataStack, (ficlInteger)(*pStep)(vm, s));
@@ -952,12 +957,9 @@ if success, FICL_FALSE otherwise)."
 static void ficlPrimitiveAddParseStep(ficlVm *vm)
 {
   ficlWord *pStep;
-  ficlCell c;
 
   FICL_STACK_CHECK(vm->dataStack, 1, 0);
-  c = ficlStackPop(vm->dataStack);
-  pStep = CELL_VOIDP_REF(&c);
-
+  pStep = ficlStackPopPointer(vm->dataStack);
   if ((pStep != NULL) && ficlDictionaryIsAWord(ficlVmGetDictionary(vm), pStep))
     ficlSystemAddParseStep(vm->callback.system, pStep);
 }
@@ -1212,10 +1214,10 @@ ficl_postpone_none_im(ficlVm *vm)
 
   /* Preparation for word location, see also vm.c.  [ms] */
   PRIMITIVE_APPEND_UNSIGNED(dict, ficl_word_location);
-  ficlDictionaryAppendPointer(dict,  dict->smudge);
-  ficlDictionaryAppendFTH(dict,      fth_string_copy(fth_current_file));
-  ficlDictionaryAppendInteger(dict,  fth_current_line);
-  ficlDictionaryAppendCell(dict,     ficlStackPop(vm->dataStack));
+  ficlDictionaryAppendPointer(dict, dict->smudge);
+  ficlDictionaryAppendFTH(dict, fth_string_copy(fth_current_file));
+  ficlDictionaryAppendInteger(dict, fth_current_line);
+  ficlDictionaryAppendCell(dict, ficlStackPop(vm->dataStack));
 }
 
 static void
@@ -1875,9 +1877,9 @@ static void ficlPrimitiveWhileCoIm(ficlVm *vm)
   PRIMITIVE_APPEND_UNSIGNED(dict, ficlInstructionBranch0ParenWithCheck);
   markBranch(dict, vm, origTag);
   /* equivalent to 2swap */
-  ficlStackRoll(vm->dataStack, 3);
-  ficlStackRoll(vm->dataStack, 3);
-  PRIMITIVE_APPEND_UNSIGNED(dict, 1);
+  ficlStackRoll(vm->dataStack, 3L);
+  ficlStackRoll(vm->dataStack, 3L);
+  PRIMITIVE_APPEND_UNSIGNED(dict, 1UL);
 }
 
 static void ficlPrimitiveRepeatCoIm(ficlVm *vm)
@@ -2434,18 +2436,21 @@ Ficl's user facility is implemented with two primitives, \
 USER and (USER), a variable (nUSER) (in softcore.c) that \
 holds the index of the next free user ficlCell, and a redefinition \
 (also in softcore) of USER that defines a user word and increments nUser."
-  ficlDictionary *dict = ficlVmGetDictionary(vm);
-  ficlString s = ficlVmGetWord(vm);
-  ficlCell c;
+  ficlDictionary *dict;
+  ficlString s;
+  ficlInteger n;
  
+  dict = ficlVmGetDictionary(vm);
+  s = ficlVmGetWord(vm);
   FICL_STACK_CHECK(vm->dataStack, 1, 0);
-  c = ficlStackPop(vm->dataStack);
-
-  if (CELL_INT_REF(&c) >= FICL_USER_CELLS)
-    ficlVmThrowError(vm, "out of user space (%d)", (int)CELL_INT_REF(&c));
-
-  ficlDictionaryAppendWord(dict, s, (ficlPrimitive)ficlInstructionUserParen, FICL_WORD_DEFAULT);
-  ficlDictionaryAppendCell(dict, c);
+  n = ficlStackPopInteger(vm->dataStack);
+  if (n >= FICL_USER_CELLS)
+    ficlVmThrowError(vm, "out of user space (%ld)", n);
+  ficlDictionaryAppendWord(dict,
+      s,
+      (ficlPrimitive)ficlInstructionUserParen,
+      FICL_WORD_DEFAULT);
+  ficlDictionaryAppendInteger(dict, n);
 }
 
 /*
@@ -2465,8 +2470,9 @@ into the client definition to fetch the value of the \
 corresponding local variable from the return stack.  \
 The private dictionary gets initialized at the end of each block \
 that uses locals (in ; and does> for example)."
-  ficlInteger nLocal = CELL_INT_REF(vm->runningWord->param);
+  ficlInteger nLocal;
 
+  nLocal = CELL_INT_REF(vm->runningWord->param);
   if (vm->state == FICL_VM_STATE_INTERPRET)
     ficlStackPush(vm->dataStack, vm->returnStack->frame[nLocal]);
   else
@@ -2490,7 +2496,6 @@ that uses locals (in ; and does> for example)."
       appendLocalOffset = FICL_TRUE;
     }
     PRIMITIVE_APPEND_UNSIGNED(ficlVmGetDictionary(vm), instruction);
-    
     if (appendLocalOffset)
       ficlDictionaryAppendInteger(ficlVmGetDictionary(vm), nLocal);
   }
