@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * %W% %G%
+ * @(#)primitives.c	1.107 11/22/13
  */
 
 #if defined(HAVE_CONFIG_H)

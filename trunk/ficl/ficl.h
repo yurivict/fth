@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * %W% %G%
+ * @(#)ficl.h	1.89 11/22/13
  */
 
 #if !defined (__FICL_H__)
@@ -449,10 +449,6 @@ ficl2UnsignedQR	ficl2UnsignedDivide(ficl2Unsigned, ficlUnsigned);
 
 #if 0
 #define NEW_CELL 1
-/*
- * FIXME
- * src/proc.c: ficl_init_locals doesn't work with NEW_CELL
- */
 #endif
 
 #if defined(NEW_CELL)
@@ -578,9 +574,6 @@ typedef struct {
 typedef union {
 	ficlInteger	i;
 	ficlUnsigned	u;
-	ficl2Integer	di;
-	ficl2Unsigned	ud;
-	ficlFloat	f;
 	FTH		fp;
 	void           *p;
 	void            (*fn) (void);

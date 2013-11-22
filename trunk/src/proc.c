@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * %W% %G%
+ * @(#)proc.c	1.155 11/22/13
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2040,10 +2040,6 @@ ficl_init_locals(ficlVm *vm, ficlDictionary *dict)
 	 * 0 postpone literal ( dummy value for dummy variable )
 	 * s" ___dummy___" (local)
 	 * 0 0 (local)
-	 */
-	/*
-	 * FIXME
-	 * Doesn't work with NEW_CELL
 	 */
 	ficlDictionaryAppendUnsigned(dict,
 	    (ficlUnsigned)ficlInstructionLiteralParen);
