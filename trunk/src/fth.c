@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.104 10/17/13";
+const char fth_sccsid[] = "@(#)fth.c	1.105 1/4/14";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,7 +36,7 @@ const char fth_sccsid[] = "@(#)fth.c	1.104 10/17/13";
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2013 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2014 Michael Scholz"
 
 static FTH	 eval_with_error_exit(void *p, int kind);
 static void	 repl_in_place(char *in, FTH out, ficlWord *word,
