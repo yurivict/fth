@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.176 11/15/13
+dnl @(#)configure.ac	1.177 1/4/14
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ AC_ARG_WITH([tecla-prefix], [AS_HELP_STRING([--with-tecla-prefix@<:@=DIR@:>@],
     [search for tecla(7) in DIR/include and DIR/lib])],
     [CFLAGS="${CFLAGS} -I${withval}/include"
      CPPFLAGS="${CPPFLAGS} -I${withval}/include"
-     LDFLAGS="${LDFLAGS} -rpath=${withval}/lib -L${withval}/lib"])
+     LDFLAGS="${LDFLAGS} -L${withval}/lib"])
 
 dnl
 dnl Check for programs.

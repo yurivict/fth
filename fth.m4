@@ -1,4 +1,4 @@
-## Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+## Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 ## All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##
-## @(#)fth.m4	1.10 9/13/13
+## @(#)fth.m4	1.11 1/4/14
 
 # FTH_CHECK_LIB(action-if-found, [action-if-not-found])
 # 
@@ -30,6 +30,9 @@
 #
 # Don't quote this macro: [FTH_CHECK_LIB(...)] isn't correct.
 # Instead call it FTH_CHECK_LIB(...).
+#
+# Checks environment variable $FTH_PROG and name `fth' for valid Fth
+# interpreters (for example: setenv FTH_PROG /usr/pkg/bin/fth).
 # 
 # Six variables will be substituted:
 #
@@ -62,7 +65,7 @@ AC_DEFUN([fth_AC_CHECK_LIB], [
 ])# fth_AC_CHECK_LIB
 
 AC_DEFUN([FTH_CHECK_LIB], [
-	[AC_PATH_PROGS([FTH], [${FTH_PROG} fth], [no])]
+	AC_PATH_PROGS(FTH, ${FTH_PROG} fth, no)
 	FTH_VERSION=""
 	FTH_CFLAGS=""
 	FTH_LIBS=""
