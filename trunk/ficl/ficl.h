@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.89 11/22/13
+ * @(#)ficl.h	1.92 1/19/14
  */
 
 #if !defined (__FICL_H__)
@@ -447,117 +447,6 @@ typedef struct {
 ficl2IntegerQR	ficl2IntegerDivideSymmetric(ficl2Integer, ficlInteger);
 ficl2UnsignedQR	ficl2UnsignedDivide(ficl2Unsigned, ficlUnsigned);
 
-#if 0
-#define NEW_CELL 1
-#endif
-
-#if defined(NEW_CELL)
-
-enum {
-	CELL_INT_T,
-	CELL_UINT_T,
-	CELL_2INT_T,
-	CELL_2UINT_T,
-	CELL_FLOAT_T,
-	CELL_FTH_T,
-	CELL_VOIDP_T,
-	CELL_FN_T,
-	CELL_UNDEFINED_T
-};
-
-typedef struct {
-	int		type;
-	union {
-		ficlInteger	i;
-		ficlUnsigned	u;
-		ficl2Integer	di;
-		ficl2Unsigned	ud;
-		ficlFloat	f;
-		FTH		fp;
-		void           *p;
-		void            (*fn) (void);
-	}		cu;
-} ficlCell;
-
-#define CELL_FICL_TO_FTH(Obj)	ficl_to_fth(CELL_FTH_REF(Obj))
-
-#define CELL_REF(Obj)		((ficlCell *)(Obj))
-#define CELL_TYPE_REF(Obj)	CELL_REF(Obj)->type
-#define CELL_TYPE_SET(Obj, Tp)	CELL_TYPE_REF(Obj) = (Tp)
-
-#define CELL_INT_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_INT_T)
-#define CELL_UINT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_UINT_T)
-#define CELL_2INT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_2INT_T)
-#define CELL_2UINT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_2UINT_T)
-#define CELL_FLOAT_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_FLOAT_T)
-#define CELL_FTH_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_FTH_T)
-#define CELL_VOIDP_P(Obj)	(CELL_TYPE_REF(Obj) == CELL_VOIDP_T)
-#define CELL_FN_P(Obj)		(CELL_TYPE_REF(Obj) == CELL_FN_T)
-
-#define CELL_INT_REF(Obj)	CELL_REF(Obj)->cu.i
-#define CELL_UINT_REF(Obj)	CELL_REF(Obj)->cu.u
-/* FIXME */
-#if 0
-#define CELL_LONG_REF(Obj)	CELL_REF(Obj)->cu.di
-#define CELL_ULONG_REF(Obj)	CELL_REF(Obj)->cu.ud
-#define CELL_FLOAT_REF(Obj)	CELL_REF(Obj)->cu.f
-#else /* FIXME */
-#define CELL_LONG_REF(Obj)	fth_long_long_ref(CELL_FICL_TO_FTH(Obj))
-#define CELL_ULONG_REF(Obj)	fth_ulong_long_ref(CELL_FICL_TO_FTH(Obj))
-#define CELL_FLOAT_REF(Obj)	fth_float_ref(CELL_FICL_TO_FTH(Obj))
-#endif /* FIXME */
-#define CELL_FTH_REF(Obj)	CELL_REF(Obj)->cu.fp
-#define CELL_VOIDP_REF(Obj)	CELL_REF(Obj)->cu.p
-#define CELL_FN_REF(Obj)	CELL_REF(Obj)->cu.fn
-#define CELL_BOOL_REF(Obj)	FTH_TO_BOOL((CELL_FTH_REF(Obj)))
-
-#define CELL_INT_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_INT_T);					\
-	CELL_INT_REF(Obj) = (ficlInteger)(Val);				\
-} while (0)
-#define CELL_UINT_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_UINT_T);				\
-	CELL_UINT_REF(Obj) = (ficlUnsigned)(Val);			\
-} while (0)
-/* FIXME */
-#if 0
-#define CELL_LONG_SET(Obj, Val)	do {					\
-	CELL_TYPE_SET(Obj, CELL_2INT_T);				\
-	CELL_LONG_REF(Obj) = (ficl2Integer)(Val);			\
-} while (0)
-#define CELL_ULONG_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_2UINT_T);				\
-	CELL_ULONG_REF(Obj) = (ficl2Unsigned)(Val);			\
-} while (0)
-#define CELL_FLOAT_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_FLOAT_T);				\
-	CELL_FLOAT_REF(Obj) = (ficlFloat)(Val);				\
-} while (0)
-#else /* FIXME */
-#define CELL_LONG_SET(Obj, Val) 					\
-	CELL_FTH_SET(Obj, fth_make_llong((ficl2Integer)(Val)))
-#define CELL_ULONG_SET(Obj, Val) 					\
-	CELL_FTH_SET(Obj, fth_make_ullong((ficl2Unsigned)(Val)))
-#define CELL_FLOAT_SET(Obj, Val) 					\
-	CELL_FTH_SET(Obj, fth_make_float((ficlFloat)(Val)))
-#endif /* FIXME */
-#define CELL_FTH_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_FTH_T);					\
-	CELL_FTH_REF(Obj) = (FTH)(Val);					\
-} while (0)
-#define CELL_VOIDP_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_VOIDP_T);				\
-	CELL_VOIDP_REF(Obj) = (void *)(Val);				\
-} while (0)
-#define CELL_FN_SET(Obj, Val) do {					\
-	CELL_TYPE_SET(Obj, CELL_FN_T);					\
-	CELL_FN_REF(Obj) = (void (*)(void))(Val);			\
-} while (0)
-#define CELL_BOOL_SET(Obj, Val)						\
-	CELL_FTH_SET(Obj, BOOL_TO_FTH(Val))
-
-#else /* !NEW_CELL */
-
 /*
 ** A ficlCell is the main storage type. It must be large enough
 ** to contain a pointer or a scalar. In order to accommodate 
@@ -567,8 +456,6 @@ typedef struct {
 ** A ficlUnsigned, ficlInteger, and ficlFloat *MUST* be the same
 ** size as a "void *" on the target system.  (Sorry, but that's
 ** a design constraint of FORTH.)
-**
-** [ms] fth doesn't conform to the above.
 */
 
 typedef union {
@@ -610,8 +497,6 @@ typedef union {
 	CELL_FTH_REF(Obj) = fth_make_float((ficlFloat)(Val))
 #define CELL_BOOL_SET(Obj, Val)						\
 	CELL_FTH_REF(Obj) = BOOL_TO_FTH(Val)
-
-#endif /* NEW_CELL */
 
 #define FICL_BITS_PER_CELL	(sizeof(ficlCell) * 8)
 
@@ -902,6 +787,7 @@ typedef enum {
 
 struct ficlVm {
 	void           *context;
+	void           *repl;	/* [ms] for libtecla's GetLine *gl */
 	ficlCallback	callback;
 	ficlVm         *link;	/* Ficl keeps a VM list for simple teardown */
 	jmp_buf        *exceptionHandler;	/* crude exception
@@ -922,10 +808,10 @@ struct ficlVm {
 	ficlCell	user[FICL_USER_CELLS];
 	ficlWord       *gc_word[GC_FRAME_SIZE];	/* [ms] gc_push/pop */
 	void           *gc_inst[GC_FRAME_SIZE];	/* [ms] gc_push/pop */
-	char		pad_eval[FICL_PAD_SIZE + 1]; /* second scratch area
-						      * (for ficlVmEvaluate) */
-	char		pad[FICL_PAD_SIZE + 1];	/* the scratch area (see
-						 * above)  */
+	char		pad_eval[FICL_PAD_SIZE + 1];	/* second scratch area
+							 * (ficlVmEvaluate) */
+	char		pad[FICL_PAD_SIZE + 1];	/* the scratch area
+						 * (see above) */
 };
 
 /*
@@ -1086,6 +972,7 @@ void		ficlVmErrorOut(ficlVm *, char *);
 #define ficlVmGetContext(vm)	((vm)->context)
 #define ficlVmGetDataStack(vm)	((vm)->dataStack)
 #define ficlVmGetFloatStack(vm)	((vm)->dataStack)
+#define ficlVmGetRepl(vm)	((vm)->repl)
 #define ficlVmGetReturnStack(vm) ((vm)->returnStack)
 #define ficlVmGetRunningWord(vm) ((vm)->runningWord)
 

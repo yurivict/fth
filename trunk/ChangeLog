@@ -1,3 +1,17 @@
+2014-01-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.h (FTH_XString): Stringizing macro added.
+
+2014-01-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/ficl.h (struct ficlVm): void *repl slot added.
+
+	* src/proc.c (ficl_get_help): Use gl_display_text if available.
+
+	* src/utils.c (fth_repl):  New words history and bindkey added.
+	New configuration variables *histdup*, *histfile*, *history*,
+	*savehist*, *promptstyle* added.
+
 2013-11-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* configure.ac: Remove hardcoded LDFLAGS if host is netbsd.

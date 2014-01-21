@@ -1,4 +1,4 @@
-.\" Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.123 9/13/13
+.\" @(#)fth.1	1.125 1/21/14
 .\"
-.Dd September 13, 2013
+.Dd January 21, 2014
 .Dt FTH 1
 .Os
 .\"
@@ -80,9 +80,9 @@ for Forth as an extension language.
 .\"
 .It Fl a
 Split every line to array
-.Dv *farray*
+.Ev *farray*
 before evaluation.  The split string is field separator
-.Dv *fs* .
+.Ev *fs* .
 Used with
 .Fl n
 or
@@ -95,7 +95,7 @@ option.
 Prepend
 .Ar path
 to
-.Dv *load\(hylib\(hypath* ,
+.Ev *load\(hylib\(hypath* ,
 multiple calls possible.
 .\"
 .\" -D
@@ -109,7 +109,7 @@ additional source files, or evaluating strings from the command line.
 .\"
 .It Fl d
 Set global variable
-.Dv *fth\(hydebug*
+.Ev *fth\(hydebug*
 to #t.
 .\"
 .\" -Ee
@@ -139,7 +139,7 @@ appear, all but the last are in interpret state.
 .\"
 .It Fl F Ar fs
 Set global variable
-.Dv *fs*
+.Ev *fs*
 to field separator
 .Ar fs .
 .\"
@@ -165,7 +165,7 @@ Display help message and exit.
 Prepend
 .Ar path
 to
-.Dv *load\(hypath* ,
+.Ev *load\(hypath* ,
 multiple calls possible.
 .\"
 .\" -i
@@ -190,7 +190,7 @@ option.
 .\"
 .It Fl n
 Suppress output of current
-.Dv *line* .
+.Ev *line* .
 If not in\(hyplace
 .Fl i ,
 start an implicit loop.
@@ -199,7 +199,7 @@ start an implicit loop.
 .\"
 .It Fl p
 Print current
-.Dv *line*
+.Ev *line*
 to stdout.  If not in\(hyplace
 .Fl i ,
 start an implicit loop.
@@ -213,7 +213,7 @@ Neither load the system wide nor the local initialization file.
 .\"
 .It Fl q
 Do not print banner and set global variable
-.Dv *fth\(hyverbose*
+.Ev *fth\(hyverbose*
 to #f.
 .\"
 .\" -r
@@ -255,9 +255,9 @@ Evaluate
 .Ar file
 as a Forth script and exit.  It doesn't read the initialization file.
 The global Forth variables
-.Dv *argc*
+.Ev *argc*
 and
-.Dv *argv*
+.Ev *argv*
 are set and filled with the count and command line options appearing
 after
 .Fl s Ar file .
@@ -278,7 +278,7 @@ Display version info and exit.
 .\"
 .It Fl v
 Set global variable
-.Dv *fth\(hyverbose*
+.Ev *fth\(hyverbose*
 to #t (default).
 .El
 .\"
@@ -289,13 +289,13 @@ to #t (default).
 .\"
 .\" *argc*
 .\"
-.It Dv *argc*
+.It Ev *argc*
 Number of arguments in
-.Dv *argv* .
+.Ev *argv* .
 .\"
 .\" *argv*
 .\"
-.It Dv *argv*
+.It Ev *argv*
 Array of command line arguments.
 .\"
 .\" *exception-list*
@@ -304,67 +304,67 @@ Return array of all exceptions.
 .\"
 .\" *farray*
 .\"
-.It Dv *farray*
+.It Ev *farray*
 Auto\(hysplitted array of strings of current line.
 .\"
 .\" *features*
 .\"
-.It Dv *features*
+.It Ev *features*
 Return array of all features.
 .\"
 .\" *filename*
 .\"
-.It Dv *filename*
+.It Ev *filename*
 Current file name.
 .\"
 .\" *fname*
 .\"
-.It Dv *fname*
+.It Ev *fname*
 Current in\(hyplace file name.
 .\"
 .\" *fnr*
 .\"
-.It Dv *fnr*
+.It Ev *fnr*
 Input record number in current file.
 .\"
 .\" *fs*
 .\"
-.It Dv *fs*
+.It Ev *fs*
 Input field separator, default one space.
 .\"
 .\" *fth-debug*
 .\"
-.It Dv *fth\(hydebug*
+.It Ev *fth\(hydebug*
 If #t, show more diagnostic output.
 .\"
 .\" *fth-verbose*
 .\"
-.It Dv *fth\(hyverbose*
+.It Ev *fth\(hyverbose*
 If #t, show more output.
 .\"
 .\" *key*
 .\"
-.It Dv *key*
+.It Ev *key*
 Hold current value in a map\(emend\(hymap loop.
 .\"
 .\" *last-exception*
 .\"
-.It Dv *last\(hyexception*
+.It Ev *last\(hyexception*
 Hold last raised exception.
 .\"
 .\" *line*
 .\"
-.It Dv *line*
+.It Ev *line*
 Current in\(hyplace processing line.
 .\"
 .\" *lineno*
 .\"
-.It Dv *lineno*
+.It Ev *lineno*
 Current line number.
 .\"
 .\" *load-lib-path*
 .\"
-.It Dv *load\(hylib\(hypath*
+.It Ev *load\(hylib\(hypath*
 Array of directories where
 .Nm
 searchs for
@@ -373,7 +373,7 @@ C\(hylibrary files.
 .\"
 .\" *load-path*
 .\"
-.It Dv *load\(hypath*
+.It Ev *load\(hypath*
 Array of directories where
 .Nm
 searchs for
@@ -382,53 +382,53 @@ script files.
 .\"
 .\" *loaded-files*
 .\"
-.It Dv *loaded\(hyfiles*
+.It Ev *loaded\(hyfiles*
 Array of already loaded files.
 .\"
 .\" *nr*
 .\"
-.It Dv *nr*
+.It Ev *nr*
 Input record number over all files.
 .\"
 .\" *re*
 .\"
-.It Dv *re*
+.It Ev *re*
 Array with last regexp match.
 .\"
 .\" *re-syntax-options*
 .\"
-.It Dv *re\(hysyntax\(hyoptions*
+.It Ev *re\(hysyntax\(hyoptions*
 Regexp syntax option, default
 .Dv REG_EXTENDED.
 .\"
 .\" *re0* ... *re9*
 .\"
-.It Dv *re0*
+.It Ev *re0*
 Regexp last entire match.
-.It Dv *re1* ... *re9*
+.It Ev *re1* ... *re9*
 Regexp last subexpression matches.
 .\"
 .\" optarg
 .\"
-.It Dv optarg
+.It Ev optarg
 Getopt variable with current option argument string, default #f.
 .\"
 .\" opterr
 .\"
-.It Dv opterr
+.It Ev opterr
 If #t, getopt print error message for wrong or missing arguments;
 default #t.
 .\"
 .\" optind
 .\"
-.It Dv optind
+.It Ev optind
 Getopt variable with index of next element in
-.Dv *argv*
+.Ev *argv*
 array, default 1.
 .\"
 .\" optopt
 .\"
-.It Dv optopt
+.It Ev optopt
 Getopt variable with last known option, default #f.
 .El
 .\"
@@ -462,7 +462,7 @@ before-load-hook lambda: <{ fname -- f }>
 Called after loading 
 .Ar filename
 and updating global variable 
-.Dv *loaded-files* .
+.Ev *loaded-files* .
 .Bd -literal -offset indent -compact
 after-load-hook lambda: <{ fname -- }>
 	\(dq\e\e %s loaded\en\(dq #( fname ) fth-print
@@ -527,10 +527,13 @@ before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
 	\(dqfth (%d) ok \(dq #( pos ) string-format
 ; add-hook!
 .Ed
-Or with standout and bold mode (see
-.Xr libtecla 3 ,
-optional prompt formatting):
+Or with standout and bold mode, see
+.Xr gl_prompt_style 3
+and
+.Sx *promptstyle*
+below:
 .Bd -literal -offset indent -compact
+#t to *promptstyle*
 before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
 	\(dq%%Sfth (%d)%%s %%Bok%%b \(dq #( pos ) string-format
 ; add-hook!
@@ -571,6 +574,162 @@ completed word.  If the Forth dictionary has no entry starting with
 the characters before the cursor, try file name completion.  For
 complete key listings and function descriptions, see
 .Xr tecla 7 .
+.\"
+.\" Tecla variables
+.\"
+.Ss Tecla variables
+.Bl -tag -width MMM -compact
+.\"
+.\" *histdup*
+.\"
+.It Ev *histdup*
+If set to 
+.Cm gl-all ,
+only unique history events are entered in the history list.  If set to
+.Cm gl-prev
+and the last history event is the same as the current, the current
+command is not entered.  If set to
+.Cm gl-erase
+and the same event is found in the history list, that old event gets
+erased and the current one gets inserted.  If not defined (undef, the
+default), all history events are entered.  Default is undef.
+.\"
+.\" *histfile*
+.\"
+.It Ev *histfile*
+Can be set to the pathname where history is going to be saved and
+restored.  If not set, use
+.Ev $FTH_HISTORY
+or
+.Pa ~/.fth-history .
+Default is undef.
+.\"
+.\" *history*
+.\"
+.It Ev *history*
+Can be given a numeric value to control the size of the history list.
+If not set, use
+.Ev $FTH_HISTORY_LENGTH
+or 100.  Default is undef.
+.\"
+.\" *savehist*
+.\"
+.It Ev *savehist*
+If true, save at most *history*,
+.Ev $FTH_HISTORY_LENGTH ,
+or 100 history events to
+.Ev *history* ,
+.Ev $FTH_HISTORY ,
+or
+.Pa ~/.fth-history ,
+if false, don't save history events.  Default is #t.
+.\"
+.\" *promptstyle*
+.\"
+.It Ev *promptstyle*
+If true, enable special formatting directives within the prompt, see
+.Xr gl_prompt_style 3 .
+Default is #f.
+.El
+.\"
+.\" Tecla words
+.\"
+.Ss Tecla words
+.Bl -tag -width MMM -compact
+.\"
+.\" bindkey
+.\"
+.It Cm bindkey No (\ :optional key action --\ )
+Key bindings and others can be set in
+.Pa ~/.fthrc
+to control libtecla and getline.
+.Bl -tag -compact
+.It no argument
+Show user-defined key-bindings set for example in
+.Pa ~/.fthrc .
+.It one argument
+If
+.Ar key
+is a string, take it as configure string.  If
+.Ar key
+is a predefined constant, set specific value as configure string.
+Valid constants:
+.Bl -tag -compact
+.It Cm gl-vi
+edit-mode vi
+.It Cm gl-emacs
+edit-mode emacs
+.It Cm gl-none
+edit-mode none
+.It Cm gl-nobeep
+nobeep
+.El
+.Bd -literal -offset indent -compact
+\(dqedit-mode vi \\n nobeep\(dq bindkey
+gl-vi bindkey
+.Ed
+.It two arguments
+If
+.Ar key
+and
+.Ar action
+are strings, bind
+.Ar action
+to
+.Ar key .
+If
+.Ar key
+is a string and
+.Ar action
+is anything else, unbind
+.Ar key
+from last bind.  See
+.Xr tecla 7
+for key-bindings and actions.
+.Bd -literal -offset indent -compact
+\(dq^G\(dq \(dquser-interrupt\(dq bindkey
+\(dq^G\(dq #f bindkey
+.Ed
+.El
+.\"
+.\" history
+.\"
+.It Cm history No (\ :optional action arg --\ )
+History events can be displayed, loaded, saved, and cleared where
+.Ar action
+can be one of
+.Bl -tag -compact
+.It Cm gl-show
+show
+.Ar arg
+or all history events
+.It Cm gl-load
+load history events from
+.Ar arg
+or
+.Ev *histfile*
+.It Cm gl-save
+save history events to
+.Ar arg
+or
+.Ev *histfile*
+.It Cm gl-clear
+clear all history events
+.El
+.Bd -literal -offset indent -compact
+             history \(rA show entire history
+gl-show      history \(rA same as above
+        10   history \(rA show 10 last history events
+gl-show 10   history \(rA same as above
+gl-load      history \(rA load from *histfile*
+gl-load nil  history \(rA same as above
+gl-load file history \(rA load from file
+gl-save      history \(rA save to *histfile*
+gl-save nil  history \(rA same as above
+gl-save file history \(rA save to file
+gl-clear     history \(rA clear all history events
+.Ed
+.El
 .\"
 .\" Loops
 .\"
@@ -623,7 +782,7 @@ in order on stack and repeat execution of body.
 Set each element of
 .Ar obj
 in order to global variable 
-.Dv *key*
+.Ev *key*
 and repeat execution of body.
 The current element of 
 .Ar obj
@@ -1701,7 +1860,7 @@ Change working directory to
 and, if in a repl, print result to current standard output.  If
 .Ar path
 is nil, change working directory to
-.Dv $HOME .
+.Ev $HOME .
 .Ar path
 may contain
 .Sq ~
@@ -1792,7 +1951,7 @@ Load and eval content of file
 and add
 .Ar name
 to
-.Dv *loaded-files*
+.Ev *loaded-files*
 if it wasn't there.  It's similar to
 .Cm include
 except that file name must be on stack (include is a parseword).  With
@@ -1929,7 +2088,7 @@ If
 starts with
 .Sq ~ ,
 replace it with content of environment variable
-.Dv $HOME .
+.Ev $HOME .
 If
 .Xr realpath 3
 function exists, return resolved path, otherwise return
@@ -2584,17 +2743,17 @@ Global variables:
 .\"
 .\" *stderr*
 .\"
-.It Dv *stderr*
+.It Ev *stderr*
 Return current standard error output IO object.
 .\"
 .\" *stdin*
 .\"
-.It Dv *stdin*
+.It Ev *stdin*
 Return current standard input IO object.
 .\"
 .\" *stdout*
 .\"
-.It Dv *stdout*
+.It Ev *stdout*
 Return current standard output IO object.
 .\"
 .\" set-*stderr*
@@ -2787,7 +2946,7 @@ already exist
 overwrite existing file (default)
 .It Sy :rename
 depends on environment variable
-.Dv $VERSION_CONTROL
+.Ev $VERSION_CONTROL
 and global Fth variable
 .Dv version-control
 (see there)
@@ -3423,7 +3582,7 @@ Features and Source files:
 .\"
 .\" *features*
 .\"
-.It Dv *features*
+.It Ev *features*
 Return array of all features.
 .\"
 .\" add-feature
@@ -3442,7 +3601,7 @@ a string or symbol, to *features* list.
 Add string
 .Ar path
 to
-.Dv *load-lib-path*
+.Ev *load-lib-path*
 array if not already there.
 .Bd -literal -offset indent -compact
 \(dq/home/mike/lib/fth\(dq add-load-lib-path
@@ -3454,7 +3613,7 @@ array if not already there.
 Add string
 .Ar path
 to
-.Dv *load-path*
+.Ev *load-path*
 array if not already there.
 .Bd -literal -offset indent -compact
 \(dq/home/mike/share/fth\(dq add-load-path
@@ -3488,13 +3647,13 @@ Load Forth source file
 and add
 .Ar name
 to
-.Dv *loaded-files*
+.Ev *loaded-files*
 if it wasn't already there.  If file extension wasn't specified, use
 .Sq .fs .
 If
 .Ar name
 doesn't exist, try each entry of
-.Dv *load-path*
+.Ev *load-path*
 with
 .Ar name .
 With
@@ -3522,9 +3681,9 @@ include hello
 Install
 .Ar file
 in first writeable path found in
-.Dv *load-path*
+.Ev *load-path*
 (*.fs[m]) or
-.Dv *load-lib-path*
+.Ev *load-lib-path*
 (*.so).
 .Bd -literal -offset indent -compact
 install snd-test.fs
@@ -3549,7 +3708,7 @@ in first writeable path found in *load-path* (*.fs[m]) or
 If Forth source
 .Ar file
 exists in current or
-.Dv $HOME
+.Ev $HOME
 dir, load it, otherwise do nothing.
 .Bd -literal -offset indent -compact
 \(dq.my-fth-init\(dq load-init-file
@@ -3572,17 +3731,17 @@ a string or symbol, exists in *features* list, otherwise #f.
 If Forth source file
 .Ar name
 doesn't exist in array
-.Dv *loaded-files* ,
+.Ev *loaded-files* ,
 load it and add
 .Ar name
 to
-.Dv *loaded-files* .
+.Ev *loaded-files* .
 If file extension wasn't specified, use
 .Sq .fs .
 If
 .Ar name
 doesn't exist, try each entry of
-.Dv *load-path*
+.Ev *load-path*
 with
 .Ar name .
 With
@@ -3610,7 +3769,7 @@ require hello
 Prepend string
 .Ar path
 to
-.Dv *load-lib-path*
+.Ev *load-lib-path*
 array if not already there.
 .Bd -literal -offset indent -compact
 \(dq/home/mike/lib/fth\(dq unshift-load-lib-path
@@ -3622,7 +3781,7 @@ array if not already there.
 Prepend string
 .Ar path
 to
-.Dv *load-path*
+.Ev *load-path*
 array if not already there.
 .Bd -literal -offset indent -compact
 \(dq/home/mike/share/fth\(dq unshift-load-path
@@ -3898,11 +4057,11 @@ Replace current process by running
 as shell command.  If
 .Ar cmd
 is a string, shell expansion takes place and
-.Dv $SHELL
+.Ev $SHELL
 \(em or
 .Ic sh
 if
-.Dv $SHELL
+.Ev $SHELL
 is empty \(em executes
 .Ar cmd .
 If
@@ -4133,17 +4292,17 @@ ored.
 .Pp
 Getopt variables:
 .Bl -tag -width MMM -compact
-.It Dv optarg
+.It Ev optarg
 Getopt set this variable to the option string of an argument which
 accepts options, otherwise to #f.
-.It Dv opterr
+.It Ev opterr
 If #t, the default, getopt print error message in case of an error, if
 #f, no message will be printed.
-.It Dv optind
+.It Ev optind
 Getopt set this variable to the index of the next element of the
-.Dv *argv*
+.Ev *argv*
 array.
-.It Dv optopt
+.It Ev optopt
 If getopt finds unknown options or getopt misses required arguments, it
 stores that option in this variable.
 .El
@@ -6383,12 +6542,12 @@ hello
 .\"
 .\" *filename*
 .\"
-.It Dv *filename*
+.It Ev *filename*
 Current file name.
 .\"
 .\" *lineno*
 .\"
-.It Dv *lineno*
+.It Ev *lineno*
 Current line number.
 .\"
 .\" .proc
@@ -6639,7 +6798,7 @@ hosts help-ref \(rA \(dqlocal-net hostnames\(dq
 .\"
 .It Cm lambda: No (\ -- xt\ )
 Start nameless word definition and set variable
-.Dv latestxt
+.Ev latestxt
 to word.  Stack-effect or normal comment immediately at the beginning
 will be used as documentation.  Return xt after closing semicolon
 \(oq;\(cq.
@@ -6973,7 +7132,7 @@ is an xt (execution token, address of a Ficl word), otherwise #f.
 .\"
 .\" *re-syntax-options*
 .\"
-.It Dv *re-syntax-options*
+.It Ev *re-syntax-options*
 This regexp variable can be set with the following constants.  If more
 than one constant is used, combine them with
 .Cm or ,
@@ -7052,11 +7211,11 @@ Return count of matched characters or #f.  Possible matched group
 results or #f can be found in regexp object
 .Ar reg ,
 in read-only variables
-.Dv *re1*
+.Ev *re1*
 to
-.Dv *re9*
+.Ev *re9*
 and in read-only array
-.Dv *re* .
+.Ev *re* .
 .Bd -literal -offset indent -compact
 /.*(bar)/ value reg
 reg \(dqfoobar\(dq regexp-match \(rA 6
@@ -7099,11 +7258,11 @@ is -1 (default), the entire string will be searched.  Possible matched
 group results or #f can be found in regexp object
 .Ar reg ,
 in read-only variables
-.Dv *re1*
+.Ev *re1*
 to
-.Dv *re9*
+.Ev *re9*
 and in read-only array
-.Dv *re* .
+.Ev *re* .
 .Bd -literal -offset indent -compact
 /foo/ \(dqfoobar\(dq :start 0 :range 6 regexp-search \(rA #t (pos 0)
 /(bar)/ value reg
@@ -7947,7 +8106,7 @@ prepended by \(oq:\(cq.  Keywords are actually values (variables) named
 .\"
 .\" *last-exception*
 .\"
-.It Dv *last-exception*
+.It Ev *last-exception*
 Hold last raised exception.
 .\"
 .\" .exception
@@ -8073,19 +8232,19 @@ Overwrite default size of parameter stack (8192).
 .It Ev FTH_FTHPATH
 A colon separated list of paths pointing to Forth script files.  These
 paths will be prepended to
-.Dv *load-path* .
+.Ev *load-path* .
 .It Ev FTH_HISTORY
 Overwrite default history file name
 .Pa ~/.fth-history .
 .It Ev FTH_HISTORY_LENGTH
-Overwrite default history file length (20).
+Overwrite default history file length (100).
 .It Ev FTH_INIT_FILE
 Overwrite default initialization file name
 .Pa ~/.fthrc .
 .It Ev FTH_LIBPATH
 A colon separated list of paths pointing to C extension libraries.
 These paths will be prepended to
-.Dv *load-lib-path* .
+.Ev *load-lib-path* .
 .El
 .\"
 .\" FILES
@@ -8136,7 +8295,7 @@ and exit if finished
 Prepend path
 .Ar ~/share/forth
 to
-.Dv *load-path* ,
+.Ev *load-path* ,
 load Forth source file
 .Ar sound-script.fs
 and start the repl showing a prompt.  Initialization files
@@ -8347,8 +8506,8 @@ has no extra floating point stack; floats are of type
 .Xr getopt 3 ,
 .Xr getservbyname 3 ,
 .Xr getservbyport 3 ,
+.Xr gl_prompt_style 3 ,
 .Xr libfth 3 ,
-.Xr libtecla 3 ,
 .Xr realpath 3 ,
 .Xr regex 3 ,
 .Xr sethostname 3 ,

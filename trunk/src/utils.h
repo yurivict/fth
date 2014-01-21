@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.h	1.119 9/13/13
+ * @(#)utils.h	1.121 1/20/14
  */
 
 #if !defined(_UTILS_H_)
@@ -34,9 +34,9 @@
 /*
  * Shell environment variables and default values:
  *
- * $FTH_INIT_FILE		.fthrc
- * $FTH_HISTORY			.fth-history
- * $FTH_HISTORY_LENGTH		20
+ * $FTH_INIT_FILE		~/.fthrc
+ * $FTH_HISTORY			~/.fth-history
+ * $FTH_HISTORY_LENGTH		100
  * $FTH_FTHPATH			""
  * $FTH_LIBPATH			""
  *
@@ -57,11 +57,8 @@
 #define FTH_ENV_RETURN_SIZE	"FTH_RETURN_SIZE"
 #define FTH_ENV_LOCALS_SIZE	"FTH_LOCALS_SIZE"
 
-#define FTH_INIT_FILE		".fthrc"
-#define FTH_HIST_FILE		".fth-history"
-#define FTH_HIST_LEN		20
-#define FTH_PATH_SEPARATOR	":"
-#define FTH_REPL_PROMPT		FTH_PACKAGE_NAME "> "
+#define _FTH_String(X)		#X
+#define FTH_XString(X)		_FTH_String(X)
 
 /* proc.c */
 #define fth_make_proc_from_vfunc(Name, Func, Req, Opt, Rest)		\

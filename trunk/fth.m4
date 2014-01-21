@@ -22,7 +22,7 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##
-## @(#)fth.m4	1.11 1/4/14
+## @(#)fth.m4	1.12 1/19/14
 
 # FTH_CHECK_LIB(action-if-found, [action-if-not-found])
 # 
@@ -42,9 +42,6 @@
 # FTH_LIBS          -L${prefix}/lib -lfth    or ""
 # FTH_HAVE_COMPLEX  yes or no
 # FTH_HAVE_RATIO    yes or no
-
-# AC_CHECK_LIB was written by David MacKenzie.
-# This version is slightly changed for FTH_CHECK_LIB.
 
 AC_DEFUN([fth_AC_CHECK_LIB], [
 	m4_ifval([$3], , [AH_CHECK_LIB([$1])])dnl
