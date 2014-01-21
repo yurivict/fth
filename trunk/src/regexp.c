@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	1.99 9/13/13
+ * @(#)regexp.c	1.100 1/21/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -58,6 +58,10 @@ typedef struct {
 #define FTH_REGEXP_RE_BUF(Obj)	FTH_REGEXP_OBJECT(Obj)->re_buf
 #define FTH_REGEXP_RESULTS(Obj)	FTH_REGEXP_OBJECT(Obj)->results
 #define FTH_REGSTR_P(Obj)	(FTH_REGEXP_P(Obj) || FTH_STRING_P(Obj))
+
+#define FTH_REGEXP_THROW(Msg)						\
+	fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",			\
+	    RUNNING_WORD(), c__FUNCTION__, Msg)
 
 static void	ficl_make_regexp(ficlVm *vm);
 static void	ficl_make_regexp_im(ficlVm *vm);
@@ -192,16 +196,13 @@ fth_make_regexp(const char *reg)
 		regerror(ret, &r->re_buf, errbuf, sizeof(errbuf));
 		regfree(&r->re_buf);
 		FTH_FREE(r);
-		fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",
-		    RUNNING_WORD(), c__FUNCTION__, errbuf);
+		FTH_REGEXP_THROW(errbuf);
 		/* NOTREACHED */
 		return (FTH_FALSE);
 	}
 	r->data = FTH_STRDUP(reg);
 	r->length = (ficlInteger)fth_strlen(reg);
-	r->results =
-	    fth_make_array_with_init((ficlInteger)(r->re_buf.re_nsub + 1),
-	    FTH_FALSE);
+	r->results = fth_make_array_with_init(r->re_buf.re_nsub + 1, FTH_FALSE);
 	return (fth_make_instance(regexp_tag, r));
 }
 
@@ -239,32 +240,30 @@ regexp_search(FTH regexp, char *str, int kind)
 {
 	regmatch_t *pmatch;
 	regoff_t beg, end;
+	regex_t *re_buf;
 	ficlInteger i, pos, slen;
 	size_t nmatch;
 	int ret;
 	FTH fs;
 
 	pos = -1;
-	nmatch = FTH_REGEXP_RE_BUF(regexp).re_nsub + 1;
+	re_buf = &FTH_REGEXP_RE_BUF(regexp);
+	nmatch = re_buf->re_nsub + 1;
 	pmatch = FTH_MALLOC(nmatch * sizeof(regmatch_t));
-	ret = regexec(&FTH_REGEXP_RE_BUF(regexp), str, nmatch, pmatch, 0);
-
+	ret = regexec(re_buf, str, nmatch, pmatch, 0);
 	if (ret != 0) {
 		if (ret != REG_NOMATCH) {
 			char errbuf[128];
 
 			FTH_FREE(pmatch);
-			regerror(ret, &FTH_REGEXP_RE_BUF(regexp),
-			    errbuf, sizeof(errbuf));
-			fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",
-			    RUNNING_WORD(), c__FUNCTION__, errbuf);
+			regerror(ret, re_buf, errbuf, sizeof(errbuf));
+			FTH_REGEXP_THROW(errbuf);
 		}
 		FTH_FREE(pmatch);
 		return (pos);
 	}
 	beg = pmatch[0].rm_so;
 	end = pmatch[0].rm_eo;
-
 	switch (kind) {
 	case FREG_SEARCH:
 		pos = (ficlInteger)beg;
@@ -283,12 +282,10 @@ regexp_search(FTH regexp, char *str, int kind)
 		slen = (ficlInteger)(end - beg);
 		if (slen < 0)
 			break;
-		else {
-			fs = fth_make_string_len(str + beg, slen);
-			fth_array_set(FTH_REGEXP_RESULTS(regexp), i, fs);
-			if (i < REGEXP_REGS)
-				fth_array_set(regexp_results, i, fs);
-		}
+		fs = fth_make_string_len(str + beg, slen);
+		fth_array_set(FTH_REGEXP_RESULTS(regexp), i, fs);
+		if (i < REGEXP_REGS)
+			fth_array_set(regexp_results, i, fs);
 	}
 	FTH_FREE(pmatch);
 	return (pos);
@@ -308,13 +305,11 @@ fth_regexp_find(const char *reg, const char *str)
 	found = -1;
 	if (str == NULL || reg == NULL)
 		return (found);
-
 	ret = regcomp(&re, reg, REG_EXTENDED);
 	if (ret != 0) {
 		regerror(ret, &re, errbuf, sizeof(errbuf));
 		regfree(&re);
-		fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",
-		    RUNNING_WORD(), c__FUNCTION__, errbuf);
+		FTH_REGEXP_THROW(errbuf);
 		/* NOTREACHED */
 		return (found);
 	}
@@ -323,8 +318,7 @@ fth_regexp_find(const char *reg, const char *str)
 		if (ret != REG_NOMATCH) {
 			regerror(ret, &re, errbuf, sizeof(errbuf));
 			regfree(&re);
-			fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",
-			    RUNNING_WORD(), c__FUNCTION__, errbuf);
+			FTH_REGEXP_THROW(errbuf);
 			/* NOTREACHED */
 			return (found);
 		}
@@ -340,23 +334,15 @@ fth_regexp_find(const char *reg, const char *str)
 ficlInteger
 fth_regexp_match(FTH regexp, FTH string)
 {
-	char *str;
-
-	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1,
-	    "a regexp or string");
-	if (string == 0)
-		return (-1);
+	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1, "a regexp");
 	FTH_ASSERT_ARGS(FTH_STRING_P(string), string, FTH_ARG2, "a string");
 	if (fth_string_length(string) == 0)
 		return (-1);
 	if (FTH_STRING_P(regexp))
 		regexp = fth_make_regexp(fth_string_ref(regexp));
-	if (regexp == 0)
-		return (-1);
-	str = fth_string_ref(string);
 	fth_array_clear(FTH_REGEXP_RESULTS(regexp));
 	fth_array_clear(regexp_results);
-	return (regexp_search(regexp, str, FREG_MATCH));
+	return (regexp_search(regexp, fth_string_ref(string), FREG_MATCH));
 }
 
 /*
@@ -406,29 +392,19 @@ fth_regexp_search(FTH regexp, FTH string, ficlInteger start, ficlInteger range)
 	size_t size;
 	bool allocated;
 
-	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1,
-	    "a regexp or string");
+	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1, "a regexp");
+	FTH_ASSERT_ARGS(FTH_STRING_P(string), string, FTH_ARG2, "a string");
 	len = fth_string_length(string);
-	if (len == -1) {
-		FTH_ASSERT_ARGS(FTH_STRING_P(string), string, FTH_ARG2,
-		    "a string");
-		/* NOTREACHED */
-		return (-1);
-	}
 	if (len == 0)
 		return (-1);
 	if (FTH_STRING_P(regexp))
 		regexp = fth_make_regexp(fth_string_ref(regexp));
-	if (regexp == 0)
-		return (-1);
 	if (start < 0)
 		start += len;
 	if (range == -1)
 		range = len;
 	if (start < 0 || start >= len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, start);
-	fth_array_clear(FTH_REGEXP_RESULTS(regexp));
-	fth_array_clear(regexp_results);
 	range++;
 	if (range < 0)
 		range = -range;
@@ -443,6 +419,8 @@ fth_regexp_search(FTH regexp, FTH string, ficlInteger start, ficlInteger range)
 		s = regexp_scratch;
 		allocated = false;
 	}
+	fth_array_clear(FTH_REGEXP_RESULTS(regexp));
+	fth_array_clear(regexp_results);
 	fth_strncpy(s, size, fth_string_ref(string) + start, (size_t)range);
 	pos = regexp_search(regexp, s, FREG_SEARCH);
 	if (allocated)
@@ -489,9 +467,6 @@ See regex(3) for more information."
 		ficlStackPushInteger(vm->dataStack, result);
 }
 
-#define BI_WARN "%s: wrong backward reference index %ld, result length is %ld"
-#define BN_WARN "%s: backward reference without number, \"%s\""
-
 FTH
 fth_regexp_replace(FTH regexp, FTH string, FTH replace)
 {
@@ -506,55 +481,54 @@ If no corresponding subexpression exist, raise REGEXP-ERROR exception.  \
 Return a new string in any case, with or without replacement."
 	ficlInteger pos, fs_len, rpl_len, reg_len, found_len;
 	char *str, *rpl;
+	FTH res_ary;
 
-	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1,
-	    "a regexp or string");
+	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1, "a regexp");
 	FTH_ASSERT_ARGS(FTH_STRING_P(string), string, FTH_ARG2, "a string");
 	FTH_ASSERT_ARGS(FTH_STRING_P(replace), replace, FTH_ARG3, "a string");
-
 	fs_len = fth_string_length(string);
 	if (fs_len == 0)
 		return (fth_make_empty_string());
-
+	if (FTH_STRING_P(regexp))
+		regexp = fth_make_regexp(fth_string_ref(regexp));
+	res_ary = FTH_REGEXP_RESULTS(regexp);
 	pos = fth_regexp_search(regexp, string, 0L, fs_len);
 	if (pos < 0)
 		return (fth_string_copy(string));
-
-	rpl_len = fth_string_length(replace);
-	reg_len = fth_array_length(FTH_REGEXP_RESULTS(regexp));
-	found_len = fth_string_length(fth_array_ref(
-	    FTH_REGEXP_RESULTS(regexp), 0L));
 	str = fth_string_ref(string);
 	rpl = fth_string_ref(replace);
-
+	rpl_len = fth_string_length(replace);
+	reg_len = fth_array_length(res_ary);
+	found_len = fth_string_length(fth_array_ref(res_ary, 0L));
 	if (reg_len > 1 && strchr(rpl, '\\')) {
 		int i;
-		FTH fs;
+		ficlInteger digit;
+		FTH fs, ds;
 
 		fs = fth_make_empty_string();
 		for (i = 0; i < rpl_len; i++) {
-			if (rpl[i] != '\\')
+			if (rpl[i] != '\\') {
 				fth_string_sformat(fs, "%c", rpl[i]);
-			else if (++i < rpl_len && isdigit((int)rpl[i])) {
-				ficlInteger digit;
-
+				continue;
+			}
+			if (++i < rpl_len && isdigit((int)rpl[i])) {
 				digit = rpl[i] - 0x30;
-				if (digit < reg_len)
-					fth_string_push(fs,
-					    fth_array_ref(
-					    FTH_REGEXP_RESULTS(regexp), digit));
-				else
-					fth_throw(FTH_REGEXP_ERROR, BI_WARN,
-					    RUNNING_WORD(), digit, reg_len);
-			} else
-				fth_throw(FTH_REGEXP_ERROR, BN_WARN,
-				    RUNNING_WORD(), rpl);
+				if (digit < reg_len) {
+					ds = fth_array_ref(res_ary, digit);
+					fth_string_push(fs, ds);
+					continue;
+				}
+				FTH_REGEXP_THROW("wrong backward ref index");
+			}
+			FTH_REGEXP_THROW("backward ref without number");
 		}
 		rpl = fth_string_ref(fs);
 		rpl_len = (ficlInteger)fth_strlen(rpl);
 	}
-	return (fth_make_string_format("%.*s%.*s%.*s", pos, str,
-	    rpl_len, rpl, fs_len - pos, str + pos + found_len));
+	return (fth_make_string_format("%.*s%.*s%.*s",
+	    pos, str,
+	    rpl_len, rpl,
+	    fs_len - pos, str + pos + found_len));
 }
 
 static void
@@ -573,31 +547,23 @@ Return count of matched characters or -1 for no match."
 	start = ficlStackPopInteger(vm->dataStack);
 	str = fth_pop_ficl_cell(vm);
 	reg = fth_pop_ficl_cell(vm);
-	if (reg == 0) {
+	FTH_ASSERT_ARGS(FTH_REGSTR_P(reg), reg, FTH_ARG1, "a regexp");
+	FTH_ASSERT_ARGS(FTH_STRING_P(str), str, FTH_ARG2, "a string");
+	len = fth_string_length(str);
+	if (len == 0) {
 		ficlStackPushInteger(vm->dataStack, -1);
 		return;
 	}
-	FTH_ASSERT_ARGS(FTH_REGSTR_P(reg), reg, FTH_ARG1, "a regexp or string");
 	if (FTH_STRING_P(reg))
 		reg = fth_make_regexp(fth_string_ref(reg));
-	if (reg == 0) {
-		ficlStackPushInteger(vm->dataStack, -1);
-		return;
-	}
-	fth_array_clear(FTH_REGEXP_RESULTS(reg));
-	fth_array_clear(regexp_results);
-	len = fth_string_length(str);
-	if (len == -1) {
-		FTH_ASSERT_ARGS(FTH_STRING_P(str), str, FTH_ARG2, "a string");
-		/* NOTREACHED */
-		return;
-	}
 	if (start < 0)
 		start += len;
 	if (start < 0)
 		start = 0;
 	else if (start >= len)
 		start = len - 1;
+	fth_array_clear(FTH_REGEXP_RESULTS(reg));
+	fth_array_clear(regexp_results);
 	res = regexp_search(reg, fth_string_ref(str) + start, FREG_MATCH);
 	ficlStackPushInteger(vm->dataStack, res);
 }
@@ -620,27 +586,17 @@ Return index of match or -1 for no match."
 	start = ficlStackPopInteger(vm->dataStack);
 	str = fth_pop_ficl_cell(vm);
 	reg = fth_pop_ficl_cell(vm);
-	if (reg == 0) {
+	FTH_ASSERT_ARGS(FTH_REGSTR_P(reg), reg, FTH_ARG1, "a regexp");
+	FTH_ASSERT_ARGS(FTH_STRING_P(str), str, FTH_ARG2, "a string");
+	len = fth_string_length(str);
+	if (len == 0) {
 		ficlStackPushInteger(vm->dataStack, -1);
 		return;
 	}
-	FTH_ASSERT_ARGS(FTH_REGSTR_P(reg), reg, FTH_ARG1, "a regexp or string");
 	if (FTH_STRING_P(reg))
 		reg = fth_make_regexp(fth_string_ref(reg));
-	if (reg == 0) {
-		ficlStackPushInteger(vm->dataStack, -1);
-		return;
-	}
-	len = fth_string_length(str);
-	if (len == -1) {
-		FTH_ASSERT_ARGS(FTH_STRING_P(str), str, FTH_ARG2, "a string");
-		/* NOTREACHED */
-		return;
-	}
 	if (start < 0 || start >= len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, start);
-	fth_array_clear(FTH_REGEXP_RESULTS(reg));
-	fth_array_clear(regexp_results);
 	range++;
 	if (range < 0)
 		range = -range;
@@ -655,6 +611,8 @@ Return index of match or -1 for no match."
 		s = regexp_scratch;
 		allocated = false;
 	}
+	fth_array_clear(FTH_REGEXP_RESULTS(reg));
+	fth_array_clear(regexp_results);
 	fth_strncpy(s, size, fth_string_ref(str) + start, (size_t)range);
 	pos = regexp_search(reg, s, FREG_SEARCH);
 	if (allocated)
@@ -708,8 +666,8 @@ See regex(3) for more information."
 static void								\
 ficl_re_ ## numb (ficlVm *vm)						\
 {									\
-	fth_push_ficl_cell(vm, fth_array_ref(regexp_results,		\
-	    (ficlInteger)numb));					\
+	fth_push_ficl_cell(vm,						\
+	    fth_array_ref(regexp_results, (ficlInteger)numb));		\
 }
 
 static void
@@ -748,8 +706,8 @@ void
 init_regexp(void)
 {
 	fth_set_object_apply(regexp_tag, (void *)reg_ref, 1, 0, 0);
-	regexp_results = fth_gc_permanent(
-	    fth_make_array_with_init(REGEXP_REGS, FTH_FALSE));
+	regexp_results = fth_make_array_with_init(REGEXP_REGS, FTH_FALSE);
+	fth_gc_permanent(regexp_results);
 	/* regexp */
 	FTH_PRI1("regexp?", ficl_regexp_p, h_regexp_p);
 	FTH_PRI1("make-regexp", ficl_make_regexp, h_make_regexp);

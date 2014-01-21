@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.214 1/21/14
+ * @(#)utils.c	1.215 1/21/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -888,14 +888,16 @@ static FTH	fgl_erase;	/* gl-erase to *histdup* */
 #endif
 
 static void	ficl_history(ficlVm *vm);
-static int	gl_config(GetLine *gl, FTH action);
+static int	gl_config(GetLine * gl, FTH action);
 static void	ficl_bindkey(ficlVm *vm);
 
 static int	repl_command_generator(WordCompletion * cpl,
 		    void *data, const char *line, int word_end);
 static int	repl_init_history(void);
-static int	repl_unique_history(GetLine *gl, char *line);
-static int	repl_append_history(GetLine *gl, char *line);
+static int	repl_unique_history(GetLine * gl, char *line);
+static int	repl_append_history(GetLine * gl, char *line);
+static char    *repl_expand_history(GetLine * gl, char *line);
+static char    *repl_replace_history(GetLine *gl, char *line);
 
 static simple_array *fgl_getline_config;
 static simple_array *fgl_getline_bindkey;
@@ -1231,8 +1233,8 @@ repl_unique_history(GetLine *gl, char *line)
  * According to libtecla's source files, gl_append_history() adds only
  * unique history lines.  But this doesn't seem to work.
  *
- * Here we try a tcsh-like scheme where *histdup* can be set to 'all,
- * 'prev, 'erase, or undef.
+ * Here we try a tcsh-like scheme where *histdup* can be set to gl-all,
+ * gl-prev, gl-erase, or undef.
  */
 static int
 repl_append_history(GetLine *gl, char *line)
@@ -1266,10 +1268,132 @@ repl_append_history(GetLine *gl, char *line)
 	return (gl_append_history(gl, line));
 }
 
+/*
+ * If command line starts with !, try to substitute with commands from
+ * previous history events.
+ *
+ * !123			repeat event 123
+ * !-123		repeat 123rd last event
+ * !!			repeat last event (same as !-1)
+ * !?sub_string(?)	repeat last event containing SUB_STRING
+ * !start_of_string	repeat last event starting with START_OF_STRING
+ */
+static char *
+repl_expand_history(GetLine *gl, char *line)
+{
+	unsigned long id;
+	GlHistoryRange range;
+	GlHistoryLine hline;
+	long ld;
+	size_t ln;
+	char s[FGL_BUFFER + 1], *res;
+
+	ln = strlen(line);
+	if (ln < 2)
+		return (line);
+	strcpy(s, line + 1);
+	ln--;
+	s[ln - 1] = '\0';
+	/* adjust 'ln' for use below (strncmp) */
+	ln--;
+	res = NULL;
+	gl_range_of_history(gl, &range);
+	id = range.newest;
+	if (isdigit((int)*s) || *s == '-') {
+		/* !123 or !-123 */
+		ld = strtol(s, NULL, 10);
+		if (ld < 0)
+			id += ++ld;
+		else
+			id = ld;
+		if (gl_lookup_history(gl, id, &hline))
+			res = (char *)hline.line;
+	} else if (*s == '!') {
+		/* !! */
+		if (gl_lookup_history(gl, id, &hline))
+			res = (char *)hline.line;
+	} else if (*s == '?') {
+		/* !?sub_string(?) */
+		size_t sl;
+		char *r;
+
+		r = s + 1;
+		sl = strlen(r) - 1;
+		if (r[sl] == '?')
+			r[sl] = '\0';
+		for (id = range.newest; id > range.oldest; id--)
+			if (gl_lookup_history(gl, id, &hline))
+				if (fth_regexp_find(r, hline.line) != -1) {
+					res = (char *)hline.line;
+					break;
+				}
+	} else
+		/* !start_of_string */
+		for (id = range.newest; id > range.oldest; id--)
+			if (gl_lookup_history(gl, id, &hline))
+				if (strncmp(s, hline.line, ln) == 0) {
+					res = (char *)hline.line;
+					break;
+				}
+	if (res == NULL) {
+		if (*s == '!')
+			line++;
+		if (*s == '?')
+			line++;
+		fth_printf("%s: event not found\n", s);
+	}
+	return (res);
+}
+
+/*
+ * If command line starts with ^, try a search from previous history
+ * events and replace it with second part of ^search^replace.
+ *
+ * ^search^replace(^)
+ */
+static char *
+repl_replace_history(GetLine *gl, char *line)
+{
+	unsigned long id;
+	GlHistoryRange range;
+	GlHistoryLine hline;
+	size_t i, j;
+	char src[FGL_BUFFER], dst[FGL_BUFFER], *res;
+
+	if (strlen(line) < 4)
+		return (line);
+	i = 0;
+	j = 1;		/* skip 1st ^ */
+	while (line[j] != '^' && !isspace((int)line[j]))
+		src[i++] = line[j++];
+	src[i] = '\0';
+	i = 0;
+	j++;		/* skip 2nd ^ */
+	while (line[j] != '^' && !isspace((int)line[j]))
+		dst[i++] = line[j++];
+	dst[i] = '\0';
+	res = NULL;
+	gl_range_of_history(gl, &range);
+	for (id = range.newest; id > range.oldest; id--)
+		if (gl_lookup_history(gl, id, &hline))
+			if (fth_regexp_find(src, hline.line) != -1) {
+				FTH reg, str, rep, rpl;
+
+				reg = fth_make_regexp(src);
+				str = fth_make_string(hline.line);
+				rep = fth_make_string(dst);
+				rpl = fth_regexp_replace(reg, str, rep);
+				res = fth_string_ref(rpl);
+				break;
+			}
+	if (res == NULL)
+		fth_printf("%s: event not found\n", src);
+	return (res);
+}
+
 #else	/* !HAVE_LIBTECLA */
 
 static void	ficl_bindkey(ficlVm *vm);
-
 static char    *get_line(char *prompt, char *dummy);
 static char	utils_readline_buffer[BUFSIZ];
 
@@ -1394,6 +1518,12 @@ fth_repl(int argc, char **argv)
 	while (status != FTH_BYE) {
 		line = NULL;
 		prompt = NULL;
+#if defined(HAVE_LIBTECLA)
+		if (FGL_HISTDUP_UNDEF_P()) {
+			gl_range_of_history(gl, &range);
+			lineno = (ficlInteger)range.newest + 1;
+		}
+#endif
 		if (compile_p)
 			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
 		else if (!fth_hook_empty_p(before_prompt_hook)) {
@@ -1428,6 +1558,27 @@ fth_repl(int argc, char **argv)
 			}
 			if (rs == GLR_ERROR)	
 				FTH_GL_ERROR(gl);
+		}
+		/*
+		 * If command line starts with !, try to substitute with
+		 * commands from previous history events.
+		 */
+		if (*line == '!') {
+			line = repl_expand_history(gl, line);
+			if (line == NULL)
+				continue;
+			fth_printf("%s\n", line);
+		}
+		/*
+		 * If command line starts with ^, try a search from previous
+		 * history events and replace it with second part of
+		 * ^search^replace.
+		 */
+		if (*line == '^') {
+			line = repl_replace_history(gl, line);
+			if (line == NULL)
+				continue;
+			fth_printf("%s\n", line);
 		}
 #else
 		line = get_line(prompt, err_line);

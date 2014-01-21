@@ -1,3 +1,8 @@
+2014-01-21  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (repl_expand_history, repl_replace_history): New
+	private functions added to access or substitute history events.
+
 2014-01-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/utils.h (FTH_XString): Stringizing macro added.

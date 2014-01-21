@@ -22,3 +22,21 @@ history
 bindkey
 
 stringizing macro FTH_XString() added to utils.h
+
+Simple history expansion and substitution added to libtecla's input
+functions.
+
+If the command line starts with !, try to substitute with commands from
+previous history events.
+
+	!123			repeat event 123
+	!-123			repeat 123rd last event
+	!!			repeat last event (same as !-1)
+	!?sub_string(?)		repeat last event containing SUB_STRING
+	!start_of_string	repeat last event starting with START_OF_STRING
+
+If the command line starts with ^, try a search from previous history
+events and replace it with second part of ^search^replace.
+
+	^search^replace(^)
+
