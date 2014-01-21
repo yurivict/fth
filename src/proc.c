@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.156 1/19/14
+ * @(#)proc.c	1.157 1/22/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -900,7 +900,6 @@ get_help(FTH obj, char *name)
 #endif
 
 static char    *get_help2(FTH obj, char *name);
-static void	fgl_display(ficlVm *vm, int len, char *s);
 
 /*
  * Like get_help() but adds a '\n' and doesn't format the string.
@@ -928,19 +927,11 @@ get_help2(FTH obj, char *name)
 	return (fth_format("%s  %s\n", name, buf));
 }
 
-static void
-fgl_display(ficlVm *vm, int len, char *s)
-{
-	FILE *fp;
-
-	fp = stdout;
-	stdout = vm->callback.stdout_ptr;
-	fth_print_p = true;
-	gl_display_text(ficlVmGetRepl(vm), 0, NULL, NULL, ' ', len, 0, s);
-	stdout = fp;
-}
-
-#define PRINT_HELP(Vm, Str)	fgl_display(Vm, MAX_LINE_LENGTH, Str)
+#define PRINT_HELP(Vm, Str) do {					\
+	fth_print_p = true;						\
+	gl_display_text(ficlVmGetRepl(Vm), 0, NULL, NULL, ' ',		\
+	    MAX_LINE_LENGTH, 0, Str);					\
+} while (0)
 
 #else	/* !HAVE_LIBTECLA */
 
