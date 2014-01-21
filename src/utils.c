@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.208 9/13/13
+ * @(#)utils.c	1.214 1/21/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -33,6 +33,9 @@
 #include "fth.h"
 #include "utils.h"
 
+#if defined(HAVE_SYS_TYPES_H)
+#include <sys/types.h>
+#endif
 #if defined(HAVE_SYS_STAT_H)
 #include <sys/stat.h>
 #endif
@@ -47,11 +50,6 @@ static void	ficl_repl_cb(void);
 static void    *fixup_null_alloc(size_t n, const char *name);
 static int	get_pos_from_buffer(ficlVm *vm, char *delim);
 static ficlString parse_input_buffer_0(ficlVm *vm, int pos);
-#if defined(HAVE_LIBTECLA)
-static int	repl_init_history(void);
-#else
-static char    *readline(char *prompt);
-#endif
 static void	utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p);
 
 char *
@@ -823,11 +821,6 @@ simple_array_to_array(simple_array *ary)
 	return (fth_make_empty_array());
 }
 
-#include <stdio.h>
-#if defined(HAVE_SYS_TYPES_H)
-#include <sys/types.h>
-#endif
-
 FTH
 fth_set_argv(int from, int to, char **argv)
 {
@@ -854,11 +847,256 @@ static FTH	after_repl_hook;
 static FTH	before_prompt_hook;
 static bool	fth_in_repl_p = false;
 
+#define FTH_REPL_PROMPT		"ok "
+#define FTH_REPL_PROMPT2	"c> "
+#define FTH_HIST_FILE		".fth-history"
+#define FTH_HIST_LEN		100
+
+#define FGL_COMMENT		"\\"
+#define FGL_BUFFER		4096
+
+static FTH	fgl_all;	/* gl-all to *histdup* */
+static FTH	fgl_prev;	/* gl-prev to *histdup* */
+static FTH	fgl_erase;	/* gl-erase to *histdup* */
+
+/* constant (string) */
+#define FGL_HISTDUP_REF()	fth_variable_ref("*histdup*")
+#define FGL_HISTDUP_ALL_P()	(FGL_HISTDUP_REF() == fgl_all)
+#define FGL_HISTDUP_PREV_P()	(FGL_HISTDUP_REF() == fgl_prev)
+#define FGL_HISTDUP_ERASE_P()	(FGL_HISTDUP_REF() == fgl_erase)
+#define FGL_HISTDUP_UNDEF_P()	FTH_UNDEF_P(FGL_HISTDUP_REF())
+
+/* string */
+#define FGL_HISTFILE_REF()	fth_variable_ref("*histfile*")
+#define FGL_HISTFILE_SET(Val)	fth_variable_set("*histfile*", (Val))
+#define FGL_HISTFILE_CSTR()	fth_string_ref(FGL_HISTFILE_REF())
+
+/* integer */
+#define FGL_HISTORY_REF()	fth_variable_ref("*history*")
+#define FGL_HISTORY_SET(Val)	fth_variable_set("*history*", (Val))
+#define FGL_HISTORY_CSET(Val)	FGL_HISTORY_SET(FIX_TO_INT(Val))
+#define FGL_HISTORY_CINT()	FIX_TO_INT(FGL_HISTORY_REF())
+
+/* boolean */
+#define FGL_PROMPTSTYLE_P()	FTH_TRUE_P(fth_variable_ref("*promptstyle*"))
+#define FGL_SAVEHIST_P()	FTH_TRUE_P(fth_variable_ref("*savehist*"))
+
 #if defined(HAVE_LIBTECLA)
 
 #if defined(HAVE_LIBTECLA_H)
 #include <libtecla.h>
 #endif
+
+static void	ficl_history(ficlVm *vm);
+static int	gl_config(GetLine *gl, FTH action);
+static void	ficl_bindkey(ficlVm *vm);
+
+static int	repl_command_generator(WordCompletion * cpl,
+		    void *data, const char *line, int word_end);
+static int	repl_init_history(void);
+static int	repl_unique_history(GetLine *gl, char *line);
+static int	repl_append_history(GetLine *gl, char *line);
+
+static simple_array *fgl_getline_config;
+static simple_array *fgl_getline_bindkey;
+
+#define FTH_GET_LINE_ERROR	fth_exception("getline-error")
+#define FTH_GL_ERROR(gl)						\
+	fth_throw(FTH_GET_LINE_ERROR,					\
+	    "%s (%s): %s",						\
+	    RUNNING_WORD(),						\
+	    c__FUNCTION__,						\
+	    gl_error_message(gl, NULL, 0))
+
+static FTH	fgl_show;	/* gl-show [n] history */
+static FTH	fgl_load;	/* gl-load [fname] history */
+static FTH	fgl_save;	/* gl-save [fname] history */
+static FTH	fgl_clear;	/* gl-clear history */
+
+static void
+ficl_history(ficlVm *vm)
+{
+#define h_history "( :optional action arg -- )  handle histoy events\n\
+             history => show entire history\n\
+gl-show      history => same as above\n\
+        10   history => show 10 last history events\n\
+gl-show 10   history => same as above\n\
+gl-load      history => load from *histfile*\n\
+gl-load nil  history => same as above\n\
+gl-load file history => load from file\n\
+gl-save      history => save to *histfile*\n\
+gl-save nil  history => same as above\n\
+gl-save file history => save to file\n\
+gl-clear     history => clear all history events\n\
+gl-show: show ARG or all history events.\n\
+gl-load: load from ARG or *histfile* (~/" FTH_HIST_FILE ").\n\
+gl-save: save to ARG or *histfile*.\n\
+gl-clear: clear all history events."
+	GetLine *gl;
+	int len, n;
+	FTH action, arg;
+
+	action = FTH_FALSE;
+	arg = FTH_FALSE;
+	n = -1;
+	gl = ficlVmGetRepl(vm);
+	len = FTH_STACK_DEPTH(vm);
+	if (len == 0)
+		action = fgl_show;
+	else if (len == 1) {
+		action = fth_pop_ficl_cell(vm);
+		if (FTH_INTEGER_P(action)) {
+			n = (int)FTH_INT_REF(action);
+			action = fgl_show;
+		}
+	} else {
+		arg = fth_pop_ficl_cell(vm);
+		action = fth_pop_ficl_cell(vm);
+	}
+	if (action == fgl_load) {
+		char *fname;
+
+		fname = fth_string_ref(arg);
+		if (fname == NULL)
+			fname = FGL_HISTFILE_CSTR();
+		gl_load_history(gl, fname, FGL_COMMENT);
+	} else if (action == fgl_save) {
+		char *fname;
+
+		fname = fth_string_ref(arg);
+		if (fname == NULL)
+			fname = FGL_HISTFILE_CSTR();
+		gl_save_history(gl, fname, FGL_COMMENT, -1);
+	} else if (action == fgl_clear)
+		gl_clear_history(gl, 1);
+ 	else {
+		FILE *fp;
+
+		fp = vm->callback.stdout_ptr;
+		if (FTH_INTEGER_P(arg))
+			n = (int)FTH_INT_REF(arg);
+		gl_show_history(gl, fp, "%N  %T   %H\n", 1, n);
+	}
+}
+
+static FTH	fgl_vi;		/* edit-mode vi */
+static FTH	fgl_emacs;	/* edit-mode emacs */
+static FTH	fgl_none;	/* edit-mode none */
+static FTH	fgl_nobeep;	/* nobeep */
+
+#define FGL_TECLA_RC		"~/.teclarc"
+
+static int 
+gl_config(GetLine *gl, FTH action)
+{
+	char *app;
+	
+	if (action == fgl_vi)
+		app = "edit-mode vi";
+	else if (action == fgl_emacs)
+		app = "edit-mode emacs";
+	else if (action == fgl_none)
+		app = "edit-mode none";
+	else if (action == fgl_nobeep)
+		app = "nobeep";
+	else
+		app = fth_string_ref(action);
+	simple_array_push(fgl_getline_config, app);
+	if (gl != NULL)
+		return (gl_configure_getline(gl, app, NULL, NULL));
+	return (0);
+}
+
+static void
+ficl_bindkey(ficlVm *vm)
+{
+#define h_bindkey "( :optional key action -- )  bind or unbind keys\n\
+                         bindkey => show user-defined key-bindings\n\
+\"edit-mode vi \\n nobeep\" bindkey => configure getline\n\
+gl-vi                    bindkey => set getline to vi mode\n\
+\"^G\" \"user-interrupt\"    bindkey => bind user-interrupt to Ctrl-G\n\
+\"^G\" #f                  bindkey => unbind last bind from Ctrl-G\n\
+No argument:\n\
+Show user-defined key-bindings set for example in ~/.fthrc.\n\
+One argument (KEY):\n\
+If KEY is a string, take it as configure string.  \
+If KEY is a predefined constant, set specific value as configure string.\n\
+Valid constants:\n\
+	gl-vi		=> edit-mode vi\n\
+	gl-emacs	=> edit-mode emacs\n\
+	gl-none		=> edit-mode none\n\
+	gl-nobeep	=> nobeep\n\
+Two arguments (KEY ACTION):\n\
+If KEY and ACTION are strings, bind ACTION to KEY.  \
+If KEY is a string and ACTION is anything else, unbind KEY from last bind.\n\
+See tecla(7) for key-bindings and actions."
+	GetLine *gl;
+	FTH key, action;
+	char *k, *a;
+	int i, l, len;
+
+	gl = ficlVmGetRepl(vm);
+	len = FTH_STACK_DEPTH(vm);
+	switch (len) {
+	case 0:
+		/*-
+		 * show current key-bindings and configurations
+		 */
+		l = simple_array_length(fgl_getline_config);
+		for (i = 0; i < l; i++) {
+			k = simple_array_ref(fgl_getline_config, i);
+			fth_printf("config[%d]: %s\n", i, k);
+		}
+		l = simple_array_length(fgl_getline_bindkey);
+		for (i = 0; i < l; i += 2) {
+			k = simple_array_ref(fgl_getline_bindkey, i);
+			a = simple_array_ref(fgl_getline_bindkey, i + 1);
+			if (a == NULL)
+				a = "undef";
+			fth_printf("bindkey[%d]: %s => %s\n", i, k, a);
+		}
+		break;
+	case 1:
+		/*-
+		 * gl_configure_getline()
+		 *
+		 * KEY is string:
+		 *	"edit-mode vi \n nobeep" bindkey
+		 *
+		 * KEY is one of the predefined constants:
+		 *	gl-vi		bindkey
+		 *	gl-emacs	bindkey
+		 *	gl-none		bindkey
+		 *	gl-nobeep	bindkey
+		 */
+		key = fth_pop_ficl_cell(vm);
+		if (gl_config(gl, key))
+			FTH_GL_ERROR(gl);
+		break;
+	case 2:
+	default:
+		/*-
+		 * gl_bind_keyseq()
+		 *
+		 * KEY must be a string!
+		 * ACTION can be a string: "^G" "user-interrupt" bindkey
+		 *	binds ACTION to KEY
+		 * ACTION is anything else: "^G" #f bindkey
+		 *	unbinds KEY from previous bound ACTION
+		 */
+		action = fth_pop_ficl_cell(vm);
+		key = fth_pop_ficl_cell(vm);
+		FTH_ASSERT_ARGS(FTH_STRING_P(key), key, FTH_ARG1, "a string");
+		k = fth_string_ref(key);
+		a = fth_string_ref(action);
+		simple_array_push(fgl_getline_bindkey, k);
+		simple_array_push(fgl_getline_bindkey, a);
+		if (gl != NULL)
+			if (gl_bind_keyseq(gl, GL_USER_KEY, k, a))
+				FTH_GL_ERROR(gl);
+		break;
+	}
+}
 
 /* ARGSUSED */
 static int
@@ -913,168 +1151,150 @@ repl_command_generator(WordCompletion *cpl,
 	return (0);
 }
 
-static char	hist_file[MAXPATHLEN];
-
 static int
 repl_init_history(void)
 {
-	char *h_file, *len_str;
 	int hist_len;
-	size_t h_len;
+	char *tmp_str;
+	FTH fs, fn;
 
-	h_len = sizeof(hist_file);
-	h_file = getenv(FTH_ENV_HIST);
-	if (h_file == NULL) {
-		fth_strcpy(hist_file, h_len, fth_getenv("HOME", "/tmp"));
-		fth_strcat(hist_file, h_len, "/" FTH_HIST_FILE);
-	} else
-		fth_strcpy(hist_file, h_len, h_file);
-	hist_len = 0;
-	len_str = getenv(FTH_ENV_HIST_LEN);
-	if (len_str != NULL)
-		hist_len = (int)strtol(len_str, NULL, 10);
+	/*-
+	 * Set history file.
+	 *
+	 * Check for:
+	 * 	- Fth variable *histfile*
+	 * 	- environment variable $FTH_HISTORY
+	 * 	- otherwise default to FTH_HIST_FILE
+	 */
+	fs = FGL_HISTFILE_REF();
+	if (fth_string_length(fs) <= 0) {
+		tmp_str = getenv(FTH_ENV_HIST);
+		fs = (tmp_str != NULL) ?
+		    fth_make_string(tmp_str) :
+		    fth_make_string_format("%s/" FTH_HIST_FILE,
+			fth_getenv("HOME", "/tmp"));
+		FGL_HISTFILE_SET(fs);
+	}
+	/*-
+	 * Set history length.
+	 *
+	 * Check for:
+	 * 	- Fth variable *history*
+	 * 	- environment variable $FTH_HISTORY_LENGTH
+	 * 	- otherwise default to FTH_HIST_LEN
+	 */
+	fn = FGL_HISTORY_REF();
+	hist_len = (int)fth_int_ref_or_else(fn, -1);
+	if (hist_len == -1) {
+		tmp_str = getenv(FTH_ENV_HIST_LEN);
+		if (tmp_str != NULL)
+			hist_len = (int)strtol(tmp_str, NULL, 10);
+	}
 	if (hist_len < FTH_HIST_LEN)
 		hist_len = FTH_HIST_LEN;
+	FGL_HISTORY_CSET(hist_len);
 	return (hist_len);
 }
 
-void
-fth_repl(int argc, char **argv)
+static int
+repl_unique_history(GetLine *gl, char *line)
 {
-	static ficlInteger lineno;
-	ficlVm *vm;
-	char *line;
-	char *volatile prompt;
-	volatile bool compile_p;
-	volatile int status;
-#if !defined(_WIN32)
-	volatile int sig;
-#endif
-	volatile int hist_len;
-	int i;
-	GetLine *gl;
-	GlHistoryRange range;
+	char *hf;
+	FTH hary, nhary, cline, hline;
+	ficlInteger i, len;
 
-	vm = FTH_FICL_VM();
-	prompt = NULL;
-	compile_p = false;
-	status = FICL_VM_STATUS_OUT_OF_TEXT;
-	fth_current_file = fth_make_string("repl-eval");
-	fth_in_repl_p = true;
-	hist_len = repl_init_history();
-	gl = new_GetLine(1024L, (size_t)(128 * hist_len));
-	if (gl == NULL)
-		fth_exit(EXIT_FAILURE);
-	gl_load_history(gl, hist_file, "\\");
-	gl_automatic_history(gl, 0);
-	gl_customize_completion(gl, NULL, repl_command_generator);
-	gl_prompt_style(gl, GL_FORMAT_PROMPT);
-	fth_set_argv(0, argc, argv);
-	/*
-	 * Call hook before starting repl.
-	 */
-	if (!fth_hook_empty_p(before_repl_hook))
-		fth_run_hook(before_repl_hook, 0);
-	gl_range_of_history(gl, &range);
-	lineno = (ficlInteger)range.newest;
-	fth_interactive_p = true;
-	/*
-	 * Main loop.
-	 */
-	while (status != FTH_BYE) {
-		if (compile_p)
-			prompt = "c> ";	/* continue prompt */
-		else if (!fth_hook_empty_p(before_prompt_hook))
-			prompt = fth_string_ref(
-			    fth_run_hook_again(before_prompt_hook, 2,
-			    fth_make_string(prompt), INT_TO_FIX(lineno)));
-		else
-			prompt = FTH_REPL_PROMPT;
-		fth_print_p = false;
-		fth_current_line = lineno++;
-#if defined(_WIN32)
-		if (true) {
-#else
-
-		sig = sigsetjmp(fth_sig_toplevel, 1);
-		if (sig == 0) {
-#endif
-			line = gl_get_line(gl, prompt, NULL, -1);
-			if (line == NULL || *line == '\0')
-				break;
-			if (line != NULL && *line != '\0') {
-				line[strlen(line) - 1] = '\0';
-				gl_append_history(gl, line);
-				status = fth_catch_eval(line);
-				if (status == FTH_ERROR)
-					continue;
-				if (status == FTH_BYE)
-					break;
-				compile_p =
-				    (vm->state == FICL_VM_STATE_COMPILE);
-				if (compile_p)
-					continue;
-				else
-					status = FTH_OKAY;
-				if (fth_true_repl_p) {
-					int len;
-
-					len = FTH_STACK_DEPTH(vm);
-					switch (len) {
-					case 0:
-						if (!fth_print_p)
-							fth_printf("%S",
-							    FTH_UNDEF);
-						break;
-					case 1:
-						fth_printf("%M",
-						    fth_pop_ficl_cell(vm));
-						break;
-					default:
-						for (i = len - 1;
-						    i >= 0;
-						    i--) {
-							ficlStackRoll(
-							    vm->dataStack, i);
-							fth_printf("%M ",
-							    fth_pop_ficl_cell(
-							    vm));
-						}
-						break;
-					}
-					fth_print("\n");
-				} else if (fth_print_p)	/* forth repl */
-					fth_print("\n");
-			} else if (fth_true_repl_p)	/* empty line */
-				fth_printf("%S\n", FTH_UNDEF);
-		} else {	/* sig != 0 */
-#if !defined(_WIN32)
-			signal_check(sig);
-#endif
-			errno = 0;
-			ficlVmReset(vm);
-		}
-	}			/* while */
-	gl_limit_history(gl, hist_len);
-	gl_save_history(gl, hist_file, "\\", -1);
-	del_GetLine(gl);
-	if (fth_print_p)
-		fth_print("\n");
-	/*
-	 * Call hook after finishing repl; for example to remove duplicates
-	 * from history file.
-	 */
-	if (!fth_hook_empty_p(after_repl_hook))
-		fth_run_hook(after_repl_hook, 1, fth_make_string(hist_file));
-	fth_exit(EXIT_SUCCESS);
+	hf = FGL_HISTFILE_CSTR();
+	gl_save_history(gl, hf, FGL_COMMENT, -1);
+	hary = fth_array_reverse(fth_readlines(hf));
+	cline = fth_make_string_format("%s\n", line);
+	nhary = fth_make_empty_array();
+	len = fth_array_length(hary) - 1; 
+	for (i = 0; i < len; i += 2) {
+		hline = fth_array_ref(hary, i);
+		if (fth_string_equal_p(cline, hline))
+			continue;
+		if (fth_array_member_p(nhary, hline))
+			continue;
+		/* history line */
+		fth_array_unshift(nhary, hline);
+		/* time line */
+		fth_array_unshift(nhary, fth_array_ref(hary, i + 1));
+	}
+	fth_writelines(hf, nhary);
+	gl_clear_history(gl, 1);
+	return (gl_load_history(gl, hf, FGL_COMMENT));
 }
 
-#else				/* !HAVE_LIBTECLA */
+/*
+ * XXX: gl_append_history() (Wed Jan 15 18:10:07 CET 2014)
+ *
+ * According to libtecla's source files, gl_append_history() adds only
+ * unique history lines.  But this doesn't seem to work.
+ *
+ * Here we try a tcsh-like scheme where *histdup* can be set to 'all,
+ * 'prev, 'erase, or undef.
+ */
+static int
+repl_append_history(GetLine *gl, char *line)
+{
+	unsigned long id;
+	GlHistoryRange range;
+	GlHistoryLine hline;
 
+	/* replace '\n' */
+	line[strlen(line) - 1] = '\0';
+	if (FGL_HISTDUP_ALL_P()) {
+		gl_range_of_history(gl, &range);
+		for (id = range.newest; id > range.oldest; id--)
+			if (gl_lookup_history(gl, id, &hline))
+				if (strcmp(hline.line, line) == 0)
+					return (0);
+	} else if (FGL_HISTDUP_PREV_P()) {
+		gl_range_of_history(gl, &range);
+		if (gl_lookup_history(gl, range.newest, &hline))
+			if (strcmp(hline.line, line) == 0)
+				return (0);
+	} else if (FGL_HISTDUP_ERASE_P()) {
+		gl_range_of_history(gl, &range);
+		for (id = range.newest; id > range.oldest; id--)
+			if (gl_lookup_history(gl, id, &hline))
+				if (strcmp(hline.line, line) == 0) {
+					repl_unique_history(gl, line);
+					break;
+				}
+	}
+	return (gl_append_history(gl, line));
+}
+
+#else	/* !HAVE_LIBTECLA */
+
+static void	ficl_bindkey(ficlVm *vm);
+
+static char    *get_line(char *prompt, char *dummy);
 static char	utils_readline_buffer[BUFSIZ];
 
+static void
+ficl_bindkey(ficlVm *vm)
+{
+#define h_bindkey "( :optional key action -- )  noop without libtecla"
+	int len;
+
+	/* clear at most 2 stack entries */
+	len = FTH_STACK_DEPTH();
+	switch (len) {
+	case 2:
+		fth_pop_ficl_cell(vm);
+		/* FALLTHROUGH */
+	case 1:
+		fth_pop_ficl_cell(vm);
+		/* FALLTHROUGH */
+	default:
+		break;
+	}
+}
+
 static char *
-readline(char *prompt)
+get_line(char *prompt, char *dummy)
 {
 	char *buf;
 
@@ -1088,110 +1308,201 @@ readline(char *prompt)
 	return (buf);
 }
 
+#endif	/* !HAVE_LIBTECLA */
+
 void
 fth_repl(int argc, char **argv)
 {
 	static ficlInteger lineno;
 	ficlVm *vm;
+	char *line;
 	char *volatile prompt;
-	char *volatile rl_buffer;
+	char *volatile err_line;
 	volatile bool compile_p;
 	volatile int status;
 #if !defined(_WIN32)
 	volatile int sig;
 #endif
-	int i;
+	int i, len;
+#if defined(HAVE_LIBTECLA)
+	GetLine *gl;
+	GlHistoryRange range;
+	GlReturnStatus rs;
+#endif
 
-	lineno = 0;
 	vm = FTH_FICL_VM();
 	prompt = NULL;
-	rl_buffer = NULL;
+	err_line = NULL;
 	compile_p = false;
 	status = FICL_VM_STATUS_OUT_OF_TEXT;
 	fth_current_file = fth_make_string("repl-eval");
 	fth_in_repl_p = true;
+#if defined(HAVE_LIBTECLA)
+	gl = new_GetLine(FGL_BUFFER, FGL_BUFFER * repl_init_history());
+	if (gl == NULL)
+		fth_exit(EXIT_FAILURE);
+	ficlVmGetRepl(vm) = gl;
+	/*
+	 * We have to load explicitely ~/.teclarc.  Subsequent calls of
+	 * gl_configure_getline() will trigger gl->configure = 1 and GetLine
+	 * will skip further implicite calls of gl_configure_getline() (via
+	 * gl_get_line() etc).
+	 */
+	if (gl_configure_getline(gl, NULL, NULL, FGL_TECLA_RC))
+		FTH_GL_ERROR(gl);
+	/*
+	 * Delayed init of config and bindkey sequences from ~/.fthrc.
+	 */
+	len = simple_array_length(fgl_getline_config);
+	for (i = 0; i < len; i++) {
+		char *app;
+
+		app = simple_array_ref(fgl_getline_config, i);
+		if (gl_configure_getline(gl, app, NULL, NULL))
+			FTH_GL_ERROR(gl);
+	}
+	len = simple_array_length(fgl_getline_bindkey);
+	for (i = 0; i < len; i += 2) {
+		char *k, *a;
+
+		k = simple_array_ref(fgl_getline_bindkey, i);
+		a = simple_array_ref(fgl_getline_bindkey, i + 1);
+		if (gl_bind_keyseq(gl, GL_USER_KEY, k, a))
+			FTH_GL_ERROR(gl);
+	}
+	gl_automatic_history(gl, FGL_HISTDUP_UNDEF_P());
+	gl_customize_completion(gl, NULL, repl_command_generator);
+	gl_prompt_style(gl,
+	    FGL_PROMPTSTYLE_P() ? GL_FORMAT_PROMPT : GL_LITERAL_PROMPT);
+	gl_load_history(gl, FGL_HISTFILE_CSTR(), FGL_COMMENT);
+	gl_range_of_history(gl, &range);
+	lineno = (ficlInteger)range.newest;
+#else
+	lineno = 1;
+#endif
 	fth_set_argv(0, argc, argv);
+	/*
+	 * Call hook before starting repl.
+	 */
 	if (!fth_hook_empty_p(before_repl_hook))
 		fth_run_hook(before_repl_hook, 0);
+	fth_current_line = lineno;
 	fth_interactive_p = true;
+	/*
+	 * Main loop.
+	 */
 	while (status != FTH_BYE) {
+		line = NULL;
+		prompt = NULL;
 		if (compile_p)
-			prompt = "c> ";	/* continue prompt */
-		else if (!fth_hook_empty_p(before_prompt_hook))
-			prompt = fth_string_ref(
-			    fth_run_hook_again(before_prompt_hook, 2,
-			    fth_make_string((char *)prompt),
-			    INT_TO_FIX(lineno)));
-		else
+			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
+		else if (!fth_hook_empty_p(before_prompt_hook)) {
+			FTH fs;
+
+			fs = fth_run_hook_again(before_prompt_hook,
+			    2,
+			    fth_make_string(prompt),
+			    INT_TO_FIX(lineno));
+			prompt = fth_string_ref(fs);
+		}
+		if (prompt == NULL)
 			prompt = FTH_REPL_PROMPT;
-		rl_buffer = NULL;
 		fth_print_p = false;
-		fth_current_line = lineno++;
-#if defined(_WIN32)
-		if (true) {
-#else
-		sig = sigsetjmp(fth_sig_toplevel, 1);
-		if (sig == 0) {
-#endif
-
-			rl_buffer = readline(prompt);
-			if (rl_buffer == NULL) {	/* EOF/ctrl-d */
-				status = FTH_BYE;
-				fth_print("\n");
-				continue;
-			}
-			if (rl_buffer != NULL) {
-				status = fth_catch_eval(rl_buffer);
-				if (status == FTH_BYE)
-					break;
-				if (status == FTH_ERROR)
-					continue;
-				compile_p =
-				    (vm->state == FICL_VM_STATE_COMPILE);
-				if (compile_p)
-					continue;
-				if (fth_true_repl_p) {
-					int len;
-
-					len = FTH_STACK_DEPTH(vm);
-					switch (len) {
-					case 0:
-						if (!fth_print_p)
-							fth_printf("%I",
-							    FTH_UNDEF);
-						break;
-					case 1:
-						fth_printf("%M",
-						    fth_pop_ficl_cell(vm));
-						break;
-					default:
-						for (i = len - 1;
-						    i >= 0; i--) {
-							ficlStackRoll(
-							    vm->dataStack, i);
-							fth_printf("%M ",
-							    fth_pop_ficl_cell(
-							    vm));
-						}
-						break;
-					}
-					fth_print("\n");
-				} else if (fth_print_p)	/* forth repl */
-					fth_print("\n");
-			} else if (fth_true_repl_p)	/* empty line */
-				fth_printf("%I\n", FTH_UNDEF);
-		} else {	/* sig != 0 */
 #if !defined(_WIN32)
+		sig = sigsetjmp(fth_sig_toplevel, 1);
+		if (sig != 0) {
 			signal_check(sig);
-#endif
 			errno = 0;
 			ficlVmReset(vm);
+			continue;
 		}
-	}			/* while */
+#endif
+#if defined(HAVE_LIBTECLA)
+		gl_automatic_history(gl, FGL_HISTDUP_UNDEF_P());
+		line = gl_get_line(gl, prompt, err_line, -1);
+		if (line == NULL) {
+			rs = gl_return_status(gl);
+			if (rs == GLR_EOF) {
+				status = FTH_BYE;
+				continue;
+			}
+			if (rs == GLR_ERROR)	
+				FTH_GL_ERROR(gl);
+		}
+#else
+		line = get_line(prompt, err_line);
+		if (line == NULL)	/* Ctrl-D finishes repl */
+			break;
+#endif
+		if (*line == '\n') {	/* empty line */
+			if (fth_true_repl_p)
+				fth_printf("%S\n", FTH_UNDEF);
+			continue;
+		}
+		status = fth_catch_eval(line);
+		if (status == FTH_ERROR) {
+			/*
+			 * If an error occures, show the wrong command again.
+			 */
+			err_line = line;
+			continue;
+		}
+		err_line = NULL;
+#if defined(HAVE_LIBTECLA)
+		/*
+		 * If *histdup* is set to undef, gl_automatic_history() was
+		 * set to true and the command line is already copied to the
+		 * history list. All other values of *histdup* are handled in
+		 * repl_append_history().
+		 */
+		if (!FGL_HISTDUP_UNDEF_P())
+			repl_append_history(gl, line);
+#endif
+		if (status == FTH_BYE)
+			break;
+		fth_current_line = lineno++;
+		compile_p = (vm->state == FICL_VM_STATE_COMPILE);
+		if (compile_p)
+			continue;
+		status = FTH_OKAY;
+		if (!fth_true_repl_p) {	/* forth repl */
+			if (fth_print_p)
+				fth_print("\n");
+			continue;
+		}	
+		len = FTH_STACK_DEPTH(vm);
+		switch (len) {
+		case 0:
+			if (!fth_print_p)
+				fth_printf("%S", FTH_UNDEF);
+			break;
+		case 1:
+			fth_printf("%M", fth_pop_ficl_cell(vm));
+			break;
+		default:
+			for (i = len - 1; i >= 0; i--) {
+				ficlStackRoll(vm->dataStack, i);
+				fth_printf("%M ", fth_pop_ficl_cell(vm));
+			}
+			break;
+		}
+		fth_print("\n");
+	}	/* while */
+#if defined(HAVE_LIBTECLA)
+	if (FGL_SAVEHIST_P())
+		gl_save_history(gl, FGL_HISTFILE_CSTR(), FGL_COMMENT,
+		    FGL_HISTORY_CINT());
+	ficlVmGetRepl(vm) = gl = del_GetLine(gl);
+#endif
+	if (fth_print_p)
+		fth_print("\n");
+	/*
+	 * Call hook after finishing repl.
+	 */
+	if (!fth_hook_empty_p(after_repl_hook))
+		fth_run_hook(after_repl_hook, 1, FGL_HISTFILE_REF());
 	fth_exit(EXIT_SUCCESS);
 }
-
-#endif				/* !HAVE_LIBTECLA */
 
 static void
 ficl_repl_cb(void)
@@ -1223,9 +1534,64 @@ ficl_cold(void)
 void
 init_utils(void)
 {
+#define FGL_MAKE_STRING_CONSTANT(Str)					\
+	fth_define_constant(Str, fth_make_string(Str), NULL)
+#define FGL_SET_CONSTANT(Name) 						\
+	fgl_ ##Name = FGL_MAKE_STRING_CONSTANT("gl-" #Name)
 #if defined(HAVE_LIBTECLA)
+	fth_add_feature("tecla");
 	fth_add_feature("libtecla");
+
+	FTH_GET_LINE_ERROR;
+	fgl_getline_config = make_simple_array(16);
+	fgl_getline_bindkey = make_simple_array(16);
+	/* history constants */
+	FGL_SET_CONSTANT(show);
+	FGL_SET_CONSTANT(load);
+	FGL_SET_CONSTANT(save);
+	FGL_SET_CONSTANT(clear);
+	FTH_PRI1("history", ficl_history, h_history);
 #endif
+	/* bindkey constants */
+	FGL_SET_CONSTANT(vi);
+	FGL_SET_CONSTANT(emacs);
+	FGL_SET_CONSTANT(none);
+	FGL_SET_CONSTANT(nobeep);
+	FTH_PRI1("bindkey", ficl_bindkey, h_bindkey);
+	/* *histdup* constants */
+	FGL_SET_CONSTANT(all);
+	FGL_SET_CONSTANT(prev);
+	FGL_SET_CONSTANT(erase);
+	fth_define_variable("*histdup*", FTH_UNDEF,
+	    "History variable (constant).\n\
+If set to GL-ALL, only unique history events are entered in the history list.  \
+If set to GL-PREV and the last history event is the same as the current, \
+the current command is not entered.  \
+If set to GL-ERASE and the same event is found in the history list, \
+that old event gets erased and the current one gets inserted.  \
+If not defined (undef, the default), all history events are entered.\n\
+Default is undef.");
+	fth_define_variable("*histfile*", FTH_UNDEF,
+	    "History variable (string).\n\
+Can be set to the pathname where history is going to be saved and restored.  \
+If not set, use $FTH_HISTORY or ~/" FTH_HIST_FILE ".\n\
+Default is undef.");
+	fth_define_variable("*history*", FTH_UNDEF,
+	    "History variable (numeric).\n\
+Can be given a numeric value to control the size of the history list.  \
+If not set, use $FTH_HISTORY_LENGTH or " FTH_XString(FTH_HIST_LEN) ".\n\
+Default is undef.");
+	fth_define_variable("*savehist*", FTH_TRUE,
+	    "History variable (boolean).\n\
+If true, save at most *history*, $FTH_HISTORY_LENGTH, or \
+" FTH_XString(FTH_HIST_LEN) " history events to *history*, $FTH_HISTORY, or ~/\
+" FTH_HIST_FILE ", if false, don't save history events.\n\
+Default is #t.");
+	fth_define_variable("*promptstyle*", FTH_FALSE,
+	    "Prompt style variable (boolean).\n\
+If true, enable special formatting directives within the prompt, \
+see gl_prompt_style(3).\n\
+Default is #f.");
 	fth_define_variable("*argc*", FTH_ZERO,
 	    "number of arguments in *argv*");
 	fth_define_variable("*argv*", fth_make_empty_array(),

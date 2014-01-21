@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.155 11/22/13
+ * @(#)proc.c	1.156 1/19/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -893,6 +893,62 @@ get_help(FTH obj, char *name)
 	return (help);
 }
 
+#if defined (HAVE_LIBTECLA)
+
+#if defined(HAVE_LIBTECLA_H)
+#include <libtecla.h>
+#endif
+
+static char    *get_help2(FTH obj, char *name);
+static void	fgl_display(ficlVm *vm, int len, char *s);
+
+/*
+ * Like get_help() but adds a '\n' and doesn't format the string.
+ * Formatting is done with gl_display_text().  Without '\n' added,
+ * gl_display_text doesn't format the last line correct.
+ */
+static char *
+get_help2(FTH obj, char *name)
+{
+	FTH fs;
+	char *buf;
+	size_t len;
+
+	fs = fth_documentation_ref(obj);
+	if (!FTH_STRING_P(fs) && fth_symbol_p(name))
+		fs = fth_documentation_ref(fth_symbol(name));
+	buf = fth_string_ref(fs);
+	if (buf == NULL)
+		return (fth_format("no documentation available\n"));
+	if (name == NULL)
+		return (fth_format("%s\n", buf));
+	len = strlen(name);
+	if (strncmp(name, buf, len) == 0 || strncmp(name, buf + 1, len) == 0)
+		return (fth_format("%s\n", buf));
+	return (fth_format("%s  %s\n", name, buf));
+}
+
+static void
+fgl_display(ficlVm *vm, int len, char *s)
+{
+	FILE *fp;
+
+	fp = stdout;
+	stdout = vm->callback.stdout_ptr;
+	fth_print_p = true;
+	gl_display_text(ficlVmGetRepl(vm), 0, NULL, NULL, ' ', len, 0, s);
+	stdout = fp;
+}
+
+#define PRINT_HELP(Vm, Str)	fgl_display(Vm, MAX_LINE_LENGTH, Str)
+
+#else	/* !HAVE_LIBTECLA */
+
+#define get_help2(Obj, Name)	get_help(Obj, Name)
+#define PRINT_HELP(Vm, Str)	fth_print(Str)
+
+#endif	/* HAVE_LIBTECLA */
+
 static void
 ficl_get_help(ficlVm *vm)
 {
@@ -909,11 +965,11 @@ See also help-set!, help-add! and help-ref."
 	ficlVmGetWordToPad(vm);
 	word = FICL_WORD_NAME_REF(vm->pad);
 	if (word == NULL)
-		help = get_help(fth_make_string(vm->pad), vm->pad);
+		help = get_help2(fth_make_string(vm->pad), vm->pad);
 	else
-		help = get_help((FTH)word, vm->pad);
+		help = get_help2((FTH)word, vm->pad);
 	if (help != NULL) {
-		fth_print(help);
+		PRINT_HELP(vm, help);
 		FTH_FREE(help);
 	}
 }

@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.622 1/4/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.627 1/21/14";
 #endif /* not lint */
 
-#define FTH_DATE                        "2014/01/04"
+#define FTH_DATE                        "2014/01/21"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -64,6 +64,9 @@ const char libfth_sccsid[] = "@(#)misc.c	1.622 1/4/14";
 #if defined(HAVE_SIGNAL_H)
 #include <signal.h>
 #endif
+
+#define FTH_INIT_FILE		".fthrc"
+#define FTH_PATH_SEPARATOR	":"
 
 #define FTH_GLOBAL_INIT_FILE	FTH_PREFIX_PATH "/etc/fth.conf"
 #define FTH_SO_LIB_PATH		FTH_PREFIX_PATH "/lib/" FTH_PROG_NAME

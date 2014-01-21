@@ -2,3 +2,23 @@ See ChangeLog for more.
 
 * 1.3.7
 
+Some Tcsh-like global Fth variables added to utils.c to control
+libtecla's history mechanism and prompt style:
+
+*histdup*	constant (undef|gl-all|gl-prev|gl-erase)
+	gl-all	only unique history events are entered
+	gl-prev	if the last history event is the same as the current
+		command, the current command is not entered
+	gl-erase if the same event is found in the history list, that old
+		event gets erased and the current one gets inserted
+	undef	all history events are entered (default)
+*histfile*	string	~/.fth-history
+*history*	number	100
+*savehist*	boolean	#t
+*promptstyle*	boolean #f
+
+New words in utils.c:
+history
+bindkey
+
+stringizing macro FTH_XString() added to utils.h
