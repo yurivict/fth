@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.210 9/13/13
+ * @(#)object.c	1.211 1/22/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -266,8 +266,7 @@ gc_push(ficlWord *word)
 {
 	if (++gc_frame_level >= GC_FRAME_SIZE) {
 #if defined(FTH_DEBUG)
-		fprintf(stderr, "#<GC_FRAME (%s): above max?>\n",
-		    c__FUNCTION__);
+		fprintf(stderr, "#<GC_FRAME (%s): above max?>\n", __func__);
 #endif
 		gc_frame_level = GC_FRAME_SIZE - 1;
 	}
@@ -280,8 +279,7 @@ gc_pop(void)
 {
 	if (--gc_frame_level < 0) {
 #if defined(FTH_DEBUG)
-		fprintf(stderr, "#<GC_FRAME (%s): below zero?>\n",
-		    c__FUNCTION__);
+		fprintf(stderr, "#<GC_FRAME (%s): below zero?>\n", __func__);
 #endif
 		gc_frame_level = 0;
 	}

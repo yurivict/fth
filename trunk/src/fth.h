@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.210 11/20/13
+ * @(#)fth.h	1.211 1/22/14
  */
 
 #if !defined(_FTH_H_)
@@ -384,16 +384,13 @@ enum {
 
 #define FTH_ASSERT_STRING(Obj)						\
 	if ((Obj) == 0)							\
-		fth_throw(FTH_NULL_STRING,				\
-		    "%s (%s): got null string",				\
-		    RUNNING_WORD(),					\
-		    c__FUNCTION__)
+		fth_throw(FTH_NULL_STRING, "%s (%s): got null string",	\
+		    RUNNING_WORD(), __func__)
 
 #define FTH_WRONG_TYPE_ARG_ERROR(Caller, Pos, Arg, Desc)		\
 	fth_throw(FTH_WRONG_TYPE_ARG,					\
 	    "%s (%s): wrong type arg %d, %s (%S), wanted %s",		\
-	    (Caller),							\
-	    c__FUNCTION__,						\
+	    (Caller), __func__,						\
 	    (Pos),							\
 	    fth_object_name(Arg),					\
 	    (Arg),							\
@@ -409,8 +406,7 @@ enum {
 #define FTH_OUT_OF_BOUNDS_ERROR(Pos, Arg, Desc)				\
 	fth_throw(FTH_OUT_OF_RANGE,					\
 	    "%s (%s) arg %d: %ld is %s",				\
-	    RUNNING_WORD(),						\
-	    c__FUNCTION__,						\
+	    RUNNING_WORD(), __func__,					\
 	    (int)(Pos),							\
 	    (ficlInteger)(Arg),						\
 	    (Desc))
@@ -425,8 +421,7 @@ enum {
 #define FTH_OUT_OF_RANGE_ERROR(Caller, Pos, Arg, Desc)			\
 	fth_throw(FTH_OUT_OF_RANGE,					\
 	    "%s (%s) arg %d: %S is out of range (%s)",			\
-	    (Caller),							\
-	    c__FUNCTION__,						\
+	    (Caller), __func__,						\
 	    (int)(Pos),							\
 	    (Arg),							\
 	    (Desc))
@@ -435,8 +430,7 @@ enum {
 #define FTH_BAD_ARITY_ERROR(Pos, Arg, Desc)				\
 	fth_throw(FTH_BAD_ARITY,					\
 	    "%s (%s) arg %d: %S, %s",					\
-	    RUNNING_WORD(),						\
-	    c__FUNCTION__,						\
+	    RUNNING_WORD(), __func__,					\
 	    (Pos),							\
 	    (Arg),							\
 	    (Desc))
@@ -444,8 +438,7 @@ enum {
 #define FTH_BAD_ARITY_ERROR_ARGS(Pos, Arg, Wr, Wo, Wrst, Gr, Go, Grst)	\
 	fth_throw(FTH_BAD_ARITY,					\
 	    "%s (%s) arg %d: %S (%d/%d/%s), wanted %d/%d/%s",		\
-	    RUNNING_WORD(),						\
-	    c__FUNCTION__,						\
+	    RUNNING_WORD(), __func__,					\
 	    (Pos),							\
 	    (Arg),							\
 	    (Gr),							\
@@ -458,14 +451,14 @@ enum {
 #define FTH_ANY_ERROR_THROW(Exc, Func)					\
 	((errno != 0) ?							\
 	 fth_throw(Exc,	"%s (%s): %s",					\
-	     c__FUNCTION__, #Func, fth_strerror(errno)) :		\
-	 fth_throw(Exc, "%s: %s", c__FUNCTION__, #Func))
+	     __func__, #Func, fth_strerror(errno)) :			\
+	 fth_throw(Exc, "%s: %s", __func__, #Func))
 
 #define FTH_ANY_ERROR_ARG_THROW(Exc, Func, Desc)			\
 	((errno != 0) ?							\
 	 fth_throw(Exc, "%s (%s:\"%s\"): %s",				\
-	     c__FUNCTION__, #Func, Desc, fth_strerror(errno)) :		\
-	 fth_throw(Exc, "%s (%s): %s", c__FUNCTION__, #Func, Desc))
+	     __func__, #Func, Desc, fth_strerror(errno)) :		\
+	 fth_throw(Exc, "%s (%s): %s", __func__, #Func, Desc))
 
 #define FTH_SYSTEM_ERROR_THROW(Func)					\
 	FTH_ANY_ERROR_THROW(FTH_SYSTEM_ERROR, Func)
@@ -475,23 +468,16 @@ enum {
 
 #define FTH_NOT_IMPLEMENTED_ERROR(Func)					\
 	fth_throw(FTH_NOT_IMPLEMENTED,					\
-	    "%s (%s): %S",						\
-	    c__FUNCTION__,						\
-	    #Func,							\
+	    "%s (%s): %S", __func__, #Func,				\
 	    fth_exception_message_ref(FTH_NOT_IMPLEMENTED))
 
 #define FTH_BAD_SYNTAX_ERROR(Desc)					\
 	fth_throw(FTH_BAD_SYNTAX,					\
-	    "%s (%s): %s",						\
-	    RUNNING_WORD(),						\
-	    c__FUNCTION__,						\
-	    (Desc))
+	    "%s (%s): %s", RUNNING_WORD(), __func__, (Desc))
 
 #define FTH_NO_MEMORY_THROW()						\
 	fth_throw(FTH_NO_MEMORY_ERROR,					\
-	    "%s (%s): can't allocate memory",				\
-	    RUNNING_WORD(),						\
-	    c__FUNCTION__)
+	    "%s (%s): can't allocate memory", RUNNING_WORD(), __func__)
 
 __BEGIN_DECLS
 

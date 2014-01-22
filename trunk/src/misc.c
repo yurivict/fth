@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.629 1/22/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.630 1/22/14";
 #endif /* not lint */
 
 #define FTH_DATE                        "2014/01/22"
@@ -1062,7 +1062,7 @@ load_file(const char *name, const char *caller)
 			FINISH_LOAD();
 			fth_throw(ficl_ans_real_exc((int)status),
 			    "%s (%s): can't load file %S",
-			    caller, c__FUNCTION__, fs);
+			    caller, __func__, fs);
 			/* NOTREACHED */
 			return (FTH_FALSE);
 			break;

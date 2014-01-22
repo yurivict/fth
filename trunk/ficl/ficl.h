@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.92 1/19/14
+ * @(#)ficl.h	1.94 1/22/14
  */
 
 #if !defined (__FICL_H__)
@@ -975,6 +975,16 @@ void		ficlVmErrorOut(ficlVm *, char *);
 #define ficlVmGetRepl(vm)	((vm)->repl)
 #define ficlVmGetReturnStack(vm) ((vm)->returnStack)
 #define ficlVmGetRunningWord(vm) ((vm)->runningWord)
+
+#define ficlVmGetPortIn(vm)	((vm)->callback.port_in)
+#define ficlVmGetPortOut(vm)	((vm)->callback.port_out)
+#define ficlVmGetPortErr(vm)	((vm)->callback.port_err)
+#define ficlVmGetStdin(vm)	((vm)->callback.stdin_ptr)
+#define ficlVmGetStdout(vm)	((vm)->callback.stdout_ptr)
+#define ficlVmGetStderr(vm)	((vm)->callback.stderr_ptr)
+#define ficlVmGetFilenoIn(vm)	((vm)->callback.stdin_fileno)
+#define ficlVmGetFilenoOut(vm)	((vm)->callback.stdout_fileno)
+#define ficlVmGetFilenoErr(vm)	((vm)->callback.stderr_fileno)
 
 char           *ficl_running_word(ficlVm *);
 void		ficlVmDisplayDataStack(ficlVm *);

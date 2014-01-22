@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.157 1/22/14
+ * @(#)proc.c	1.158 1/22/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -524,7 +524,7 @@ execute_proc(ficlVm *vm, ficlWord *word, int depth, const char *caller)
 			    fth_word_inspect((FTH)word));
 		else
 			ficlVmThrowException(vm, status, "can't execute %s",
-			    caller = caller != NULL ?  caller : c__FUNCTION__);
+			    caller = caller != NULL ?  caller : __func__);
 		break;
 	}
 	/* collect values from stack */
@@ -689,7 +689,7 @@ See also <'set>, set-xt and set-execute."
 	word = FICL_WORD_NAME_REF(vm->pad);
 	if (word == NULL) {
 		fth_throw(FTH_UNDEFINED, "%s (%s): %s not found",
-		    RUNNING_WORD_VM(vm), c__FUNCTION__, vm->pad);
+		    RUNNING_WORD_VM(vm), __func__, vm->pad);
 		/* NOTREACHED */
 		return;
 	}
@@ -758,7 +758,7 @@ See also <'set>, set! and set-xt."
 	set_word = FICL_WORD_NAME_REF(vm->pad);
 	if (set_word == NULL) {
 		fth_throw(FTH_UNDEFINED, "%s (%s): %s not found",
-		    RUNNING_WORD_VM(vm), c__FUNCTION__, vm->pad);
+		    RUNNING_WORD_VM(vm), __func__, vm->pad);
 		/* NOTREACHED */
 		return;
 	}
@@ -1729,7 +1729,7 @@ static ficlWord *local_paren;
 
 #define FTH_OPTKEY_ERROR_THROW(Desc)					\
 	fth_throw(FTH_OPTKEY_ERROR, "%s (%s): wrong optkey array, %S",	\
-	    RUNNING_WORD(), c__FUNCTION__, Desc)
+	    RUNNING_WORD(), __func__, Desc)
 
 static void
 ficl_args_keys_paren_co(ficlVm *vm)

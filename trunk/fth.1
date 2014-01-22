@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.125 1/21/14
+.\" @(#)fth.1	1.126 1/22/14
 .\"
-.Dd January 21, 2014
+.Dd January 22, 2014
 .Dt FTH 1
 .Os
 .\"
@@ -570,10 +570,49 @@ The Tab-key or
 initiates word completion.  If the Forth dictionary has more than
 one entry starting with characters before the cursor, show all, if
 only one definition exists, complete it and add a space after the
-completed word.  If the Forth dictionary has no entry starting with
+completed word.  If the Forth dictionary has no entries starting with
 the characters before the cursor, try file name completion.  For
 complete key listings and function descriptions, see
 .Xr tecla 7 .
+.Pp
+If the first character of the command-line is an exclamation point
+.Cm \&! ,
+try history expansion similar to
+.Xr csh 1 .
+.Pp
+.Bl -tag -compact
+.It !123
+repeat event 123
+.It !-123
+repeat 123rd last event
+.It !!
+repeat last event (same as !-1)
+.It !?str(?)
+repeat last event containing
+.Ar str;
+the last
+.Cm \&?
+is optional
+.It !str
+repeat last event starting with
+.Ar str
+.El
+.Pp
+If the first character of the command-line is a caret
+.Cm ^ ,
+try history substitution similar to
+.Xr csh 1 .
+.Pp
+.Bl -tag -compact
+.It ^search^replace(^)
+repeat last event containing
+.Ar search
+and replace this string with
+.Ar replace ;
+the last
+.Cm ^
+is optional
+.El
 .\"
 .\" Tecla variables
 .\"
@@ -655,13 +694,13 @@ is a string, take it as configure string.  If
 is a predefined constant, set specific value as configure string.
 Valid constants:
 .Bl -tag -compact
-.It Cm gl-vi
+.It gl-vi
 edit-mode vi
-.It Cm gl-emacs
+.It gl-emacs
 edit-mode emacs
-.It Cm gl-none
+.It gl-none
 edit-mode none
-.It Cm gl-nobeep
+.It gl-nobeep
 nobeep
 .El
 .Bd -literal -offset indent -compact
@@ -699,21 +738,21 @@ History events can be displayed, loaded, saved, and cleared where
 .Ar action
 can be one of
 .Bl -tag -compact
-.It Cm gl-show
+.It gl-show
 show
 .Ar arg
 or all history events
-.It Cm gl-load
+.It gl-load
 load history events from
 .Ar arg
 or
 .Ev *histfile*
-.It Cm gl-save
+.It gl-save
 save history events to
 .Ar arg
 or
 .Ev *histfile*
-.It Cm gl-clear
+.It gl-clear
 clear all history events
 .El
 .Bd -literal -offset indent -compact
@@ -8489,6 +8528,7 @@ has no extra floating point stack; floats are of type
 .\" SEE ALSO
 .\"
 .Sh SEE ALSO
+.Xr csh 1 ,
 .Xr snd 1 ,
 .Xr tcsh 1 ,
 .Xr vi 1 ,
