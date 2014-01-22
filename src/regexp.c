@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	1.100 1/21/14
+ * @(#)regexp.c	1.101 1/22/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -61,7 +61,7 @@ typedef struct {
 
 #define FTH_REGEXP_THROW(Msg)						\
 	fth_throw(FTH_REGEXP_ERROR, "%s (%s): %s",			\
-	    RUNNING_WORD(), c__FUNCTION__, Msg)
+	    RUNNING_WORD(), __func__, Msg)
 
 static void	ficl_make_regexp(ficlVm *vm);
 static void	ficl_make_regexp_im(ficlVm *vm);
