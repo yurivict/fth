@@ -58,7 +58,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)system.c	1.41 10/17/13
+ * @(#)system.c	1.42 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -134,14 +134,20 @@ ficlSystem *ficlSystemCreate(ficlSystemInformation *fsi)
   sys->environment = ficlDictionaryCreate(sys, environmentSize);
   sys->environment->forthWordlist->name = "environment";
 
-  sys->callback.textIn   = fsi->textIn;
-  sys->callback.textOut  = fsi->textOut;
+  sys->callback.textIn = fsi->textIn;
+  sys->callback.textOut = fsi->textOut;
   sys->callback.errorOut = fsi->errorOut;
-  sys->callback.context  = fsi->context;
-  sys->callback.system   = sys;
-  sys->callback.vm       = NULL;
-  sys->stackSize         = stackSize;
-  sys->returnSize        = returnSize;
+  sys->callback.stdin_fileno = fsi->stdin_fileno;
+  sys->callback.stdout_fileno = fsi->stdout_fileno;
+  sys->callback.stderr_fileno = fsi->stderr_fileno;
+  sys->callback.stdin_ptr = fsi->stdin_ptr;
+  sys->callback.stdout_ptr = fsi->stdout_ptr;
+  sys->callback.stderr_ptr = fsi->stderr_ptr;
+  sys->callback.context = fsi->context;
+  sys->callback.system = sys;
+  sys->callback.vm = NULL;
+  sys->stackSize = stackSize;
+  sys->returnSize = returnSize;
 
   /*
   ** The locals dictionary is only searched while compiling,

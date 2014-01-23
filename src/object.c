@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.211 1/22/14
+ * @(#)object.c	1.212 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -266,7 +266,7 @@ gc_push(ficlWord *word)
 {
 	if (++gc_frame_level >= GC_FRAME_SIZE) {
 #if defined(FTH_DEBUG)
-		fprintf(stderr, "#<GC_FRAME (%s): above max?>\n", __func__);
+		fprintf(stderr, "#<GC_FRAME (gc_push): above max?>\n");
 #endif
 		gc_frame_level = GC_FRAME_SIZE - 1;
 	}
@@ -279,7 +279,7 @@ gc_pop(void)
 {
 	if (--gc_frame_level < 0) {
 #if defined(FTH_DEBUG)
-		fprintf(stderr, "#<GC_FRAME (%s): below zero?>\n", __func__);
+		fprintf(stderr, "#<GC_FRAME (gc_pop): below zero?>\n");
 #endif
 		gc_frame_level = 0;
 	}

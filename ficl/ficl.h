@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.94 1/22/14
+ * @(#)ficl.h	1.95 1/23/14
  */
 
 #if !defined (__FICL_H__)
@@ -965,9 +965,6 @@ void		ficlVmThrowError(ficlVm *, const char *,...);
 void		ficlVmThrowErrorVararg(ficlVm *, int, const char *, va_list);
 /* [ms]*/
 void		ficlVmThrowException(ficlVm *, int, const char *,...);
-char           *ficlVmTextIn(ficlVm *);
-void		ficlVmTextOut(ficlVm *, char *);
-void		ficlVmErrorOut(ficlVm *, char *);
 
 #define ficlVmGetContext(vm)	((vm)->context)
 #define ficlVmGetDataStack(vm)	((vm)->dataStack)
@@ -1397,6 +1394,15 @@ struct ficlSystemInformation {
 	ficlInputFunction textIn;	/* default textIn function [ms] */
 	ficlOutputFunction textOut;	/* default textOut function */
 	ficlOutputFunction errorOut;	/* textOut function used for errors */
+	FTH		port_in;	/* rest added by [ms] */
+	FTH		port_out;
+	FTH		port_err;
+	int		stdin_fileno;
+	int		stdout_fileno;
+	int		stderr_fileno;
+	FILE           *stdin_ptr;
+	FILE           *stdout_ptr;
+	FILE           *stderr_ptr;
 };
 
 #define ficlSystemInformationInitialize(x)				\

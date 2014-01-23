@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.216 1/22/14
+ * @(#)utils.c	1.217 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -102,7 +102,7 @@ fth_malloc(size_t n)
 
 	p = malloc(n);
 	if (p == NULL)
-		p = fixup_null_alloc(n, __func__);
+		p = fixup_null_alloc(n, "fth_malloc");
 	return (p);
 }
 
@@ -113,7 +113,7 @@ fth_realloc(void *p, size_t n)
 		return (fth_malloc(n));
 	p = realloc(p, n);
 	if (p == NULL)
-		p = fixup_null_alloc(n, __func__);
+		p = fixup_null_alloc(n, "fth_realloc");
 	return (p);
 }
 
@@ -356,7 +356,7 @@ fth_throw(FTH obj, const char *fmt,...)
 		fth_string_vsformat(fs, fmt, ap);
 		va_end(ap);
 	} else if (FTH_FALSE_P(exc)) {
-		fth_string_sformat(fs, "%s", __func__);
+		fth_string_sformat(fs, "fth_throw");
 		if (errno != 0)
 			fth_string_sformat(fs, ": %s", fth_strerror(errno));
 	} else
@@ -905,8 +905,7 @@ static simple_array *fgl_getline_bindkey;
 #define FTH_GET_LINE_ERROR	fth_exception("getline-error")
 #define FTH_GL_ERROR(gl)						\
 	fth_throw(FTH_GET_LINE_ERROR,					\
-	    "%s (%s): %s", RUNNING_WORD(), __func__,			\
-	    gl_error_message(gl, NULL, 0))
+	    "%s: %s", RUNNING_WORD(), gl_error_message(gl, NULL, 0))
 
 static FTH	fgl_show;	/* gl-show [n] history */
 static FTH	fgl_load;	/* gl-load [fname] history */
@@ -970,12 +969,13 @@ gl-clear: clear all history events."
 	} else if (action == fgl_clear)
 		gl_clear_history(gl, 1);
  	else {
-		FILE *fp;
-
-		fp = ficlVmGetStdout(vm);
 		if (FTH_INTEGER_P(arg))
 			n = (int)FTH_INT_REF(arg);
-		gl_show_history(gl, fp, "%N  %T   %H\n", 1, n);
+		/*
+		 * XXX: gl_show_history and stdout
+		 * Use stdout direct, not ficlVmGetStdout(vm).
+		 */
+		gl_show_history(gl, stdout, "%N  %T   %H\n", 1, n);
 	}
 }
 

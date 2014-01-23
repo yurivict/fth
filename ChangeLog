@@ -1,6 +1,12 @@
+2014-01-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/vm.c (ficlVmTextIn|Out, ficlVmErrorOut): Superfluouse
+	public functions removed.  Use ficlCallbackDefaultTextIn|Out and
+	ficlCallbackDefaultErrorOut instead.
+
 2014-01-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
-	* src/fth-lib.h (c__FUNCTION__): Macro replaced by __func__.
+	* src/fth-lib.h (c__FUNCTION__): Macro removed.
 
 2014-01-20  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
