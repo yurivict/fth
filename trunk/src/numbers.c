@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.163 1/22/14
+ * @(#)numbers.c	1.164 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -64,8 +64,7 @@ static FRatio	fth_rt_zero;
 	ERR_load_crypto_strings();					\
 	ERR_error_string(ERR_get_error(), _e_);				\
 	ERR_free_strings();						\
-	fth_throw(FTH_BIGNUM_ERROR,					\
-	    "%s (%s): %s", RUNNING_WORD(), __func__, _e_);		\
+	fth_throw(FTH_BIGNUM_ERROR, "%s: %s", RUNNING_WORD(), _e_);	\
 } while (0)
 
 #define BN_CHECK(Bn) do {						\
@@ -80,8 +79,7 @@ static FRatio	fth_rt_zero;
 #endif				/* HAVE_BN */
 
 #define FTH_MATH_ERROR_THROW(Desc)					\
-	fth_throw(FTH_MATH_ERROR,					\
-	    "%s (%s): %s", RUNNING_WORD(), __func__, Desc)
+	fth_throw(FTH_MATH_ERROR, "%s: %s", RUNNING_WORD(), Desc)
 
 #if !defined(HAVE_LOG2)
 static double	log2(double x);

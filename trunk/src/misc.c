@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.630 1/22/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.631 1/23/14";
 #endif /* not lint */
 
-#define FTH_DATE                        "2014/01/22"
+#define FTH_DATE                        "2014/01/23"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -311,8 +311,18 @@ fth_make_ficl(unsigned int dict_size, unsigned int stack_size,
 		fsi.returnSize = return_size;
 		fsi.localsSize = locals_size;
 		fsi.environmentSize = FICL_DEFAULT_ENVIRONMENT_SIZE;
+		/* we use our own io-functions from port.c */
+		fsi.textIn = NULL;
 		fsi.textOut = NULL;
 		fsi.errorOut = NULL;
+		/* unistd.h */
+		fsi.stdin_fileno = STDIN_FILENO;
+		fsi.stdout_fileno = STDOUT_FILENO;
+		fsi.stderr_fileno = STDERR_FILENO;
+		/* stdio.h */
+		fsi.stdin_ptr = stdin;
+		fsi.stdout_ptr = stdout;
+		fsi.stderr_ptr = stderr;
 		sys = ficlSystemCreate(&fsi);
 		INIT_ASSERT(sys);
 		FTH_FICL_SYSTEM() = sys;
@@ -1061,8 +1071,7 @@ load_file(const char *name, const char *caller)
 			    fth_current_file, fth_current_line);
 			FINISH_LOAD();
 			fth_throw(ficl_ans_real_exc((int)status),
-			    "%s (%s): can't load file %S",
-			    caller, __func__, fs);
+			    "%s: can't load file %S", caller, fs);
 			/* NOTREACHED */
 			return (FTH_FALSE);
 			break;

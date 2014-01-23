@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.131 1/22/14
+ * @(#)fth-lib.h	1.132 1/23/14
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -236,11 +236,6 @@ enum {
 #define FTH_CALLOC(M, N)	fth_calloc((size_t)(M), (size_t)(N))
 #define FTH_FREE(P)		fth_free(P)
 #define FTH_STRDUP(S)		fth_strdup(S)
-
-/* from snd/_sndlib.h */
-#if (!defined(__NetBSD__) && (defined(_MSC_VER) || !defined(__STC__) || (defined(__STDC_VERSION__) && (__STDC_VERSION__ < 199901L))))
-#define __func__		__FUNCTION__
-#endif
 
 /* from ruby/defines.h */
 #if defined(__cplusplus)
@@ -578,8 +573,7 @@ typedef struct FInstance {
 
 #define RUNNING_WORD_VM(Vm)						\
 	(((Vm)->runningWord && (Vm)->runningWord->length > 0) ?		\
-	    (Vm)->runningWord->name :					\
-	    (char *)__func__)
+	    (Vm)->runningWord->name : "noname")
 #define RUNNING_WORD()			RUNNING_WORD_VM(FTH_FICL_VM())
 
 #define FTH_ADD_FEATURE_AND_INFO(Name, Docs)				\
@@ -623,7 +617,7 @@ FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_COMPILE_ONLY, Docs)
 	fth_define_void_procedure(Name, Code, Req, Opt, Rest, Docs)
 
 #define fth_show(Obj)							\
-	fprintf(stderr, "#<SHOW %s[%d]: %s>\n", __func__, __LINE__,	\
+	fprintf(stderr, "#<SHOW %s[%d]: %s>\n", __FILE__, __LINE__,	\
 	    fth_to_c_inspect(Obj))
 
 /*

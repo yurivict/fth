@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)primitives.c	1.107 11/22/13
+ * @(#)primitives.c	1.108 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -3584,7 +3584,7 @@ ficlPrimitiveSaveInput(ficlVm *vm)
 X1 through XN describe the current state of the input source \
 specification for later use by RESTORE-INPUT."
   FICL_STACK_CHECK(vm->dataStack, 0, 2);
-  ficlStackPushFTH(vm->dataStack, vm->callback.port_in);
+  ficlStackPushFTH(vm->dataStack, ficlVmGetPortIn(vm));
   ficlStackPushInteger(vm->dataStack, 1L);
 }
 

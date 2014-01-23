@@ -50,7 +50,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)vm.c	1.149 10/17/13
+ * @(#)vm.c	1.150 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2465,42 +2465,28 @@ void ficlVmReset(ficlVm *vm)
 void
 ficlVmSetTextIn(ficlVm *vm, ficlInputFunction textIn)
 {
-  vm->callback.textIn = textIn;
+	if (textIn == NULL)
+		vm->callback.textIn = ficlCallbackDefaultTextIn;
+	else
+		vm->callback.textIn = textIn;
 }
 
 void
 ficlVmSetTextOut(ficlVm *vm, ficlOutputFunction textOut)
 {
-  vm->callback.textOut = textOut;
+	if (textOut == NULL)
+		vm->callback.textOut = ficlCallbackDefaultTextOut;
+	else
+		vm->callback.textOut = textOut;
 }
 
 void
 ficlVmSetErrorOut(ficlVm *vm, ficlOutputFunction errorOut)
 {
-  vm->callback.errorOut = errorOut;
-}
-
-/* ARGSUSED */
-char *
-ficlVmTextIn(ficlVm *vm)
-{
-  static char str[BUFSIZ];
-  
-  return fgets(str, BUFSIZ, stdin);
-}
-
-/* ARGSUSED */
-void
-ficlVmTextOut(ficlVm *vm, char *text)
-{
-  fputs(text, stdout);
-}
-
-/* ARGSUSED */
-void
-ficlVmErrorOut(ficlVm *vm, char *text)
-{
-  fputs(text, stderr);
+	if (errorOut == NULL)
+		vm->callback.errorOut = ficlCallbackDefaultErrorOut;
+	else
+		vm->callback.errorOut = errorOut;
 }
 
 /**************************************************************************

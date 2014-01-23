@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)port.c	1.62 1/22/14
+ * @(#)port.c	1.63 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -124,7 +124,7 @@ port_read_char(void *ptr)
 {
 	FTH ch;
 
-	ch = fth_proc_call(FTH_SOFT_PORT_READ_CHAR(ptr), __func__, 0);
+	ch = fth_proc_call(FTH_SOFT_PORT_READ_CHAR(ptr), "port_read_char", 0);
 	if (FTH_FALSE_P(ch))
 		return (EOF);
 	return (FTH_TO_CHAR(ch));
@@ -136,7 +136,7 @@ port_write_char(void *ptr, int c)
 	FTH ch;
 
 	ch = CHAR_TO_FTH(c);
-	fth_proc_call(FTH_SOFT_PORT_WRITE_CHAR(ptr), __func__, 1, ch);
+	fth_proc_call(FTH_SOFT_PORT_WRITE_CHAR(ptr), "port_write_char", 1, ch);
 }
 
 static char *
@@ -144,7 +144,7 @@ port_read_line(void *ptr)
 {
 	FTH fs;
 
-	fs = fth_proc_call(FTH_SOFT_PORT_READ_LINE(ptr), __func__, 0);
+	fs = fth_proc_call(FTH_SOFT_PORT_READ_LINE(ptr), "port_read_line", 0);
 	if (FTH_FALSE_P(fs))
 		return (NULL);
 	return (fth_string_ref(fs));
@@ -156,19 +156,19 @@ port_write_line(void *ptr, const char *line)
 	FTH fs;
 
 	fs = fth_make_string(line);
-	fth_proc_call(FTH_SOFT_PORT_WRITE_LINE(ptr), __func__, 1, fs);
+	fth_proc_call(FTH_SOFT_PORT_WRITE_LINE(ptr), "port_write_line", 1, fs);
 }
 
 static void
 port_flush(void *ptr)
 {
-	fth_proc_call(FTH_SOFT_PORT_FLUSH(ptr), __func__, 0);
+	fth_proc_call(FTH_SOFT_PORT_FLUSH(ptr), "port_flush", 0);
 }
 
 static void
 port_close(void *ptr)
 {
-	fth_proc_call(FTH_SOFT_PORT_CLOSE(ptr), __func__, 0);
+	fth_proc_call(FTH_SOFT_PORT_CLOSE(ptr), "port_close", 0);
 }
 
 /* --- Soft Port Procs --- */
@@ -772,8 +772,7 @@ io_keyword_args_ref(int fam)
 		return (fth_make_soft_port(prcs, name, fam));
 	}
 	fth_throw(FTH_ARGUMENT_ERROR,
-	    "%s (%s): wrong or empty keyword args",
-	    RUNNING_WORD(), __func__);
+	    "%s: wrong or empty keyword args", RUNNING_WORD());
 	return (FTH_FALSE);
 }
 

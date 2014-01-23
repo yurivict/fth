@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.158 1/22/14
+ * @(#)proc.c	1.160 1/23/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -513,18 +513,21 @@ execute_proc(ficlVm *vm, ficlWord *word, int depth, const char *caller)
 	int status;
 	ficlInteger new_depth, i;
 	FTH ret;
+	char *s;
 
+	s = caller != NULL ? (char *)caller : "execute_proc";
 	status = fth_execute_xt(vm, word);
 	switch (status) {
 	case FICL_VM_STATUS_ERROR_EXIT:
 	case FICL_VM_STATUS_ABORT:
 	case FICL_VM_STATUS_ABORTQ:
 		if (word->length > 0)
-			ficlVmThrowException(vm, status, "can't execute %S",
-			    fth_word_inspect((FTH)word));
+			ficlVmThrowException(vm, status,
+			    "%s: can't execute %S",
+			    s, fth_word_inspect((FTH)word));
 		else
-			ficlVmThrowException(vm, status, "can't execute %s",
-			    caller = caller != NULL ?  caller : __func__);
+			ficlVmThrowException(vm, status,
+			    "%s: can't execute word %p", s, word);
 		break;
 	}
 	/* collect values from stack */
@@ -688,8 +691,8 @@ See also <'set>, set-xt and set-execute."
 	snprintf(vm->pad, sizeof(vm->pad), "set-%.*s", (int)s.length, s.text);
 	word = FICL_WORD_NAME_REF(vm->pad);
 	if (word == NULL) {
-		fth_throw(FTH_UNDEFINED, "%s (%s): %s not found",
-		    RUNNING_WORD_VM(vm), __func__, vm->pad);
+		fth_throw(FTH_UNDEFINED, "%s: %s not found",
+		    RUNNING_WORD_VM(vm), vm->pad);
 		/* NOTREACHED */
 		return;
 	}
@@ -757,8 +760,8 @@ See also <'set>, set! and set-xt."
 	snprintf(vm->pad, sizeof(vm->pad), "set-%s", word->name);
 	set_word = FICL_WORD_NAME_REF(vm->pad);
 	if (set_word == NULL) {
-		fth_throw(FTH_UNDEFINED, "%s (%s): %s not found",
-		    RUNNING_WORD_VM(vm), __func__, vm->pad);
+		fth_throw(FTH_UNDEFINED, "%s: %s not found",
+		    RUNNING_WORD_VM(vm), vm->pad);
 		/* NOTREACHED */
 		return;
 	}
@@ -1728,8 +1731,8 @@ static ficlWord *local_paren;
 } while (0)
 
 #define FTH_OPTKEY_ERROR_THROW(Desc)					\
-	fth_throw(FTH_OPTKEY_ERROR, "%s (%s): wrong optkey array, %S",	\
-	    RUNNING_WORD(), __func__, Desc)
+	fth_throw(FTH_OPTKEY_ERROR, "%s: wrong optkey array, %S",	\
+	    RUNNING_WORD(), Desc)
 
 static void
 ficl_args_keys_paren_co(ficlVm *vm)
