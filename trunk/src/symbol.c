@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)symbol.c	1.96 9/13/13
+ * @(#)symbol.c	1.97 1/30/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -199,7 +199,7 @@ make_symbol(const char *name, const char *message, char prefix, int kind)
 		CELL_VOIDP_SET(word->param, word);
 		if (kind == FW_EXCEPTION && message != NULL)
 			fth_word_property_set((FTH)word,
-			    FTH_MESSAGE_SYMBOL, fth_make_string(message));
+			    FTH_SYMBOL_MESSAGE, fth_make_string(message));
 		return ((FTH)word);
 	}
 	FTH_SYSTEM_ERROR_ARG_THROW(make_symbol, FTH_STR_SYMBOL);
@@ -609,7 +609,7 @@ Return name of exception EX."
 FTH
 fth_exception_message_ref(FTH exc)
 {
-	return (fth_word_property_ref(exc, FTH_MESSAGE_SYMBOL));
+	return (fth_word_property_ref(exc, FTH_SYMBOL_MESSAGE));
 }
 
 static void
@@ -627,7 +627,7 @@ See also exception-message-set!."
 void
 fth_exception_message_set(FTH exc, FTH msg)
 {
-	fth_word_property_set(exc, FTH_MESSAGE_SYMBOL, msg);
+	fth_word_property_set(exc, FTH_SYMBOL_MESSAGE, msg);
 }
 
 static void
@@ -653,9 +653,9 @@ fth_exception_last_message_ref(FTH exc)
 {
 	FTH msg;
 
-	msg = fth_word_property_ref(exc, FTH_LAST_MESSAGE_SYMBOL);
+	msg = fth_word_property_ref(exc, FTH_SYMBOL_LAST_MESSAGE);
 	if (FTH_FALSE_P(msg))
-		msg = fth_word_property_ref(exc, FTH_MESSAGE_SYMBOL);
+		msg = fth_word_property_ref(exc, FTH_SYMBOL_MESSAGE);
 	return (msg);
 }
 
@@ -678,7 +678,7 @@ See also exception-last-message-set!."
 void
 fth_exception_last_message_set(FTH exc, FTH msg)
 {
-	fth_word_property_set(exc, FTH_LAST_MESSAGE_SYMBOL, msg);
+	fth_word_property_set(exc, FTH_SYMBOL_LAST_MESSAGE, msg);
 }
 
 static void
@@ -721,10 +721,11 @@ void
 init_symbol(void)
 {
 	/* symbol */
-	FTH_DOCUMENTATION_SYMBOL;
-	FTH_SOURCE_SYMBOL;
-	FTH_MESSAGE_SYMBOL;
-	FTH_LAST_MESSAGE_SYMBOL;
+	FTH_SYMBOL_DOCUMENTATION;
+	FTH_SYMBOL_LAST_MESSAGE;
+	FTH_SYMBOL_MESSAGE;
+	FTH_SYMBOL_SOURCE;
+	FTH_SYMBOL_TRACE_VAR;
 	FTH_PRI1("symbol?", ficl_symbol_p, h_symbol_p);
 	FTH_PRI1("symbol=", ficl_symbol_equal_p, h_symbol_equal_p);
 	FTH_PRI1("create-symbol", ficl_create_symbol, h_create_symbol);

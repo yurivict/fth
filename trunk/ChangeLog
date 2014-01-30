@@ -1,3 +1,13 @@
+2014-01-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth-lib.h, src/proc.c, src/symbol.c (FTH_*_SYMBOL):
+	Macros renamed (old names can still be used):
+	FTH_DOCUMENTATION_SYMBOL --> FTH_SYMBOL_DOCUMENTATION
+	FTH_LAST_MESSAGE_SYMBOL	--> FTH_SYMBOL_LAST_MESSAGE
+	FTH_MESSAGE_SYMBOL	--> FTH_SYMBOL_MESSAGE
+	FTH_SOURCE_SYMBOL	--> FTH_SYMBOL_SOURCE
+	FTH_TRACE_VAR_SYMBOL	--> FTH_SYMBOL_TRACE_VAR
+
 2014-01-23  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* ficl/vm.c (ficlVmTextIn|Out, ficlVmErrorOut): Superfluouse

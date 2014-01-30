@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.132 1/23/14
+ * @(#)fth-lib.h	1.133 1/30/14
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -69,11 +69,11 @@
 #define FTH_STR_STRING		"string"
 
 /* Predefined symbols. */
-#define FTH_DOCUMENTATION_SYMBOL fth_symbol("documentation")
-#define FTH_LAST_MESSAGE_SYMBOL	fth_symbol("last-message")
-#define FTH_MESSAGE_SYMBOL	fth_symbol("message")
-#define FTH_SOURCE_SYMBOL	fth_symbol("source")
-#define FTH_TRACE_VAR_SYMBOL	fth_symbol("trace-var-hook")
+#define FTH_SYMBOL_DOCUMENTATION fth_symbol("documentation")
+#define FTH_SYMBOL_LAST_MESSAGE	fth_symbol("last-message")
+#define FTH_SYMBOL_MESSAGE	fth_symbol("message")
+#define FTH_SYMBOL_SOURCE	fth_symbol("source")
+#define FTH_SYMBOL_TRACE_VAR	fth_symbol("trace-var-hook")
 
 /* Predefined keywords. */
 #define FTH_KEYWORD_CLOSE	fth_keyword("close")
@@ -623,11 +623,19 @@ FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_COMPILE_ONLY, Docs)
 /*
  * Old names partly required elsewhere.
  */
+
+#define FTH_DOCUMENTATION_SYMBOL	FTH_SYMBOL_DOCUMENTATION
+#define FTH_LAST_MESSAGE_SYMBOL		FTH_SYMBOL_LAST_MESSAGE
+#define FTH_MESSAGE_SYMBOL		FTH_SYMBOL_MESSAGE
+#define FTH_SOURCE_SYMBOL		FTH_SYMBOL_SOURCE
+#define FTH_TRACE_VAR_SYMBOL		FTH_SYMBOL_TRACE_VAR
+
 #define FTH_PRIM(Dict, Name, Code, Docs)				\
 	fth_word_doc_set(ficlDictionaryAppendPrimitive(Dict,		\
 	    Name,							\
 	    Code,							\
 	    FICL_WORD_DEFAULT), Docs)
+
 #define ficlStackPop2Float(Stack)	ficlStackPopFloat(Stack)
 #define fth_false()			FTH_FALSE
 #define fth_hook_procedure_list(Obj)	fth_hook_to_array(Obj)
