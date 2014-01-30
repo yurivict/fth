@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.160 1/23/14
+ * @(#)proc.c	1.161 1/30/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -34,9 +34,9 @@
 #include "utils.h"
 
 #define FICL_WORD_DOC(Obj)						\
-	fth_word_property_ref((FTH)(Obj), FTH_DOCUMENTATION_SYMBOL)
+	fth_word_property_ref((FTH)(Obj), FTH_SYMBOL_DOCUMENTATION)
 #define FICL_WORD_SRC(Obj)						\
-	fth_word_property_ref((FTH)(Obj), FTH_SOURCE_SYMBOL)
+	fth_word_property_ref((FTH)(Obj), FTH_SYMBOL_SOURCE)
 #define FICL_WORD_FILE(Obj)						\
 	FICL_WORD_REF(Obj)->file
 #define FICL_WORD_LINE(Obj)						\
@@ -1049,12 +1049,12 @@ See also documentation-set!."
 		word = FICL_WORD_NAME_REF(fth_string_ref(obj));
 		if (word != NULL)
 			return (fth_word_property_ref((FTH)word,
-			    FTH_DOCUMENTATION_SYMBOL));
-		return (fth_property_ref(obj, FTH_DOCUMENTATION_SYMBOL));
+			    FTH_SYMBOL_DOCUMENTATION));
+		return (fth_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
 	}
 	if (FICL_WORD_DEFINED_P(obj))
-		return (fth_word_property_ref(obj, FTH_DOCUMENTATION_SYMBOL));
-	return (fth_object_property_ref(obj, FTH_DOCUMENTATION_SYMBOL));
+		return (fth_word_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
+	return (fth_object_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
 }
 
 /*
@@ -1077,13 +1077,13 @@ See also documentation-ref."
 		word = FICL_WORD_NAME_REF(fth_string_ref(obj));
 		if (word != NULL)
 			fth_word_property_set((FTH)word,
-			    FTH_DOCUMENTATION_SYMBOL, doc);
+			    FTH_SYMBOL_DOCUMENTATION, doc);
 		else
-			fth_property_set(obj, FTH_DOCUMENTATION_SYMBOL, doc);
+			fth_property_set(obj, FTH_SYMBOL_DOCUMENTATION, doc);
 	} else if (FICL_WORD_DEFINED_P(obj))
-		fth_word_property_set(obj, FTH_DOCUMENTATION_SYMBOL, doc);
+		fth_word_property_set(obj, FTH_SYMBOL_DOCUMENTATION, doc);
 	else
-		fth_object_property_set(obj, FTH_DOCUMENTATION_SYMBOL, doc);
+		fth_object_property_set(obj, FTH_SYMBOL_DOCUMENTATION, doc);
 }
 
 /* obj: ficlWord or proc */
@@ -1112,7 +1112,7 @@ plus source-ref => \": plus ( n1 n2 -- n3 ) + ;\"\n\
 Set source string of OBJ, a proc or xt, to STR.  \
 See also source-ref."
 	if (FICL_WORD_DEFINED_P(obj))
-		fth_word_property_set(obj, FTH_SOURCE_SYMBOL, source);
+		fth_word_property_set(obj, FTH_SYMBOL_SOURCE, source);
 }
 
 /* obj: ficlWord */
@@ -1152,7 +1152,7 @@ fth_word_doc_set(ficlWord *word, const char *str)
 {
 	if (word != NULL && str != NULL)
 		fth_word_property_set((FTH)word,
-		    FTH_DOCUMENTATION_SYMBOL, fth_make_string(str));
+		    FTH_SYMBOL_DOCUMENTATION, fth_make_string(str));
 	return (word);
 }
 
@@ -2630,11 +2630,11 @@ See also untrace-var."
 		/* NOTREACHED */
 		return;
 	}
-	hook = fth_word_property_ref(obj, FTH_TRACE_VAR_SYMBOL);
+	hook = fth_word_property_ref(obj, FTH_SYMBOL_TRACE_VAR);
 	if (!FTH_HOOK_P(hook))
 		hook = fth_make_simple_hook(1);
 	fth_add_hook(hook, proc_or_xt);
-	fth_word_property_set(obj, FTH_TRACE_VAR_SYMBOL, hook);
+	fth_word_property_set(obj, FTH_SYMBOL_TRACE_VAR, hook);
 	FICL_WORD_TYPE(obj) = FW_TRACE_VAR;
 }
 
@@ -2658,7 +2658,7 @@ See also trace-var."
 		/* NOTREACHED */
 		return;
 	}
-	fth_word_property_set(obj, FTH_TRACE_VAR_SYMBOL, FTH_FALSE);
+	fth_word_property_set(obj, FTH_SYMBOL_TRACE_VAR, FTH_FALSE);
 	FICL_WORD_TYPE(obj) = FW_VARIABLE;
 }
 
@@ -2669,7 +2669,7 @@ fth_trace_var_execute(ficlWord *word)
 
 	FTH_ASSERT_ARGS(FTH_TRACE_VAR_P(word), (FTH)word, FTH_ARG1,
 	    "a global variable");
-	hook = fth_word_property_ref((FTH)word, FTH_TRACE_VAR_SYMBOL);
+	hook = fth_word_property_ref((FTH)word, FTH_SYMBOL_TRACE_VAR);
 	if (!FTH_HOOK_P(hook))
 		return (FTH_FALSE);
 	args = fth_make_array_var(1, FTH_WORD_PARAM(word));
