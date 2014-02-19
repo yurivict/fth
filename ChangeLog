@@ -1,3 +1,8 @@
+2014-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/string.c (string-cmp): New word which returns -1, 0, 1
+	according to s1 is less than, equal to, or greater than s2.
+
 2014-01-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/fth-lib.h, src/proc.c, src/symbol.c (FTH_*_SYMBOL):

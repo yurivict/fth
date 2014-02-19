@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.126 1/22/14
+.\" @(#)fth.1	1.127 2/19/14
 .\"
-.Dd January 22, 2014
+.Dd February 19, 2014
 .Dt FTH 1
 .Os
 .\"
@@ -7953,6 +7953,23 @@ Return new string with all characters uppercase.
 Return
 .Ar str
 changed to all characters uppercase.
+.\"
+.\" string-cmp
+.\"
+.It Cm string-cmp No (\ str1 str2 -- n\ )
+Return -1 if
+.Ar str1
+is less than
+.Ar str2 ,
+1 if
+.Ar str1
+is greater than
+.Ar str2 ,
+and 0 if
+.Ar str1
+is equal to
+.Ar str2 .
+It may be used with sort functions.
 .\"
 .\" string<
 .\"
