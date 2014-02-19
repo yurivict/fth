@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.159 9/13/13
+ * @(#)string.c	1.160 2/19/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -98,6 +98,7 @@ static void	ficl_string_chomp_bang(ficlVm *vm);
 static void	ficl_string_delete(ficlVm *vm);
 static void	ficl_string_downcase(ficlVm *vm);
 static void	ficl_string_downcase_bang(ficlVm *vm);
+static void	ficl_string_cmp(ficlVm *vm);
 static void	ficl_string_equal_p(ficlVm *vm);
 static void	ficl_string_eval(ficlVm *vm);
 static void	ficl_string_eval_with_status(ficlVm *vm);
@@ -191,6 +192,7 @@ string-substring    ( str start end -- substr )\n\
 string-unshift      ( str val -- str' )\n\
 string-upcase       ( str1 -- str2 )\n\
 string-upcase!      ( str -- str' )\n\
+string-cmp          ( str1 str2 -- n )\n\
 string<             ( str1 str2 -- f )\n\
 string<>            ( str1 str2 -- f )\n\
 string=             ( str1 str2 -- f )\n\
@@ -768,6 +770,40 @@ fth_string_equal_p(FTH obj1, FTH obj2)
 }
 
 static void
+ficl_string_cmp(ficlVm *vm)
+{
+#define h_string_cmp "( str1 str2 -- n )  compare strings\n\
+\"foo\" value s1\n\
+\"bar\" value s2\n\
+\"foo\" value s3\n\
+s1 s2 string-cmp => 1\n\
+s1 s3 string-cmp => 0\n\
+s2 s3 string-cmp => -1\n\
+Return -1 if STR1 is less than STR2, \
+1 if STR1 is greater than STR2, \
+and 0 if STR1 is equal to STR2.  \
+It may be used with sort functions.\n\
+See also string=, string<>, string<, string>."
+	char *s1, *s2;
+	int n;
+
+	FTH_STACK_CHECK(vm, 2, 1);
+	s2 = pop_cstring(vm);
+	s1 = pop_cstring(vm);
+	if (s1 == NULL)
+		s1 = "";
+	if (s2 == NULL)
+		s2 = "";
+	n = strcmp(s1, s2);
+	if (n < 0)
+		ficlStackPushInteger(vm->dataStack, -1);
+	else if (n > 0)
+		ficlStackPushInteger(vm->dataStack, 1);
+	else
+		ficlStackPushInteger(vm->dataStack, 0);
+}
+
+static void
 ficl_string_equal_p(ficlVm *vm)
 {
 #define h_string_equal_p "( str1 str2 -- f )  compare strings\n\
@@ -778,7 +814,7 @@ s1 s2 string= => #f\n\
 s1 s3 string= => #t\n\
 s3 s3 string= => #t\n\
 Return #t if strings are equal, otherwise #f.\n\
-See also string<>, string<, string>."
+See also string<>, string<, string>, string-cmp."
 	FTH obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -806,7 +842,7 @@ s1 s2 string<> => #t\n\
 s1 s3 string<> => #f\n\
 s3 s3 string<> => #f\n\
 Return #t if strings are not equal, otherwise #f.\n\
-See also string=, string<, string>."
+See also string=, string<, string>, string-cmp."
 	FTH obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -834,7 +870,7 @@ s1 s2 string< => #f\n\
 s1 s3 string< => #f\n\
 s3 s3 string< => #f\n\
 Return #t if STR1 is lexicographically lesser than STR2, otherwise #f.\n\
-See also string=, string<>, string>."
+See also string=, string<>, string>, string-cmp."
 	FTH obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -861,7 +897,7 @@ s1 s2 string> => #t\n\
 s1 s3 string> => #f\n\
 s3 s3 string> => #f\n\
 Return #t if STR1 is lexicographically greater than STR2, otherwise #f.\n\
-See also string=, string<>, string<."
+See also string=, string<>, string<, string-cmp."
 	FTH obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -2052,6 +2088,7 @@ init_string(void)
 	FTH_PRI1(".stdout", ficl_print_stdout, h_print_stdout);
 	FTH_PRI1(".stderr", ficl_print_stderr, h_print_stderr);
 	FTH_PRI1(".debug", ficl_print_debug, h_print_debug);
+	FTH_PRI1("string-cmp", ficl_string_cmp, h_string_cmp);
 	FTH_PRI1("string=", ficl_string_equal_p, h_string_equal_p);
 	FTH_PRI1("string<>", ficl_string_not_equal_p, h_string_not_equal_p);
 	FTH_PRI1("string<", ficl_string_less_p, h_string_less_p);

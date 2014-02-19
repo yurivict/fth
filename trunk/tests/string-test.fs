@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)string-test.fs	1.30 9/13/13
+\ @(#)string-test.fs	1.31 2/19/14
 
 require test-utils.fs
 
@@ -45,10 +45,20 @@ require test-utils.fs
     "3 x make-string: 'xxx'" test-expr
   0 1 2 " foo " "b" "a" "r"  7 >string "012 foo bar" string<>
     ">string: '012 foo bar'" test-expr
+  \ string-cmp
+  "foo" { s1 }
+  "bar" { s2 }
+  "baz" { s3 }
+  s1  s2  string-cmp  1 <> "s1 s2 string-cmp 1"   test-expr
+  s2  s2  string-cmp  0<>  "s1 s2 string-cmp 0"   test-expr
+  s2  s3  string-cmp -1 <> "s1 s2 string-cmp -1"  test-expr
+  s1  nil string-cmp  1 <> "s1 nil string-cmp 1"  test-expr
+  nil nil string-cmp  0<>  "nil nil string-cmp 0" test-expr
+  nil s3  string-cmp -1 <> "nil s3 string-cmp -1" test-expr
   \ string=, string<>, string<, string>
-  "hello" { s1 }
-  "hello" { s2 }
-  "hallo" { s3 }
+  "hello" to s1
+  "hello" to s2
+  "hallo" to s3
   s1 s1 string=  not "s1 s1 string="  test-expr
   s1 s2 string=  not "s1 s2 string="  test-expr
   s1 s3 string=      "s1 s3 string="  test-expr
