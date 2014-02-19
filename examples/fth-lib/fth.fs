@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth.fs	1.63 9/13/13
+\ @(#)fth.fs	1.64 2/19/14
 
 \ Commentary:
 \
@@ -889,26 +889,38 @@ Return timer object with execution time of XT."
 ;
 
 hide
+: int-cmp { n1 n2 -- n3 }
+	n1 n2 < if
+		-1
+	else
+		n1 n2 > if
+			1
+		else
+			0
+		then
+	then
+;
+
+: float-cmp { r1 r2 -- n }
+	r1 r2 f< if
+		-1
+	else
+		r1 r2 f> if
+			1
+		else
+			0
+		then
+	then
+;
+
 : obj-sort< { val1 val2 -- n }
 	val1 string? if
-		val1 val2 string< if
-			-1
-		else
-			val1 val2 string> if
-				1
-			else
-				0
-			then
-		then
+		val1 val2 string-cmp
 	else
-		val1 val2 f< if
-			-1
+		val1 float? if
+			val1 val2 float-cmp
 		else
-			val1 val2 f> if
-				1
-			else
-				0
-			then
+			val1 val2 int-cmp
 		then
 	then
 ;
