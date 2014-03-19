@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.217 1/23/14
+ * @(#)utils.c	1.218 3/20/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -859,6 +859,11 @@ static FTH	fgl_all;	/* gl-all to *histdup* */
 static FTH	fgl_prev;	/* gl-prev to *histdup* */
 static FTH	fgl_erase;	/* gl-erase to *histdup* */
 
+static FTH	fgl_vi;		/* edit-mode vi */
+static FTH	fgl_emacs;	/* edit-mode emacs */
+static FTH	fgl_none;	/* edit-mode none */
+static FTH	fgl_nobeep;	/* nobeep */
+
 /* constant (string) */
 #define FGL_HISTDUP_REF()	fth_variable_ref("*histdup*")
 #define FGL_HISTDUP_ALL_P()	(FGL_HISTDUP_REF() == fgl_all)
@@ -978,11 +983,6 @@ gl-clear: clear all history events."
 		gl_show_history(gl, stdout, "%N  %T   %H\n", 1, n);
 	}
 }
-
-static FTH	fgl_vi;		/* edit-mode vi */
-static FTH	fgl_emacs;	/* edit-mode emacs */
-static FTH	fgl_none;	/* edit-mode none */
-static FTH	fgl_nobeep;	/* nobeep */
 
 #define FGL_TECLA_RC		"~/.teclarc"
 
@@ -1402,7 +1402,7 @@ ficl_bindkey(ficlVm *vm)
 	int len;
 
 	/* clear at most 2 stack entries */
-	len = FTH_STACK_DEPTH();
+	len = FTH_STACK_DEPTH(vm);
 	switch (len) {
 	case 2:
 		fth_pop_ficl_cell(vm);
