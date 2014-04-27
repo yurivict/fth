@@ -5,6 +5,8 @@
 	* examples/site-lib/hooks.fs (dac-hook, stop-dac-hook):
 	Removed.
 
+	* examples/site-lib/extensions.fs (local-dac-func): Removed.
+
 2014-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/string.c (string-cmp): New word which returns -1, 0, 1

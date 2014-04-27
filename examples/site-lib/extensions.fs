@@ -1,10 +1,10 @@
 \ extensions.fs -- extensions.scm -> extensions.fs
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Sun Dec 18 19:21:00 CET 2005
-\ Changed: Fri Oct  4 23:27:58 CEST 2013
+\ Created: 05/12/18 19:21:00
+\ Changed: 14/04/27 16:24:31
 \
-\ @(#)extensions.fs	1.46 10/4/13
+\ @(#)extensions.fs	1.47 4/27/14
 
 \ Commentary:
 \
@@ -1044,17 +1044,6 @@ hide
 	'original-cursor val snd chn set-channel-property
 ;
 
-: local-dac-func <{ data -- val }>
-	sounds each { snd }
-		snd channels 0 ?do
-			snd i #f cursor snd i original-cursor <> if
-				snd i snd i #f cursor set-current-cursor
-			then
-		loop
-	end-each
-	#f
-;
-
 : local-start-playing-func <{ snd -- val }>
 	snd channels 0 ?do
 		snd i #f cursor { cur }
@@ -1071,11 +1060,9 @@ set-current
 
 : if-cursor-follows-play-it-stays-where-play-stopped <{ :optional enable #t }>
 	enable if
-		dac-hook <'> local-dac-func add-hook!
 		start-playing-hook <'> local-start-playing-func add-hook!
 		stop-playing-hook <'> local-stop-playing-func add-hook!
 	else
-		dac-hook <'> local-dac-func remove-hook! drop
 		start-playing-hook <'> local-start-playing-func
 		    remove-hook! drop
 		stop-playing-hook <'> local-stop-playing-func remove-hook! drop
