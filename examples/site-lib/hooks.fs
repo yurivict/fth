@@ -1,10 +1,10 @@
 \ hooks.fs -- hooks.scm -> hooks.fs
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Tue Aug 08 23:27:50 CEST 2006
-\ Changed: Fri Oct  4 23:28:11 CEST 2013
+\ Created: 06/08/08 23:27:50
+\ Changed: 14/04/27 16:09:49
 \
-\ @(#)hooks.fs	1.23 10/4/13
+\ @(#)hooks.fs	1.24 4/27/14
 
 \ snd-hooks         Array with all Snd hooks.
 \ reset-all-hooks   ( -- )
@@ -29,7 +29,6 @@ require examp
      clip-hook
      close-hook
      color-hook
-     dac-hook
      draw-mark-hook
      draw-mix-hook
      drop-hook
@@ -82,7 +81,6 @@ require examp
      start-hook
      start-playing-hook
      start-playing-selection-hook
-     stop-dac-hook
      stop-playing-hook
      stop-playing-selection-hook
      update-hook )
