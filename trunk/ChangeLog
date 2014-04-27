@@ -1,3 +1,10 @@
+2014-04-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/mix.fs (save-mix, save-mixes): Removed.
+
+	* examples/site-lib/hooks.fs (dac-hook, stop-dac-hook):
+	Removed.
+
 2014-02-19  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/string.c (string-cmp): New word which returns -1, 0, 1
