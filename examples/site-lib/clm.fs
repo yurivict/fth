@@ -110,6 +110,18 @@
 			mus-srate f>s
 		then
 	;
+	
+	: framples <{ :optional snd #f chn #f edpos #f -- n }>
+		snd string? if
+			snd mus-sound-framples
+		else
+			snd mus-generator? if
+				snd mus-length
+			else
+				snd object-length
+			then
+		then
+	;
 
 	: maxamp <{ :optional snd #f chn #f edpos #f -- r }>
 		snd string? if
