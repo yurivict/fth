@@ -1,6 +1,6 @@
 \ .snd_forth -- start up file for Snd/Forth
 \
-\ %W% %G%
+\ @(#)snd-forth-init.fs	1.42 4/28/14
 \
 
 \ You can install the *.fs scripts with:
@@ -352,7 +352,7 @@ require examp
 	
 	"End" 0 lambda: <{ -- val }>
 		selected-sound { snd }
-		snd #f #f frames { frms }
+		snd #f #f framples { frms }
 		snd srate { sr }
 		'( 0.0 frms sr f/ ) snd #f undef set-x-bounds ( val )
 	; #f "view full sound" undef bind-key drop

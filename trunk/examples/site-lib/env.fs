@@ -1,13 +1,11 @@
 \ env.fs -- env.scm -> env.fs
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Thu Oct 27 04:51:42 CEST 2005
-\ Changed: Fri Oct  4 23:27:34 CEST 2013
+\ Created: 05/10/27 04:51:42
+\ Changed: 14/04/28 03:52:17
 \
-\ @(#)env.fs	1.24 10/4/13
+\ @(#)env.fs	1.25 4/28/14
 
-\ Commentary:
-\
 \ From env.scm|rb with original comments and doc strings from env.scm.
 \ 
 \ envelope?		( obj -- f )
@@ -582,7 +580,7 @@ REFLECTED causes every other repetition to be in reverse."
 [defined] xramp-channel [if]
 	hide
 	: powc-cb { en beg dur snd chn edpos -- prc; self -- base }
-		dur snd chn #f frames || to dur
+		dur snd chn #f framples || to dur
 		0 proc-create ( prc )
 		en , beg , dur , snd , chn , edpos ,
 	  does> { self -- base }
@@ -685,9 +683,10 @@ REFLECTED causes every other repetition to be in reverse."
 		beg fsr f* fround->s { start }
 		start file 0 1 #f make-sampler { reader }
 		dur if
-			fsr dur f* start f+ fround->s file mus-sound-frames min
+			fsr dur f* start f+ fround->s
+			  file mus-sound-framples min
 		else
-			file mus-sound-frames
+			file mus-sound-framples
 		then { end }
 		:size incrsamps make-moving-average { rms }
 		end 0 ?do
