@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.218 3/20/14
+ * @(#)utils.c	1.219 11/4/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1297,6 +1297,9 @@ repl_expand_history(GetLine *gl, char *line)
 	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
+	/* If current line is in history list, skip it. */
+	if (FGL_HISTDUP_UNDEF_P())
+		id--;
 	if (isdigit((int)*s) || *s == '-') {
 		/* !123 or !-123 */
 		ld = strtol(s, NULL, 10);
@@ -1304,6 +1307,9 @@ repl_expand_history(GetLine *gl, char *line)
 			id += ++ld;
 		else
 			id = ld;
+		/* If current line is in history list, skip it. */
+		if (FGL_HISTDUP_UNDEF_P())
+			id--;
 		if (gl_lookup_history(gl, id, &hline))
 			res = (char *)hline.line;
 	} else if (*s == '!') {
@@ -1319,7 +1325,7 @@ repl_expand_history(GetLine *gl, char *line)
 		sl = strlen(r) - 1;
 		if (r[sl] == '?')
 			r[sl] = '\0';
-		for (id = range.newest; id > range.oldest; id--)
+		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
 				if (fth_regexp_find(r, hline.line) != -1) {
 					res = (char *)hline.line;
@@ -1327,7 +1333,7 @@ repl_expand_history(GetLine *gl, char *line)
 				}
 	} else
 		/* !start_of_string */
-		for (id = range.newest; id > range.oldest; id--)
+		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
 				if (strncmp(s, hline.line, ln) == 0) {
 					res = (char *)hline.line;
@@ -1372,7 +1378,11 @@ repl_replace_history(GetLine *gl, char *line)
 	dst[i] = '\0';
 	res = NULL;
 	gl_range_of_history(gl, &range);
-	for (id = range.newest; id > range.oldest; id--)
+	id = range.newest;
+	/* If current line is in history list, skip it. */
+	if (FGL_HISTDUP_UNDEF_P())
+		id--;
+	for (; id > range.oldest; id--)
 		if (gl_lookup_history(gl, id, &hline))
 			if (fth_regexp_find(src, hline.line) != -1) {
 				FTH reg, str, rep, rpl;

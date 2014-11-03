@@ -1,3 +1,9 @@
+2014-11-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs
+	* examples/site-lib/examp.fs (mus-sound-data-format):
+	Renamed to mus-sound-sample-type.
+
 2014-04-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs

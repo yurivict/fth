@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 14/04/28 03:52:17
+\ Changed: 14/11/04 00:30:54
 \
-\ @(#)clm.fs	1.110 4/28/14
+\ @(#)clm.fs	1.113 11/4/14
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -89,6 +89,7 @@
 	<'> noop alias save-sound
 	<'> noop alias scale-channel
 	<'> noop alias sound?
+	<'> noop alias framples
 
 	\ Some generic words for non-Snd use.
 	: channels <{ :optional obj #f -- n }>
@@ -108,18 +109,6 @@
 			obj mus-sound-srate
 		else
 			mus-srate f>s
-		then
-	;
-	
-	: framples <{ :optional snd #f chn #f edpos #f -- n }>
-		snd string? if
-			snd mus-sound-framples
-		else
-			snd mus-generator? if
-				snd mus-length
-			else
-				snd object-length
-			then
 		then
 	;
 
@@ -294,7 +283,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 27-Nov-2012" value *clm-version*
+"fth 04-Nov-2014" value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
@@ -626,7 +615,7 @@ set-current
 	"filename: %S" #( output ) clm-message
 	"   chans: %d, srate: %d" #( channels srate f>s ) clm-message
 	"  format: %s [%s]"
-	    #( output mus-sound-data-format mus-data-format-name
+	    #( output mus-sound-sample-type mus-data-format-name
 	       output mus-sound-header-type mus-header-type-name ) clm-message
 	"  length: %.3f  (%d frames)" #( dur frms ) clm-message
 	timer timer? if
