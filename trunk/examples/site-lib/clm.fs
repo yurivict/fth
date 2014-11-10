@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 14/11/04 00:30:54
+\ Changed: 14/11/10 01:32:16
 \
-\ @(#)clm.fs	1.113 11/4/14
+\ @(#)clm.fs	1.115 11/10/14
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -283,7 +283,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 04-Nov-2014" value *clm-version*
+"fth 2014/11/10"  value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
