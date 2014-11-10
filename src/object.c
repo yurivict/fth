@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.212 1/23/14
+ * @(#)object.c	1.213 11/10/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2452,7 +2452,7 @@ See also cycle-set!"
 FTH
 fth_object_cycle_set(FTH obj, FTH value)
 {
-	if (INSTANCE_P(obj))
+	if (!INSTANCE_P(obj))
 		return (value);
 	fth_object_value_set(obj, FTH_INSTANCE_REF(obj)->cycle, value);
 	FTH_CYCLE_NEXT(obj);
