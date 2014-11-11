@@ -1,3 +1,13 @@
+2014-11-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs:
+	* examples/site-lib/examp.fs:
+	* examples/site-lib/popup.fs:
+	* examples/site-lib/snd-forth-init.fs: Rename all words
+	containing data-format with sample-type.
+
+	* src/utils.c: Adjustments on get_line's history mechanism.
+
 2014-11-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/examp.fs (env-sound-interp,

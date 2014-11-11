@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.219 11/4/14
+ * @(#)utils.c	1.220 11/11/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1297,9 +1297,6 @@ repl_expand_history(GetLine *gl, char *line)
 	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
-	/* If current line is in history list, skip it. */
-	if (FGL_HISTDUP_UNDEF_P())
-		id--;
 	if (isdigit((int)*s) || *s == '-') {
 		/* !123 or !-123 */
 		ld = strtol(s, NULL, 10);
@@ -1307,9 +1304,6 @@ repl_expand_history(GetLine *gl, char *line)
 			id += ++ld;
 		else
 			id = ld;
-		/* If current line is in history list, skip it. */
-		if (FGL_HISTDUP_UNDEF_P())
-			id--;
 		if (gl_lookup_history(gl, id, &hline))
 			res = (char *)hline.line;
 	} else if (*s == '!') {
@@ -1379,9 +1373,6 @@ repl_replace_history(GetLine *gl, char *line)
 	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
-	/* If current line is in history list, skip it. */
-	if (FGL_HISTDUP_UNDEF_P())
-		id--;
 	for (; id > range.oldest; id--)
 		if (gl_lookup_history(gl, id, &hline))
 			if (fth_regexp_find(src, hline.line) != -1) {
@@ -1502,7 +1493,7 @@ fth_repl(int argc, char **argv)
 		if (gl_bind_keyseq(gl, GL_USER_KEY, k, a))
 			FTH_GL_ERROR(gl);
 	}
-	gl_automatic_history(gl, FGL_HISTDUP_UNDEF_P());
+	gl_automatic_history(gl, 0);
 	gl_customize_completion(gl, NULL, repl_command_generator);
 	gl_prompt_style(gl,
 	    FGL_PROMPTSTYLE_P() ? GL_FORMAT_PROMPT : GL_LITERAL_PROMPT);
@@ -1527,10 +1518,8 @@ fth_repl(int argc, char **argv)
 		line = NULL;
 		prompt = NULL;
 #if defined(HAVE_LIBTECLA)
-		if (FGL_HISTDUP_UNDEF_P()) {
-			gl_range_of_history(gl, &range);
-			lineno = (ficlInteger)range.newest + 1;
-		}
+		gl_range_of_history(gl, &range);
+		lineno = (ficlInteger)range.newest + 1;
 #endif
 		if (compile_p)
 			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
@@ -1556,7 +1545,6 @@ fth_repl(int argc, char **argv)
 		}
 #endif
 #if defined(HAVE_LIBTECLA)
-		gl_automatic_history(gl, FGL_HISTDUP_UNDEF_P());
 		line = gl_get_line(gl, prompt, err_line, -1);
 		if (line == NULL) {
 			rs = gl_return_status(gl);
@@ -1598,6 +1586,9 @@ fth_repl(int argc, char **argv)
 				fth_printf("%S\n", FTH_UNDEF);
 			continue;
 		}
+#if defined(HAVE_LIBTECLA)
+		repl_append_history(gl, line);
+#endif
 		status = fth_catch_eval(line);
 		if (status == FTH_ERROR) {
 			/*
@@ -1607,16 +1598,6 @@ fth_repl(int argc, char **argv)
 			continue;
 		}
 		err_line = NULL;
-#if defined(HAVE_LIBTECLA)
-		/*
-		 * If *histdup* is set to undef, gl_automatic_history() was
-		 * set to true and the command line is already copied to the
-		 * history list. All other values of *histdup* are handled in
-		 * repl_append_history().
-		 */
-		if (!FGL_HISTDUP_UNDEF_P())
-			repl_append_history(gl, line);
-#endif
 		if (status == FTH_BYE)
 			break;
 		fth_current_line = lineno++;
