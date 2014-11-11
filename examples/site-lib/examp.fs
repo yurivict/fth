@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/07/05 13:09:37
-\ Changed: 14/11/10 01:28:57
+\ Changed: 14/11/11 00:08:48
 \
-\ @(#)examp.fs	1.66 11/10/14
+\ @(#)examp.fs	1.67 11/11/14
 
 \ With original comments and doc strings from examp.scm.
 \
@@ -385,7 +385,7 @@ It is intended for use with after-transform-hook."
 	       file mus-sound-chans
 	       file mus-sound-srate
 	       file mus-sound-header-type mus-header-type-name
-	       file mus-sound-sample-type mus-data-format-name
+	       file mus-sound-sample-type mus-sample-type-name
 	       file mus-sound-samples
 	       file mus-sound-chans
 	       file mus-sound-srate f* f/ ) string-format
