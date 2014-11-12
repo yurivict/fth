@@ -1,8 +1,8 @@
 #! @prefix@/bin/@prog_name@ -Dvs
 \ @configure_input@
-\ play-sound.fth -- plays and records sound files
+\ play-sound.fth -- plays sound files
 
-\ Copyright (c) 2006-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,14 @@
 \ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \
-\ @(#)play-sound.fth.in	1.15 10/4/13
+\ @(#)play-sound.fth.in	1.16 11/12/14
+\
+\ % play-sound oboe.snd dog.snd
+\ % play-sound -p sndplay cardinal.snd
+\ % play-sound -P /usr/opt/sound/SFiles -p play cage.snd
 
 *filename* nil file-basename constant *script-name*
-"This is %s v1.15, (c) 2006-2013 Michael Scholz"
+"This is %s v1.16, (c) 2006-2014 Michael Scholz"
     '( *script-name* string-upcase ) string-format constant *banner*
   
 SIGINT lambda: { sig -- }
@@ -39,57 +43,31 @@ SIGINT lambda: { sig -- }
 
 require clm
 
+: play-sound-player <{ output -- }>
+	"sox -qV1 %s -d" #( output ) string-format file-system unless
+		"exit %d\n" #( exit-status ) fth-warning
+	then
+;
+
 \ Main program starts here.
 let: ( -- )
 	\ getopt prints error message
 	#t to opterr
-	"b:c:d:f:i:P:p:qr:s:t:V" { args }
-	#f                { play-file }
-	#f                { record-file }
-	10.0              { duration }
-	1                 { channels }
-	44100             { srate }
-	mus-next          { header-type }
-	mus-lfloat        { data-format }
-	512               { rt-bufsize }
-	mus-audio-default { device }
-	#t                { verbose }
+	"P:p:qV" { args }
+	<'> play-sound-player { player }
+	#t { verbose }
 	begin
 		*argv* args getopt ( ch ) dup
 	while
 		( ch ) case
-			<char> b of
-				optarg string->number to rt-bufsize
-			endof
-			<char> c of
-				optarg string->number to channels
-			endof
-			<char> d of
-				optarg string->number to duration
-			endof
-			<char> f of
-				optarg string->number to data-format
-			endof
-			<char> i of
-				optarg string->number to device
-			endof
 			<char> P of
 				*clm-search-list* optarg array-push drop
 			endof
 			<char> p of
-				optarg to play-file
+				optarg to player
 			endof
 			<char> q of
 				#f to verbose
-			endof
-			<char> r of
-				optarg to record-file
-			endof
-			<char> s of
-				optarg string->number to srate
-			endof
-			<char> t of
-				optarg string->number to header-type
 			endof
 			<char> V of
 				"%s\n" '( *banner* ) fth-print
@@ -97,10 +75,7 @@ let: ( -- )
 			endof
 			<char> ? of
 				"\
-Usage: play-sound [-q] [-P search-path] file...
-       play-sound [-q] [-P search-path] [-p file-to-play]
-       play-sound [-q] [-b bufsize] [-c chans] [-d secs] [-f data-format]
-		  [-i device] [-s srate] [-t header-type] [-r rec-file]
+usage: play-sound [-q] [-P search-path] [-p player] file...
        play-sound [-V]\n" '() fth-print
 				1 (bye)
 			endof
@@ -113,40 +88,19 @@ Usage: play-sound [-q] [-P search-path] file...
 	verbose if
 		"\\ %s\n" '( *banner* ) fth-print
 	then
-	play-file if
-		play-file find-file file-exists? if
-			play-file :verbose verbose play-sound
-		else
-			"%s doesn't exist in %s"
-			    '( play-file *clm-search-list* ) fth-warning
-		then
-		0 (bye)
-	then
-	record-file if
-		record-file
-		    :duration      duration
-		    :verbose       verbose
-		    :channels      channels
-		    :srate         srate
-		    :header-type   header-type
-		    :data-format   data-format
-		    :output-device device
-		    :dac-size      rt-bufsize  record-sound
-		0 (bye)
-	then
 	*argc* 0> if
 		*argv* each { file }
 			file find-file file-exists? if
-				file :verbose verbose play-sound
+				file :player player :verbose verbose play-sound
 			else
 				"%s doesn't exist in %s"
 				    '( file *clm-search-list* ) fth-warning
 			then
 		end-each
-		0 (bye)
-	then
-	verbose if
-		"\\ nothing to do\n" '() fth-print
+	else
+		verbose if
+			"\\ nothing to do\n" '() fth-print
+		then
 	then
 	0 (bye)
 ;let

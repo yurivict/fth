@@ -1,4 +1,10 @@
+2014-11-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/scripts/play-sound.fth.in: recording part removed.
+
 2014-11-11  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs (play-sound): added.
 
 	* examples/site-lib/clm.fs:
 	* examples/site-lib/examp.fs:
