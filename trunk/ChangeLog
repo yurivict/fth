@@ -1,5 +1,9 @@
 2014-12-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
+	* src/misc.c (fth_parse_word): If an existing word does
+	not exist, return the found name itself (for
+	fth_documentation_ref etc).
+
 	* src/utils.c: Set trace_var to *promptstyle* to trigger
 	actually a promptstyle switch.
 
