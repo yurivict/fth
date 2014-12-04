@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.643 12/4/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.644 12/4/14";
 #endif /* not lint */
 
 #define FTH_DATE                        "2014/12/04"
@@ -1625,16 +1625,23 @@ fth_word_ref(const char *name)
 	return ((FTH)FICL_WORD_NAME_REF(name));
 }
 
-/* required by snd/snd-help.c */
+/*
+ * Used by snd/snd-help.c and repl/repl.c.
+ */
 char *
 fth_parse_word(void)
 {
-	ficlString s;
-	ficlWord *word;
+	ficlVm *vm;
+	ficlWord *w;
 
-	s = ficlVmGetWord(FTH_FICL_VM());
-	word = ficlDictionaryLookup(FTH_FICL_DICT(), s);
-	return (word != NULL ? word->name : NULL);
+	vm = FTH_FICL_VM();
+	ficlVmGetWordToPad(vm);
+	w = FICL_WORD_NAME_REF(vm->pad);
+	if (w != NULL)
+		return (w->name);
+	if (fth_strlen(vm->pad) > 0)
+		return (vm->pad);
+	return (NULL);
 }
 
 FTH
