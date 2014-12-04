@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.133 1/30/14
+ * @(#)fth-lib.h	1.134 12/3/14
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -606,7 +606,8 @@ exception")
 	FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_IMMEDIATE, Docs)
 
 #define FTH_PRIM_CO(Name, Code, Docs)					\
-FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_COMPILE_ONLY, Docs)
+	FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_COMPILE_ONLY, Docs)
+
 #define FTH_PRIM_CO_IM(Name, Code, Docs)				\
 	FTH_PRIMITIVE_SET(Name, Code, FICL_WORD_COMPILE_ONLY_IMMEDIATE, Docs)
 

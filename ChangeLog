@@ -1,3 +1,13 @@
+2014-12-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c: Set trace_var to *promptstyle* to trigger
+	actually a promptstyle switch.
+
+2014-12-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/extensions.fs (delete-selection-and-smooth):
+	Removed, it already exists in Snd.
+
 2014-11-12  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/scripts/play-sound.fth.in: recording part removed.

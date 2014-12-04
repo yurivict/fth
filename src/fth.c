@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.105 1/4/14";
+const char fth_sccsid[] = "@(#)fth.c	1.106 12/3/14";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -484,14 +484,18 @@ main(int argc, char **argv)
 	for (i = 0; argv[i]; i++) {
 		/* read words from stdin and exit */
 		if (strcmp(argv[i], "-") == 0) {
-			/*
-			 * % echo "80 f2c . cr" | fth - 26.6667
+			/*-
+			 * % echo "80 .f2c cr" | fth -	==> 26.67
 			 * 
-			 * % cat foo 80 f2c . cr
+			 * % cat foo
+			 * 80 .f2c cr
 			 * 
-			 * % fth - < foo 26.6667
+			 * % fth - < foo		==> 26.67
 			 * 
-			 * % fth - 80 f2c . cr 26.6667
+			 * % fth -
+			 * 80 .f2c cr <enter>		==> 26.67
+			 * bye <enter>
+			 * %
 			 */
 			char *buf;
 
