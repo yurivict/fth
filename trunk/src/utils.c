@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.220 11/11/14
+ * @(#)utils.c	1.221 12/4/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -45,8 +45,11 @@
 
 static char    *do_strncat(char *d, size_t size, const char *s, size_t count);
 static char    *do_strncpy(char *d, size_t size, const char *s, size_t count);
-static void	ficl_cold(void);
-static void	ficl_repl_cb(void);
+static void	ficl_cold(ficlVm *);
+#if defined(HAVE_LIBTECLA)
+static void	ficl_ps_cb(ficlVm *);
+#endif
+static void	ficl_repl_cb(ficlVm *);
 static void    *fixup_null_alloc(size_t n, const char *name);
 static int	get_pos_from_buffer(ficlVm *vm, char *delim);
 static ficlString parse_input_buffer_0(ficlVm *vm, int pos);
@@ -1462,8 +1465,10 @@ fth_repl(int argc, char **argv)
 	fth_in_repl_p = true;
 #if defined(HAVE_LIBTECLA)
 	gl = new_GetLine(FGL_BUFFER, FGL_BUFFER * repl_init_history());
-	if (gl == NULL)
+	if (gl == NULL) {
+		fprintf(stderr, "cannot initialize GetLine\n");
 		fth_exit(EXIT_FAILURE);
+	}
 	ficlVmGetRepl(vm) = gl;
 	/*
 	 * We have to load explicitely ~/.teclarc.  Subsequent calls of
@@ -1645,8 +1650,12 @@ fth_repl(int argc, char **argv)
 }
 
 static void
-ficl_repl_cb(void)
+ficl_repl_cb(ficlVm *vm)
 {
+#define h_repl_cb "( -- )  show some hints at startup\n\
+A hard coded before-repl-hook.  \
+Before adding your own, do:\n\
+before-repl-hook reset-hook!."
 	if (FTH_TRUE_P(fth_variable_ref("*fth-verbose*"))) {
 		fth_print("\\\n");
 		fth_print("\\ type help <word> to get help, \
@@ -1659,17 +1668,33 @@ e.g. `help make-array'\n");
 }
 
 static void
-ficl_cold(void)
+ficl_cold(ficlVm *vm)
 {
-#define h_cold "( -- )  Resets ficl system."
+#define h_cold "( -- )  reset ficl system."
 	fth_reset_loop_and_depth();
-	ficlVmReset(FTH_FICL_VM());
+	ficlVmReset(vm);
 	if (fth_in_repl_p)
 		if (!fth_hook_empty_p(before_repl_hook))
 			fth_run_hook(before_repl_hook, 0);
 	errno = 0;
-	ficlVmThrow(FTH_FICL_VM(), FICL_VM_STATUS_QUIT);
+	ficlVmThrow(vm, FICL_VM_STATUS_QUIT);
 }
+
+#if defined(HAVE_LIBTECLA)
+static void
+ficl_ps_cb(ficlVm *vm)
+{
+#define h_ps_cb "( val -- res )  callback for setting *promptstyle*."
+	bool fp;
+	GetLine *gl;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	fp = ficlStackPopBoolean(vm->dataStack);
+	gl = ficlVmGetRepl(vm);
+	gl_prompt_style(gl, fp ? GL_FORMAT_PROMPT : GL_LITERAL_PROMPT);
+	ficlStackPushBoolean(vm->dataStack, fp);
+}
+#endif
 
 void
 init_utils(void)
@@ -1727,11 +1752,6 @@ If true, save at most *history*, $FTH_HISTORY_LENGTH, or \
 " FTH_XString(FTH_HIST_LEN) " history events to *history*, $FTH_HISTORY, or ~/\
 " FTH_HIST_FILE ", if false, don't save history events.\n\
 Default is #t.");
-	fth_define_variable("*promptstyle*", FTH_FALSE,
-	    "Prompt style variable (boolean).\n\
-If true, enable special formatting directives within the prompt, \
-see gl_prompt_style(3).\n\
-Default is #f.");
 	fth_define_variable("*argc*", FTH_ZERO,
 	    "number of arguments in *argv*");
 	fth_define_variable("*argv*", fth_make_empty_array(),
@@ -1748,7 +1768,7 @@ Default is #f.");
 	    "input record number in current file");
 	fth_define_variable("*nr*", FTH_ZERO,
 	    "input record number since beginning");
-	fth_define_void_procedure("cold", ficl_cold, 0, 0, false, h_cold);
+	FTH_PRI1("cold", ficl_cold, h_cold);
 	before_repl_hook = fth_make_hook("before-repl-hook", 0,
 	    "before-repl-hook ( -- )  \
 Called after initializing the tecla(7) command-line \
@@ -1761,8 +1781,6 @@ before-repl-hook lambda: <{ -- }>\n\
   .\" \\ Starting FTH on \" date .string .\" !\" cr\n\
   .\" \\\" cr\n\
 ; add-hook!");
-	fth_add_hook(before_repl_hook,
-	    fth_make_proc_from_vfunc("repl-cb", ficl_repl_cb, 0, 0, false));
 	after_repl_hook = fth_make_hook("after-repl-hook", 1,
 	    "after-repl-hook ( history-file -- )  \
 Called after leaving the repl and writing the \
@@ -1794,6 +1812,24 @@ PROMPT argument for the next hook procedure if any.\n\
 before-prompt-hook lambda: <{ prompt pos -- new-prompt }>\n\
   \"fth (%d)> \" #( pos ) string-format\n\
 ; add-hook!");
+	{
+		ficlWord *ps, *rcb;
+#if defined(HAVE_LIBTECLA)
+		ficlWord *pscb;
+#endif
+
+		ps = FTH_CONSTANT_SET("*promptstyle*", FTH_FALSE);
+		fth_word_doc_set(ps, "Prompt style variable (boolean).\n\
+If true, enable special formatting directives within the prompt, \
+see gl_prompt_style(3).\n\
+Default is #f.");
+#if defined(HAVE_LIBTECLA)
+		pscb = FTH_PRI1("prompt-style-cb", ficl_ps_cb, h_ps_cb);
+		fth_trace_var((FTH)ps, (FTH)pscb);
+#endif
+		rcb = FTH_PRI1("repl-cb", ficl_repl_cb, h_repl_cb);
+		fth_add_hook(before_repl_hook, (FTH)rcb);
+	}
 }
 
 /*
