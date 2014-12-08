@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.129 1/21/14
+# @(#)Makefile.in	1.130 12/8/14
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -268,6 +268,7 @@ dist: all-dep ${top_srcdir}/README
 	    ${CP} *.[ch3] *.in ${distdir}/lib/)
 	(cd ${top_srcdir}/src && \
 	    ${CP} *.[ch] *.in ${distdir}/src/)
+	chmod -R +w ${distdir}
 	tar -cof - ${distfile} | bzip2 -9c > ${distfile}.tar.bz2
 	${RMD} ${distdir}
 
