@@ -1,7 +1,7 @@
 #! /usr/bin/env fth
 \ install.fth -- installs all *.fs? files to first path in *load-path*.
 \
-\ @(#)install.fth	1.10 10/4/13
+\ @(#)install.fth	1.11 12/8/14
 
 let:
 	#t to *fth-verbose*
