@@ -1,3 +1,5 @@
+README(1)			     LOCAL			     README(1)
+
 NAME
      README -- installation information for the Fth package
 
@@ -165,3 +167,5 @@ RUNNING FTH
      FTH 1.3.7 (2013/10/05) [amd64-vbox-netbsd6.99.24]
      FTH 1.3.7 (2013/10/05) [amd64-vbox-openbsd5.4]
      FTH 1.3.7 (2013/10/05) [x86_64-vboxdebian-linux-gnu3.10]
+
+NetBSD 7.99.3		       December 28, 2014		 NetBSD 7.99.3
