@@ -3394,7 +3394,7 @@ SSTTAANNDDAARRDDSS
      fftthh conforms only partly to _A_N_S _F_o_r_t_h; see _C_O_M_P_A_T_I_B_I_L_I_T_Y.
 
 HHIISSTTOORRYY
-     This manual page describes version 1.3.7.  fftthh is based on _F_i_c_l,
+     This manual page describes version 1.3.8.  fftthh is based on _F_i_c_l,
      _F_o_r_t_h_-_i_n_s_p_i_r_e_d _c_o_m_m_a_n_d _l_a_n_g_u_a_g_e, version 4.0.31 written by John Sadler.
 
 AAUUTTHHOORRSS
@@ -3404,4 +3404,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.3                  February 19, 2014                 NetBSD 7.99.3
+NetBSD 7.99.3                  December 28, 2014                 NetBSD 7.99.3
