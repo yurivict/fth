@@ -1,0 +1,1052 @@
+LIBFTH(3)                  Library Functions Manual                  LIBFTH(3)
+
+NNAAMMEE
+     lliibbfftthh -- Forth script and extension language library
+
+LLIIBBRRAARRYY
+     library ``libfth''
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<fftthh..hh>>
+
+DDEESSCCRRIIPPTTIIOONN
+     This is the Fth library manual page.  Fth is known to compile with
+     clang(1) and gcc(1).  One can include Fth library functions in
+     applications and in C extension libraries.  The following shows example
+     for each:
+
+   HHeelllloo--WWoorrlldd aapppplliiccaattiioonn::
+     % cat hello.c
+     #include <fth.h>
+     int
+     main(int argc, char *argv[])
+     {
+             fth_init();
+             fth_printf("%s, World%c\n", "Hello", '!');
+             return (EXIT_SUCCESS);
+     }
+     Compile and link it with:
+     % cc -I/usr/local/include/fth -I/usr/local/include -c hello.c
+     % cc hello.o -o hello -L/usr/local/lib -lfth -lm
+     A test run looks like this:
+           % ./hello => Hello, World!
+
+   HHeelllloo--WWoorrlldd lliibbrraarryy::
+     % cat libhello.c
+     #include <fth.h>
+
+     /*
+      * hello-prim ( str1 -- str2 )
+      * intro hello-prim => "Hello, World!"
+      */
+     static void
+     ficl_hello_primitive(ficlVm *vm)
+     {
+             FTH intro, world, result;
+
+             FTH_STACK_CHECK(vm, 1, 1);
+             intro = fth_pop_ficl_cell(vm);
+             world = fth_variable_ref("world");
+             result = fth_make_string_format("%S, %S!", intro, world);
+             fth_push_ficl_cell(vm, result);
+     }
+
+     /*
+      * hello-proc ( str1 -- str2 )
+      * intro hello-proc => "Hello, World!"
+      */
+     static FTH
+     fth_hello_procedure(FTH intro)
+     {
+             FTH world, result;
+
+             world = fth_variable_ref("world");
+             result = fth_make_string_format("%S, %S!", intro, world);
+             return (result);
+     }
+
+     void
+     Init_libhello(void)
+     {
+             fth_define_variable("intro",
+                 fth_make_string("Hello"), NULL);
+             fth_define_constant("world",
+                 fth_make_string("World"), NULL);
+             FTH_PRI1("hello-prim",
+                 ficl_hello_primitive, NULL);
+             FTH_PROC("hello-proc",
+                 fth_hello_procedure, 1, 0, 0, NULL);
+     }
+     Compile and link it with:
+     % cc -fPIC -I/usr/local/include/fth -I/usr/local/include -c libhello.c
+     % cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
+     Installing isn't necessarily required for testing.  Start fth and load
+     the new library with
+           dl-load ./libhello.so Init_libhello
+     The new words hheelllloo--pprriimm and hheelllloo--pprroocc as well as the variable iinnttrroo and
+     the constant wwoorrlldd are available.
+     % fth
+     fth> dl-load ./libhello.so Init_libhello
+     fth> intro hello-prim => "Hello, World!"
+     fth> intro hello-proc => "Hello, World!"
+     fth> "Goodbye" to intro
+     fth> intro hello-prim => "Goodbye, World!"
+     fth> "Bye" hello-proc => "Bye, World!"
+     fth> bye
+     %
+     If the new library is finished, one can install it with
+           % fth -ve "install libhello.so"
+     After installing you can load your new library with
+           dl-load libhello Init_libhello
+
+   AArrrraayyss
+     _b_o_o_l FFTTHH__AARRRRAAYY__PP(_o_b_j)
+     _b_o_o_l FFTTHH__AASSSSOOCC__PP(_o_b_j)
+     _b_o_o_l FFTTHH__CCOONNSS__PP(_o_b_j)
+     _b_o_o_l FFTTHH__PPAAIIRR__PP(_o_b_j)
+          All four return true if _o_b_j is an array object, otherwise false.
+     _F_T_H fftthh__aarrrraayy__aappppeenndd(_F_T_H _a_r_r_a_y_1, _F_T_H _a_r_r_a_y_2)
+     _v_o_i_d fftthh__aarrrraayy__cclleeaarr(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ccoommppaacctt(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ccooppyy(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ddeelleettee(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__aarrrraayy__ddeelleettee__kkeeyy(_F_T_H _a_r_r_a_y, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__eeaacchh(_F_T_H _a_r_r_a_y, _F_T_H _(_*_f_u_n_c_)_(_F_T_H _v_a_l_u_e, _F_T_H _d_a_t_a_), _F_T_H _d_a_t_a)
+     _F_T_H fftthh__aarrrraayy__eeaacchh__wwiitthh__iinnddeexx(_F_T_H _a_r_r_a_y, _F_T_H _(_*_f_u_n_c_)_(_F_T_H _v_a_l_u_e_, _F_T_H _d_a_t_a_,
+          _f_i_c_l_I_n_t_e_g_e_r _i_d_x_), _F_T_H _d_a_t_a)
+     _b_o_o_l fftthh__aarrrraayy__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _F_T_H fftthh__aarrrraayy__ffiillll(_F_T_H _a_r_r_a_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__aarrrraayy__ffiinndd(_F_T_H _a_r_r_a_y, _F_T_H _k_e_y)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__aarrrraayy__iinnddeexx(_F_T_H _a_r_r_a_y, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__iinnsseerrtt(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__aarrrraayy__jjooiinn(_F_T_H _a_r_r_a_y, _F_T_H _s_e_p)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__aarrrraayy__lleennggtthh(_F_T_H _o_b_j)
+          If _o_b_j is an Array object, return its length, otherwise -1.
+     _F_T_H fftthh__aarrrraayy__mmaapp(_F_T_H _a_r_r_a_y, _F_T_H _(_*_f_u_n_c_)_(_F_T_H _v_a_l_u_e, _F_T_H _d_a_t_a_), _F_T_H _d_a_t_a)
+     _b_o_o_l fftthh__aarrrraayy__mmeemmbbeerr__pp(_F_T_H _a_r_r_a_y, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__ppoopp(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ppuusshh(_F_T_H _a_r_r_a_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__aarrrraayy__rreeff(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+          Return value at position _i_n_d_e_x.  Negative index counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_r_a_y_'_s
+          range.
+     _F_T_H fftthh__aarrrraayy__rreejjeecctt(_F_T_H _a_r_r_a_y, _F_T_H _p_r_o_c___o_r___x_t, _F_T_H _a_r_g_s)
+     _F_T_H fftthh__aarrrraayy__rreevveerrssee(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__sseett(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+          Store _v_a_l_u_e at position _i_n_d_e_x and return _v_a_l_u_e.  Negative index
+          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
+          in _a_r_r_a_y_'_s range.
+     _F_T_H fftthh__aarrrraayy__sshhiifftt(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ssoorrtt(_F_T_H _a_r_r_a_y, _F_T_H _p_r_o_c___o_r___x_t)
+     _F_T_H fftthh__aarrrraayy__ssuubbaarrrraayy(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t, _f_i_c_l_I_n_t_e_g_e_r _e_n_d)
+     _F_T_H fftthh__aarrrraayy__ttoo__aarrrraayy(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__ttoo__lliisstt(_F_T_H _o_b_j)
+          Return _o_b_j as List object.
+     _F_T_H fftthh__aarrrraayy__uunniiqq(_F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__aarrrraayy__uunnsshhiifftt(_F_T_H _a_r_r_a_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__mmaakkee__aarrrraayy__lleenn(_f_i_c_l_I_n_t_e_g_e_r _l_e_n)
+     _F_T_H fftthh__mmaakkee__aarrrraayy__vvaarr(_f_i_c_l_I_n_t_e_g_e_r _l_e_n, _._._.)
+     _F_T_H fftthh__mmaakkee__aarrrraayy__wwiitthh__iinniitt(_f_i_c_l_I_n_t_e_g_e_r _l_e_n, _F_T_H _i_n_i_t)
+          Return Array with _l_e_n entries each initialized to _i_n_i_t.
+     _F_T_H fftthh__mmaakkee__eemmppttyy__aarrrraayy(_v_o_i_d)
+
+     Assocs:
+     _F_T_H fftthh__aacceellll__kkeeyy(_F_T_H _c_e_l_l)
+     _F_T_H fftthh__aacceellll__vvaalluuee(_F_T_H _c_e_l_l)
+     _F_T_H fftthh__aarrrraayy__aassssoocc(_F_T_H _a_s_s_o_c, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__aassssoocc__rreeff(_F_T_H _a_s_s_o_c, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__aassssoocc__rreemmoovvee(_F_T_H _a_s_s_o_c, _F_T_H _k_e_y)
+     _F_T_H fftthh__aarrrraayy__aassssoocc__sseett(_F_T_H _a_s_s_o_c, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__aassssoocc(_F_T_H _a_s_s_o_c, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__mmaakkee__aacceellll(_F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+
+     Lists:
+     _b_o_o_l FFTTHH__LLIISSTT__PP(_o_b_j)
+          Return true if _o_b_j is nil or a cons pointer (array object),
+          otherwise false.
+     _F_T_H fftthh__aaccoonnss(_F_T_H _k_e_y, _F_T_H _v_a_l_u_e, _F_T_H _a_l_i_s_t)
+     _F_T_H fftthh__ccaaddddddrr(_F_T_H _l_i_s_t)
+     _F_T_H fftthh__ccaaddddrr(_F_T_H _l_i_s_t)
+     _F_T_H fftthh__ccaaddrr(_F_T_H _l_i_s_t)
+     _F_T_H fftthh__ccaarr(_F_T_H _l_i_s_t)
+          If length of _l_i_s_t is greather than 0, return first list entry,
+          otherwise FTH_NIL.
+     _F_T_H fftthh__ccddddrr(_F_T_H _l_i_s_t)
+     _F_T_H fftthh__ccddrr(_F_T_H _l_i_s_t)
+          If length of _l_i_s_t is greather than 1, return new list without first
+          entry of _l_i_s_t, otherwise FTH_NIL.
+     _F_T_H fftthh__ccoonnss(_F_T_H _v_a_l_u_e, _F_T_H _l_i_s_t)
+          Return Lisp-like cons pointer with _v_a_l_u_e as car and _l_i_s_t as cdr.
+     _F_T_H fftthh__ccoonnss__22(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2, _F_T_H _l_i_s_t)
+          Return Lisp-like cons pointer with _o_b_j_1 as car, _o_b_j_2 as cadr and
+          _l_i_s_t as cddr.
+     _F_T_H fftthh__lliisstt__aappppeenndd(_F_T_H _a_r_g_s)
+          If _a_r_g_s is not an Array or List object, return FTH_NIL, otherwise
+          return new List object with each element of _a_r_g_s append with
+          _f_t_h___a_r_r_a_y___a_p_p_e_n_d.
+     _F_T_H fftthh__lliisstt__aassssoocc(_F_T_H _a_l_i_s_t, _F_T_H _k_e_y)
+          If _k_e_y matches, return corresponding key-value pair, otherwise
+          FTH_FALSE.
+     _F_T_H fftthh__lliisstt__aassssoocc__rreeff(_F_T_H _a_l_i_s_t, _F_T_H _k_e_y)
+          If _k_e_y matches, return corresponding value, otherwise FTH_FALSE.
+     _F_T_H fftthh__lliisstt__aassssoocc__rreemmoovvee(_F_T_H _a_l_i_s_t, _F_T_H _k_e_y)
+          If _k_e_y matches, remove key-value pair from _a_l_i_s_t.  Return current
+          assoc-list.
+     _F_T_H fftthh__lliisstt__aassssoocc__sseett(_F_T_H _a_l_i_s_t, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+          If _k_e_y matches, set key-value pair, otherwise add new pair to _a_l_i_s_t.
+          Return current assoc-list.
+     _F_T_H fftthh__lliisstt__ccooppyy(_F_T_H _l_i_s_t)
+          Return copy of _l_i_s_t using object-copy for all elements.
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__lliisstt__lleennggtthh(_F_T_H _o_b_j)
+          If _o_b_j is a list (or array), return length of list, if _o_b_j is nil,
+          return 0 otherwise -1.
+     _F_T_H fftthh__lliisstt__mmeemmbbeerr__pp(_F_T_H _l_i_s_t, _F_T_H _k_e_y)
+          Return FTH_TRUE if _k_e_y exists in _l_i_s_t, otherwise FTH_FALSE.
+     _F_T_H fftthh__lliisstt__rreeff(_F_T_H _l_i_s_t, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+          Return element at position _i_n_d_e_x.  Negative index counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _l_i_s_t_'_s
+          range.
+     _F_T_H fftthh__lliisstt__rreevveerrssee(_F_T_H _l_i_s_t)
+          Return new list with elements reversed.
+     _F_T_H fftthh__lliisstt__sseett(_F_T_H _l_i_s_t, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+          Store _v_a_l_u_e at position _i_n_d_e_x and return _v_a_l_u_e.  Negative index
+          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
+          in _l_i_s_t_'_s range.
+     _F_T_H fftthh__lliisstt__ttoo__aarrrraayy(_F_T_H _l_i_s_t)
+     _F_T_H fftthh__mmaakkee__eemmppttyy__lliisstt(_v_o_i_d)
+     _F_T_H fftthh__mmaakkee__lliisstt__lleenn(_f_i_c_l_I_n_t_e_g_e_r _l_e_n)
+     _F_T_H fftthh__mmaakkee__lliisstt__vvaarr(_f_i_c_l_I_n_t_e_g_e_r _l_e_n, _._._._')
+     _F_T_H fftthh__mmaakkee__lliisstt__wwiitthh__iinniitt(_f_i_c_l_I_n_t_e_g_e_r _l_e_n, _F_T_H _i_n_i_t)
+
+   FFiillee FFuunnccttiioonnss
+     General file functions:
+     _F_T_H fftthh__ffiillee__aattiimmee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _F_T_H fftthh__ffiillee__bbaasseennaammee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _c_o_n_s_t _c_h_a_r _*_e_x_t)
+     _v_o_i_d fftthh__ffiillee__cchhmmoodd(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _m_o_d_e___t _m_o_d_e)
+     _v_o_i_d fftthh__ffiillee__ccooppyy(_c_o_n_s_t _c_h_a_r _*_s_r_c, _c_o_n_s_t _c_h_a_r _*_d_s_t)
+     _F_T_H fftthh__ffiillee__ccttiimmee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _v_o_i_d fftthh__ffiillee__ddeelleettee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _F_T_H fftthh__ffiillee__ddiirrnnaammee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__iinnssttaallll(_c_o_n_s_t _c_h_a_r _*_s_r_c, _c_o_n_s_t _c_h_a_r _*_d_s_t, _m_o_d_e___t _m_o_d_e)
+     _F_T_H fftthh__ffiillee__lleennggtthh(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _F_T_H fftthh__ffiillee__mmaattcchh__ddiirr(_F_T_H _s_t_r_i_n_g, _F_T_H _r_e_g_e_x_p)
+     _v_o_i_d fftthh__ffiillee__mmkkddiirr(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _m_o_d_e___t _m_o_d_e)
+     _v_o_i_d fftthh__ffiillee__mmkkffiiffoo(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _m_o_d_e___t _m_o_d_e)
+     _F_T_H fftthh__ffiillee__mmttiimmee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _F_T_H fftthh__ffiillee__rreeaallppaatthh(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _v_o_i_d fftthh__ffiillee__rreennaammee(_c_o_n_s_t _c_h_a_r _*_s_r_c, _c_o_n_s_t _c_h_a_r _*_d_s_t)
+     _v_o_i_d fftthh__ffiillee__rrmmddiirr(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _F_T_H fftthh__ffiillee__sspplliitt(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _v_o_i_d fftthh__ffiillee__ssyymmlliinnkk(_c_o_n_s_t _c_h_a_r _*_s_r_c, _c_o_n_s_t _c_h_a_r _*_d_s_t)
+
+     File test functions:
+     _b_o_o_l fftthh__ffiillee__bblloocckk__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__cchhaarraacctteerr__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ddiirreeccttoorryy__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__eexxeeccuuttaabbllee__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__eexxiissttss__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ffiiffoo__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ggrrppoowwnneedd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__oowwnneedd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__rreeaaddaabbllee__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__sseettggiidd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__sseettuuiidd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ssoocckkeett__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ssttiicckkyy__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__ssyymmlliinnkk__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__wwrriittaabbllee__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _b_o_o_l fftthh__ffiillee__zzeerroo__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+
+   HHaasshhss
+     _b_o_o_l FFTTHH__HHAASSHH__PP(_o_b_j)
+          Return true if _o_b_j is a hash object, otherwise false.
+     _v_o_i_d fftthh__hhaasshh__cclleeaarr(_F_T_H _h_a_s_h)
+     _F_T_H fftthh__hhaasshh__ccooppyy(_F_T_H _h_a_s_h)
+     _F_T_H fftthh__hhaasshh__ddeelleettee(_F_T_H _h_a_s_h, _F_T_H _k_e_y)
+     _F_T_H fftthh__hhaasshh__eeaacchh(_F_T_H _h_a_s_h, _F_T_H _(_*_f_)_(_F_T_H _k_e_y_, _F_T_H _v_a_l_, _F_T_H _d_a_t_a_), _F_T_H
+          _d_a_t_a)
+     _b_o_o_l fftthh__hhaasshh__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _F_T_H fftthh__hhaasshh__ffiinndd(_F_T_H _h_a_s_h, _F_T_H _k_e_y)
+     _F_T_H fftthh__hhaasshh__kkeeyyss(_F_T_H _h_a_s_h)
+     _F_T_H fftthh__hhaasshh__mmaapp(_F_T_H _h_a_s_h, _F_T_H _(_*_f_)_(_F_T_H _k_e_y_, _F_T_H _v_a_l_, _F_T_H _d_a_t_a_), _F_T_H
+          _d_a_t_a)
+     _b_o_o_l fftthh__hhaasshh__mmeemmbbeerr__pp(_F_T_H _h_a_s_h, _F_T_H _k_e_y)
+     _F_T_H fftthh__hhaasshh__rreeff(_F_T_H _h_a_s_h, _F_T_H _k_e_y)
+     _v_o_i_d fftthh__hhaasshh__sseett(_F_T_H _h_a_s_h, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__hhaasshh__ttoo__aarrrraayy(_F_T_H _h_a_s_h)
+     _F_T_H fftthh__hhaasshh__vvaalluueess(_F_T_H _h_a_s_h)
+     _F_T_H fftthh__mmaakkee__hhaasshh(_v_o_i_d)
+     _F_T_H fftthh__mmaakkee__hhaasshh__lleenn(_i_n_t _h_a_s_h_s_i_z_e)
+
+     Property functions:
+     _F_T_H fftthh__hhaasshh__iidd(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__iidd(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__pprrooppeerrttiieess(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__pprrooppeerrttyy__rreeff(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _v_o_i_d fftthh__oobbjjeecctt__pprrooppeerrttyy__sseett(_F_T_H _o_b_j, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__pprrooppeerrttiieess(_F_T_H _o_b_j)
+     _F_T_H fftthh__pprrooppeerrttyy__rreeff(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _v_o_i_d fftthh__pprrooppeerrttyy__sseett(_F_T_H _o_b_j, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__wwoorrdd__pprrooppeerrttiieess(_F_T_H _o_b_j)
+     _F_T_H fftthh__wwoorrdd__pprrooppeerrttyy__rreeff(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _v_o_i_d fftthh__wwoorrdd__pprrooppeerrttyy__sseett(_F_T_H _o_b_j, _F_T_H _k_e_y, _F_T_H _v_a_l_u_e)
+
+   HHooookkss
+     _b_o_o_l FFTTHH__HHOOOOKK__PP(_o_b_j)
+          Return true if _o_b_j is a hook object, otherwise false.
+     _v_o_i_d fftthh__aadddd__hhooookk(_F_T_H _h_o_o_k, _F_T_H _p_r_o_c)
+          Add hook procedure _p_r_o_c to _h_o_o_k.  Raise _b_a_d_-_a_r_i_t_y exception if
+          _p_r_o_c_'_s arity doesn't match _h_o_o_k_'_s arity.
+     _F_T_H fftthh__hhooookk__aappppllyy(_F_T_H _h_o_o_k, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
+     _i_n_t fftthh__hhooookk__aarriittyy(_F_T_H _h_o_o_k)
+     _v_o_i_d fftthh__hhooookk__cclleeaarr(_F_T_H _h_o_o_k)
+          Remove all hook procedures from _h_o_o_k.
+     _b_o_o_l fftthh__hhooookk__eemmppttyy__pp(_F_T_H _h_o_o_k)
+          Return true if no hook procedure exist in _h_o_o_k, otherwise false.
+     _b_o_o_l fftthh__hhooookk__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _b_o_o_l fftthh__hhooookk__mmeemmbbeerr__pp(_F_T_H _h_o_o_k, _F_T_H _n_a_m_e)
+     _F_T_H fftthh__hhooookk__nnaammeess(_F_T_H _h_o_o_k)
+     _F_T_H fftthh__hhooookk__ttoo__aarrrraayy(_F_T_H _h_o_o_k)
+          Return array of all _h_o_o_k procedures.
+     _F_T_H fftthh__mmaakkee__hhooookk(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _a_r_i_t_y, _c_o_n_s_t _c_h_a_r _*_d_o_c)
+          Return a Hook object called _n_a_m_e with _a_r_i_t_y required arguments, 0
+          optional arguments and no rest arguments.  An optional documentation
+          _d_o_c can be provided.
+     _F_T_H fftthh__mmaakkee__hhooookk__wwiitthh__aarriittyy(_c_o_n_s_t _c_h_a_r _*_n, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t,
+          _c_o_n_s_t _c_h_a_r _*_d)
+     _F_T_H fftthh__mmaakkee__ssiimmppllee__hhooookk(_i_n_t _a_r_i_t_y)
+          Return a Hook object with _a_r_i_t_y required arguments, 0 optional
+          arguments and no rest arguments.
+     _F_T_H fftthh__rreemmoovvee__hhooookk(_F_T_H _h_o_o_k, _F_T_H _n_a_m_e)
+     _F_T_H fftthh__rruunn__hhooookk(_F_T_H _h_o_o_k, _i_n_t _l_e_n, _._._.)
+     _F_T_H fftthh__rruunn__hhooookk__aaggaaiinn(_F_T_H _h_o_o_k, _i_n_t _l_e_n, _._._.)
+     _F_T_H fftthh__rruunn__hhooookk__bbooooll(_F_T_H _h_o_o_k, _i_n_t _l_e_n, _._._.)
+
+   IIOO ffuunnccttiioonnss
+     _b_o_o_l FFTTHH__IIOO__PP(_o_b_j)
+          Return true if _o_b_j is an IO object, otherwise false.
+     _v_o_i_d fftthh__iioo__cclloossee(_F_T_H _i_o)
+     _b_o_o_l fftthh__iioo__cclloosseedd__pp(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__iioo__eeooff__pp(_F_T_H _i_o)
+     _b_o_o_l fftthh__iioo__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _c_h_a_r_* fftthh__iioo__ffiilleennaammee(_F_T_H _i_o)
+     _i_n_t fftthh__iioo__ffiilleennoo(_F_T_H _i_o)
+     _v_o_i_d fftthh__iioo__fflluusshh(_F_T_H _i_o)
+     _i_n_t fftthh__iioo__ggeettcc(_F_T_H _i_o)
+     _b_o_o_l fftthh__iioo__iinnppuutt__pp(_F_T_H _o_b_j)
+     _f_i_c_l_2_I_n_t_e_g_e_r fftthh__iioo__lleennggtthh(_F_T_H _o_b_j)
+     _i_n_t fftthh__iioo__mmooddee(_F_T_H _i_o)
+     _F_T_H fftthh__iioo__nnooppeenn(_c_o_n_s_t _c_h_a_r _*_h_o_s_t, _i_n_t _p_o_r_t, _i_n_t _t_y_p_e)
+     _F_T_H fftthh__iioo__ooppeenn(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _f_a_m)
+     _b_o_o_l fftthh__iioo__oouuttppuutt__pp(_F_T_H _o_b_j)
+     _F_T_H fftthh__iioo__ppooppeenn(_F_T_H _c_m_d, _i_n_t _f_a_m)
+     _f_i_c_l_2_I_n_t_e_g_e_r fftthh__iioo__ppooss__rreeff(_F_T_H _i_o)
+     _v_o_i_d fftthh__iioo__ppooss__sseett(_F_T_H _i_o, _f_i_c_l_2_I_n_t_e_g_e_r _p_o_s)
+     _v_o_i_d_* fftthh__iioo__ppttrr(_F_T_H _i_o)
+     _v_o_i_d fftthh__iioo__ppuuttcc(_F_T_H _i_o, _i_n_t _c)
+     _c_h_a_r_* fftthh__iioo__rreeaadd(_F_T_H _i_o)
+     _F_T_H fftthh__iioo__rreeaadd__lliinnee(_F_T_H _i_o)
+     _F_T_H fftthh__iioo__rreeaaddlliinneess(_F_T_H _i_o)
+     _v_o_i_d fftthh__iioo__rreewwiinndd(_F_T_H _i_o)
+     _F_T_H fftthh__iioo__ssooppeenn(_F_T_H _s_t_r_i_n_g, _i_n_t _f_a_m)
+     _F_T_H fftthh__iioo__ttoo__ssttrriinngg(_F_T_H _i_o)
+     _v_o_i_d fftthh__iioo__wwrriittee(_F_T_H _i_o, _c_o_n_s_t _c_h_a_r _*_l_i_n_e)
+     _v_o_i_d fftthh__iioo__wwrriittee__aanndd__fflluusshh(_F_T_H _i_o, _c_o_n_s_t _c_h_a_r _*_l_i_n_e)
+     _v_o_i_d fftthh__iioo__wwrriittee__ffoorrmmaatt(_F_T_H _i_o, _F_T_H _f_m_t, _F_T_H _a_r_g_s)
+     _v_o_i_d fftthh__iioo__wwrriitteelliinneess(_F_T_H _i_o, _F_T_H _a_r_r_a_y)
+     _F_T_H fftthh__rreeaaddlliinneess(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _i_n_t fftthh__sseett__eexxiitt__ssttaattuuss(_i_n_t _s_t_a_t_u_s)
+     _F_T_H fftthh__sseett__iioo__ssttddeerrrr(_F_T_H _i_o)
+     _F_T_H fftthh__sseett__iioo__ssttddiinn(_F_T_H _i_o)
+     _F_T_H fftthh__sseett__iioo__ssttddoouutt(_F_T_H _i_o)
+     _v_o_i_d fftthh__wwrriitteelliinneess(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_r_a_y)
+
+   MMiisscceellllaanneeoouuss
+     Predicate functions:
+     _b_o_o_l fftthh__bboooolleeaann__pp(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__iinnssttaannccee__ffllaagg__pp(_F_T_H _o_b_j, _i_n_t _f_l_a_g_s)
+     _b_o_o_l fftthh__iinnssttaannccee__ttyyppee__pp(_F_T_H _o_b_j, _i_n_t _t_y_p_e)
+     _b_o_o_l fftthh__wwoorrdd__ddeeffiinneedd__pp(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__wwoorrdd__ttyyppee__pp(_F_T_H _o_b_j, _i_n_t _t_y_p_e)
+
+     Initialization functions:
+     _v_o_i_d fftthh__eexxiitt(_i_n_t _n)
+     _v_o_i_d fftthh__mmaakkee__ffiiccll(_u_n_s_i_g_n_e_d _i_n_t _d___s_i_z_e, _u_n_s_i_g_n_e_d _i_n_t _s___s_i_z_e, _u_n_s_i_g_n_e_d _i_n_t
+          _r___s_i_z_e, _u_n_s_i_g_n_e_d _i_n_t _l___s_i_z_e)
+     _v_o_i_d fftthh__rreesseett(_v_o_i_d)
+
+     Evaluation functions:
+     _v_o_i_d fftthh__aadddd__ffeeaattuurree(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Push C string _n_a_m_e to environment word list for later review with
+          pprroovviiddeedd?? and *features*.
+     _i_n_t fftthh__ccaattcchh__eevvaall(_c_o_n_s_t _c_h_a_r _*_b_u_f_f_e_r)
+     _i_n_t fftthh__ccaattcchh__eexxeecc(_f_i_c_l_W_o_r_d _*_w_o_r_d)
+     _F_T_H fftthh__eevvaall(_c_o_n_s_t _c_h_a_r _*_b_u_f_f_e_r)
+          Evaluate C string _b_u_f_f_e_r.  If _b_u_f_f_e_r is NULL, return #undef, if
+          _b_u_f_f_e_r evaluates to FTH_BYE, exit program, if _b_u_f_f_e_r evaluates to no
+          value, return #undef, if _b_u_f_f_e_r evaluates to a single value, remove
+          it from stack and return it, if _b_u_f_f_e_r evaluates to more than one
+          value, remove them from stackand and return them as Fth array.
+     _v_o_i_d fftthh__iinniitt(_v_o_i_d)
+          This function must be called before any libfth.so action can take
+          place.
+     _b_o_o_l fftthh__pprroovviiddeedd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Test if feature _n_a_m_e exists in environment word list.
+
+     Loading source files:
+     _v_o_i_d fftthh__aadddd__llooaadd__lliibb__ppaatthh(_c_o_n_s_t _c_h_a_r _*_p_a_t_h)
+          Push _p_a_t_h at the end of global array variable *load-lib-path* if not
+          already there.
+     _v_o_i_d fftthh__aadddd__llooaadd__ppaatthh(_c_o_n_s_t _c_h_a_r _*_p_a_t_h)
+          Push _p_a_t_h at the end of global array variable *load-path* if not
+          already there.
+     _v_o_i_d fftthh__aadddd__llooaaddeedd__ffiilleess(_c_o_n_s_t _c_h_a_r _*_f_i_l_e)
+          Push _f_i_l_e at the end of global array variable *loaded-files* if not
+          already there.
+     _c_h_a_r_* fftthh__bbaasseennaammee(_c_o_n_s_t _c_h_a_r _*_p_a_t_h)
+     _F_T_H fftthh__ddll__llooaadd(_c_o_n_s_t _c_h_a_r _*_l_i_b, _c_o_n_s_t _c_h_a_r _*_f_u_n_c)
+          Load C string _n_a_m_e as dynamic library if not already loaded and add
+          _n_a_m_e to global array *loaded-files*.  C string _f_u_n_c will be called
+          after load was successful.  Before loading the dynamic library run
+          hook bbeeffoorree--llooaadd--hhooookk if not empty.  If this hook returns #f, return
+          immediately without loading the library and return FTH_FALSE.  If
+          loading finishes successfully or library was already loaded, return
+          FTH_TRUE, otherwise raise _s_o_-_f_i_l_e_-_e_r_r_o_r exception.  After loading
+          the dynamic library run hook aafftteerr--llooaadd--hhooookk if not empty.  If _n_a_m_e
+          has no file extension, ".so" will be added.  If _n_a_m_e or _n_a_m_e plus
+          ".so" doesn't exist, try all path names from *load-lib-path* with
+          _n_a_m_e.
+     _F_T_H fftthh__ffiinndd__ffiillee(_F_T_H _n_a_m_e)
+     _v_o_i_d fftthh__iinnssttaallll(_v_o_i_d)
+     _v_o_i_d fftthh__iinnssttaallll__ffiillee(_F_T_H _f_n_a_m_e)
+     _F_T_H fftthh__llooaadd__ffiillee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Load C string _n_a_m_e as Fth source file and add _n_a_m_e to global array
+          *loaded-files*.  Before loading source file run hook
+          bbeeffoorree--llooaadd--hhooookk if not empty.  If this hook returns #f, nothing is
+          loaded and return value is FTH_FALSE.  If loading finishes
+          successfully, return value is FTH_TRUE, otherwise throw an
+          exception.  After loading source file run hook aafftteerr--llooaadd--hhooookk if
+          not empty.  If _n_a_m_e has no file extension, FTH_FILE_EXTENSION `.fs'
+          will be added.  If _n_a_m_e or _n_a_m_e plus FTH_FILE_EXTENSION doesn't
+          exist, try all path names from *load-path* with _n_a_m_e.
+     _F_T_H fftthh__llooaadd__gglloobbaall__iinniitt__ffiillee(_v_o_i_d)
+          Load FTH_GLOBAL_INIT_FILE _$_{_p_r_e_f_i_x_}_/_e_t_c_/_f_t_h_r_c as Forth source file
+          if it exists, otherwise do nothing.  Run bbeeffoorree--llooaadd--hhooookk and
+          aafftteerr--llooaadd--hhooookk if not empty.
+     _F_T_H fftthh__llooaadd__iinniitt__ffiillee(_c_o_n_s_t _c_h_a_r _*_i_n_i_t___f_i_l_e)
+          Load C string _i_n_i_t___f_i_l_e as Forth source file if it exists, otherwise
+          do nothing.  If _i_n_i_t___f_i_l_e is NULL, try to load ${FTH_INIT_FILE}.  If
+          ${FTH_INIT_FILE} is not set, try to load ${HOME}/.fthrc instead.
+          Run bbeeffoorree--llooaadd--hhooookk and aafftteerr--llooaadd--hhooookk if not empty.
+     _F_T_H fftthh__rreeqquuiirree__ffiillee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Load C string _n_a_m_e as Fth source file if not already loaded and add
+          _n_a_m_e to global array *loaded-files*.  Before loading source file run
+          hook bbeeffoorree--llooaadd--hhooookk if not empty.  If this hook returns #f,
+          nothing is loaded and return value is FTH_FALSE.  If loading
+          finishes successfully, return value is FTH_TRUE, otherwise throw an
+          exception.  After loading source file run hook aafftteerr--llooaadd--hhooookk if
+          not empty.  If _n_a_m_e has no file extension, FTH_FILE_EXTENSION `.fs'
+          will be added.  If _n_a_m_e or _n_a_m_e plus FTH_FILE_EXTENSION doesn't
+          exist, try all path names from *load-path* with _n_a_m_e.
+     _v_o_i_d fftthh__uunnsshhiifftt__llooaadd__lliibb__ppaatthh(_c_o_n_s_t _c_h_a_r _*_p_a_t_h)
+          Prepend _p_a_t_h to the beginning of global array variable
+          *load-lib-path* if not already there.
+     _v_o_i_d fftthh__uunnsshhiifftt__llooaadd__ppaatthh(_c_o_n_s_t _c_h_a_r _*_p_a_t_h)
+          Prepend _p_a_t_h to the beginning of global array variable *load-path*
+          if not already there.
+
+     Rest:
+     _F_T_H fftthh__aapprrooppooss(_F_T_H _r_e_g_e_x_p)
+     _v_o_i_d fftthh__bbeeggiinn__vvaalluueess__ttoo__oobbjj(_f_i_c_l_V_m _*_v_m, _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_g_s)
+     _F_T_H fftthh__ffiinndd__iinn__wwoorrddlliisstt(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _c_h_a_r_* fftthh__ppaarrssee__wwoorrdd(_v_o_i_d)
+     _c_h_a_r_* fftthh__sshhoorrtt__vveerrssiioonn(_v_o_i_d)
+     _c_h_a_r_* fftthh__vveerrssiioonn(_v_o_i_d)
+     _F_T_H fftthh__wwoorrdd__rreeff(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Find _n_a_m_e in Forth dictionary and return ficlWord.
+     _F_T_H fftthh__wwoorrddlliisstt__eeaacchh(_b_o_o_l _(_*_f_u_n_c_)_(_f_i_c_l_W_o_r_d _*_w_o_r_d_, _F_T_H _d_a_t_a_), _F_T_H _d_a_t_a)
+
+   NNuummbbeerrss
+     _b_o_o_l FFTTHH__NNUUMMBBEERR__PP(_o_b_j)
+     _b_o_o_l fftthh__nnuummbbeerr__pp(_o_b_j)
+          Both return true if _o_b_j is any kind of a number, otherwise false.
+     _b_o_o_l FFTTHH__FFIIXXNNUUMM__PP(_o_b_j)
+     _b_o_o_l fftthh__ffiixxnnuumm__pp(_o_b_j)
+          Both return true if _o_b_j is a fixnum, otherwise false.
+     _b_o_o_l FFTTHH__LLOONNGG__LLOONNGG(_o_b_j)
+     _b_o_o_l FFTTHH__IINNTTEEGGEERR__PP(_o_b_j)
+     _b_o_o_l fftthh__iinntteeggeerr__pp(_o_b_j)
+          All three return true if _o_b_j is an integer, otherwise false.
+     _b_o_o_l FFTTHH__UUNNSSIIGGNNEEDD__PP(_o_b_j)
+     _b_o_o_l fftthh__uunnssiiggnneedd__pp(_o_b_j)
+          Both return true if _o_b_j is a unsigned integer, otherwise false.
+     _b_o_o_l FFTTHH__OOFFFF__TT__PP(_o_b_j)
+          Return true if _o_b_j is an off_t object, otherwise false.
+     _b_o_o_l FFTTHH__UUOOFFFF__TT__PP(_o_b_j)
+     _b_o_o_l fftthh__uuooffff__tt__pp(_o_b_j)
+          Both return true if _o_b_j is an unsigned off_t object, otherwise
+          false.
+     _b_o_o_l FFTTHH__FFLLOOAATT__PP(_o_b_j)
+          Return true if _o_b_j is a float object, otherwise false.
+     _b_o_o_l FFTTHH__EEXXAACCTT__PP(_o_b_j)
+     _b_o_o_l fftthh__eexxaacctt__pp(_o_b_j)
+          Both return true if _o_b_j is an exact number, otherwise false.
+     ffiiccllCCoommpplleexx(_f_t_h___c_o_m_p_l_e_x___r_e_f, _F_T_H _x)
+          Return C ficlComplex from _x.
+     _F_T_H fftthh__ffllooaatt__ccooppyy(_F_T_H _x)
+     _f_i_c_l_F_l_o_a_t fftthh__ffllooaatt__rreeff(_F_T_H _x)
+          Return C ficlFloat from _x.
+     _f_i_c_l_F_l_o_a_t fftthh__ffllooaatt__rreeff__oorr__eellssee(_F_T_H _x, _f_i_c_l_F_l_o_a_t _f_a_l_l_b_a_c_k)
+          Return C ficlFloat from _x.  If _x doesn't fit in Fixnum, FTH off_t,
+          FTH float, FTH complex, or any bignum, return _f_a_l_l_b_a_c_k.
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__iinntt__rreeff(_F_T_H _x)
+          Return C ficlInteger from _x.
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__iinntt__rreeff__oorr__eellssee(_F_T_H _x, _f_i_c_l_I_n_t_e_g_e_r _f_a_l_l_b_a_c_k)
+          Return C ficlInteger from _x.  If _x doesn't fit in Fixnum, FTH off_t,
+          FTH float, FTH complex, or any bignum, return _f_a_l_l_b_a_c_k.
+     _b_o_o_l fftthh__iissiinnff(_f_i_c_l_F_l_o_a_t _f)
+     _b_o_o_l fftthh__iissnnaann(_f_i_c_l_F_l_o_a_t _f)
+     _f_i_c_l_2_I_n_t_e_g_e_r fftthh__lloonngg__lloonngg__rreeff(_F_T_H _x)
+          Return C ficl2Integer from _x.
+     _F_T_H fftthh__mmaakkee__iinntt(_f_i_c_l_I_n_t_e_g_e_r _n)
+          Return a FTH fixnum or a FTH off_t object depending on _n.
+     _F_T_H fftthh__mmaakkee__ffllooaatt(_f_i_c_l_F_l_o_a_t _f)
+          Return a FTH float object from _f.
+     _F_T_H fftthh__mmaakkee__lloonngg__lloonngg(_f_i_c_l_2_I_n_t_e_g_e_r _d)
+          Return a FTH fixnum or a FTH off_t object depending on _d.
+     _F_T_H fftthh__mmaakkee__ooffff__tt(_f_i_c_l_2_I_n_t_e_g_e_r _d)
+     _f_i_c_l_F_l_o_a_t fftthh__rreeaall__rreeff(_F_T_H _x)
+     _F_T_H fftthh__mmaakkee__uulloonngg__lloonngg(_f_i_c_l_2_U_n_s_i_g_n_e_d _u_d)
+          Return a FTH unsigned fixnum or a FTH uoff_t object depending on _u_d.
+     _F_T_H fftthh__mmaakkee__uunnssiiggnneedd(_f_i_c_l_U_n_s_i_g_n_e_d _u)
+          Return a FTH unsigned fixnum or a FTH uoff_t object depending on _u.
+     _F_T_H fftthh__mmaakkee__uuooffff__tt(_f_i_c_l_2_U_n_s_i_g_n_e_d _u_d)
+     _F_T_H fftthh__ooffff__tt__ccooppyy(_F_T_H _o_b_j)
+     _f_i_c_l_2_U_n_s_i_g_n_e_d fftthh__uulloonngg__lloonngg__rreeff(_F_T_H _x)
+          Return C ficl2Unsigned from _x.
+     _f_i_c_l_U_n_s_i_g_n_e_d fftthh__uunnssiiggnneedd__rreeff(_F_T_H _x)
+          Return C ficlUnsigned from _x.
+
+     Random numbers:
+     _f_i_c_l_F_l_o_a_t fftthh__ffrraannddoomm(_f_i_c_l_F_l_o_a_t _f)
+          Return _-_f _f.
+     _f_i_c_l_F_l_o_a_t fftthh__rraannddoomm(_f_i_c_l_F_l_o_a_t _f)
+          Return 0 ...  _f.
+     _v_o_i_d fftthh__ssrraanndd(_f_i_c_l_I_n_t_e_g_e_r _n)
+
+     Complex numbers:
+     _b_o_o_l FFTTHH__CCOOMMPPLLEEXX__PP(_o_b_j)
+          Return true if _o_b_j is a complex object, otherwise false.
+     _f_i_c_l_C_o_m_p_l_e_x ffiiccllSSttaacckkPPooppCCoommpplleexx(_f_i_c_l_S_t_a_c_k _*_s_t_a_c_k)
+     _v_o_i_d ffiiccllSSttaacckkPPuusshhCCoommpplleexx(_f_i_c_l_S_t_a_c_k _*_s_t_a_c_k, _f_i_c_l_C_o_m_p_l_e_x _c_p)
+     _F_T_H fftthh__mmaakkee__ccoommpplleexx(_f_i_c_l_C_o_m_p_l_e_x _z)
+          Return a FTH complex object from _z.
+     _F_T_H fftthh__mmaakkee__ppoollaarr(_f_i_c_l_F_l_o_a_t _r_e_a_l, _f_i_c_l_F_l_o_a_t _t_h_e_t_a)
+     _F_T_H fftthh__mmaakkee__rreeccttaanngguullaarr(_f_i_c_l_F_l_o_a_t _r_e_a_l, _f_i_c_l_F_l_o_a_t _i_m_a_g_e)
+
+     Big and rational numbers
+     _b_o_o_l FFTTHH__BBIIGGNNUUMM__PP(_o_b_j)
+          Return true if _o_b_j is a bignum object, otherwise false.
+     _b_o_o_l FFTTHH__BBIIGGFFLLOOAATT__PP(_o_b_j)
+          Return true if _o_b_j is a bigfloat object, otherwise false.
+     _b_o_o_l FFTTHH__RRAATTIIOO__PP(_o_b_j)
+          Return true if _o_b_j is a ratio object, otherwise false.
+     _b_o_o_l FFTTHH__RRAANNDD__SSTTAATTEE__PP(_o_b_j)
+          Return true if _o_b_j is a rand-state object, otherwise false.
+     _F_T_H fftthh__ddeennoommiinnaattoorr(_F_T_H _x)
+          Return denominator from _x or 1.
+     _F_T_H fftthh__eexxaacctt__ttoo__iinneexxaacctt(_F_T_H _x)
+     _F_T_H fftthh__iinneexxaacctt__ttoo__eexxaacctt(_F_T_H _x)
+     _F_T_H fftthh__mmaakkee__bbiiggnnuumm(_f_i_c_l_B_i_g_n_u_m _b_n)
+     _F_T_H fftthh__mmaakkee__bbiiggnnuumm(_F_T_H _m)
+     _F_T_H fftthh__mmaakkee__rraattiioo(_F_T_H _n_u_m, _F_T_H _d_e_n)
+          Return a FTH ratio object from _n_u_m and _d_e_n.
+     _F_T_H fftthh__mmaakkee__rraattiioo__ffrroomm__ffllooaatt(_f_i_c_l_F_l_o_a_t _f)
+     _F_T_H fftthh__mmaakkee__rraattiioo__ffrroomm__iinntt(_f_i_c_l_I_n_t_e_g_e_r _n_u_m, _f_i_c_l_I_n_t_e_g_e_r _d_e_n)
+     _F_T_H fftthh__mmaakkee__rraattiioonnaall(_f_i_c_l_R_a_t_i_o _r)
+     _F_T_H fftthh__nnuummeerraattoorr(_F_T_H _x)
+          Return numerator from _x or 0.
+     _F_T_H fftthh__rraattiioo__fflloooorr(_F_T_H _x)
+     _F_T_H fftthh__rraattiioonnaalliizzee(_F_T_H _x, _F_T_H _e_r_r)
+          Return inexact number within _e_r_r of _x.
+
+     _F_T_H fftthh__nnuummbbeerr__aadddd(_F_T_H _x, _F_T_H _y)
+     _F_T_H fftthh__nnuummbbeerr__ddiivv(_F_T_H _x, _F_T_H _y)
+     _b_o_o_l fftthh__nnuummbbeerr__eeqquuaall__pp(_F_T_H _x, _F_T_H _y)
+     _b_o_o_l fftthh__nnuummbbeerr__lleessss__pp(_F_T_H _x, _F_T_H _y)
+     _F_T_H fftthh__nnuummbbeerr__mmuull(_F_T_H _x, _F_T_H _y)
+     _F_T_H fftthh__nnuummbbeerr__ssuubb(_F_T_H _x, _F_T_H _y)
+
+   OObbjjeeccttss
+     GC related functions:
+     _v_o_i_d fftthh__ggcc__mmaarrkk(_F_T_H _o_b_j)
+     _F_T_H fftthh__ggcc__ooffff(_v_o_i_d)
+     _F_T_H fftthh__ggcc__oonn(_v_o_i_d)
+     _F_T_H fftthh__ggcc__ppeerrmmaanneenntt(_F_T_H _o_b_j)
+     _F_T_H fftthh__ggcc__pprrootteecctt(_F_T_H _o_b_j)
+          Protect _o_b_j from garbage collection until fth_gc_unprotect.
+     _F_T_H fftthh__ggcc__pprrootteecctt__sseett(_F_T_H _o_u_t, _F_T_H _i_n)
+     _v_o_i_d fftthh__ggcc__uunnmmaarrkk(_F_T_H _o_b_j)
+     _F_T_H fftthh__ggcc__uunnpprrootteecctt(_F_T_H _o_b_j)
+          Unprotect _o_b_j from garbage collection.
+
+     Object type related functions:
+     _v_o_i_d_* fftthh__iinnssttaannccee__rreeff__ggeenn(_F_T_H _o_b_j)
+          Return GEN-struct of _o_b_j.
+     _F_T_H fftthh__mmaakkee__oobbjjeecctt__ttyyppee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Add _n_a_m_e to feature environment list, create a constant fth-_n_a_m_e of
+          object-type and return new object-type _n_a_m_e.
+     _F_T_H fftthh__mmaakkee__oobbjjeecctt__ttyyppee__ffrroomm(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _b_a_s_e)
+     _b_o_o_l fftthh__oobbjjeecctt__ttyyppee__pp(_F_T_H _o_b_j)
+
+     Instance related functions:
+     _b_o_o_l fftthh__iinnssttaannccee__pp(_F_T_H _o_b_j)
+     _F_T_H fftthh__mmaakkee__iinnssttaannccee(_F_T_H _o_b_j, _v_o_i_d _*_g_e_n)
+          Return new instance of Object type _o_b_j with _g_e_n wrapped in.
+     _b_o_o_l fftthh__oobbjjeecctt__iiss__iinnssttaannccee__ooff(_F_T_H _o_b_j, _F_T_H _t_y_p_e)
+          Return true if _o_b_j is an instance of _t_y_p_e, otherwise false.
+
+     Object set functions:
+     _F_T_H fftthh__sseett__oobbjjeecctt__aappppllyy(_F_T_H _o_b_j, _v_o_i_d _*_a_p_p_l_y, _i_n_t _r_e_q, _i_n_t _o_p_t, _i_n_t
+          _r_e_s_t)
+     _F_T_H fftthh__sseett__oobbjjeecctt__ccooppyy(_F_T_H _o_b_j, _F_T_H _(_*_c_o_p_y_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__dduummpp(_F_T_H _o_b_j, _F_T_H _(_*_d_u_m_p_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__eeqquuaall__pp(_F_T_H _o_b_j, _F_T_H _(_*_e_q_u_a_l___p_)_(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__ffrreeee(_F_T_H _o_b_j, _v_o_i_d _(_*_f_r_e_e_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__iinnssppeecctt(_F_T_H _o_b_j, _F_T_H _(_*_i_n_s_p_e_c_t_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__lleennggtthh(_F_T_H _o_b_j, _F_T_H _(_*_l_e_n_g_t_h_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__mmaarrkk(_F_T_H _o_b_j, _v_o_i_d _(_*_m_a_r_k_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__ttoo__aarrrraayy(_F_T_H _o_b_j, _F_T_H _(_*_t_o___a_r_r_a_y_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__ttoo__ssttrriinngg(_F_T_H _o_b_j, _F_T_H _(_*_t_o___s_t_r_i_n_g_)_(_F_T_H _o_b_j_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__vvaalluuee__rreeff(_F_T_H _o_b_j, _F_T_H _(_*_v_a_l_u_e___r_e_f_)_(_F_T_H _o_b_j, _F_T_H
+          _i_n_d_e_x_))
+     _F_T_H fftthh__sseett__oobbjjeecctt__vvaalluuee__sseett(_F_T_H _o_b_j, _F_T_H _(_*_v_a_l_u_e___s_e_t_)_(_F_T_H _o_b_j, _F_T_H
+          _i_n_d_e_x, _F_T_H _v_a_l_u_e_))
+
+     Object functions:
+     _F_T_H fftthh__oobbjjeecctt__aappppllyy(_F_T_H _o_b_j, _F_T_H _a_r_g_s)
+     _F_T_H fftthh__oobbjjeecctt__ccooppyy(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__dduummpp(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__oobbjjeecctt__eemmppttyy__pp(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__oobbjjeecctt__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+          Test if _o_b_j_1 is equal _o_b_j_2.
+     _F_T_H fftthh__oobbjjeecctt__ffiinndd(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _F_T_H fftthh__oobbjjeecctt__iinnddeexx(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _F_T_H fftthh__oobbjjeecctt__iinnssppeecctt(_F_T_H _o_b_j)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__oobbjjeecctt__lleennggtthh(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__oobbjjeecctt__mmeemmbbeerr__pp(_F_T_H _o_b_j, _F_T_H _k_e_y)
+     _c_h_a_r_* fftthh__oobbjjeecctt__nnaammee(_F_T_H _o_b_j)
+     _b_o_o_l fftthh__oobbjjeecctt__rraannggee__pp(_F_T_H _o_b_j, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__oobbjjeecctt__ssoorrtt(_F_T_H _o_b_j, _F_T_H _p_r_o_c)
+     _F_T_H fftthh__oobbjjeecctt__ttoo__aarrrraayy(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__ttoo__ssttrriinngg(_F_T_H _o_b_j)
+          Return Fth string representation of _o_b_j.
+     _F_T_H fftthh__oobbjjeecctt__ttoo__ssttrriinngg__22(_F_T_H _o_b_j)
+          Like _f_t_h___o_b_j_e_c_t___t_o___s_t_r_i_n_g but if _o_b_j is a string, wrap string to
+          "string".
+     _F_T_H fftthh__oobbjjeecctt__vvaalluuee__rreeff(_F_T_H _o_b_j, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__oobbjjeecctt__vvaalluuee__sseett(_F_T_H _o_b_j, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+     _c_h_a_r_* fftthh__ttoo__cc__dduummpp(_F_T_H _o_b_j)
+     _c_h_a_r_* fftthh__ttoo__cc__iinnssppeecctt(_F_T_H _o_b_j)
+     _c_h_a_r_* fftthh__ttoo__cc__ssttrriinngg(_F_T_H _o_b_j)
+     _c_h_a_r_* fftthh__ttoo__cc__ssttrriinngg__22(_F_T_H _o_b_j)
+          If _o_b_j is a string, wrap string to "string".
+
+     Cycle through objects:
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ccyyccllee__nneexxtt(_F_T_H _o_b_j)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ccyyccllee__ppooss__00(_F_T_H _o_b_j)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ccyyccllee__ppooss__rreeff(_F_T_H _o_b_j)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ccyyccllee__ppooss__sseett(_F_T_H _o_b_j, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__oobbjjeecctt__ccyyccllee__rreeff(_F_T_H _o_b_j)
+     _F_T_H fftthh__oobbjjeecctt__ccyyccllee__sseett(_F_T_H _o_b_j, _F_T_H _v_a_l_u_e)
+
+     Stack access functions:
+     _F_T_H ffiiccll__ttoo__fftthh(_F_T_H _o_b_j)
+     _F_T_H fftthh__ppoopp__ffiiccll__cceellll(_f_i_c_l_V_m _*_v_m)
+     _v_o_i_d fftthh__ppuusshh__ffiiccll__cceellll(_f_i_c_l_V_m _*_v_m, _F_T_H _o_b_j)
+     _F_T_H fftthh__ttoo__ffiiccll(_F_T_H _o_b_j)
+
+   PPoorrttss
+     _v_o_i_d fftthh__ppoorrtt__cclloossee(_F_T_H _p_o_r_t)
+          Close _p_o_r_t; if _p_o_r_t is FTH_FALSE, do nothing.
+     _v_o_i_d fftthh__ppoorrtt__ddiissppllaayy(_F_T_H _p_o_r_t, _F_T_H _o_b_j)
+          Put string representation of Fth object _o_b_j to output port _p_o_r_t.  If
+          _p_o_r_t is FTH_FALSE, print to standard out.
+     _v_o_i_d fftthh__ppoorrtt__fflluusshh(_F_T_H _p_o_r_t)
+          Flush _p_o_r_t; if _p_o_r_t is FTH_FALSE, do nothing.
+     _i_n_t fftthh__ppoorrtt__ggeettcc(_F_T_H _p_o_r_t)
+     _c_h_a_r_* fftthh__ppoorrtt__ggeettss(_F_T_H _p_o_r_t)
+     _v_o_i_d fftthh__ppoorrtt__ppuuttcc(_F_T_H _p_o_r_t, _i_n_t _c)
+     _v_o_i_d fftthh__ppoorrtt__ppuuttss(_F_T_H _p_o_r_t, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+          Put C string _s_t_r to output port _p_o_r_t.  If _p_o_r_t is FTH_FALSE, print
+          to standard out.
+     _o_u_t___c_b fftthh__sseett__eerrrroorr__ccbb(_o_u_t___c_b _c_b)
+     _o_u_t___c_b fftthh__sseett__pprriinntt__aanndd__eerrrroorr__ccbb(_o_u_t___c_b _c_b)
+     _o_u_t___c_b fftthh__sseett__pprriinntt__ccbb(_o_u_t___c_b _c_b)
+     _i_n___c_b fftthh__sseett__rreeaadd__ccbb(_i_n___c_b _c_b)
+     _F_T_H fftthh__ppoorrtt__ttoo__ssttrriinngg(_F_T_H _p_o_r_t)
+          Return content of _p_o_r_t as Fth string.  If _p_o_r_t is FTH_FALSE, return
+          FTH_FALSE.
+
+   PPrriinnttff
+     The format string for the following functions can have zero or more of
+     the following flags:
+           `##'       The value will be converted to an alternate form.  For bb,
+                     BB, oo and OO conversions prepend a zero before output, for
+                     xx and XX conversions prepend a `0x' respective `0X' before
+                     output.  For aa, AA, ee, EE, ff, FF, gg and GG conversions the
+                     result will always have a decimal point.
+           `--'       Flush output left.
+           `00' (zero)
+                     Padding with `0' (zero) rather than blank.
+           `ll'       Modifier for _l_o_n_g, _u_n_s_i_g_n_e_d _l_o_n_g and _l_o_n_g _*.
+           `llll'      Modifier for _l_o_n_g _l_o_n_g, _u_n_s_i_g_n_e_d _l_o_n_g _l_o_n_g and _l_o_n_g _l_o_n_g
+                     _*.
+           `zz'       Modifier for _s_i_z_e___t.
+     The following conversion specifiers are known:
+           %%         A `%' is written.
+           aaAAeeEEffFFggGG  Floating point output like sprintf(3).
+           bbBBddooOOppuuUUxxXX
+                     Integer output in binary, decimal, octal, void pointer,
+                     unsigned and hexadecimal form.
+           cc         Single character output.
+           DD         Dump string output of any Forth object with oobbjjeecctt--dduummpp.
+           II         Inspect string output of any Forth object with
+                     oobbjjeecctt--iinnssppeecctt.
+           MM         String representation of any Forth object with
+                     oobbjjeecctt-->>ssttrriinngg, in addition, strings will be enclosed in
+                     double quotations ("string").
+           qqQQss       C string char * output.
+           SS         String representation of any Forth object with
+                     oobbjjeecctt-->>ssttrriinngg.
+     _i_n_t fftthh__aasspprriinnttff(_c_h_a_r _*_*_r_e_s_u_l_t, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__ddeebbuugg(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__eerrrroorr(_c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _i_n_t fftthh__eerrrroorrff(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _c_h_a_r_* fftthh__ffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__ffpprriinnttff(_F_I_L_E _*_f_p, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__iioopprriinnttff(_F_T_H _i_o, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__ppoorrtt__pprriinnttff(_F_T_H _p_o_r_t, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__ppoorrtt__vvpprriinnttff(_F_T_H _p_o_r_t, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__pprriinntt(_c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _i_n_t fftthh__pprriinnttff(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__ssnnpprriinnttff(_c_h_a_r _*_b_u_f_f_e_r, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__sspprriinnttff(_c_h_a_r _*_b_u_f_f_e_r, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _i_n_t fftthh__vvaasspprriinnttff(_c_h_a_r _*_*_r_e_s_u_l_t, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vveerrrroorrff(_c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _c_h_a_r_* fftthh__vvffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vvffpprriinnttff(_F_I_L_E _*_f_p, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vviioopprriinnttff(_F_T_H _i_o, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vvpprriinnttff(_c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vvssnnpprriinnttff(_c_h_a_r _*_b_u_f_f_e_r, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__vvsspprriinnttff(_c_h_a_r _*_b_u_f_f_e_r, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+     _i_n_t fftthh__wwaarrnniinngg(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+
+   PPrrooccss
+     _b_o_o_l FFTTHH__PPRROOCC__PP(_o_b_j)
+          Return true if _o_b_j is a proc object, otherwise false.
+     _b_o_o_l FFTTHH__WWOORRDD__PP(_o_b_j)
+          Return true if _o_b_j is a ficlWord, otherwise false.
+     _f_i_c_l_W_o_r_d_* fftthh__ddeeffiinnee__pprroocceedduurree(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _(_*_f_u_n_c_)_(_), _i_n_t _r_e_q,
+          _i_n_t _o_p_t, _i_n_t _r_e_s_t, _c_o_n_s_t _c_h_a_r _*_d_o_c)
+          Return new ficlWord _n_a_m_e tied to C function _f_u_n_c with _r_e_q required
+          arguments, _o_p_t optional arguments and _r_e_s_t (true) or no _r_e_s_t (false)
+          arguments with optional documentation string _d_o_c.  _f_u_n_c takes zero
+          or more FTH objects and returns a FTH object.
+     _f_i_c_l_W_o_r_d_* fftthh__ddeeffiinnee__vvooiidd__pprroocceedduurree(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _v_o_i_d _(_*_f_u_n_c_)_(_), _i_n_t
+          _r_e_q, _i_n_t _o_p_t, _i_n_t _r_e_s_t, _c_o_n_s_t _c_h_a_r _*_d_o_c)
+          Return new ficlWord _n_a_m_e tied to C function _f_u_n_c with _r_e_q required
+          arguments, _o_p_t optional arguments and _r_e_s_t (true) or no _r_e_s_t (false)
+          arguments with optional documentation string _d_o_c.  _f_u_n_c takes zero
+          or more FTH objects and doesn't return any (void).
+     _F_T_H fftthh__ddooccuummeennttaattiioonn__rreeff(_F_T_H _o_b_j)
+          Return documentation property string of _o_b_j or FTH_FALSE.
+     _v_o_i_d fftthh__ddooccuummeennttaattiioonn__sseett(_F_T_H _o_b_j, _F_T_H _d_o_c)
+          Set documentation property string of any _o_b_j to _d_o_c.
+     _F_T_H fftthh__ggeett__ooppttaarrgg(_f_i_c_l_I_n_t_e_g_e_r _r_e_q, _F_T_H _d_e_f)
+     _F_T_H fftthh__ggeett__ooppttkkeeyy(_F_T_H _k_e_y, _F_T_H _d_e_f)
+     _f_i_c_l_2_I_n_t_e_g_e_r fftthh__ggeett__ooppttkkeeyy__22iinntt(_F_T_H _k_e_y, _f_i_c_l_2_I_n_t_e_g_e_r _d_e_f)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ggeett__ooppttkkeeyy__iinntt(_F_T_H _k_e_y, _f_i_c_l_I_n_t_e_g_e_r _d_e_f)
+     _i_n_t fftthh__ggeett__ooppttkkeeyy__ffiixx(_F_T_H _k_e_y, _i_n_t _d_e_f)
+     _c_h_a_r_* fftthh__ggeett__ooppttkkeeyy__ssttrr(_F_T_H _k_e_y, _c_h_a_r _*_d_e_f)
+     _F_T_H fftthh__mmaakkee__pprroocc(_f_i_c_l_W_o_r_d _*_w_o_r_d, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t)
+     _F_T_H fftthh__mmaakkee__pprroocc__ffrroomm__ffuunncc(_c_o_n_s_t _c_h_a_r _*, _F_T_H _(_*_)_(_), _b_o_o_l, _i_n_t, _i_n_t,
+          _b_o_o_l)
+     _F_T_H fftthh__pprroocc__aappppllyy(_F_T_H _p_r_o_c, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
+          If _p_r_o_c is a Proc object, execute its ficlWord with Array object
+          _a_r_g_s as arguments on stack.  _c_a_l_l_e_r can be any C string used for
+          error message.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_o_c has more required
+          arguments than _l_e_n.  Raise _e_v_a_l_-_e_r_r_o_r exception if an error occured
+          during evaluation.
+
+          If _p_r_o_c is not a Proc object, return FTH_FALSE, If _p_r_o_c doesn't
+          leave a return value on stack, return FTH_FALSE, if _p_r_o_c leaves a
+          singel value on stack, return it, if _p_r_o_c leaves more than one
+          values on stack, return them as Array object.
+     _i_n_t fftthh__pprroocc__aarriittyy(_F_T_H _p_r_o_c)
+          If _p_r_o_c is a Proc object, return required arguments as C int,
+          otherwise return 0.
+     _F_T_H fftthh__pprroocc__ccaallll(_F_T_H _p_r_o_c, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r, _i_n_t _l_e_n, _._._.)
+          If _p_r_o_c is a Proc object, execute its ficlWord with _l_e_n arguments on
+          stack.  _c_a_l_l_e_r can be any C string used for error message.  Raise
+          _b_a_d_-_a_r_i_t_y exception if _p_r_o_c has more required arguments than _l_e_n.
+          Raise _e_v_a_l_-_e_r_r_o_r exception if an error occured during evaluation.
+
+          If _p_r_o_c is not a Proc object, return FTH_FALSE, If _p_r_o_c doesn't
+          leave a return value on stack, return FTH_FALSE, if _p_r_o_c leaves a
+          singel value on stack, return it, if _p_r_o_c leaves more than one
+          values on stack, return them as Array object.
+     _c_h_a_r_* fftthh__pprroocc__nnaammee(_F_T_H _o_b_j)
+          If _o_b_j is a ficlWord, return name as C string, otherwise return
+          "not-a-proc".
+     _F_T_H fftthh__pprroocc__ssoouurrccee__rreeff(_F_T_H _p_r_o_c)
+          Return source string property of _p_r_o_c, or FTH_FALSE if not
+          available.
+     _v_o_i_d fftthh__pprroocc__ssoouurrccee__sseett(_F_T_H _p_r_o_c, _F_T_H _s_o_u_r_c_e)
+          Set source string property of _p_r_o_c to _s_o_u_r_c_e.
+     _f_i_c_l_W_o_r_d_* fftthh__pprroocc__ttoo__xxtt(_F_T_H _p_r_o_c)
+     _F_T_H fftthh__ssoouurrccee__ffiillee(_F_T_H _o_b_j)
+     _F_T_H fftthh__ssoouurrccee__lliinnee(_F_T_H _o_b_j)
+     _F_T_H fftthh__ssoouurrccee__rreeff(_F_T_H _o_b_j)
+     _v_o_i_d fftthh__ssoouurrccee__sseett(_F_T_H _o_b_j, _F_T_H _s_o_u_r_c_e)
+     _f_i_c_l_W_o_r_d_* fftthh__wwoorrdd__ddoocc__sseett(_f_i_c_l_W_o_r_d _*_w_o_r_d, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _F_T_H pprroocc__ffrroomm__pprroocc__oorr__xxtt(_F_T_H _p_r_o_c___o_r___x_t, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t)
+
+   DDeeffiinnee VVaarriiaabblleess
+     _F_T_H fftthh__ddeeffiinnee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _v_a_l_u_e)
+          Define constant _n_a_m_e to _v_a_l_u_e which can be a FTH Fixnum (in contrast
+          to _f_t_h___d_e_f_i_n_e___c_o_n_s_t_a_n_t below) or any other FTH object.  Return
+          _v_a_l_u_e.
+     _F_T_H fftthh__ddeeffiinnee__ccoonnssttaanntt(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _v_a_l_u_e, _c_o_n_s_t _c_h_a_r _*_d_o_c)
+          Define constant _n_a_m_e to _v_a_l_u_e which can be a C integer (in contrast
+          to _f_t_h___d_e_f_i_n_e above) or any other FTH object.  _d_o_c can be NULL or a
+          description of the constant for the hheellpp word.  Return _v_a_l_u_e where C
+          integers are converted to FTH Fixnums, any other objects remain
+          untouched.
+     _F_T_H fftthh__ddeeffiinnee__vvaarriiaabbllee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _v_a_l_u_e, _c_o_n_s_t _c_h_a_r _*_d_o_c)
+          Define global variable _n_a_m_e to _v_a_l_u_e which can be a FTH Fixnum or
+          any other FTH object, see the similar function fftthh__ddeeffiinnee() for
+          constants above.  Return _v_a_l_u_e.
+     _b_o_o_l fftthh__ddeeffiinneedd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Return true if _n_a_m_e is defined in the dictionary, otherwise false.
+     _v_o_i_d fftthh__ttrraaccee__vvaarr(_F_T_H _o_b_j, _F_T_H _p_r_o_c___o_r___x_t)
+     _F_T_H fftthh__ttrraaccee__vvaarr__eexxeeccuuttee(_f_i_c_l_W_o_r_d _*_w_o_r_d)
+     _v_o_i_d fftthh__uunnttrraaccee__vvaarr(_F_T_H _o_b_j)
+     _F_T_H fftthh__vvaarr__rreeff(_F_T_H _o_b_j)
+     _F_T_H fftthh__vvaarr__sseett(_F_T_H _o_b_j, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__vvaarriiaabbllee__rreeff(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Return FTH value from global variable or constant _n_a_m_e.
+     _F_T_H fftthh__vvaarriiaabbllee__sseett(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _v_a_l_u_e)
+          Set (or create if not existing) global variable _n_a_m_e to _v_a_l_u_e.
+          Return _v_a_l_u_e.
+
+   RReeggeexxpp oobbjjeecctt ttyyppee
+     _b_o_o_l FFTTHH__RREEGGEEXXPP__PP(_o_b_j)
+          Return true if _o_b_j is a regexp object, otherwise false.
+     _F_T_H fftthh__mmaakkee__rreeggeexxpp(_c_o_n_s_t _c_h_a_r _*_r_e_g)
+          Return new regexp object from _r_e_g which may contain regular
+          expression.
+     _i_n_t fftthh__rreeggeexxpp__ffiinndd(_c_o_n_s_t _c_h_a_r _*_r_e_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+          Return match index or -1 if not found.
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__mmaattcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g)
+          Return match length or -1 if not found.
+     _F_T_H fftthh__rreeggeexxpp__rreeppllaaccee(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _F_T_H _r_e_p_l_a_c_e)
+          Replace 1st occurrence of _r_e_g_e_x_p in _s_t_r_i_n_g with _r_e_p_l_a_c_e if found.
+          References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
+          subexpressions.  If no corresponding subexpression exist, an
+          _r_e_g_e_x_p_-_e_r_r_o_r exception will be raised.
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__sseeaarrcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t,
+          _f_i_c_l_I_n_t_e_g_e_r _r_a_n_g_e)
+          Return match index or -1 if not found.  If _r_a_n_g_e is -1, search
+          entire string.
+
+   SSttrriinngg oobbjjeecctt ttyyppee
+     _b_o_o_l FFTTHH__SSTTRRIINNGG__PP(_o_b_j)
+          Return true if _o_b_j is a string object, otherwise false.
+     _b_o_o_l FFTTHH__CCHHAARR__PP(_o_b_j)
+     _b_o_o_l fftthh__cchhaarr__pp(_o_b_j)
+          Both return true if _o_b_j is an ASCII character, otherwise false.
+     _F_T_H fftthh__mmaakkee__eemmppttyy__ssttrriinngg(_v_o_i_d)
+     _F_T_H fftthh__mmaakkee__ssttrriinngg(_c_o_n_s_t _c_h_a_r _*_s_t_r)
+          Return a new Fth string object constructed from C string _s_t_r.
+     _F_T_H fftthh__mmaakkee__ssttrriinngg__ffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _F_T_H fftthh__mmaakkee__ssttrriinngg__lleenn(_c_o_n_s_t _c_h_a_r _*_s_t_r, _f_i_c_l_I_n_t_e_g_e_r _l_e_n)
+          Return a new Fth string object constructed from C string _s_t_r with at
+          most _l_e_n characters.
+     _F_T_H fftthh__mmaakkee__ssttrriinngg__oorr__ffaallssee(_c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _F_T_H fftthh__ssttrriinngg__aappppeenndd(_F_T_H _s_t_r_i_n_g_1, _F_T_H _s_t_r_i_n_g_2)
+     _F_T_H fftthh__ssttrriinngg__ccaappiittaalliizzee(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__cchhaarr__rreeff(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__ssttrriinngg__cchhaarr__sseett(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+     _F_T_H fftthh__ssttrriinngg__cchhoommpp(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__ccooppyy(_F_T_H _s_t_r_i_n_g)
+     _c_h_a_r fftthh__ssttrriinngg__cc__cchhaarr__rreeff(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _c_h_a_r fftthh__ssttrriinngg__cc__cchhaarr__sseett(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _c_h_a_r _c)
+     _F_T_H fftthh__ssttrriinngg__ddeelleettee(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+     _F_T_H fftthh__ssttrriinngg__ddoowwnnccaassee(_F_T_H _s_t_r_i_n_g)
+     _b_o_o_l fftthh__ssttrriinngg__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _i_n_t fftthh__ssttrriinngg__eevvaall(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__ffiillll(_F_T_H _s_t_r_i_n_g, _F_T_H _f_i_l_l___c_h_a_r)
+     _F_T_H fftthh__ssttrriinngg__ffiinndd(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+     _F_T_H fftthh__ssttrriinngg__ffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _F_T_H _a_r_g_s___l_i_s_t)
+     _b_o_o_l fftthh__ssttrriinngg__ggrreeaatteerr__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _F_T_H fftthh__ssttrriinngg__iinnddeexx(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+     _F_T_H fftthh__ssttrriinngg__iinnsseerrtt(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+     _f_i_c_l_I_n_t_e_g_e_r fftthh__ssttrriinngg__lleennggtthh(_F_T_H _s_t_r_i_n_g)
+     _b_o_o_l fftthh__ssttrriinngg__lleessss__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _b_o_o_l fftthh__ssttrriinngg__mmeemmbbeerr__pp(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+     _b_o_o_l fftthh__ssttrriinngg__nnoott__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _F_T_H fftthh__ssttrriinngg__ppoopp(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__ppuusshh(_F_T_H _s_t_r_i_n_g, _F_T_H _a_d_d___s_t_r)
+     _c_h_a_r_* fftthh__ssttrriinngg__rreeff(_F_T_H _s_t_r_i_n_g)
+          Return C string from Fth _s_t_r_i_n_g or NULL.
+     _F_T_H fftthh__ssttrriinngg__rreeppllaaccee(_F_T_H _s_t_r_i_n_g, _F_T_H _f_r_o_m, _F_T_H _t_o)
+     _F_T_H fftthh__ssttrriinngg__rreevveerrssee(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__ssccaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _F_T_H fftthh__ssttrriinngg__ssffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _F_T_H fftthh__ssttrriinngg__sshhiifftt(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__ssnnccaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_s_t_r, _f_i_c_l_I_n_t_e_g_e_r _l_e_n)
+     _F_T_H fftthh__ssttrriinngg__sspplliitt(_F_T_H _s_t_r_i_n_g, _F_T_H _s_e_p___s_t_r)
+     _F_T_H fftthh__ssttrriinngg__ssuubbssttrriinngg(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t, _f_i_c_l_I_n_t_e_g_e_r _e_n_d)
+     _F_T_H fftthh__ssttrriinngg__ttoo__aarrrraayy(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__uunnsshhiifftt(_F_T_H _s_t_r_i_n_g, _F_T_H _a_d_d___s_t_r)
+     _F_T_H fftthh__ssttrriinngg__uuppccaassee(_F_T_H _s_t_r_i_n_g)
+     _F_T_H fftthh__ssttrriinngg__vvffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _F_T_H _a_r_g_s)
+     _F_T_H fftthh__ssttrriinngg__vvssffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+
+   SSyymmbboollss
+     _b_o_o_l FFTTHH__SSYYMMBBOOLL__PP(_o_b_j)
+          Return true if _o_b_j is a symbol, otherwise false.
+     _b_o_o_l fftthh__ssttrriinngg__oorr__ssyymmbbooll__pp(_F_T_H _o_b_j)
+     _c_h_a_r_* fftthh__ssttrriinngg__oorr__ssyymmbbooll__rreeff(_F_T_H _o_b_j)
+     _F_T_H fftthh__ssyymmbbooll(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Return value, the word address, of symbol _n_a_m_e; if symbol doesn't
+          exist, creat it.
+     _b_o_o_l fftthh__ssyymmbbooll__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _b_o_o_l fftthh__ssyymmbbooll__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _c_h_a_r_* fftthh__ssyymmbbooll__rreeff(_F_T_H _o_b_j)
+          Return C string name of symbol _o_b_j without first sign (') or NULL.
+
+   KKeeyywwoorrddss
+     _b_o_o_l FFTTHH__KKEEYYWWOORRDD__PP(_o_b_j)
+          Return true if _o_b_j is a keyword, otherwise false.
+     _F_T_H fftthh__kkeeyywwoorrdd(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Return value, the word address, of keyword _n_a_m_e; if keyword doesn't
+          exist, creat it.
+     _b_o_o_l fftthh__kkeeyywwoorrdd__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _b_o_o_l fftthh__kkeeyywwoorrdd__pp(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+     _c_h_a_r_* fftthh__kkeeyywwoorrdd__rreeff(_F_T_H _o_b_j)
+
+   EExxcceeppttiioonnss
+     _b_o_o_l FFTTHH__EEXXCCEEPPTTIIOONN__PP(_o_b_j)
+          Return true if _o_b_j is an exception, otherwise false.
+     _F_T_H fftthh__eexxcceeppttiioonn(_c_o_n_s_t _c_h_a_r _*_n_a_m_e)
+          Return a new Exception object _n_a_m_e.
+     _b_o_o_l fftthh__eexxcceeppttiioonn__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+     _F_T_H fftthh__eexxcceeppttiioonn__llaasstt__mmeessssaaggee__rreeff(_F_T_H _e_x_c)
+     _v_o_i_d fftthh__eexxcceeppttiioonn__llaasstt__mmeessssaaggee__sseett(_F_T_H _e_x_c, _F_T_H _m_s_g)
+     _F_T_H fftthh__eexxcceeppttiioonn__mmeessssaaggee__rreeff(_F_T_H _e_x_c)
+     _v_o_i_d fftthh__eexxcceeppttiioonn__mmeessssaaggee__sseett(_F_T_H _e_x_c, _F_T_H _m_s_g)
+     _c_h_a_r_* fftthh__eexxcceeppttiioonn__rreeff(_F_T_H _o_b_j)
+     _F_T_H fftthh__mmaakkee__eexxcceeppttiioonn(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _c_o_n_s_t _c_h_a_r _*_m_e_s_s_a_g_e)
+     _b_o_o_l fftthh__ssyymmbbooll__oorr__eexxcceeppttiioonn__pp(_F_T_H _o_b_j)
+     _F_T_H fftthh__ssyymmbbooll__oorr__eexxcceeppttiioonn__rreeff(_F_T_H _o_b_j)
+     _F_T_H fftthh__ssyymmbbooll__ttoo__eexxcceeppttiioonn(_F_T_H _o_b_j)
+
+   UUttiilliittiieess
+     _v_o_i_d_* fftthh__ccaalllloocc(_s_i_z_e___t _s_i_z_e, _s_i_z_e___t _e_l_t_s_i_z_e)
+     _i_n_t fftthh__eevvaalluuaattee(_f_i_c_l_V_m _*_v_m, _c_o_n_s_t _c_h_a_r _*_b_u_f_f_e_r)
+     _i_n_t fftthh__eexxeeccuuttee__xxtt(_f_i_c_l_V_m _*_v_m, _f_i_c_l_W_o_r_d _*_w_o_r_d)
+     _v_o_i_d fftthh__ffrreeee(_v_o_i_d _*_p)
+     _c_h_a_r_* fftthh__ggeetteennvv(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _c_h_a_r _*_d_e_f)
+     _v_o_i_d_* fftthh__mmaalllloocc(_s_i_z_e___t _s_i_z_e)
+     _v_o_i_d_* fftthh__rreeaalllloocc(_v_o_i_d _*_p, _s_i_z_e___t _s_i_z_e)
+     _v_o_i_d fftthh__rreeppll(_i_n_t _a_r_g_c, _c_h_a_r _*_*_a_r_g_v)
+     _c_h_a_r_* fftthh__ssttrrccaatt(_c_h_a_r _*_d, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_s)
+          Append _s to _d but doesn't exceed entire _s_i_z_e - 1; append terminating
+          `\0'.
+     _c_h_a_r_* fftthh__ssttrrccppyy(_c_h_a_r _*_d, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_s)
+          Copy _s to _d but not more than _s_i_z_e - 1 chars; append terminating
+          `\0'.
+     _c_h_a_r_* fftthh__ssttrrdduupp(_c_o_n_s_t _c_h_a_r _*_s)
+     _c_h_a_r_* fftthh__ssttrreerrrroorr(_i_n_t _n)
+     _s_i_z_e___t fftthh__ssttrrlleenn(_c_o_n_s_t _c_h_a_r _*_s)
+     _c_h_a_r_* fftthh__ssttrrnnccaatt(_c_h_a_r _*_d, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_s, _s_i_z_e___t _c_o_u_n_t)
+          Append _c_o_u_n_t chars from _s to _d but doesn't exceed entire _s_i_z_e - 1;
+          append terminating `\0'.
+     _c_h_a_r_* fftthh__ssttrrnnccppyy(_c_h_a_r _*_d, _s_i_z_e___t _s_i_z_e, _c_o_n_s_t _c_h_a_r _*_s, _s_i_z_e___t _c_o_u_n_t)
+          Copy _c_o_u_n_t chars from _s to _d but not more than _s_i_z_e - 1 chars;
+          append terminating `\0'.
+     _v_o_i_d fftthh__tthhrrooww(_F_T_H _e_x_c, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+     _v_o_i_d fftthh__tthhrrooww__eerrrroorr(_F_T_H _e_x_c, _F_T_H _a_r_g_s)
+          Throw exception _e_x_c with text built from _a_r_g_s.  If _a_r_g_s is not an
+          array, its string representation is used.  If _a_r_g_s is FTH_NIL or an
+          empty array, a default string is used.  If _a_r_g_s is an array with one
+          element, this string is used.  If _a_r_g_s is an array and its first
+          element is a format string with N %s-format signs, _a_r_g_s should have
+          N more elements.
+                /*
+                 * ARGS: any object
+                 */
+                fth_throw_error(FTH_BAD_ARITY, proc);
+                  => #<bad-arity in test-proc>
+                /*
+                 * ARGS: nil or #()
+                 */
+                fth_throw_error(FTH_BAD_ARITY, FTH_NIL);
+                  => #<bad-arity: proc has bad arity>
+                /*
+                 * ARGS: #( string )
+                 */
+                fth_throw_error(FTH_BAD_ARITY,
+                    FTH_LIST_1(fth_make_string("test-proc"));
+                  => #<bad-arity in test-proc>
+                /*
+                 * ARGS: #( fmt arg1 arg2 arg3 )
+                 */
+                fth_throw_error(FTH_BAD_ARITY,
+                    FTH_LIST_4(fth_make_string("%s: %s args require, got %s"),
+                               proc,
+                               FTH_TWO,
+                               FTH_THREE));
+                  => #<bad-arity in test-proc: 2 args required, got 3>
+     _v_o_i_d fftthh__tthhrrooww__lliisstt(_F_T_H _e_x_c, _F_T_H _a_r_g_s)
+          The same like fftthh__tthhrrooww__eerrrroorr except for replacing format signs ~A
+          and ~S with %s.
+     _c_h_a_r_* ppoopp__ccssttrriinngg(_f_i_c_l_V_m _*_v_m)
+     _v_o_i_d ppuusshh__ccssttrriinngg(_f_i_c_l_V_m _*_v_m, _c_h_a_r _*_s)
+
+EENNVVIIRROONNMMEENNTT
+     FTH_DICTIONARY_SIZE
+          Overwrite default dictionary size (1024 * 1024).
+     FTH_LOCALS_SIZE
+          Overwrite default number of locals (2048).
+     FTH_RETURN_SIZE
+          Overwrite default size of return stack (1024).
+     FTH_STACK_SIZE
+          Overwrite default size of parameter stack (8192).
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     lliibbfftthh conforms only partly to _A_N_S _F_o_r_t_h.  The double word set doesn't
+     take two stack entries and is actually of type _f_i_c_l_2_I_n_t_e_g_e_r.
+
+     lliibbfftthh has no extra floating point stack; floats are of type _f_i_c_l_F_l_o_a_t.
+
+SSEEEE AALLSSOO
+     clang(1), fth(1), sprintf(3)
+
+SSTTAANNDDAARRDDSS
+     lliibbfftthh conforms only partly to _A_N_S _F_o_r_t_h.
+
+HHIISSTTOORRYY
+     This manual page describes version 1.3.7.  lliibbfftthh is based on _F_i_c_l,
+     _F_o_r_t_h_-_i_n_s_p_i_r_e_d _c_o_m_m_a_n_d _l_a_n_g_u_a_g_e, version 4.0.31 written by John Sadler.
+
+AAUUTTHHOORRSS
+     lliibbfftthh and this manual page was written by Michael Scholz
+     <mi-scholz@users.sourceforge.net>.
+
+BBUUGGSS
+     Please report bugs to the author.
+
+NetBSD 7.99.3                 September 13, 2013                 NetBSD 7.99.3

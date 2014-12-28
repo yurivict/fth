@@ -1,0 +1,3407 @@
+FTH(1)                      General Commands Manual                     FTH(1)
+
+NNAAMMEE
+     fftthh -- Forth script and extension language
+
+SSYYNNOOPPSSIISS
+     fftthh [--DDddQQqqrrvv] [--CC _s_o_-_l_i_b_-_p_a_t_h] [--EEee _p_a_t_t_e_r_n] [--FF _f_s] [--ff _i_n_i_t_-_f_i_l_e]
+         [--II _f_s_-_p_a_t_h] [--SS "_l_i_b _i_n_i_t"] [--ss _f_i_l_e] [_f_i_l_e _._._.]
+     fftthh [--aall] [--ii [_s_u_f_f_i_x]] [--nn | --pp] --ee _p_a_t_t_e_r_n [_f_i_l_e | _-]
+     fftthh [--hh | --VV]
+
+DDEESSCCRRIIPPTTIIOONN
+     This is the manual page for the interactive and script processing Forth
+     interpreter fftthh.  It is based on _F_i_c_l.  This manual page provides
+     information for running fftthh in a UNIX command line environment.  See
+     libfth(3) for Forth as an extension language.
+
+   AArrgguummeenntt lliisstt pprroocceessssiinngg
+     --aa   Split every line to array *farray* before evaluation.  The split
+          string is field separator *fs*.  Used with --nn or --pp option.
+     --CC _p_a_t_h
+          Prepend _p_a_t_h to *load-lib-path*, multiple calls possible.
+     --DD   Show backtrace and exit with return code 1 if an exception was found
+          evaluating the initialization file, running a script, loading
+          additional source files, or evaluating strings from the command
+          line.
+     --dd   Set global variable *fth-debug* to #t.
+     --EE _p_a_t_t_e_r_n
+     --ee _p_a_t_t_e_r_n
+          Evaluate _p_a_t_t_e_r_n.  After evaluation, if options --ee was specified,
+          exit, if option --EE was specified, start read-eval-print-loop.
+          Multiple calls possible.  If --DD was given and evaluation was not
+          successful, show backtrace and exit with return code 1, otherwise
+          exit with return code 0.  The last or only --ee _p_a_t_t_e_r_n can be
+          considered between
+                lambda: <{}> pattern ;
+          and is in compile state!  If multiple --ee _p_a_t_t_e_r_n appear, all but the
+          last are in interpret state.
+     --FF _f_s
+          Set global variable *fs* to field separator _f_s.
+     --ff _f_i_l_e
+          Take initialization file _f_i_l_e instead of _~_/_._f_t_h_r_c.  Use --QQ to
+          prevent loading initialization files.
+     --hh   Display help message and exit.
+     --II _p_a_t_h
+          Prepend _p_a_t_h to *load-path*, multiple calls possible.
+     --ii [_s_u_f_f_i_x]
+          The --ee _p_a_t_t_e_r_n will be applied to files or stdin.  If _s_u_f_f_i_x is
+          specified, a backup file will be created with that suffix.
+     --ll   Remove line ending \n when used with --nn or --pp option.
+     --nn   Suppress output of current *line*.  If not in-place --ii, start an
+          implicit loop.
+     --pp   Print current *line* to stdout.  If not in-place --ii, start an
+          implicit loop.
+     --QQ   Neither load the system wide nor the local initialization file.
+     --qq   Do not print banner and set global variable *fth-verbose* to #f.
+     --rr   Start a conventional Forth-like session with data stack left
+          untouched after pressing <Return>.  Normally the data stack is
+          printed and cleared but --rr changes this behavior to something like a
+          _r_e_a_d_-_e_v_a_l_-_l_o_o_p instead of a _r_e_a_d_-_e_v_a_l_-_p_r_i_n_t_-_l_o_o_p.  If --DD was given
+          and evaluation was not successful, show backtrace and exit with
+          return code 1, otherwise exit with return code 0.
+     --SS "_l_i_b _i_n_i_t"
+          Load C extension library _l_i_b and call the initialization function
+          _i_n_i_t.  _l_i_b and _i_n_i_t must be enclosed in quotations
+                -S "dbm Init_dbm"
+          Multiple calls possible.
+     --ss _f_i_l_e
+          Evaluate _f_i_l_e as a Forth script and exit.  It doesn't read the
+          initialization file.  The global Forth variables *argc* and *argv*
+          are set and filled with the count and command line options appearing
+          after --ss _f_i_l_e.  This must be the last option given to the fftthh
+          interpreter.  Options after that are taken as script options.  If --DD
+          was given and evaluation was not successful, show a backtrace and
+          exit with return code 1, otherwise exit with return code 0.
+     --VV   Display version info and exit.
+     --vv   Set global variable *fth-verbose* to #t (default).
+
+   FFoorrtthh vvaarriiaabblleess
+     *argc*
+          Number of arguments in *argv*.
+     *argv*
+          Array of command line arguments.  Return array of all exceptions.
+     *farray*
+          Auto-splitted array of strings of current line.
+     *features*
+          Return array of all features.
+     *filename*
+          Current file name.
+     *fname*
+          Current in-place file name.
+     *fnr*
+          Input record number in current file.
+     *fs*
+          Input field separator, default one space.
+     *fth-debug*
+          If #t, show more diagnostic output.
+     *fth-verbose*
+          If #t, show more output.
+     *key*
+          Hold current value in a map--end-map loop.
+     *last-exception*
+          Hold last raised exception.
+     *line*
+          Current in-place processing line.
+     *lineno*
+          Current line number.
+     *load-lib-path*
+          Array of directories where fftthh searchs for _*_._s_o C-library files.
+     *load-path*
+          Array of directories where fftthh searchs for _*_._f_s script files.
+     *loaded-files*
+          Array of already loaded files.
+     *nr*
+          Input record number over all files.
+     *re*
+          Array with last regexp match.
+     *re-syntax-options*
+          Regexp syntax option, default REG_EXTENDED.
+     *re0*
+          Regexp last entire match.
+     *re1* ... *re9*
+          Regexp last subexpression matches.
+     optarg
+          Getopt variable with current option argument string, default #f.
+     opterr
+          If #t, getopt print error message for wrong or missing arguments;
+          default #t.
+     optind
+          Getopt variable with index of next element in *argv* array, default
+          1.
+     optopt
+          Getopt variable with last known option, default #f.
+
+   HHooookk vvaarriiaabblleess
+     fftthh calls five hooks if they are not empty: before and after loading
+     source files and in interactive mode before starting and after ending the
+     repl as well as every time before showing the prompt.
+     bbeeffoorree--llooaadd--hhooookk ( filename -- f )
+          Called before loading _f_i_l_e_n_a_m_e.  If hook returns #f, _f_i_l_e_n_a_m_e won't
+          be loaded.
+                before-load-hook lambda: <{ fname -- f }>
+                        "\\ loading %s\n" #( fname ) fth-print
+                        #t
+                ; add-hook!
+     aafftteerr--llooaadd--hhooookk ( filename -- )
+          Called after loading _f_i_l_e_n_a_m_e and updating global variable
+          *loaded-files*.
+                after-load-hook lambda: <{ fname -- }>
+                        "\\ %s loaded\n" #( fname ) fth-print
+                ; add-hook!
+     bbeeffoorree--rreeppll--hhooookk ( -- )
+          Called after initializing the tecla(7) command-line editing library
+          but before starting the repl.  A predefined hook showing some help
+          lines can be replaced by your own message.
+                before-repl-hook reset-hook!
+                before-repl-hook lambda: <{ -- }>
+                        ." \" cr
+                        ." \ Starting FTH on " date .string ." !" cr
+                        ." \" cr
+                ; add-hook!
+     aafftteerr--rreeppll--hhooookk ( history-file -- )
+          Called after leaving the repl and writing the history file but
+          before leaving the program.  Its only argument is the history
+          filename.  You may manipulate the history data entries.  One history
+          entry consists of two lines: a time stamp preceded by a Forth
+          comment backslash and the actual history line.
+                after-repl-hook lambda: <{ history -- }>
+                        \ Remove duplicates from history file.
+                        history readlines array-reverse! { hary }
+                        #() "" "" { nhary hline tline }
+                        hary array-length 0 ?do
+                                hary i    array-ref to hline
+                                hary i 1+ array-ref to tline
+                                nhary hline array-member? unless
+                                        nhary hline array-unshift
+                                        tline array-unshift drop
+                                then
+                        2 +loop
+                        history nhary writelines
+                ; add-hook!
+     bbeeffoorree--pprroommpptt--hhooookk ( prompt pos -- new-prompt )
+          Called before printing a new prompt to customize the output of it.
+          _p_r_o_m_p_t is the old prompt and _p_o_s the current history position.  The
+          return value, preferable a string, is the _p_r_o_m_p_t argument for the
+          next hook procedure if any.
+                before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
+                        "fth (%d) ok " #( pos ) string-format
+                ; add-hook!
+          Or with standout and bold mode, see gl_prompt_style(3) and
+          _*_p_r_o_m_p_t_s_t_y_l_e_* below:
+                #t to *promptstyle*
+                before-prompt-hook lambda: <{ prompt pos -- new-prompt }>
+                        "%%Sfth (%d)%%s %%Bok%%b " #( pos ) string-format
+                ; add-hook!
+
+   TThhee ccoommmmaanndd--lliinnee eeddiittoorr
+     Command-line editing similar to tcsh(1) is handled by the tecla(7)
+     library if installed.  Predefined key bindings exist for those similar to
+     vi(1) and emacs(1).  The default editing mode is emacs-mode.  You can
+     switch from emacs-mode to vi-mode via MM--^^VV and from vi-mode to emacs-mode
+     via MM--^^EE.  To start in vi-mode, put a line like
+           edit-mode vi
+     in your _~_/_._t_e_c_l_a_r_c file.  A history of the last command-lines can be
+     listed with ^^XXhh, the last 10 history entries can be listed with MM--1100^^XXhh.
+     The Tab-key or ^^II initiates word completion.  If the Forth dictionary has
+     more than one entry starting with characters before the cursor, show all,
+     if only one definition exists, complete it and add a space after the
+     completed word.  If the Forth dictionary has no entries starting with the
+     characters before the cursor, try file name completion.  For complete key
+     listings and function descriptions, see tecla(7).
+
+     If the first character of the command-line is an exclamation point !!, try
+     history expansion similar to csh(1).
+
+     !123   repeat event 123
+     !-123  repeat 123rd last event
+     !!     repeat last event (same as !-1)
+     !?str(?)
+            repeat last event containing _s_t_r_; the last ?? is optional
+     !str   repeat last event starting with _s_t_r
+
+     If the first character of the command-line is a caret ^^, try history
+     substitution similar to csh(1).
+
+     ^search^replace(^)   repeat last event containing _s_e_a_r_c_h and replace this
+                          string with _r_e_p_l_a_c_e; the last ^^ is optional
+
+   TTeeccllaa vvaarriiaabblleess
+     *histdup*
+          If set to ggll--aallll, only unique history events are entered in the
+          history list.  If set to ggll--pprreevv and the last history event is the
+          same as the current, the current command is not entered.  If set to
+          ggll--eerraassee and the same event is found in the history list, that old
+          event gets erased and the current one gets inserted.  If not defined
+          (undef, the default), all history events are entered.  Default is
+          undef.
+     *histfile*
+          Can be set to the pathname where history is going to be saved and
+          restored.  If not set, use $FTH_HISTORY or _~_/_._f_t_h_-_h_i_s_t_o_r_y.  Default
+          is undef.
+     *history*
+          Can be given a numeric value to control the size of the history
+          list.  If not set, use $FTH_HISTORY_LENGTH or 100.  Default is
+          undef.
+     *savehist*
+          If true, save at most *history*, $FTH_HISTORY_LENGTH, or 100 history
+          events to *history*, $FTH_HISTORY, or _~_/_._f_t_h_-_h_i_s_t_o_r_y, if false,
+          don't save history events.  Default is #t.
+     *promptstyle*
+          If true, enable special formatting directives within the prompt, see
+          gl_prompt_style(3).  Default is #f.
+
+   TTeeccllaa wwoorrddss
+     bbiinnddkkeeyy ( :optional key action -- )
+          Key bindings and others can be set in _~_/_._f_t_h_r_c to control libtecla
+          and getline.
+          no argument   Show user-defined key-bindings set for example in
+                        _~_/_._f_t_h_r_c.
+          one argument  If _k_e_y is a string, take it as configure string.  If
+                        _k_e_y is a predefined constant, set specific value as
+                        configure string.  Valid constants:
+                        gl-vi   edit-mode vi
+                        gl-emacs
+                                edit-mode emacs
+                        gl-none
+                                edit-mode none
+                        gl-nobeep
+                                nobeep
+                              "edit-mode vi \n nobeep" bindkey
+                              gl-vi bindkey
+          two arguments
+                        If _k_e_y and _a_c_t_i_o_n are strings, bind _a_c_t_i_o_n to _k_e_y.  If
+                        _k_e_y is a string and _a_c_t_i_o_n is anything else, unbind
+                        _k_e_y from last bind.  See tecla(7) for key-bindings and
+                        actions.
+                              "^G" "user-interrupt" bindkey
+                              "^G" #f bindkey
+     hhiissttoorryy ( :optional action arg -- )
+          History events can be displayed, loaded, saved, and cleared where
+          _a_c_t_i_o_n can be one of
+          gl-show   show _a_r_g or all history events
+          gl-load   load history events from _a_r_g or *histfile*
+          gl-save   save history events to _a_r_g or *histfile*
+          gl-clear  clear all history events
+                             history => show entire history
+                gl-show      history => same as above
+                        10   history => show 10 last history events
+                gl-show 10   history => same as above
+                gl-load      history => load from *histfile*
+                gl-load nil  history => same as above
+                gl-load file history => load from file
+                gl-save      history => save to *histfile*
+                gl-save nil  history => same as above
+                gl-save file history => save to file
+                gl-clear     history => clear all history events
+
+   LLooooppss
+     Forth has loop constructs for compile state and interpret state.  In
+     addition to the usual do--loop, fftthh provides each--end-each and map--end-
+     map loops for objects.
+     ddoo ( limit start -- ) compile-only
+     ??ddoo ( limit start -- ) compile-only
+     lloooopp ( -- ) compile-only
+          Run loop from _s_t_a_r_t up to but not including _l_i_m_i_t.  ??ddoo starts only
+          if _l_i_m_i_t is greater than _s_t_a_r_t.
+                3 0 do  i .  loop => 0 1 2
+     eeaacchh ( obj -- val ) compile-only
+     eenndd--eeaacchh ( -- ) compile-only
+          Push each element of _o_b_j in order on stack and repeat execution of
+          body.
+                #( 0 1 2 ) each  .  end-each => 0 1 2
+     mmaapp ( obj -- ) compile-only
+     mmaapp!! ( obj -- ) compile-only
+     eenndd--mmaapp ( -- obj ) compile-only
+          Set each element of _o_b_j in order to global variable *key* and repeat
+          execution of body.  The current element of _o_b_j with mmaapp!! or a copy
+          of _o_b_j with mmaapp is set to top of stack before eenndd--mmaapp.
+                #( 0 1 2 ) value a1
+                a1 map   i *key* +  end-map => #( 0 2 4 ) \ a copy of a1
+                a1 .$ => #( 0 1 2 )
+                a1 map!  i *key* +  end-map => #( 0 2 4 ) \ a1 has changed
+                a1 .$ => #( 0 2 4 )
+     Interpret state loops for use outside word definitions in scripts or in
+     the repl work like their compile state cousins above.  The body of the
+     following [do]--[loop], [each]--[end-each] and [map]--[end-map] is in
+     compile state, loop indexes ii, jj, kk and lleeaavvee etc can be used like in
+     colon definitions.
+     [[ddoo]] ( limit start -- )
+     [[lloooopp]] ( -- )
+                3 0 [do]  i .  [loop] => 0 1 2
+     [[eeaacchh]] ( obj -- val )
+     [[eenndd--eeaacchh]] ( -- )
+                #( 0 1 2 ) [each]  .  [end-each] => 0 1 2
+     [[mmaapp]] ( obj -- )
+     [[mmaapp!!]] ( obj -- )
+     [[eenndd--mmaapp]] ( -- obj )
+                #( 0 1 2 ) value a1
+                a1 [map]   i *key* +  [end-map] => #( 0 2 4 ) \ a copy of a1
+                a1 .$ => #( 0 1 2 )
+                a1 [map!]  i *key* +  [end-map] => #( 0 2 4 ) \ a1 has changed
+                a1 .$ => #( 0 2 4 )
+
+   AArrrraayyss aanndd LLiissttss
+     Arrays:
+     ##(()) ( -- ary )
+          Return array of length 0 for array-append, array-push etc.
+     ..aarrrraayy ( ary -- )
+          Print array object _a_r_y to current output.
+     >>aarrrraayy ( vals len -- ary )
+          Return array object with _l_e_n objects found on parameter stack.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+     aarrrraayy-->>aarrrraayy ( ary1 -- ary2 )
+          Return copy of _a_r_y_1 only with references of each element in contrary
+          to _a_r_r_a_y_-_c_o_p_y.  If _a_r_y_1 is not an array, return #( ary1 ).
+                #( 0 #{ 'foo 10 } 2 ) value ary1
+                ary1 array->array value ary2
+                ary1 1 array-ref 'foo 30 hash-set!
+                ary1 => #( 0 #{ 'foo 30 } 2 )
+                ary2 => #( 0 #{ 'foo 30 } 2 )
+     aarrrraayy-->>lliisstt ( ary -- lst )
+          Return copy of _a_r_y as list only with references of each elements in
+          contrary to _a_r_r_a_y_-_c_o_p_y.  If _a_r_y is not an array, return '( ary ).
+                #( 0 #{ 'foo 10 } 2 ) value ary
+                ary array->list value lst
+                ary 1 array-ref 'foo 30 hash-set!
+                lst => '( 0 #{ 'foo 30 } 2 )
+                ary => #( 0 #{ 'foo 30 } 2 )
+     aarrrraayy--aappppeenndd ( ary1 ary2 -- ary1+ary2 )
+          Append two arrays and return new one.  If _a_r_y_2 is not an array,
+          append it as a single element.
+                #( 0 1 2 ) #( 3 4 ) array-append => #( 0 1 2 3 4 )
+                #( 0 1 2 ) 10 array-append => #( 0 1 2 10 )
+     aarrrraayy--cclleeaarr ( ary -- )
+          Clear array and set all elements to #f.
+     aarrrraayy--ccoommppaacctt ( ary1 prc args -- ary2 )
+          Return new array object with nil elements removed.
+     aarrrraayy--ccoommppaacctt!! ( ary prc args -- ary' )
+          Remove all nil elements from _a_r_y and return changed array object.
+     aarrrraayy--ccoonnccaatt ( vals len -- ary ) alias for _>_a_r_r_a_y
+     aarrrraayy--ccooppyy ( ary1 -- ary2 )
+          Return copy of _a_r_y_1 with all elements new created in contrary to
+          _a_r_r_a_y_-_>_a_r_r_a_y.
+                #( 0 #{ 'foo 10 } 2 ) value ary1
+                ary1 array-copy value ary2
+                ary1 1 array-ref 'foo 30 hash-set!
+                ary1 => #( 0 #{ 'foo 30 } 2 )
+                ary2 => #( 0 #{ 'foo 10 } 2 )
+     aarrrraayy--ddeelleettee!! ( ary idx -- val )
+          Delete and return one element from _a_r_y at position _i_d_x.  Negative
+          index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is
+          not in _a_r_y_'_s range.
+     aarrrraayy--ddeelleettee--kkeeyy ( ary key -- val )
+          Delete and return _k_e_y from _a_r_y if found, otherwise return #f.
+     aarrrraayy--ffiillll ( ary val -- )
+          Set all elements of _a_r_y to _v_a_l.
+     aarrrraayy--ffiinndd ( ary key -- key )
+          Return key if _k_e_y exists in _a_r_y, otherwise #f.
+     aarrrraayy--iinnddeexx ( ary key -- idx )
+          Return index of _k_e_y in _a_r_y or -1 if not found.
+     aarrrraayy--iinnsseerrtt ( ary1 idx val -- ary2 )
+          Insert _v_a_l to _a_r_y_1 at position _i_d_x and return new array.  _v_a_l can be
+          an array or any other object.  Negative _i_d_x counts from backward.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_1_'_s range.
+     aarrrraayy--iinnsseerrtt!! ( ary idx val -- ary' )
+          Insert _v_a_l to _a_r_y at position _i_d_x and return changed array.  _v_a_l can
+          be a single object or an array.  Negative _i_d_x counts from backward.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_'_s range.
+     aarrrraayy--jjooiinn ( ary sep -- str )
+          Return string with all elements of _a_r_y converted to their string
+          representation and joined together separated by the string _s_e_p.  If
+          _s_e_p is not a string, a space will be used as separator.
+                #( 0 1 2 ) "--" array-join => "0--1--2"
+                #( 0 1 2 ) nil array-join => "0 1 2"
+     aarrrraayy--lleennggtthh ( obj -- len )
+          If _o_b_j is an array object, return its length, otherwise -1.
+     aarrrraayy--mmeemmbbeerr?? ( ary key -- f )
+          Return #t if _k_e_y exists in _a_r_y, otherwise #f.
+     aarrrraayy--ppoopp ( ary -- val )
+          Remove and return last element from _a_r_y.  If _a_r_y is empty, return
+          #f.
+     aarrrraayy--ppuusshh ( ary val -- ary' )
+          Append _v_a_l to _a_r_y.
+                #( 0 1 2 ) 10 array-push => #( 0 1 2 10 )
+     aarrrraayy--rreeff ( ary idx -- val )
+          Return value at position _i_d_x.  Negative index counts from backward.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
+     aarrrraayy--rreejjeecctt ( ary1 prc args -- ary2 )
+          _p_r_c will be called with _a_r_g_s, an array of zero or more proc
+          arguments, and the current array element set as first arg in _a_r_g_s
+          array.  The length of _a_r_g_s + 1 is the required arity of _p_r_c.  If _p_r_c
+          returns neither #f nor nil nor 0, this element will be pushed in a
+          new array object.  The new array object will be returned.  In the
+          example n1 corresponds to the current array element and n2 comes
+          from args, here 2.
+                #( 0 1 2 ) lambda: <{ n1 n2 -- f }>
+                        n1 n2 >
+                ; #( 2 ) array-reject => #( 0 1 )
+          The same a bit shorter:
+                #( 0 1 2 ) <'> > #( 2 ) array-reject => #( 0 1 )
+     aarrrraayy--rreejjeecctt!! ( ary prc args -- ary' )
+          _p_r_c will be called with _a_r_g_s, an array of zero or more proc
+          arguments, and the current array element set as first arg in _a_r_g_s
+          array.  The length of _a_r_g_s + 1 is the required arity of _p_r_c.  If _p_r_c
+          returns neither #f nor nil nor 0, the element will be removed.  In
+          the example n1 corresponds to the current array element and n2 comes
+          from args, here 2.
+     aarrrraayy--rreevveerrssee ( ary1 -- ary2 )
+          Return new array with elements reversed.
+     aarrrraayy--rreevveerrssee!! ( ary -- ary' )
+          Return _a_r_y with elements reversed.
+     aarrrraayy--sseett!! ( ary idx val -- )
+          Store _v_a_l at position _i_d_x.  Negative index counts from backward.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
+     aarrrraayy--sshhiifftt ( ary -- val )
+          Remove and return first element from _a_r_y.  If _a_r_y is empty, return
+          #f.
+     aarrrraayy--ssoorrtt ( ary1 prc -- ary2 )
+          Return new sorted array.  _p_r_c compares two elements A and B and
+          should return a negative integer if A < B, 0 if A == B, and a
+          positive integer if A > B.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c doesn't
+          take two arguments.
+                #( 2 1 0 ) lambda: <{ a b -- f }>
+                        a b < if
+                                -1
+                        else
+                                a b > if
+                                        1
+                                else
+                                        0
+                                then
+                        then
+                ; array-sort => #( 0 1 2 )
+     aarrrraayy--ssoorrtt!! ( ary prc -- ary' )
+          Return the sorted _a_r_y.  _p_r_c compares two elements A and B and should
+          return a negative integer if A < B, 0 if A == B, and a positive
+          integer if A > B.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c doesn't take two
+          arguments.
+     aarrrraayy--ssuubbaarrrraayy ( ary start end -- subary )
+          Return array built from _a_r_y beginning with index _s_t_a_r_t up to but
+          excluding index _e_n_d.  If _e_n_d is nil, up to end of array will be
+          returned.  Negative index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if _s_t_a_r_t is not in _a_r_y_'_s range.
+                #( 0 1 2 3 4 ) 2 4 array-subarray => #( 2 3 )
+                #( 0 1 2 3 4 ) -3 -1 array-subarray => #( 2 3 4 )
+                #( 0 1 2 3 4 ) -3 nil array-subarray => #( 2 3 4 )
+     aarrrraayy--uunniiqq ( ary1 -- ary2 )
+          Return new array without duplicated elements of _a_r_y_1.
+     aarrrraayy--uunniiqq!! ( ary -- ary' )
+          Return _a_r_y without duplicated elements.
+     aarrrraayy--uunnsshhiifftt ( ary val -- ary' )
+          Prepend _v_a_l to _a_r_y.
+                #( 0 1 2 ) 10 array-unshift => #( 10 0 1 2 )
+     aarrrraayy== ( ary1 ary2 -- f )
+          Return #t if _a_r_y_1 and _a_r_y_2 are array objects of same length and
+          content, otherwise #f.
+     aarrrraayy?? ( obj -- f )
+          Return #t if _o_b_j is an array object, otherwise #f.
+     mmaakkee--aarrrraayy ( len :key initial-element -- ary )
+          Return array of length _l_e_n filled with keyword INITIAL-ELEMENT
+          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+
+     Assoc arrays:
+     >>aassssoocc ( vals len -- ary )
+          Return assoc array object with _l_e_n / 2 key-value pairs found on
+          parameter stack.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
+          even.
+     aarrrraayy--aassssoocc ( ass key -- ret )
+          If _k_e_y matches, return corresponding key-value pair, otherwise #f.
+     aarrrraayy--aassssoocc--rreeff ( ass key -- val )
+          If _k_e_y matches, return corresponding value, otherwise #f.
+     aarrrraayy--aassssoocc--rreemmoovvee!! ( ass key -- 'ass )
+          If _k_e_y matches, remove key-value pair from _a_s_s.
+     aarrrraayy--aassssoocc--sseett!! ( ass key val -- 'ass )
+          If _k_e_y matches, set key-value pair, otherwise add new pair.
+     aassssoocc ( ass key val -- 'ass )
+          Build sorted assoc array.  _a_s_s must be an assoc array or an empty
+          array #().
+                #() value ass
+                ass 'a 10 assoc => #a( '( 'a . 10 ) )
+                ass 'b 20 assoc => #a( '( 'a . 10 ) '( 'b . 20 ) )
+     aassssoocc?? ( obj -- f )
+          Return #t if _o_b_j is an assoc array object, otherwise #f.
+
+     Lists:
+     ''(()) ( -- lst )
+          Return empty list.
+     ..lliisstt ( lst -- )
+          Print list object _l_s_t to current output.
+     >>lliisstt ( vals len -- lst )
+          Return list object with _l_e_n objects found on parameter stack.  Raise
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+     ccaaddddddrr ( lst -- val )
+          Return fourth entry, the cadddr, of _l_i_s_t or nil.
+     ccaaddddrr ( lst -- val )
+          Return third entry, the caddr, of _l_i_s_t or nil.
+     ccaaddrr ( lst -- val )
+          Return second entry, the cadr, of _l_i_s_t or nil.
+     ccaarr ( lst -- val )
+          Return first entry, the car, of _l_i_s_t or nil.
+     ccddddrr ( lst -- val )
+          Return rest, the cddr, of _l_i_s_t without its first and second entries.
+     ccddrr ( lst -- val )
+          Return rest, the cdr, of _l_i_s_t without its first entry.
+     ccoonnss ( val lst1 -- lst2 )
+          Return Lisp-like cons pointer with _v_a_l as car and _l_i_s_t as cdr.
+     ccoonnss22 ( val1 val2 lst1 -- lst2 )
+          Return Lisp-like cons pointer with _v_a_l_1 as car, _v_a_l_2 as cadr and
+          _l_i_s_t as cddr.
+     ccoonnss?? ( obj -- f )
+          Return #t if _o_b_j is a cons pointer, otherwise #f.
+     llaasstt--ppaaiirr ( lst -- lp )
+          Return last pair of _l_s_t.
+                '( 0 1 2 3 ) last-pair => '( 3 )
+     lliisstt-->>aarrrraayy ( lst -- ary )
+          Return copy of _l_s_t as array only with references of each element in
+          contrary to _l_i_s_t_-_c_o_p_y.  _l_s_t is not a cons pointer, return #( lst ).
+                '( 0 #{ 'foo 10 } 2 ) value lst1
+                lst1 list->array value ary2
+                lst1 1 list-ref 'foo 30 hash-set!
+                lst1 => '( 0 #{ 'foo 30 } 2 )
+                ary2 => #( 0 #{ 'foo 30 } 2 )
+     lliisstt--aappppeenndd ( arg0 arg1 ... argn n -- lst )
+          Return list object with _n objects found on parameter stack.  Raise
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _n < 0.
+     lliisstt--ccooppyy ( lst1 -- ary2 )
+          Return copy of _l_s_t_1 with all elements new created in contrary to
+          _l_i_s_t_-_>_a_r_r_a_y.
+                '( 0 #{ 'foo 10 } 2 ) value lst1
+                lst1 list-copy value lst2
+                lst1 1 list-ref 'foo 30 hash-set!
+                lst1 => '( 0 #{ 'foo 30 } 2 )
+                lst2 => '( 0 #{ 'foo 10 } 2 )
+     lliisstt--ddeelleettee ( lst1 key -- lst2 )
+          Return new list without all elements equal _k_e_y.
+     lliisstt--ddeelleettee!! ( lst key -- lst' )
+          Return _l_s_t without all elements equal _k_e_y.
+     lliisstt--ffiillll ( lst val -- lst' )
+          Set all elements of _l_s_t to _v_a_l.
+     lliisstt--hheeaadd ( lst1 idx -- lst2 )
+          Return first _i_d_x entries of _l_s_t_1 in a new list or nil.
+     lliisstt--iinnddeexx ( lst key -- idx )
+          Return index of _k_e_y in _l_s_t or -1 if not found.
+     lliisstt--iinnsseerrtt ( lst1 idx val -- lst2 )
+          Insert _v_a_l to _l_s_t_1 at position _i_d_x and return new list.  _v_a_l can be
+          a list or any other object.  Negative _i_d_x counts from backward.
+          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_1_'_s range.
+     lliisstt--lleennggtthh ( obj -- len )
+          If _o_b_j is a list (or array), return length of list, if _o_b_j is nil,
+          return 0 otherwise -1.
+     lliisstt--mmeemmbbeerr?? ( lst key -- f )
+          Return #t if _k_e_y exists in _l_s_t, otherwise #f.
+     lliisstt--rreeff ( lst idx -- val )
+          Return value at position _i_d_x of _l_s_t.  Negative _i_d_x counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
+          range.
+     lliisstt--rreevveerrssee ( lst1 -- ary2 )
+          Return new list with elements reversed.
+     lliisstt--sseett!! ( lst idx val -- )
+          Store element _v_a_l at position _i_d_x in _l_s_t.  Negative _i_d_x counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
+          range.
+     lliisstt--sslliiccee ( lst1 idx :key count 1 -- lst2 )
+          Return new list without _c_o_u_n_t elements from _i_d_x on.  Raise
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_1_'_s range.
+                #( 0 1 1 2 ) 1 :count 2 list-slice => #( 0 2 )
+     lliisstt--sslliiccee!! ( lst idx :key count 1 -- lst' )
+          Return _l_s_t without _c_o_u_n_t elements from _i_d_x on.  Raise _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if _i_d_x is not in _l_s_t_'_s range.
+     lliisstt--ttaaiill ( lst1 idx -- lst2 )
+          Return _i_d_x_'_t_h cdr of _l_s_t_1 up to the last entry in a new list or nil.
+     lliisstt== ( lst1 lst2 -- f )
+          Return #t if _l_s_t_1 and _l_s_t_2 are list objects of same length and
+          content, otherwise #f.
+     lliisstt?? ( obj -- f )
+          Return #t if _o_b_j is a list (nil or a cons pointer), otherwise #f.
+     mmaakkee--lliisstt ( len :key initial-element nil -- lst )
+          Return list of length _l_e_n filled with keyword _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t
+          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+     nniill?? ( obj -- f )
+          Return #t if _o_b_j is nil, otherwise #f.
+     nnuullll?? ( obj --f ) alias for _n_i_l_?
+     ppaaiirr?? ( obj -- f )
+          Return #t if _o_b_j is a pair (a cons pointer), otherwise #f.
+     sseett--ccaarr!! ( lst val -- lst' )
+          Set _v_a_l to car of _l_s_t.
+     sseett--ccddrr!! ( lst val -- lst' )
+          Set _v_a_l to cdr of _l_s_t.
+
+     Assoc lists:
+     >>aalliisstt ( vals len -- alst )
+          Return assoc list object with _l_e_n / 2 key-value pairs found on
+          parameter stack. Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
+          even.
+     aaccoonnss ( key val alst1 -- alst2 )
+          Return new Lisp-like associated list from _k_e_y_-_v_a_l pair and _a_l_s_t_1.
+     lliisstt--aassssoocc ( alst key -- ret )
+          If _k_e_y matches, return corresponding key-value pair, otherwise #f.
+     lliisstt--aassssoocc--rreeff ( alst key -- val )
+          If _k_e_y matches, return corresponding value, otherwise #f.
+     lliisstt--aassssoocc--rreemmoovvee!! ( alst key -- alst' )
+          If _k_e_y matches, remove key-value pair from _a_l_s_t.  Return current
+          assoc-list.
+     lliisstt--aassssoocc--sseett!! ( alst key val -- alst' )
+          If _k_e_y matches, set key-value pair, otherwise add new pair to _a_l_s_t.
+          Return current assoc-list.
+
+   FFiillee FFuunnccttiioonnss
+     General functions:
+     cchhddiirr ( path -- ) alias for _f_i_l_e_-_c_h_d_i_r
+     cclloossee--ppiippee ( fp -- ior )
+          Forth-like word.
+                256 constant max-line
+                create line-buffer max-line 2 + allot
+                s" pwd" r/o open-pipe throw value FP
+                line-buffer max-line FP read-line throw drop
+                    line-buffer swap type
+                FP close-pipe throw
+     ffiillee--aattiimmee ( name -- time )
+          If _n_a_m_e is a file, return its last access time, otherwise #f.  One
+          can convert the number in a readable string with ttiimmee-->>ssttrriinngg.
+     ffiillee--bbaasseennaammee ( name ext -- base )
+          Return basename of file _n_a_m_e depending on _e_x_t.  _e_x_t may be #f,
+          nil/undef, a string or a regexp.  If _e_x_t is #f, return file name
+          without path name.  If _e_x_t is nil or undef, discard the part from
+          the last dot to the end of basename _n_a_m_e.  If _e_x_t is a string or a
+          regexp, discard found _e_x_t from basename _n_a_m_e.
+                "/home/mike/cage.snd" #f file-basename => "cage.snd"
+                "/home/mike/cage.snd" nil file-basename => "cage"
+                "/home/mike/cage.snd" "nd" file-basename => "cage.s"
+                "/home/mike/cage.snd" /\.(snd|wave)$/ file-basename => "cage"
+     ffiillee--cchhddiirr ( path -- )
+          Change working directory to _p_a_t_h and, if in a repl, print result to
+          current standard output.  If _p_a_t_h is nil, change working directory
+          to $HOME.  _p_a_t_h may contain `~' as an abbreviation for home
+          directory.
+     ffiillee--cchhmmoodd ( name mode -- )
+          Change access mode of file _n_a_m_e to _m_o_d_e.  You can write _m_o_d_e with
+          octal numbers: prepend the number with `0o', this is number zero `0'
+          and lower letter `o', similar to `0x' for hexadecimal numbers.
+     ffiillee--cchhrroooott ( path -- )
+          Change root directory to _p_a_t_h and, if in a repl, print result to
+          current standard output.  This function is restricted to the super-
+          user.
+     ffiillee--ccooppyy ( src dst -- )
+          Copy file _s_r_c to _d_s_t.  If _d_s_t is a directory, copy _s_r_c to _D_S_T_/_S_R_C.
+          Raise _s_y_s_t_e_m_-_e_r_r_o_r exception if fopen(3) fails on any of the two
+          files.
+     ffiillee--ccttiimmee ( name -- time )
+          If _n_a_m_e is a file, return its status change time, otherwise #f.  One
+          can convert the number in a readable string with ttiimmee-->>ssttrriinngg.
+     ffiillee--ddeelleettee ( name -- )
+          If file _n_a_m_e exist, delete it, otherwise do nothing.
+     ffiillee--ddiirr ( dir -- files-ary )
+          Return an array of all file names found in _d_i_r.
+     ffiillee--ddiirrnnaammee ( name -- path )
+          Return directory part of file _n_a_m_e.
+                "/home/mike/cage.snd" file-dirname => "/home/mike"
+     ffiillee--eevvaall ( name -- )
+          Load and eval content of file _n_a_m_e and add _n_a_m_e to *loaded-files* if
+          it wasn't there.  It's similar to iinncclluuddee except that file name must
+          be on stack (include is a parseword).  With file-eval one can load
+          files from within word definitions.  Raise _l_o_a_d_-_e_r_r_o_r exception if
+          file-eval fails.
+     ffiillee--ffuullllppaatthh ( name -- path )
+          Return current working directory prepended to file _n_a_m_e.  If name
+          starts with a slash, return _n_a_m_e unchanged.
+     ffiillee--iinnssttaallll ( src dst mode -- f )
+          Install _s_r_c to _d_s_t with access mode _m_o_d_e if _d_s_t doesn't exist or if
+          modification time of _s_r_c is greater than _d_s_t_'_s.  If _d_s_t is a
+          directory, install _s_r_c to _d_s_t_/_s_r_c.  Return #t if _s_r_c could be
+          installed, otherwise #f.  You can write _m_o_d_e with octal numbers:
+          prepend the number with `0o', this is number zero `0' and lower
+          letter `o', similar to `0x' for hexadecimal numbers.
+                : install-lib { src dst mode -- }
+                        src dst mode file-install if
+                                "%s --> %04o %s" '( src mode dst )
+                        else
+                                "%s is up-to-date" '( dst )
+                        then  fth-print  cr
+                ;
+                "libsndlib.so" "/usr/opt/lib/s7" 0o755 install-lib
+     ffiillee--lleennggtthh ( name -- len )
+          If _n_a_m_e is a file, return its length in bytes, otherwise #f.
+     ffiillee--mmaattcchh--ddiirr ( dir reg -- files-ary )
+          Return an array of file names in _d_i_r matching regexp _r_e_g.
+     ffiillee--mmkkddiirr ( name mode -- )
+          Create directory named _n_a_m_e with access mode _m_o_d_e.  You can write
+          _m_o_d_e with octal numbers: prepend the number with `0o', this is
+          number zero `0' and lower letter `o', similar to `0x' for
+          hexadecimal numbers.
+     ffiillee--mmkkffiiffoo ( name mode -- )
+          Create fifo named _n_a_m_e with access mode _m_o_d_e.  You can write _m_o_d_e
+          with octal numbers: prepend the number with `0o', this is number
+          zero `0' and lower letter `o', similar to `0x' for hexadecimal
+          numbers.
+     ffiillee--mmttiimmee ( name -- time )
+          If _n_a_m_e is a file, return its last modification time, otherwise #f.
+          One can convert the number in a readable string with ttiimmee-->>ssttrriinngg.
+     ffiillee--ppwwdd ( -- path )
+          Return current working directory.
+     ffiillee--rreeaallppaatthh ( name -- path )
+          If _n_a_m_e starts with `~', replace it with content of environment
+          variable $HOME.  If realpath(3) function exists, return resolved
+          path, otherwise return _n_a_m_e with `~' replacement.
+                "~" file-realpath => "/home/mike"
+                "/usr/local" file-chdir => "/usr/local"
+                file-pwd => "/usr/local"
+                "../bin" file-realpath => "/usr/bin"
+     ffiillee--rreennaammee ( src dst -- )
+          Rename _s_r_c to _d_s_t.
+     ffiillee--rrmmddiirr ( name -- )
+          Remove empty directory _n_a_m_e.
+     ffiillee--sshheellll ( cmd -- str )
+          Open pipe for reading, feed it with _c_m_d and collect string output as
+          long as pipe is open.  Afterwards close pipe, set read-only variable
+          exit-status and return collected string (with trailing cr).
+     ffiillee--sspplliitt ( name -- ary )
+          Split file _n_a_m_e in dirname and basename and return result in array
+          of two strings.
+                "/home/mike/cage.snd" file-split
+                  => #( "/home/mike" "cage.snd" )
+     ffiillee--ssyymmlliinnkk ( src dst -- )
+          Create symlink from _s_r_c named _d_s_t.
+     ffiillee--ssyysstteemm ( cmd -- f )
+          Execute _c_m_d as a shell command.  Set read-only variable exit-status
+          and return #t for success, #f otherwise.  In the latter case you can
+          check exit-status.
+     ffiillee--ttoouucchh ( name time -- )
+          Change modification time of _n_a_m_e to _t_i_m_e.  If _t_i_m_e is nil, use
+          current time.
+     ffiillee--ttrruunnccaattee ( name size -- )
+          Truncate or extend file _n_a_m_e to _s_i_z_e bytes.
+     ooppeenn--ppiippee ( addr u fam -- fp ior )
+          Forth-like word.
+                256 constant max-line
+                create line-buffer max-line 2 + allot
+                s" pwd" r/o open-pipe throw value FP
+                line-buffer max-line FP read-line throw drop
+                    line-buffer swap type
+                FP close-pipe throw
+     sshheellll ( cmd -- str ) alias for _f_i_l_e_-_s_h_e_l_l
+
+     File test functions:
+     ffiillee--bblloocckk?? ( name -- f )
+          Return #t if _n_a_m_e is a block special file, otherwise #f.
+     ffiillee--cchhaarraacctteerr?? ( name -- f )
+          Return #t if _n_a_m_e is a character special file, otherwise #f.
+     ffiillee--ddiirreeccttoorryy?? ( name -- f )
+          Return #t if _n_a_m_e is a directory, otherwise #f.
+     ffiillee--eexxeeccuuttaabbllee?? ( name -- f )
+          Return #t if _n_a_m_e is an executable file, otherwise #f.
+     ffiillee--eexxiissttss?? ( name -- f )
+          Return #t if _n_a_m_e is an existing file, otherwise #f.
+     ffiillee--ffiiffoo?? ( name -- f )
+          Return #t if _n_a_m_e is a named pipe, otherwise #f.
+     ffiillee--ggrrppoowwnneedd?? ( name -- f )
+          Return #t if _n_a_m_e matches effective gid, otherwise #f.
+     ffiillee--oowwnneedd?? ( name -- f )
+          Return #t if _n_a_m_e matches effective uid, otherwise #f.
+     ffiillee--rreeaaddaabbllee?? ( name -- f )
+          Return #t if _n_a_m_e is a readable file, otherwise #f.
+     ffiillee--sseettggiidd?? ( name -- f )
+          Return #t if _n_a_m_e has set gid bit, otherwise #f.
+     ffiillee--sseettuuiidd?? ( name -- f )
+          Return #t if _n_a_m_e has set uid bit, otherwise #f.
+     ffiillee--ssoocckkeett?? ( name -- f )
+          Return #t if _n_a_m_e is a socket, otherwise #f.
+     ffiillee--ssttiicckkyy?? ( name -- f )
+          Return #t if _n_a_m_e has set sticky bit, otherwise #f.
+     ffiillee--ssyymmlliinnkk?? ( name -- f )
+          Return #t if _n_a_m_e is a symbolic link, otherwise #f.
+     ffiillee--wwrriittaabbllee?? ( name -- f )
+          Return #t if _n_a_m_e is a writable file, otherwise #f.
+     ffiillee--zzeerroo?? ( name -- f )
+          Return #t if _n_a_m_e length is zero, otherwise #f.
+
+   HHaasshhss
+     ##{{}} ( -- hash ) alias for _m_a_k_e_-_h_a_s_h
+     ..hhaasshh ( hash -- )
+          Print _h_a_s_h object to current output.
+     >>hhaasshh ( vals len -- hash )
+          Take _l_e_n / 2 key-value pairs from parameter stack and return hash
+          object.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or _l_e_n is not even.
+                'foo 0  'bar 1  4 >hash =>  #{ 'foo => 0  'bar => 1 }
+     hhaasshh-->>aarrrraayy ( hash -- ass )
+          Return associated array with '( key . value ) pairs of _h_a_s_h_'_s
+          content.
+                #{ 'foo 0 'bar 1 } hash->array
+                  => #a( '( 'foo . 0 ) '( 'bar . 1 ) )
+     hhaasshh--cclleeaarr ( hash -- )
+          Remove all entries from _h_a_s_h, _h_a_s_h_'_s length is zero.
+     hhaasshh--ccooppyy ( hash1 -- hash2 )
+          Return copy of _h_a_s_h_1 using object-copy for all elements.
+     hhaasshh--ddeelleettee!! ( hash key -- ary )
+          Delete key-value pair associated with _k_e_y and return key-value array
+          or #f if not found.
+     hhaasshh--eeaacchh ( hash proc -- )
+          Run _p_r_o_c for each key-value pair.  _p_r_o_c_'_s stack effect must be ( key
+          value -- ).
+                #{ 'foo 0 'bar 1 } lambda: <{ key value -- }>
+                        "%s=%s\n" #( key value ) fth-print
+                ; hash-each
+     hhaasshh--ffiinndd ( hash key -- ary )
+          Return key-value array if _k_e_y exist or #f if not found.
+     hhaasshh--kkeeyyss ( hash -- keys )
+          Return array of keys.
+     hhaasshh--mmaapp ( hash1 proc -- hash2 )
+          Run _p_r_o_c for each key-value pair.  _p_r_o_c_'_s stack effect must be ( key
+          value -- val ) where val is the new value for key.
+                #{ 'foo 0 'bar 1 } lambda: <{ key val -- val }>
+                        val 10 +
+                ; hash-map => #{ 'foo => 10  'bar => 11 }
+     hhaasshh--mmeemmbbeerr?? ( hash key -- f )
+          Return #t if _k_e_y exists, otherwise #f.
+     hhaasshh--rreeff ( hash key -- value )
+          Return associated value or #f if not found.
+     hhaasshh--sseett!! ( hash key value -- )
+          Set _k_e_y_-_v_a_l_u_e pair of _h_a_s_h.  If key exists, overwrite existing
+          value, otherwise create new key-value entry.
+     hhaasshh--vvaalluueess ( hash -- values )
+          Return array of values.
+     hhaasshh== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are hash objects with same length and
+          content, otherwise #f.
+     hhaasshh?? ( obj -- f )
+          Return #t if _o_b_j is a hash object, otherwise #f.
+     mmaakkee--hhaasshh ( -- hash )
+          Return empty hash object.
+     mmaakkee--hhaasshh--wwiitthh--lleenn ( size -- hash )
+          Return hash object with _s_i_z_e key-value pairs.  Keys are 0, 1, 2, ...
+          and values are nil.
+
+     Property functions:
+     oobbjjeecctt--pprrooppeerrttiieess ( obj -- props )
+          Return _o_b_j_'_s properties or #f if empty.
+     oobbjjeecctt--pprrooppeerrttyy--rreeff ( obj key -- val )
+          Return _o_b_j_'_s property val associated with _k_e_y or #f if not found.
+     oobbjjeecctt--pprrooppeerrttyy--sseett!! ( obj key val -- )
+          Set _k_e_y_-_v_a_l_u_e pair to _o_b_j_'_s property object.
+     pprrooppeerrttiieess ( obj -- props )
+          Return _o_b_j_'_s global properties or #f if empty.  If _o_b_j is #f, return
+          entire global property object.
+     pprrooppeerrttyy--rreeff ( obj key -- val )
+          Return _o_b_j_'_s global property val associated with _k_e_y or #f if not
+          found.
+     pprrooppeerrttyy--sseett!! ( obj key val -- )
+          Set _k_e_y_-_v_a_l_u_e pair to _o_b_j_'_s global property object.
+     wwoorrdd--pprrooppeerrttiieess ( xt -- props )
+          Return _x_t_'_s properties or #f if empty.
+     wwoorrdd--pprrooppeerrttyy--rreeff ( xt key -- val )
+          Return _x_t_'_s property val associated with _k_e_y or #f if not found.
+     wwoorrdd--pprrooppeerrttyy--sseett!! ( xt key val -- )
+          Set _k_e_y_-_v_a_l_u_e pair to _x_t_'_s property object.
+
+   HHooookkss
+     ..hhooookk ( hook -- )
+          Print hook object _h_o_o_k to current output.
+     aadddd--hhooookk!! ( hook prc -- ) alias for _h_o_o_k_-_a_d_d
+     ccrreeaattee--hhooookk ( arity help "name" -- )
+          Create hook variable _n_a_m_e with _a_r_i_t_y and documentation _h_e_l_p.  _a_r_i_t_y
+          can be an integer or an array of length 3, #( req opt rest ).
+                2 "A simple hook." create-hook my-new-hook
+                #( 2 0 #f ) "A simple hook." create-hook my-new-hook
+     hhooookk-->>aarrrraayy ( hook -- ary )
+          Return array of all _h_o_o_k procedures.
+     hhooookk-->>lliisstt ( hook -- proc-list ) alias for _h_o_o_k_-_>_a_r_r_a_y
+     hhooookk--aadddd ( hook prc -- )
+          Add hook procedure _p_r_c to _h_o_o_k.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c_'_s
+          arity doesn't match _h_o_o_k_'_s arity.
+     hhooookk--aappppllyy ( hook args -- value-list )
+          Run all hook procedures with _a_r_g_s, an array of arguments.  _a_r_g_s can
+          be an array of arguments or a single argument.  Raise _b_a_d_-_a_r_i_t_y
+          exception if _a_r_g_s_'_s length doesn't match _h_o_o_k_'_s arity.
+                2 make-hook value hk1
+                hk1  <'> + 2 make-proc  add-hook!
+                hk1 #( 1 2 ) run-hook => #( 3 )
+     hhooookk--aarriittyy ( hook -- arity )
+          Return arity array of _h_o_o_k, #( req opt rest ).
+                2 make-hook hook-arity => #( 2 0 #f )
+     hhooookk--cclleeaarr ( hook -- )
+          Remove all hook procedures from _h_o_o_k.
+     hhooookk--ddeelleettee ( hook prc-or-name -- prc )
+          Remove hook procedure _p_r_c_-_o_r_-_n_a_m_e from _h_o_o_k and return it.
+          _p_r_c_-_o_r_-_n_a_m_e can be a string, an xt or a proc.
+     hhooookk--eemmppttyy?? ( hook -- f )
+          Return #t if no hook procedure exist in _h_o_o_k, otherwise #f.
+     hhooookk--mmeemmbbeerr?? ( hook prc-or-name -- f )
+          Return #t if procedure _p_r_c_-_o_r_-_n_a_m_e exist in _h_o_o_k, otherwise #f.
+          _p_r_c_-_o_r_-_n_a_m_e can be a string, an xt or a proc.
+     hhooookk--nnaammee ( hook -- name )
+          Return name of _h_o_o_k as string if hook object, otherwise #f.
+     hhooookk--nnaammeess ( hook -- name-list )
+          Return array of hook procedure names (strings).
+     hhooookk--pprrooccss ( hook -- proc-list ) alias for _h_o_o_k_-_>_a_r_r_a_y
+     hhooookk== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are hook objects of same arity and
+          procedures, otherwise #f.
+     hhooookk?? ( obj -- f )
+          Return #t if _o_b_j is a hook object, otherwise #f.
+     mmaakkee--hhooookk ( arity -- hook )
+          Return hook object for procs accepting _a_r_i_t_y arguments.  _a_r_i_t_y can
+          be an integer or an array of length 3, #( req opt rest ).
+                2 make-hook value my-new-hook
+                #( 2 0 #f ) make-hook value my-new-hook
+     rreemmoovvee--hhooookk!! ( hook prc-or-name -- prc ) alias for _h_o_o_k_-_d_e_l_e_t_e
+     rreesseett--hhooookk!! ( hook -- ) alias for _h_o_o_k_-_c_l_e_a_r
+     rruunn--hhooookk ( hook args -- value-list ) alias for _h_o_o_k_-_a_p_p_l_y
+
+   IIOO FFuunnccttiioonnss
+     Global variables:
+     *stderr*
+          Return current standard error output IO object.
+     *stdin*
+          Return current standard input IO object.
+     *stdout*
+          Return current standard output IO object.
+     sseett--**ssttddeerrrr** ( io -- old )
+          Set _i_o to current standard error and return old IO object.
+     sseett--**ssttddiinn** ( io -- old )
+          Set _i_o to current standard input and return old IO object.
+     sseett--**ssttddoouutt** ( io -- old )
+          Set _i_o to current standard output and return old IO object.
+     sseett--vveerrssiioonn--ccoonnttrrooll ( val -- )
+          Set current version control style.  Accepted values:
+               #t     numbered backups
+               nil    numbered/simple backups
+               #f     simple backups
+               undef  no backups
+     vveerrssiioonn--ccoonnttrrooll ( -- val )
+          Return current version control style.
+
+     General IO functions:
+     ..iioo ( io -- )
+          Print _i_o object to current output.
+     eexxiitt--ssttaattuuss ( -- n ) alias for _i_o_-_e_x_i_t_-_s_t_a_t_u_s
+     iioo-->>ssttrriinngg ( io -- str )
+          Return content of _i_o object as string if possible.
+     iioo--cclloossee ( io -- )
+          If necessary, flush _i_o, close _i_o object and set closed? to #t.
+     iioo--cclloosseedd?? ( io -- f )
+          Return #t if _i_o object is closed, otherwise #f.
+     iioo--eeooff?? ( io -- f )
+          Return #t if EOF is reached, otherwise #f.
+     iioo--eexxiitt--ssttaattuuss ( -- n )
+          Return exit status of last extern process called via file-shell,
+          file-system, etc.
+     iioo--ffddooppeenn ( fd :key fam r/o -- io )
+          Connect file descriptor _f_d to new IO object.  If keyword _f_a_m was not
+          given, open file read-only, otherwise use _f_a_m.  See _i_o_-_o_p_e_n for fam.
+                2 :fam w/o io-fdopen value err-io
+                err-io "our error log" io-write
+                err-io io-flush => "our error log" (on stderr)
+     iioo--ffiilleennaammee ( io -- fname )
+          Return file name of _i_o object or #f if file name is not available.
+     iioo--ffiilleennoo ( io -- fd )
+          Return file descriptor of _i_o.
+     iioo--fflluusshh ( io -- )
+          Flushe _i_o object if possible.
+     iioo--ggeettcc ( io -- c )
+          Return next character from _i_o object or #f if EOF.
+     iioo--iinnppuutt?? ( obj -- f )
+          Return #t if _o_b_j is an input IO object, otherwise #f.
+     iioo--mmooddee ( io -- mode )
+          Return access mode of _i_o object.
+     iioo--ooppeenn ( name :key fam r/o if-exists overwrite -- io )
+          Open file _n_a_m_e and return new IO object.  If keyword _f_a_m was not
+          specified, open file read-only, otherwise take _f_a_m.  Possible _f_a_m
+          values:
+               aa//oo  apend "a"
+               rr//aa  read/write-append "a+"
+               rr//oo  read-only "r"
+               rr//ww  read/write "w+"
+               ww//oo  write-only "w"
+          If keyword iiff--eexxiissttss was not specified, overwrite possible existing
+          file before open it for writing or appending.  Possible iiff--eexxiissttss
+          values:
+               ::eerrrroorr
+                    raise _i_o_-_e_r_r_o_r exception if _n_a_m_e already exist
+               ::oovveerrwwrriittee
+                    overwrite existing file (default)
+               ::rreennaammee
+                    depends on environment variable $VERSION_CONTROL and
+                    global Fth variable version-control (see there)
+                "in-test" io-open value rd-io1
+                "in-test" :fam r/o io-open value rd-io2
+                "out-test" :fam w/o io-open value ow-io1
+                "out-test" :fam w/o :if-exists :overwrite io-open value ow-io2
+                "out-test" :fam r/w :if-exists :error io-open value rw-io1
+                "out-test" :fam r/w :if-exists :rename io-open value rn-io1
+     iioo--ooppeenn--rreeaadd ( name -- io )
+          Open file _n_a_m_e for reading and return new IO object.
+     iioo--ooppeenn--wwrriittee ( name :key if-exists overwrite -- io )
+          Open file _n_a_m_e for writing and return new IO object.  For keyword
+          if-exists see _i_o_-_o_p_e_n.
+     iioo--oouuttppuutt?? ( obj -- f )
+          Return #t if _o_b_j is an output IO object, otherwise #f.
+     iioo--ppooss--rreeff ( io -- pos )
+          Return current _i_o object position.
+     iioo--ppooss--sseett!! ( io pos -- )
+          Set _i_o object position to _p_o_s.
+     iioo--ppuuttcc ( io c -- )
+          Write character _c to _i_o object.
+     iioo--rreeaadd ( io -- line )
+          Return next line from _i_o object or #f if EOF.
+     iioo--rreeaaddlliinneess ( io -- array-of-lines )
+          Return the entire _i_o object content as an array of strings, line by
+          line.
+     iioo--rreeooppeenn ( io1 name :key fam io1-fam -- io2 )
+          Return new IO object as copy of _i_o_1 and close _i_o_1.  If _n_a_m_e is not a
+          string, for example #f or nil, use file name from _i_o_1.  If keyword
+          _f_a_m was not given, use mode from _i_o_1, otherwise use _f_a_m.  All
+          restrictions on reopen apply, for example, a file opened for reading
+          cannot reopened for writing etc.
+                "1-test" io-open-write value io1
+                io1 "hello" io-write
+                io1 "2-test" io-reopen value io2
+                io1 io-closed? => #t
+                io2 "world" io-write
+                io2 io-close
+                io2 io-closed? => #t
+                "1-test" readlines => #( "hello" )
+                "2-test" readlines => #( "world" )
+                *stderr* "error.log" io-reopen value err-io
+     iioo--rreewwiinndd ( io -- )
+          Rewind position to begin of _i_o object.
+     iioo--sseeeekk ( io offset :key whence io-seek-set -- pos )
+          Add _o_f_f_s_e_t to the file position in _i_o object and return new
+          position.  Keyword _w_h_e_n_c_e can have the following values:
+                SEEK_SET
+                     offset counts from begin of file (default)
+                SEEK_CUR
+                     offset counts from current position
+                SEEK_END
+                     offset counts from end of file.
+     iioo--tteellll ( io -- pos ) alias for _i_o_-_p_o_s_-_r_e_f
+     iioo--wwrriittee ( io line -- )
+          Write _l_i_n_e to _i_o object.
+     iioo--wwrriittee--ffoorrmmaatt ( io fmt args -- )
+          Write string built from _f_m_t and array _f_m_t_-_a_r_g_s to _i_o object.
+     iioo--wwrriitteelliinneess ( io array-of-lines -- )
+          Write _a_r_r_a_y_-_o_f_-_l_i_n_e_s to _i_o object.
+     iioo== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are IO objects with equal file names,
+          modes and file positions, otherwise #f.
+     iioo?? ( obj -- f )
+          Return #t if _o_b_j is an IO object, otherwise #f.
+     rreeaaddlliinneess ( name -- array-of-lines )
+          Open file _n_a_m_e, read its content in an array, close file and return
+          the array.
+     wwrriitteelliinneess ( name array-of-lines -- )
+          Open file _n_a_m_e, write the content of _a_r_r_a_y_-_o_f_-_l_i_n_e_s to it and close
+          file.
+
+     File functions:
+     iioo--ooppeenn--ffiillee ( :key fam r/o args -- io )
+          General IO open function.  Open and return any IO object for io-
+          read/io-write etc.  Keyword argument :fam defaults to r/o.  See
+          _m_a_k_e_-_s_o_f_t_-_p_o_r_t for keyword arguments.
+                :filename "foo" io-open-file value io1
+                :filename "foo" :fam r/o io-open-file value io2
+                :filename "bar" :fam r/w io-open-file value io3
+                :command "ls -lF" io-open-file value io4
+                :command #( "ls" "-lF" ) io-open-file value io5
+                :string "test string" io-open-file value io6
+                :soft-port "test" io-open-file value io7
+     iioo--ooppeenn--iinnppuutt--ffiillee ( :key args -- io )
+          General IO open function.  Return IO object for reading.  See _m_a_k_e_-
+          _s_o_f_t_-_i_n_p_u_t_-_p_o_r_t for keyword arguments.
+                :filename "foo" io-open-input-file value io1
+                :command "ls -lF" io-open-input-file value io2
+                :command #( "ls" "-lF") io-open-input-file value io3
+                :string "test string" io-open-input-file value io4
+                :soft-port "input-test" io-open-input-file value io5
+     iioo--ooppeenn--oouuttppuutt--ffiillee ( :key args -- io )
+          General IO open function.  Return IO object for writing.  See _m_a_k_e_-
+          _s_o_f_t_-_o_u_t_p_u_t_-_p_o_r_t for keyword arguments.
+                :filename "foo" io-open-output-file value io1
+                :command "cat" io-open-output-file value io2
+                :command #( "cat" ) io-open-output-file value io3
+                (dq(dq value s1
+                :string s1 io-open-output-file value io4
+     mmaakkee--ffiillee--iinnppuutt--ppoorrtt ( name -- io ) alias for _i_o_-_o_p_e_n_-_r_e_a_d
+     mmaakkee--ffiillee--oouuttppuutt--ppoorrtt ( name :key args -- io ) alias for _i_o_-_o_p_e_n_-_w_r_i_t_e
+     mmaakkee--ffiillee--ppoorrtt ( name :key args -- io ) alias for _i_o_-_o_p_e_n
+
+     Pipe functions:
+     iioo--ppooppeenn ( cmd :key fam r/o -- io )
+          Open pipe for command _c_m_d and return new IO object.  _c_m_d may be a
+          string (with shell expansion) or an array of strings.  If keyword
+          _f_a_m was not given, open pipe read-only, otherwise use _f_a_m.  See _i_o_-
+          _o_p_e_n for fam.
+                "ls -lAF ~/" io-popen value read-io1
+                #( "ls" "-lAF" "~/") io-popen value read-io2
+                read-io1 io->string => "..."
+                read-io1 io-close
+                "cat" :fam w/o io-popen-write value write-io1
+                write-io1 "hello" io-write
+                write-io1 io-close
+     iioo--ppooppeenn--rreeaadd ( cmd -- io )
+          Open read-only pipe for command _c_m_d and return new IO object.  _c_m_d
+          may be a string (with shell expansion) or an array of strings.
+     iioo--ppooppeenn--wwrriittee ( cmd -- io )
+          Open write-only pipe for command _c_m_d and return new IO object.  _c_m_d
+          may be a string (with shell expansion) or an array of strings.
+     mmaakkee--ppiippee--iinnppuutt--ppoorrtt ( cmd -- io ) alias for _i_o_-_p_o_p_e_n_-_r_e_a_d
+     mmaakkee--ppiippee--oouuttppuutt--ppoorrtt ( cmd -- io ) alias for _i_o_-_p_o_p_e_n_-_w_r_i_t_e
+     mmaakkee--ppiippee--ppoorrtt ( cmd :key args -- io ) alias for _i_o_-_p_o_p_e_n
+
+     String functions:
+     iioo--ssooppeenn ( str :key fam r/o -- io )
+          Open string with content _s_t_r_i_n_g and return new IO object.  If
+          keyword _f_a_m was not given, opens string read-only, otherwise takes
+          _f_a_m.  See _i_o_-_o_p_e_n for fam.
+                "test-string" value s1
+                s1 io-sopen value read-io1
+                read-io1 io-read => "test-string"
+                read-io1 io-close
+                s1 :fam r/a io-sopen value append-io1
+                append-io1 " with append content" io-write
+                append-io1 io-rewind
+                append-io1 io-read => "test-string with append content"
+                append-io1 io-close
+                s1 .string => "test-string with append content"
+     iioo--ssooppeenn--rreeaadd ( str -- io )
+          Open read-only string with content _s_t_r and return new IO object.
+     iioo--ssooppeenn--wwrriittee ( str -- io )
+          Open _s_t_r for writing and return new IO object.
+     mmaakkee--ssttrriinngg--iinnppuutt--ppoorrtt ( cmd -- io ) alias for _i_o_-_s_o_p_e_n_-_r_e_a_d
+     mmaakkee--ssttrriinngg--oouuttppuutt--ppoorrtt ( cmd :key args -- io ) alias for _i_o_-_s_o_p_e_n_-_w_r_i_t_e
+     mmaakkee--ssttrriinngg--ppoorrtt ( str :key fam r/o -- io ) alias for _i_o_-_s_o_p_e_n
+
+     Socket functions:
+     iioo--nnooppeenn (host :key port 1024 domain AF_INET -- io)
+          Connect to an already established server and return new IO object.
+          Raise an _s_o_c_k_e_t_-_e_r_r_o_r exception if an error occured.  _h_o_s_t is a host
+          name (AF_INET) or a path name (AF_UNIX).  If _h_o_s_t is not a string,
+          "localhost" will be used.  _p_o_r_t is the connection port (default
+          1024) if _d_o_m_a_i_n is AF_INET, otherwise unused, and _d_o_m_a_i_n can be one
+          of AF_INET (default) or AF_UNIX.  The socket is opened with _d_o_m_a_i_n,
+          hardcoded second argument SOCK_STREAM, and hardcoded third argument
+          of 0, see socket(2) and connect(2) for more information.
+                "localhost" :port 25 io-nopen value io
+                io io-read => "220 fth-devel.net ESMTP Sendmail ..."
+                io "HELP\r\n" io-write
+                io io-read => "... (sendmail help output)"
+                io io-close
+                "ftp.freebsd.org" :port 21 io-nopen to io
+                io io-read => "220 ftp.beastie.tdk.net FTP server ..."
+                io "HELP\r\n" io-write
+                io io-read => "... (ftpd help output)"
+                io io-close
+     mmaakkee--ssoocckkeett--ppoorrtt ( host :key args -- io ) alias for _i_o_-_n_o_p_e_n
+     nneett--aacccceepptt ( fd host domain -- io )
+          Accept a connection on a socket and return an IO object after
+          established connection.  _f_d is the socket descriptor, _h_o_s_t can be an
+          arbitrary name, its only use is the name for the IO object, _d_o_m_a_i_n
+          is one of AF_INET or AF_UNIX.  This is used on the server side of a
+          socket connection.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if accept(2) fails.
+     nneett--bbiinndd ( fd host port domain -- )
+          Assign a name to a socket.  _f_d is the socket descriptor, _h_o_s_t is a
+          host name (AF_INET) or a path name (AF_UNIX), _p_o_r_t is the port if
+          _d_o_m_a_i_n is AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or
+          AF_UNIX.  This is used on the server side of a socket connection.
+          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if bind(2) fails.
+     nneett--ccoonnnneecctt ( fd host port domain -- io )
+          Connect to a server and return IO object after an established
+          connection.  _f_d is the socket descriptor, _h_o_s_t is a host name
+          (AF_INET) or a name (AF_UNIX), _p_o_r_t is the port if _d_o_m_a_i_n is
+          AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
+          This is used on the client side of a socket connection.  Raise
+          _s_o_c_k_e_t_-_e_r_r_o_r exception if connect(2) fails.
+     nneett--lliisstteenn ( fd -- )
+          Inform the operating system that connection requests should be
+          delivered.  _f_d is the previously opened socket descriptor.  This is
+          used on the server side of a socket connection.  Raise _s_o_c_k_e_t_-_e_r_r_o_r
+          exception if listen(2) fails.
+     nneett--rreeccvv ( fd flags -- msg )
+          Receive data via a socket and return it.  _f_d is the socket
+          descriptor and _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  Raise
+          _s_o_c_k_e_t_-_e_r_r_o_r exception if recv(2) fails.
+     nneett--rreeccvvffrroomm ( fd flags host port domain -- msg )
+          Receive data via a socket and return it.  _f_d is the socket
+          descriptor, _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  _h_o_s_t is a host
+          name (AF_INET) or a path name (AF_UNIX), _p_o_r_t is the port if is
+          AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
+          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if recvfrom(2) fails.
+     nneett--sseenndd ( fd msg flags -- )
+          Send data via a socket.  _f_d is the socket descriptor, _m_s_g is the
+          data to send and _f_l_a_g_s can be 0, MSG_PEEK or MSG_OOB.  Raise
+          _s_o_c_k_e_t_-_e_r_r_o_r exception if send(2) fails.
+     nneett--sseennddttoo ( fd msg flags host port domain -- )
+          Send data via a socket.  _f_d is the socket descriptor, _m_s_g is the
+          data to send, _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  _h_o_s_t is a host
+          name (AF_INET) or a name (AF_UNIX), _p_o_r_t is the port if _d_o_m_a_i_n is
+          AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
+          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if sendto(2) fails.
+     nneett--sshhuuttddoowwnn ( fd how -- )
+          Close socket connection.  _f_d is the socket descriptor and _h_o_w is one
+          of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if
+          shutdown(2) fails.
+     nneett--ssoocckkeett ( domain type -- fd )
+          Return socket descriptor.  _d_o_m_a_i_n can be AF_INET or AF_UNIX, _t_y_p_e
+          can be SOCK_STREAM or SOCK_DGRAM.  The third argument to socket(2)
+          is 0 and cannot be set by the user.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if
+          socket(2) fails.
+                AF_INET SOCK_STREAM net-socket value fd
+                fd "localhost" 1024 AF_INET net-bind
+                fd net-listen
+                fd "localhost" AF_INET net-accept value io
+
+   MMiisscceellllaanneeoouuss
+     Constants:
+     FICL_VM_STATE_INTERPRET
+     FICL_VM_STATE_COMPILE
+     INTERPRET_STATE alias for _F_I_C_L___V_M___S_T_A_T_E___I_N_T_E_R_P_R_E_T
+     COMPILE_STATE alias for _F_I_C_L___V_M___S_T_A_T_E___C_O_M_P_I_L_E
+          Return compile or interpret state value for comparison with global
+          variable state.
+                state @ COMPILE_STATE = if
+                        \ compile state here
+                else
+                        \ interpret state here
+                then
+     cell
+          Return bytes of one cell.
+     dfloat
+          Return bytes of one dfloat.
+     ficl-version
+          Return Ficl version string.
+     float
+          Return bytes of one float (same as dfloat).
+     fth-date
+          Return version date string.
+     fth-version
+          Return full Fth version string.
+     sfloat
+          Return bytes of one sfloat (same as dfloat).
+
+     Features and Source files:
+     *features*
+          Return array of all features.
+     aadddd--ffeeaattuurree ( str -- )
+          Add _s_t_r, a string or symbol, to *features* list.
+                'snd add-feature
+     aadddd--llooaadd--lliibb--ppaatthh ( path -- )
+          Add string _p_a_t_h to *load-lib-path* array if not already there.
+                "/home/mike/lib/fth" add-load-lib-path
+     aadddd--llooaadd--ppaatthh ( path -- )
+          Add string _p_a_t_h to *load-path* array if not already there.
+                "/home/mike/share/fth" add-load-path
+     aapprrooppooss (( oobbjj ---- aarryy ))
+          Return array of dictionary entries matching regexpression or string
+          _o_b_j.
+                /do/ apropos => #( "doLocal" ... )
+     ddll--llooaadd ( "lib" "func" -- )
+          Load dynamic library _l_i_b and call its function _f_u_n_c.
+                dl-load dbm Init_dbm
+     iinncclluuddee ( "name" -- )
+          Load Forth source file _n_a_m_e and add _n_a_m_e to *loaded-files* if it
+          wasn't already there.  If file extension wasn't specified, use
+          `.fs'.  If _n_a_m_e doesn't exist, try each entry of *load-path* with
+          _n_a_m_e.  With iinncclluuddee one can load a file more than once.  Before
+          loading _n_a_m_e, run hook _b_e_f_o_r_e_-_l_o_a_d_-_h_o_o_k.  After loading _n_a_m_e, run
+          hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise _n_o_-_s_u_c_h_-_f_i_l_e exception if file doesn't
+          exist, raise _l_o_a_d_-_e_r_r_o_r if an error occured during load.
+                include hello
+     iinnssttaallll ( "file" -- )
+          Install _f_i_l_e in first writeable path found in *load-path* (*.fs[m])
+          or *load-lib-path* (*.so).
+                install snd-test.fs
+                install sndlib.so
+     iinnssttaallll--ffiillee ( file -- )
+          Install _f_i_l_e in first writeable path found in *load-path* (*.fs[m])
+          or *load-lib-path* (*.so).
+                "snd-test.fs" install-file
+                "sndlib.so" install-file
+     llooaadd--iinniitt--ffiillee ( file -- )
+          If Forth source _f_i_l_e exists in current or $HOME dir, load it,
+          otherwise do nothing.
+                ".my-fth-init" load-init-file
+     pprroovviiddeedd?? ( obj -- f )
+          Return #t if _o_b_j, a string or symbol, exists in *features* list,
+          otherwise #f.
+                'fth provided? => #t
+                'foo provided? => #f
+     rreeqquuiirree ( "name" -- )
+          If Forth source file _n_a_m_e doesn't exist in array *loaded-files*,
+          load it and add _n_a_m_e to *loaded-files*.  If file extension wasn't
+          specified, use `.fs'.  If _n_a_m_e doesn't exist, try each entry of
+          *load-path* with _n_a_m_e.  With rreeqquuiirree one can load a file only one
+          time.  Before loading _n_a_m_e, run hook _b_e_f_o_r_e_-_l_o_a_d_-_h_o_o_k.  After
+          loading _n_a_m_e, run hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise _n_o_-_s_u_c_h_-_f_i_l_e
+          exception if file doesn't exist, raise _l_o_a_d_-_e_r_r_o_r if an error
+          occured during load.
+                require hello
+     uunnsshhiifftt--llooaadd--lliibb--ppaatthh ( path -- )
+          Prepend string _p_a_t_h to *load-lib-path* array if not already there.
+                "/home/mike/lib/fth" unshift-load-lib-path
+     uunnsshhiifftt--llooaadd--ppaatthh ( path -- )
+          Prepend string _p_a_t_h to *load-path* array if not already there.
+                "/home/mike/share/fth" unshift-load-path
+
+     Catch errors:
+     fftthh--ccaattcchh ( ?? obj exc arg -- ?? res )
+          Run proc or xt _o_b_j in save environment.  If _o_b_j fails with an
+          exception, data and return stack environments are recovered to the
+          state before execution.  If _o_b_j is #f, finishs immediately and
+          returns #f.  The second argument _e_x_c may be a symbol, an exception,
+          or #t.  If it's a symbol or an exception, this will be catched, if
+          it's #t, all exceptions will be catched.  The third argument _a_r_g may
+          be nil or a return value.  If _a_r_g is nil, the catched exception or
+          #f will be returned, if _a_r_g is any other than nil, _a_r_g will be
+          returned instead of the catched exception; if _a_r_g is a proc or xt,
+          this will be executed instead of simply returned.  The stack effect
+          must be ( retval -- val ).
+                3 :initial-element 0.3 make-array value ary
+                ary .array => #( 0.3 0.3 0.3 )
+                ary 2 <'> array-ref  #t  nil  fth-catch => 0.3 #f
+                ary 4 <'> array-ref  'out-of-range  #t  fth-catch
+                  => #( 0.3 0.3 0.3 ) 4 #t
+                : ary-handler { retval -- val }
+                        "from handler: %S\n" #( retval ) fth-print
+                        #t ( return value )
+                ;
+                ary 4 0.4 <'> array-set!
+                    'out-of-range <'> ary-handler fth-catch
+                  prints: => from handler: \
+                        #( 'out-of-range "array-set! (ary_set) arg 2: \
+                        4 is out of range" )
+                  => 0.4 #t
+                ary 2 0.4 <'> array-set!
+                    'out-of-range <'> ary-handler fth-catch => #f
+     fftthh--rraaiissee ( exc fmt args -- )
+          Raise exception _e_x_c with text built from _f_m_t and _a_r_g_s.  If _f_m_t is a
+          format string with N %s-format signs, _a_r_g_s should have N elements
+          with corresponding values.  If _e_x_c is #f, reraise last exception.
+                'bad-arity "%s: %s args required, got %s"
+                    #( proc 2 3 ) fth-throw
+                  => #<bad-arity in test-proc: 2 args required, got 3>
+                #f #f #f fth-raise
+                  => reraise last exception
+     fftthh--tthhrrooww ( exc args -- )
+          Throw exception _e_x_c with text built from _a_r_g_s.  If _a_r_g_s is not an
+          array, its string representation is used. If _a_r_g_s is NIL or an empty
+          array, a default string is used.  If _a_r_g_s is an array with one
+          element, this string is used. If _a_r_g_s is an array and its first
+          element is a format string with N %s-format signs, _a_r_g_s should have
+          N more elements with corresponding values.
+                \
+                \ ARGS: any object
+                \
+                'bad-arity proc fth-throw
+                  => #<bad-arity in test-proc>
+                \
+                \ ARGS: nil or #()
+                \
+                'bad-arity nil fth-throw
+                  => #<bad-arity: proc has bad arity>
+                \
+                \ ARGS: #( string )
+                \
+                'bad-arity #( "test-proc" ) fth-throw
+                  => #<bad-arity in test-proc>
+                \
+                \ ARGS: #( fmt arg1 arg2 arg3 )
+                \
+                'bad-arity #( "%s: %s args required, got %s"
+                              proc
+                              2
+                              3 ) fth-throw
+                  => #<bad-arity in test-proc: 2 args required, got 3>
+     ssttaacckk--rreesseett ( ?? -- )
+          Reset the data stack to initial state.
+
+     Time functions:
+     ccuurrrreenntt--ttiimmee ( -- secs )
+          Return time in seconds since 1970/01/01 as ficl2Unsigned.  See
+          time(3) for more information.
+     ggmmttiimmee ( secs -- ary )
+          Return array of eleven elements with _s_e_c_s converted to Greenwich
+          Mean Time.
+                sec
+                    seconds after minute (0-60)
+                min
+                    minutes after the hour (0-59)
+                hour
+                    hours since midnight (0-23)
+                mday
+                    day of the month (1-31)
+                mon
+                    months since January (0-11)
+                year
+                    years since 1900
+                wday
+                    days since Sunday (0-6)
+                yday
+                    days since January 1 (0-365)
+                isdst
+                    Daylight Savings Time flag
+                tm_gmtoff
+                    offset from UTC in seconds
+                tm_zone
+                    timezone abbreviation
+     llooccaallttiimmee ( secs -- ary )
+          Return array of eleven elements with _s_e_c_s converted to local time,
+          see gmtime.
+     mmkkttiimmee ( ary -- secs )
+          Return time constructed from values of _a_r_y.  _a_r_y may be #f or an
+          array of up to eleven elements where single elements may be #f, see
+          gmtime for array elements.
+                #( 28 40 2 14 0 112 6 13 #f 3600 "CET" ) mktime => 1326505228
+     ssttrrffttiimmee ( fmt secs -- str )
+          Convert ficl2Unsigned _s_e_c_s in a date string corresponding to _f_m_t.
+          The _f_m_t string will be interpreted by strftime(3).
+                "%a %b %d %H:%M:%S %Z %Y" current-time strftime
+                  => "Sat Jan 14 02:40:28 CET 2012"
+     ssttrrppttiimmee ( str fmt -- secs )
+          Parse _s_t_r according to _f_m_t and return seconds as ficl2Unsigned.
+                "2012 01 14" "%Y %m %d" strptime time->string
+                  => "Sat Jan 14 02:40:28 CET 2012"
+     ttiimmee ( -- r )
+          Return real time, a ficlFloat.
+     ttiimmee-->>ssttrriinngg ( secs -- str )
+          Convert ficl2Unsigned _s_e_c_s in a date string in current local time.
+                current-time time->string => "Sat Jan 14 02:40:28 CET 2012"
+     ttiimmee--rreesseett ( -- )
+          Set global timeval struct variable to current time.
+     uuttiimmee ( -- utime stime )
+          Return user and system time as ficlFloats.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d
+          exception if times(3) is not available.
+                utime => 0.171875 0.0234375
+
+     System information:
+     ddaattee ( -- str )
+          Return date in default UNIX format as a string.
+     eennvviirroonn ( -- ary )
+          Return assoc array of all shell environment variables and their
+          values.
+     eexxeecc ( cmd -- )
+          Replace current process by running _c_m_d as shell command.  If _c_m_d is
+          a string, shell expansion takes place and $SHELL -- or sshh if $SHELL
+          is empty -- executes _c_m_d.  If _c_m_d is an array of strings, no shell
+          expansion takes place and _c_m_d _N_O _0 _a_r_r_a_y_-_r_e_f should be a program
+          name.
+                lambda: <{}> #( "ls" "-lAF" ) exec ; fork
+                lambda: <{}> "ls -lAF [A-Z]*" exec ; fork
+     ffoorrkk ( xt -- pid )
+          Create child process and execute _x_t in the child.  The child process
+          returns nothing, parent returns child's process id.
+                lambda: <{}> "ls -lAF" exec ; fork value pid
+                pid SIGKILL kill
+     ggeetteeggiidd ( -- id )
+          Return effective group id of calling process.
+     ggeetteennvv ( name -- value )
+          Return content of shell environment variable _n_a_m_e as string or #f if
+          variable is not defined.
+     ggeetteeuuiidd ( -- id )
+          Return effective user id of calling process.
+     ggeettggiidd ( -- id )
+          Return real group id of calling process.
+     ggeetthhoossttnnaammee ( -- str )
+          Return name of current host.
+     ggeettllooggiinn ( -- str )
+          Return name of user associated with current session.
+     ggeettppiidd ( -- id )
+          Return process id.
+     ggeettppppiidd ( -- id )
+          Return parent process id.
+     ggeettsseerrvvbbyynnaammee ( str -- ary )
+          Return array containing the service, an array of aliases, the port
+          number and the protocol.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
+          getservbyname(3) is not available.
+                "smtp" getservbyname => #( "smtp" #( "mail" ) 25 "tcp" )
+     ggeettsseerrvvbbyyppoorrtt ( port -- ary )
+          Return array containing the service, an array of aliases, the port
+          number and the protocol.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
+          getservbyport(3) is not available.
+                25 getservbyport => #( "smtp" #( "mail" ) 25 "tcp" )
+     ggeettuuiidd ( -- id )
+          Return real user id of calling process.
+     hhoossttnnaammee ( -- )
+     kkiillll ( pid sig -- )
+          Send signal _s_i_g to process ID _p_i_d.  If _p_i_d is zero, send _s_i_g to
+          current process.  _s_i_g is a number or a constant like SIGKILL.
+     ppuutteennvv ( name value -- )
+          Set _v_a_l_u_e to shell environment variable _n_a_m_e.
+     sseetteeggiidd ( id -- )
+          Set effective user _i_d.  This is only permitted if _i_d is equal real
+          UID or effective UID or the effective UID is that of the super user.
+     sseetteeuuiidd ( id -- )
+          Set effective group _i_d.  This is only permitted if _i_d is equal real
+          GID or effective GID or the effective UID is that of the super user.
+     sseettggiidd ( id -- )
+          Set real group _i_d.  This is only permitted if _i_d is equal real GID
+          or effective GID or the effective UID is that of the super user.
+     sseetthhoossttnnaammee ( str -- )
+          Set name of current host to _s_t_r.  This call is restricted to the
+          super-user.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if sethostname(3) is
+          not available.
+     sseettuuiidd ( id -- )
+          Set real user _i_d.  This is only permitted if _i_d is equal real UID or
+          effective UID or the effective UID is that of the super user.
+     ssiiggnnaall ( sig xt -- old-xt )
+          Install _x_t for signal _s_i_g as an signal handler and return old
+          handler.  _X_T must take one value from the stack, the signal, and
+          must not return any value; its stack effect is ( sig -- ).  The old
+          xt handler can be preserved for later use.
+                SIGINT lambda: { sig -- }
+                        ." SIGINT received" cr
+                ; signal value old-xt
+     sslleeeepp ( secs -- )
+          Pause for _s_e_c_s seconds.
+     wwaaiitt ( -- pid )
+          Wait for child process and return its process ID.  Set global read
+          only variable exit-status to wait status.
+     wwaaiittppiidd ( pid flags -- )
+          Wait for child process _p_i_d.  Set global read only variable exit-
+          status to wait status.  _f_l_a_g_s may be 0 or WNOHANG and WUNTRACED
+          ored.
+                1234 0 waitpid
+                1234 WNOHANG waitpid
+                1234 WNOHANG WUNTRACED or waitpid
+
+     Getopt variables:
+     optarg
+          Getopt set this variable to the option string of an argument which
+          accepts options, otherwise to #f.
+     opterr
+          If #t, the default, getopt print error message in case of an error,
+          if #f, no message will be printed.
+     optind
+          Getopt set this variable to the index of the next element of the
+          *argv* array.
+     optopt
+          If getopt finds unknown options or getopt misses required arguments,
+          it stores that option in this variable.
+
+     Getopt functions:
+     ggeettoopptt ( argv opts -- c )
+          Return next option character from command line options.  See
+          _E_X_A_M_P_L_E_S for an getopt example.
+     ggeettoopptt--lloonngg ( argv opts longopts -- c )
+          Return next option character from command line options.
+                : long-test
+                        #f #f { bflag ffile }
+                        #f to opterr
+                        #( #( "flag" no-argument <char> b )
+                           #( "file" required-argument <char> f ) ) { opts }
+                        begin
+                                *argv* "bf:" opts getopt-long ( ch ) dup
+                        while ( ch )
+                                case
+                                        <char> b of #t     to bflag endof
+                                        <char> f of optarg to ffile endof
+                                        <char> ? of
+                                                "-%c requires an argument"
+                                                    #( optopt ) fth-warning
+                                        endof
+                                endcase
+                        repeat drop ( ch )
+                        optind 0 ?do *argv* array-shift drop loop
+                        *argv* array-length to *argc*
+                        "-b, --flag (default #f): %s\n" #( bflag ) fth-print
+                        "-f, --file (default #f): %s\n" #( ffile ) fth-print
+                ;
+
+     Information and configuration:
+     ((bbyyee)) ( n -- )
+          The exit hook fth_exit_hook will be called if set, all procs
+          registered for at-exit will be executed and the current process will
+          be terminated with exit code _n.
+     ..ccffllaaggss ( -- )
+          Print compiler flags to compile libfth.so to other applications.
+     ..lliibbss ( -- )
+          Print linker flags to link libfth.so to other applications.
+     ..lloonngg--vveerrssiioonn ( -- )
+          Print long package version.
+     ..mmeemmoorryy ( -- )
+          Print used and free dictionary cells.
+     ..pprreeffiixx ( -- )
+          Print installation prefix path.
+     ..vveerrssiioonn ( -- )
+          Print package version number.
+     aatt--eexxiitt ( obj -- )
+          _o_b_j, an proc or xt, will be called by Fth's exit function.  More
+          than one calls to at-exit are possible, all procs or xts will be
+          called in order.  The stack effect of _o_b_j must be ( -- ).
+                lambda: <{ -- }> "test.file" file-delete ; at-exit
+     ccoonnffiigg--ccffllaaggss ( -- str )
+          Return compiler flags to compile libfth.so to other applications.
+     ccoonnffiigg--lliibbss ( -- str )
+          Return linker flags to link libfth.so to other applications.
+     ccoonnffiigg--pprreeffiixx ( -- str )
+          Return installation prefix path.
+     ccoonnffiigguurree--aarrggss ( -- str )
+          Return configure arguments.
+     vveerr ( -- addr len )
+          Return fth-version as a Forth string with addr len.
+                ver type => "1.3.1 (19-Mar-2012) [i386-portbld-freebsd9.0]"
+
+   NNuummbbeerrss
+     Number predicates:
+     bbiiggnnuumm?? ( obj -- f )
+     ccoommpplleexx?? ( obj -- f )
+     eevveenn?? ( obj -- f )
+     eexxaacctt?? ( obj -- f )
+     ffiixxnnuumm?? ( obj -- f )
+     ffllooaatt?? ( obj -- f )
+     iinneexxaacctt?? ( obj -- f )
+     iinnff?? ( obj -- f )
+     iinntteeggeerr?? ( obj -- f )
+     lloonngg--lloonngg?? ( obj -- f )
+     nnaann?? ( obj -- f )
+     nnuummbbeerr?? ( obj -- f )
+     oodddd?? ( obj -- f )
+     pprriimmee?? ( obj -- f )
+     rraattiioo?? ( obj -- f )
+     rraattiioonnaall?? ( obj -- f ) alias for _r_a_t_i_o_?
+     uulloonngg--lloonngg?? ( obj -- f )
+     uunnssiiggnneedd?? ( obj -- f )
+          Return #t if a given object is of corresponding type, otherwise #f.
+
+     Miscellaneous math functions:
+     >>bbiiggnnuumm ( x -- b )
+          Convert any number _x to a bignum object.
+     >>cc ( x -- c )
+          Convert any number _x to a complex object.
+     >>ccoommpplleexx ( r1 r2 -- c )
+          Return complex object with real _r_1 and image _r_2.
+     >>lllloonngg ( x -- d )
+          Convert any number _x to a long-long object.
+     >>rraattiioo ( x -- q )
+          Convert any number _x to a ratio object.
+     ddeennoommiinnaattoorr ( x -- n )
+          Return denominator of _x or 1.
+     eexxaacctt-->>iinneexxaacctt ( x -- r )
+          Convert _x to an inexact number.
+     iimmaagg--rreeff ( x -- r )
+          Return the image part of Ar x .
+     iimmaaggee--rreeff ( x -- r ) alias for _i_m_a_g_-_r_e_f
+     iinneexxaacctt-->>eexxaacctt ( x -- n )
+          Convert _x to an exact number.
+     iinnff ( -- inf )
+          Return Infinity.
+     mmaakkee--bbiiggnnuumm ( x -- b )
+          Return a new bignum object.
+     mmaakkee--lloonngg--lloonngg ( val -- d )
+          Return new llong object (ficl2Integer) from _v_a_l.
+     mmaakkee--ppoollaarr ( real theta -- c )
+          Return polar complex object from _r_e_a_l and _t_h_e_t_a.
+     mmaakkee--rraattiioo ( num den -- q )
+          Return a new ratio object with numerator _n_u_m and denumerator _d_e_n.
+     mmaakkee--rreeccttaanngguullaarr ( r1 r2 -- c ) alias for _>_c_o_m_p_l_e_x
+     mmaakkee--uulloonngg--lloonngg ( val -- ud )
+          Return new unsigned llong object (ficl2Unsigned) from _v_a_l.
+     nnaann ( -- NaN )
+          Return Not-A-Number.
+     nnuummeerraattoorr ( x -- n )
+          Return numerator of _x or 0.
+     rraattiioonnaalliizzee ( x err -- y )
+          Return inexact number within _e_r_r of _x.
+     rreeaall--rreeff ( x -- r )
+          Return the real part of _x.
+
+     Pseudo randomize number functions:
+     rraanndd--sseeeedd--rreeff ( -- seed )
+          Return content of the seed variable fth_randx.
+     rraanndd--sseeeedd--sseett!! ( seed -- )
+          Set _s_e_e_d to the seed variable fth_randx.
+     ffrraannddoomm ( r -- -r...+r )
+          Return pseudo randomized value between _-_r and _+_r.
+     rraannddoomm ( r -- 0.0..r )
+          Return pseudo randomized value between 0.0 and _r.
+
+     These formatted number output functions will by convention add a space
+     after the number:
+     ..rr ( n1 n2 -- )
+          Print integer _n_1 in a right-adjusted field of _n_2 characters.
+                17 3 .r => | 17 |
+     cc.. ( c -- )
+          Print complex number _c.
+                17.0+1.0i c. => |17.000000+1.000000i |
+     dd.. ( d -- )
+          Print (Forth) double _d (ficl2Integer).
+                17 d. => |17 |
+     dd..rr ( d n -- )
+          Print (Forth) double _d (ficl2Integer) in a right-adjusted field of _n
+          characters.
+                17 3 d.r => | 17 |
+     ff..rr ( r n -- )
+          Print float _r with _n digits after decimal point.
+                17.0 3 f.r => |17.000 |
+     bbnn.. ( b -- )
+          Print bignum number.
+                17.0 bn. => |17 |
+     qq.. ( q -- )
+          Print rational number.
+                17.0 q. => |17/1 |
+     uu..rr ( u n -- )
+          Print unsigned integer _u in a right-adjusted field of _n characters.
+                17 3 u.r => | 17 |
+     uudd.. ( ud -- )
+          Print (Forth) unsigned double _u_d (ficl2Unsigned).
+                17 ud. => |17 |
+     uudd..rr ( ud n -- )
+          Print (Forth) unsigned double _u_d (ficl2Unsigned) in a right-adjusted
+          field of _n characters.
+                17 3 ud.r => | 17 |
+     uuff..rr ( r len-all len-after-comma -- )
+          Print float _r in a right-adjusted field of _l_e_n_-_a_l_l characters with
+          _l_e_n_-_a_f_t_e_r_-_c_o_m_m_a digits.
+                17.0 8 3 uf.r => | 17.000 |
+                17.0 8 2 uf.r => |  17.00 |
+
+     Comparison:
+     00<< ( n -- f )
+     00<<== ( n -- f )
+     00<<>> ( n -- f )
+     00== ( n -- f )
+     00==>> ( n -- f )
+     00>> ( n -- f )
+     nneeggaattiivvee?? ( n -- f ) alias for _0_<
+     ppoossiittiivvee?? << ( n -- f ) alias for _0_>_=
+     zzeerroo?? ( n -- f ) alias for _0_=
+          Comparison between integer (ficlInteger) and zero.
+     << ( n1 n2 -- f )
+     <<== ( n1 n2 -- f )
+     <<>> ( n1 n2 -- f )
+     == ( n1 n2 -- f )
+     ==>> ( n1 n2 -- f )
+     >> ( n1 n2 -- f )
+     nneeggaattiivvee?? ( n -- f ) alias for _0_<
+     ppoossiittiivvee?? << ( n -- f ) alias for _0_>_=
+     zzeerroo?? ( n -- f ) alias for _0_=
+          Comparison between two integers (ficlInteger).
+     uu<< ( u1 u2 -- f )
+     uu<<== ( u1 u2 -- f )
+     uu<<>> ( u1 u2 -- f )
+     uu== ( u1 u2 -- f )
+     uu==>> ( u1 u2 -- f )
+     uu>> ( u1 u2 -- f )
+          Comparison between two unsigned integers (ficlUnsigned).
+     dd00<< ( d -- f )
+     dd00<<== ( d -- f )
+     dd00<<>> ( d -- f )
+     dd00== ( d -- f )
+     dd00>> ( d -- f )
+     dd00>>== ( d -- f )
+     ddnneeggaattiivvee?? ( d -- f ) alias for _d_0_<
+     ddppoossiittiivvee?? << ( d -- f ) alias for _d_0_>_=
+     ddzzeerroo?? ( d -- f ) alias for _d_0_=
+          Comparison between long integer (ficl2Integer) and zero.  _d can be
+          any type of number but should fit in ficl2Integer.
+                1 d0>= => #t
+                1.0 d0< => #f
+     dd<< ( d1 d2 -- f )
+     dd<<== ( d1 d2 -- f )
+     dd<<>> ( d1 d2 -- f )
+     dd== ( d1 d2 -- f )
+     dd>> ( d1 d2 -- f )
+     dd>>== ( d1 d2 -- f )
+          Comparison between two long integers (ficl2Integer).  _d_1 and _d_2 can
+          be any type of number but should fit in ficl2Integer.
+                1 2.0 d< => #t
+                1.0 2 d= => #f
+     dduu<< ( ud1 ud2 -- f )
+     dduu<<== ( ud1 ud2 -- f )
+     dduu<<>> ( ud1 ud2 -- f )
+     dduu== ( ud1 ud2 -- f )
+     dduu>> ( ud1 ud2 -- f )
+     dduu>>== ( ud1 ud2 -- f )
+          Comparison between two long unsigned integers (ficl2Unsigned).  _u_d_1
+          and _u_d_2 can be any type of number but should fit in ficl2Unsigned.
+                1 2.0 du< => #t
+                1.0 2 du= => #f
+     cc00<<>> ( c -- f )
+     cc00== ( c -- f )
+          Comparison between a complex number and zero.  _c can be any type of
+          number but should fit in ficlComplex.
+                1.0+1.0i c0<> => #t
+                0.0+0.0i c0= => #t
+                1 c0= => #f
+     cc<<>> ( c1 c2 -- f )
+     cc== ( c1 c2 -- f )
+          Comparison between two numbers.  _c_1 and _c_2 can be any type of number
+          but should fit in ficlComplex.
+                1.0+1.0i 1i c= => #t
+                1+0i 2.0 c<> => #t
+                1 1+0i c= => #t
+     bb00<< ( b -- f )
+     bb00<<== ( b -- f )
+     bb00<<>> ( b -- f )
+     bb00== ( b -- f )
+     bb00>> ( b -- f )
+     bb00>>== ( b -- f )
+          Comparison between an arbitrary precision number and zero.  _b can be
+          any type of number.
+     bb<< ( b1 b2 -- f )
+     bb<<== ( b1 b2 -- f )
+     bb<<>> ( b1 b2 -- f )
+     bb== ( b1 b2 -- f )
+     bb>> ( b1 b2 -- f )
+     bb>>== ( b1 b2 -- f )
+          Comparison between two arbitrary precision big numbers.  _b_1 and _b_2
+          can be any type of number.
+     qq00<< ( q -- f )
+     qq00<<== ( q -- f )
+     qq00<<>> ( q -- f )
+     qq00== ( q -- f )
+     qq00>> ( q -- f )
+     qq00>>== ( q -- f )
+          Comparison between an arbitrary precision rational number and zero.
+          _q can be any type of number.
+     qq<< ( q1 q2 -- f )
+     qq<<== ( q1 q2 -- f )
+     qq<<>> ( q1 q2 -- f )
+     qq== ( q1 q2 -- f )
+     qq>> ( q1 q2 -- f )
+     qq>>== ( q1 q2 -- f )
+          Comparison between two arbitrary precision rational numbers.  _q_1 and
+          _q_2 can be any type of number.
+
+     Convertion between number types:
+     >>bbiiggnnuumm ( x -- b )
+     ff>>bb ( r -- b ) alias for _>_b_i_g_n_u_m
+     ss>>bb ( n -- b ) alias for _>_b_i_g_n_u_m
+          Convert any number to a bignum object (ficlBignum).
+     >>cc ( x -- c )
+     ff>>cc ( r -- c ) alias for _>_c
+     qq>>cc ( q -- c ) alias for _>_c
+     ss>>cc ( n -- c ) alias for _>_c
+          Convert any number to a complex object (ficlComplex).
+     ff>>dd ( r -- d )
+     ss>>dd ( n -- d ) alias for _f_>_d
+          Convert any number to Forth double word set number (ficl2Integer).
+     bb>>ff ( b -- r ) alias for _s_>_f
+     cc>>ff ( c -- r ) alias for _s_>_f
+     dd>>ff ( d -- r ) alias for _s_>_f
+     qq>>ff ( q -- r ) alias for _s_>_f
+     ss>>ff ( n -- r )
+          Convert any number to a float object (ficlFloat).
+     cc>>qq ( c -- q ) alias for _f_>_q
+     ff>>qq ( r -- q )
+     ss>>qq ( n -- q )
+          Convert complex (c>q), float (f>q), and integer (s>q) to ratio
+          object (ficlRatio).
+     bb>>ss ( b -- n ) alias for _f_>_s
+     cc>>ss ( c -- n ) alias for _f_>_s
+     dd>>ss ( d -- n ) alias for _f_>_s
+     ff>>ss ( r -- n )
+     qq>>ss ( q -- n ) alias for _f_>_s
+          Convert any number to Forth single word set number (ficlInteger).
+
+     Math functions:
+     11++ ( n1 -- n2 )
+     11-- ( n1 -- n2 )
+     22++ ( n1 -- n2 )
+     22-- ( n1 -- n2 )
+     22** ( n1 -- n2 )
+     22// ( n1 -- n2 )
+     aabbss ( n1 -- n2 )
+     nneeggaattee ( n1 -- n2 )
+          One argument integer (ficlInteger) operators.
+     ++ ( n1 n2 -- n3 )
+     -- ( n1 n2 -- n3 )
+     ** ( n1 n2 -- n3 )
+     // ( n1 n2 -- n3 )
+     mmaaxx ( n1 n2 -- n3 )
+     mmiinn ( n1 n2 -- n3 )
+          Two argument integer (ficlInteger) operators.
+     dd22** ( d1 -- d2 )
+     dd22// ( d1 -- d2 )
+     ddaabbss ( d1 -- d2 )
+     ddnneeggaattee ( d1 -- d2 )
+          One argument long integer (ficl2Integer) operators.  _d_1 can be any
+          type of number but should fit in ficl2Integer.
+     dd++ ( d1 d2 -- d3 )
+     dd-- ( d1 d2 -- d3 )
+     dd** ( d1 d2 -- d3 )
+     dd// ( d1 d2 -- d3 )
+     ddmmaaxx ( d1 d2 -- d3 )
+     ddmmiinn ( d1 d2 -- d3 )
+          Two argument long integer (ficl2Integer) operators.  _d_1 and _d_2 can
+          be any type of number but should fit in ficl2Integer.
+     11//ff ( r1 -- r2 )
+     ff22** ( r1 -- r2 )
+     ff22// ( r1 -- r2 )
+     ffaabbss ( r1 -- r2 )
+     ffnneeggaattee ( r1 -- r2 )
+          One argument real number (ficlFloat) operators.  _r_1 can be any type
+          of number but should fit in ficlFloat.
+     ff++ ( r1 r2 -- r3 )
+     ff-- ( r1 r2 -- r3 )
+     ff** ( r1 r2 -- r3 )
+     ff// ( r1 r2 -- r3 )
+     ffmmaaxx ( r1 r2 -- r3 )
+     ffmmiinn ( r1 r2 -- r3 )
+          Two argument real numbers (ficlFloat) operators.  _r_1 and _r_2 can be
+          any type of number but should fit in ficlFloat.
+     ff**** ( r1 r2 -- r3 )
+     ffaabbss ( r1 -- r2 )
+     ffaaccooss ( r1 -- r2 )
+     ffaaccoosshh ( r1 -- r2 )
+     ffaalloogg ( r1 -- r2 )
+     ffaassiinn ( r1 -- r2 )
+     ffaassiinnhh ( r1 -- r2 )
+     ffaattaann ( r1 -- r2 )
+     ffaattaann22 ( r1 r2 -- r3 )
+     ffaattaannhh ( r1 -- r2 )
+     ffcceeiill ( r1 -- r2 )
+     ffccooss ( r1 -- r2 )
+     ffccoosshh ( r1 -- r2 )
+     ffeexxpp ( r1 -- r2 )
+     ffeexxppmm11 ( r1 -- r2 )
+     fflloogg ( r1 -- r2 )
+     fflloogg1100 ( r1 -- r2 )
+     fflloogg22 ( r1 -- r2 )
+     ffllooggpp11 ( r1 -- r2 )
+     fflloooorr ( r1 -- r2 )
+     ffppooww ( r1 r2 -- r3 ) alias for _f_*_*
+     ffrroouunndd ( r1 -- r2 )
+     ffssiinn ( r1 -- r2 )
+     ffssiinnccooss ( r1 -- r2 r3 )
+     ffssiinnhh ( r1 -- r2 )
+     ffssqqrrtt ( r1 -- r2 )
+     ffttaann ( r1 -- r2 )
+     ffttaannhh ( r1 -- r2 )
+     ffttrruunncc ( r1 -- r2 )
+          Math library functions for real numbers.  ffeexxppmm11 returns exp(r1) -
+          1.0, ffllooggpp11 returns log(r1 + 1.0) and ffssiinnccooss returns sin(r1) and
+          cos(r1).  _r_1 and probable second argument _r_2 can be any type of
+          number but should fit in ficlFloat.
+     11//cc ( c1 -- c2 )
+     cc** ( c1 c2 -- c3 )
+     cc**** ( c1 c2 -- c3 )
+     cc++ ( c1 c2 -- c3 )
+     cc-- ( c1 c2 -- c3 )
+     cc// ( c1 c2 -- c3 )
+     ccaabbss ( c1 -- c2 )
+     ccaabbss22 ( c1 -- c2 )
+     ccaaccooss ( c1 -- c2 )
+     ccaaccoosshh ( c1 -- c2 )
+     ccaarrgg ( c1 -- c2 )
+     ccaassiinn ( c1 -- c2 )
+     ccaassiinnhh ( c1 -- c2 )
+     ccaattaann ( c1 -- c2 )
+     ccaattaann22 ( c1 c2 -- c3 )
+     ccaattaannhh ( c1 -- c2 )
+     ccccooss ( c1 -- c2 )
+     ccccoosshh ( c1 -- c2 )
+     cceexxpp ( c1 -- c2 )
+     cclloogg ( c1 -- c2 )
+     cclloogg1100 ( c1 -- c2 )
+     ccoonnjj ( c1 -- c2 )
+     ccoonnjjuuggaattee ( c1 -- c2 ) alias for _c_o_n_j
+     ccppooww ( c1 c2 -- c3 ) alias for _c_*_*
+     ccssiinn ( c1 -- c2 )
+     ccssiinnhh ( c1 -- c2 )
+     ccssqqrrtt ( c1 -- c2 )
+     ccttaann ( c1 -- c2 )
+     ccttaannhh ( c1 -- c2 )
+     mmaaggnniittuuddee ( c1 -- c2 )
+          Math library functions for complex numbers.  _c_1 and probable second
+          argument _c_2 can be any type of number but should fit in ficlComplex.
+     bb22** ( b1 -- b2 )
+     bb22// ( b1 -- b2 )
+     bbaabbss ( b1 -- b2 )
+     bbnneeggaattee ( b1 -- b2 )
+          One argument arbitrary precision bignum functions.  _b_1 can be any
+          type of number.
+     bb++ ( b1 b2 -- b3 )
+     bb-- ( b1 b2 -- b3 )
+     bb** ( b1 b2 -- b3 )
+     bb// ( b1 b2 -- b3 )
+     bb**** ( b1 b2 -- b3 )
+     bbmmaaxx ( b1 b2 -- b3 )
+     bbmmiinn ( b1 b2 -- b3 )
+     bbppooww ( b1 b2 -- b3 ) alias for _b_*_*
+          Two argument arbitrary precision bignum functions.  _b_1 and _b_2 can be
+          any type of number.
+     bbllsshhiifftt ( b1 n -- b2 )
+     bbrrsshhiifftt ( b1 n -- b2 )
+          Shifts arbitrary precision number _b_1 _n bits to left resp. right.  _b_1
+          can be any type of number while _n has to be an integer
+          (ficlInteger).
+     11//qq ( q1 -- q2 )
+     qqaabbss ( q1 -- q2 )
+     qqcceeiill ( q1 -- q2 )
+     qqfflloooorr ( q1 -- q2 )
+     qqnneeggaattee ( q1 -- q2 )
+          One argument arbitrary precision rational functions.  _q_1 can be any
+          type of number.
+     qq++ ( q1 q2 -- q3 )
+     qq-- ( q1 q2 -- q3 )
+     qq** ( q1 q2 -- q3 )
+     qq// ( q1 q2 -- q3 )
+     qq**** ( q1 q2 -- q3 )
+     qqppooww ( q1 q2 -- q3 ) alias for _q_*_*
+          Two argument arbitrary precision rational functions.  _q_1 and _q_2 can
+          be any type of number.
+
+     Constants:
+     eeuulleerr     e (~2.71828)
+     hhaallff--ppii   pi/2 (~1.5708)
+     llnn--tteenn    log(10) (~2.30259)
+     llnn--ttwwoo    log(2) (~0.693147)
+     ppii        pi (~3.14159)
+     ssqqrrtt--ttwwoo  sqrt(2) (~1.41421)
+     ttwwoo--ppii    pi*2 (~6.28319)
+
+   OObbjjeecctt ttyyppeess
+     bbaacckkttrraaccee ( -- )
+          Print last word list from stack frame to error output.
+     bbtt ( -- ) alias for _b_a_c_k_t_r_a_c_e
+     ffrraammee--ddeepptthh ( -- n )
+          Internal global variable.  Return the current frame depth.
+     oobbjjeecctt--pprriinntt--lleennggtthh ( -- n )
+          Return the number of objects to print for objects like array, list,
+          hash.  Default value is 12.
+     sseett--oobbjjeecctt--pprriinntt--lleennggtthh ( n -- )
+          Set number of objects to print for objects like array, list, hash to
+          _n.  If _n is negative, print all elements of a given object.
+     ssttaacckk--lleevveell ( -- n ) alias for _f_r_a_m_e_-_d_e_p_t_h
+
+     Garbage collection words:
+     ggcc--mmaarrkk ( obj -- obj )
+          Mark _o_b_j to protect it from garbage collection on next gc-run.
+     ggcc--mmaarrkkeedd?? ( obj -- f )
+          Return #t if _o_b_j is an instance and mark flag is set.  All new
+          created objects have mark flag set.
+     ggcc--ooffff ( -- )
+          Turn off garbage collection.  The return code is meaningless in
+          Forth.
+     ggcc--oonn ( -- )
+          Turn on garbage collection.  The return code is meaningless in
+          Forth.
+     ggcc--ppeerrmmaanneenntt--oobbjjeeccttss ( -- ary )
+          Return array of all permanent objects.
+     ggcc--ppeerrmmaanneenntt?? ( obj -- f )
+          Return #t if _o_b_j is an instance and permanent flag is set like
+          constants.
+     ggcc--pprrootteecctt ( obj -- obj )
+          Protect _o_b_j from garbage collection until gc-unprotect.
+     ggcc--pprrootteecctteedd--oobbjjeeccttss ( -- ary )
+          Return array of all protected objects.
+     ggcc--pprrootteecctteedd?? ( obj -- f )
+          Return #t if _o_b_j is an instance and protected flag is set.
+     ggcc--rruunn ( -- )
+          Run garbage collection immediately.
+     ggcc--ssttaattss ( -- )
+          Print garbage collection statistics.
+                permanent
+                     permanent protected objects like constants
+                protected
+                     temporary protected objects like gc-protected
+                marked
+                     marked to protect from next freeing
+                freed
+                     freed objects
+                insts
+                     all other nonfreed objects
+                buffer
+                     size of entire allocated buffer-array
+                gc stack
+                     stack frame level
+     ggcc--uunnmmaarrkk ( obj -- obj )
+          Unmark _o_b_j to unprotect it from garbage collection on next gc-run.
+     ggcc--uunnpprrootteecctt ( obj -- obj )
+          Unprotect _o_b_j from garbage collection.
+
+     Object type and instance words:
+     iinnssttaannccee--ggeenn--rreeff ( obj -- gen )
+          Return GEN-struct of _o_b_j.
+     iinnssttaannccee--oobbjj--rreeff ( obj -- gen )
+          Return object type of _o_b_j.
+     iinnssttaannccee--ooff?? ( obj type -- f )
+          Return #t if _o_b_j is an instance of _t_y_p_e, otherwise #f.
+     iinnssttaannccee?? ( obj -- f )
+          Return #t if _o_b_j is an instance, otherwise #f.
+     mmaakkee--iinnssttaannccee ( gen obj -- instance )
+          Return new instance of Object type _o_b_j with _g_e_n wrapped in.
+     mmaakkee--oobbjjeecctt--ttyyppee ( name -- object-type )
+          Create new object type _n_a_m_e.  Add _n_a_m_e to feature environment list,
+          create a constant fth-_n_a_m_e of object-type and return new object-type
+          _n_a_m_e.  The new created object-type can be used to bind functions to
+          it.
+     oobbjjeecctt--ttyyppee--rreeff ( obj -- struct )
+          Return object struct of object-type _o_b_j.
+     oobbjjeecctt--ttyyppee?? ( obj -- f )
+          Return #t if _o_b_j is an Object type, otherwise #f.
+     oobbjjeecctt--ttyyppeess ( -- ary )
+          Return array of all object names known to the system.
+
+     Object set words:
+     sseett--oobbjjeecctt-->>aarrrraayy ( xt obj -- )
+          Set _x_t as oobbjjeecctt-->>aarrrraayy function for _o_b_j type.
+     sseett--oobbjjeecctt-->>ssttrriinngg ( xt obj -- )
+          Set _x_t as oobbjjeecctt-->>ssttrriinngg function for _o_b_j type.
+     sseett--oobbjjeecctt--aappppllyy ( xt obj arity -- )
+          Set _x_t as oobbjjeecctt--aappppllyy function for _o_b_j type.
+     sseett--oobbjjeecctt--ccooppyy ( xt obj -- )
+          Set _x_t as oobbjjeecctt--ccooppyy function for _o_b_j type.
+     sseett--oobbjjeecctt--dduummpp ( xt obj -- )
+          Set _x_t as oobbjjeecctt--dduummpp function for _o_b_j type.
+     sseett--oobbjjeecctt--eeqquuaall--pp ( xt obj -- )
+          Set _x_t as oobbjjeecctt--eeqquuaall?? function for _o_b_j type.
+     sseett--oobbjjeecctt--ffrreeee ( xt obj -- )
+          Set _x_t as gc free function for _o_b_j type.
+     sseett--oobbjjeecctt--iinnssppeecctt ( xt obj -- )
+          Set _x_t as oobbjjeecctt--iinnssppeecctt function for _o_b_j type.
+     sseett--oobbjjeecctt--lleennggtthh ( xt obj -- )
+          Set _x_t as oobbjjeecctt--lleennggtthh function for _o_b_j type.
+     sseett--oobbjjeecctt--mmaarrkk ( xt obj -- )
+          Set _x_t as gc mark function for _o_b_j type.
+     sseett--oobbjjeecctt--vvaalluuee--rreeff ( xt obj -- )
+          Set _x_t as oobbjjeecctt--rreeff function for _o_b_j type.
+     sseett--oobbjjeecctt--vvaalluuee--sseett ( xt obj -- )
+          Set _x_t as oobbjjeecctt--sseett!! function for _o_b_j type.
+
+     General object words
+     ..iinnssppeecctt ( obj -- )
+          Print inspect string of _o_b_j.
+     ..oobbjjeecctt--nnaammee ( obj -- )
+          Print object name of _o_b_j to current stdout.
+     aappppllyy ( obj args -- result ) alias for _o_b_j_e_c_t_-_a_p_p_l_y
+     ccyyccllee--rreeff ( obj -- val )
+          Return value at current cycle-index of _o_b_j and increment cycle-
+          index.  Cycle through content of _o_b_j from first to last entry and
+          start again at the beginning etc.
+     ccyyccllee--sseett!! ( obj value -- )
+          Store _v_a_l_u_e at current cycle-index of _o_b_j and increment cycle-index.
+          Cycle through content of _o_b_j from first to last entry and start
+          again at the beginning etc.
+     ccyyccllee--ssttaarrtt!! ( obj index -- )
+          Set cycle-index of _o_b_j to _i_n_d_e_x.
+     ccyyccllee--ssttaarrtt00 ( obj -- )
+          Set cycle-index of _o_b_j to zero.
+     ccyyccllee--ssttaarrtt@@ ( obj -- index )
+          Return current cycle-index of _o_b_j.
+     ddeetteecctt ( obj key -- value ) alias for _o_b_j_e_c_t_-_f_i_n_d
+     eemmppttyy?? ( obj -- f ) alias for _o_b_j_e_c_t_-_e_m_p_t_y_?
+     eeqquuaall?? ( obj1 obj2 -- f ) alias for _o_b_j_e_c_t_-_e_q_u_a_l_?
+     ffiirrsstt--rreeff ( obj -- val )
+          Return first element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
+          of _o_b_j is less than 1.
+     ffiirrsstt--sseett!! ( obj value -- )
+          Store _v_a_l_u_e to first element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
+          if length of _o_b_j is less than 1.
+     hhaasshh--iidd ( obj -- id )
+          Return hash id computed from string representation of _o_b_j.  Objects
+          with the same content have the same id.
+     iinnddeexx ( obj key -- index ) alias for _o_b_j_e_c_t_-_i_n_d_e_x
+     llaasstt--rreeff ( obj -- val )
+          Return last element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
+          of _o_b_j is less than 1.
+     llaasstt--sseett!! ( obj value -- )
+          Store _v_a_l_u_e to last element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          length of _o_b_j is less than 1.
+     lleennggtthh ( obj -- len ) alias for _o_b_j_e_c_t_-_l_e_n_g_t_h
+     mmeemmbbeerr?? ( obj key -- f ) alias for _o_b_j_e_c_t_-_m_e_m_b_e_r_?
+     oobbjjeecctt-->>aarrrraayy ( obj -- ary )
+          Return _o_b_j as array.
+     oobbjjeecctt-->>ssttrriinngg ( obj -- str )
+          Return string representation of _o_b_j.
+     oobbjjeecctt--aappppllyy ( obj args -- result )
+          Run apply on _o_b_j with _a_r_g_s as arguments.  _a_r_g_s can be an array of
+          arguments or a single argument.  The number of _a_r_g_s must fit apply's
+          definition.  The next two examples require each 1 argument:
+                fth_set_object_apply(vct_tag, vct_ref, 1, 0, 0); /* C */
+                <'> enved-ref fth-enved 1 set-object-apply \ Forth
+     oobbjjeecctt--ccooppyy ( obj1 -- obj2 )
+          Return copy of _o_b_j_1.  Copy any element if _o_b_j_1 is an instance.
+     oobbjjeecctt--ddeebbuugg--hhooookk ( obj -- hook )
+          Return debug-hook member of _o_b_j if there is any, otherwise #f.  The
+          hook has the stack effect ( inspect-string obj -- new-str ).  Every
+          object can set this hook.  If set, it will be called on inspecting
+          the object with the inspect string as first argument.  If there are
+          more than one hook procedures, all of them will be called feeded
+          with the new string previously returned.
+                #( 0 1 ) value ary
+                ary .inspect => #<array[2]:  #<fixnum: 0> #<fixnum: 1>>
+                ary object-debug-hook lambda: <{ str obj -- new-str }>
+                        "debug-inspect: %s" #( obj ) string-format
+                ; add-hook!
+                ary .inspect => #<debug-inspect: #( 0 1 )>
+                ary object-debug-hook hook-clear
+                ary .inspect => #<array[2]:  #<fixnum: 0> #<fixnum: 1>>
+     oobbjjeecctt--dduummpp ( obj -- str )
+          Return dump string of _o_b_j which one can eval to get the object back.
+     oobbjjeecctt--eemmppttyy?? ( obj -- f )
+          Return #t if length of _o_b_j is zero, otherwise #f.
+     oobbjjeecctt--eeqquuaall?? ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 have equal content, otherwise #f.
+     oobbjjeecctt--ffiinndd ( obj key -- value )
+          Search for _k_e_y in _o_b_j and return corresponding value or #f if not
+          found.
+     oobbjjeecctt--iidd ( obj -- id )
+          Return object id of _o_b_j, a uniq number.
+     oobbjjeecctt--iinnddeexx ( obj key -- index )
+          Search for _k_e_y in _o_b_j and return index or -1 if not found.
+     oobbjjeecctt--iinnssppeecctt ( obj -- str )
+          Return inspect string of _o_b_j.
+     oobbjjeecctt--lleennggtthh ( obj -- len )
+          Return length of _o_b_j.
+     oobbjjeecctt--mmeemmbbeerr?? ( obj key -- f )
+          Return #t if _k_e_y is present in _o_b_j, otherwise #f.
+     oobbjjeecctt--nnaammee ( obj -- name )
+          Return object type name of OBJ as a string.
+     oobbjjeecctt--rraannggee?? ( obj index -- f )
+          Return #t if _i_n_d_e_x is in range of _o_b_j, otherwise #f.  If _i_n_d_e_x is
+          negative, return #f.
+     oobbjjeecctt--rreeff ( obj index -- val )
+          Return value at _i_n_d_e_x from _o_b_j.  If _o_b_j is of a type which can have
+          multiple elements, an array for example, return value at _i_n_d_e_x.  If
+          _o_b_j is of a type which consists of only one element, a fixnum for
+          example, ignore _i_n_d_e_x and return _o_b_j itself.
+     oobbjjeecctt--sseett!! ( obj index value -- )
+          Set _v_a_l_u_e at _i_n_d_e_x to _o_b_j.  If _o_b_j is of a type which can have
+          multiple elements, an array for example, set _v_a_l_u_e at position
+          _i_n_d_e_x.  If _o_b_j is of a type which consists of only one element, a
+          fixnum for example, do nothing.
+     oobbjjeecctt--sseett**!! ( obj index value -- )
+          Multiply _v_a_l_u_e to value at _i_n_d_e_x of _o_b_j.  Value may be any number
+          (ficlInteger, ficlFloat, ficlRatio or ficlComplex).
+     oobbjjeecctt--sseett++!! ( obj index value -- )
+          Add _v_a_l_u_e to value at _i_n_d_e_x of _o_b_j.  Value may be any number
+          (ficlInteger, ficlFloat, ficlRatio or ficlComplex).
+     oobbjjeecctt--sseett--!! ( obj index value -- )
+          Subtract _v_a_l_u_e from value at _i_n_d_e_x of _o_b_j.  Value may be any number
+          (ficlInteger, ficlFloat, ficlRatio or ficlComplex).
+     oobbjjeecctt--sseett//!! ( obj index value -- )
+          Divide value at _i_n_d_e_x of _o_b_j by _v_a_l_u_e.  Value may be any number
+          (ficlInteger, ficlFloat, ficlRatio or ficlComplex).
+     oobbjjeecctt--ssoorrtt ( obj cmp-xt -- ary )
+          Convert _o_b_j to an array, sort and return it.  _c_m_p_-_x_t compares two
+          items A and B and should return a negative integer if A < B, 0 if A
+          == B, and a positive integer if A > B.
+                : numb-sort { val1 val2 -- n }
+                        val1 val2 < if
+                                -1
+                        else
+                                val1 val2 > if
+                                        1
+                                else
+                                        0
+                                then
+                        then
+                ;
+                #( 6 2 8 1 ) <'> numb-sort object-sort => #( 1 2 6 8 )
+     rraannggee?? ( obj index -- f ) alias for _o_b_j_e_c_t_-_r_a_n_g_e_?
+     sseeccoonndd--rreeff ( obj -- val )
+          Return second element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          length of _o_b_j is less than 2.
+     sseeccoonndd--sseett!! ( obj value -- )
+          Store _v_a_l_u_e to second element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
+          if length of _o_b_j is less than 2.
+     ssoorrtt ( obj cmp-xt -- ary ) alias for _o_b_j_e_c_t_-_s_o_r_t
+     tthhiirrdd--rreeff ( obj -- val )
+          Return third element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
+          of _o_b_j is less than 3.
+     tthhiirrdd--sseett!! ( obj value -- )
+          Store _v_a_l_u_e to third element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
+          if length of _o_b_j is less than 3.
+     xxmmoobbjj?? ( obj -- f )
+          Return #t if _o_b_j is an XmObj (xm.c), otherwise #f.  It is a very
+          special Snd XM test.  See snd(1) for more information.
+
+     Predicates:
+     bboooolleeaann?? ( obj -- f )
+          Return #t if _o_b_j is #t or #f, otherwise #f.
+     ffaallssee?? ( obj -- f )
+          Return #t if _o_b_j is #f, otherwise #f.
+     nniill?? ( obj -- f )
+          Return #t if _o_b_j is nil, otherwise #f.
+     ttrruuee?? ( obj -- f )
+          Return #t if _o_b_j is #t, otherwise #f.
+     uunnddeeff?? ( obj -- f )
+          Return #t if _o_b_j is undef, otherwise #f.
+
+   PPoorrttss
+     mmaakkee--ssoofftt--iinnppuutt--ppoorrtt ( :key args -- prt )
+          Return new input soft port IO object with corresponding procs.  Not
+          all procs are required.  Recognized keyword options:
+                ::cclloossee ( -- )
+                     Proc for closing soft port.
+                ::fflluusshh ( -- )
+                     Proc for flushing port buffer.
+                ::ppoorrtt--nnaammee _"_s_o_f_t_-_p_o_r_t_"
+                     Name for IO object, default is "soft-port".
+                ::rreeaadd--cchhaarr ( -- c )
+                     Proc for reading one character.
+                ::rreeaadd--lliinnee ( -- line )
+                     Proc for reading one line.
+          Input example, *stdin* IO object is preserved for later use:
+                :port-name "sndin"
+                :read-char lambda: <{ -- c }> *stdin* io-getc ;
+                :read-line lambda: <{ -- line }> *stdin* io-read ;
+                make-soft-port set-*stdin* value stdin-io
+     mmaakkee--ssoofftt--oouuttppuutt--ppoorrtt ( :key args -- prt )
+          Return new output soft port IO object with corresponding procs.  Not
+          all procs are required.  Recognized keyword options:
+                ::cclloossee ( -- )
+                     Proc for closing soft port.
+                ::fflluusshh ( -- )
+                     Proc for flushing port buffer.
+                ::ppoorrtt--nnaammee _"_s_o_f_t_-_p_o_r_t_"
+                     Name for IO object, default is "soft-port".
+                ::wwrriittee--cchhaarr ( c -- )
+                     Proc for writing one character.
+                ::wwrriittee--lliinnee ( line -- )
+                     Proc for writing one line.
+          Output example, *stdout* IO object is preserved for later use:
+                :port-name "sndout"
+                :write-char lambda: <{ c -- }> c snd-print .stdout ;
+                :write-line lambda: <{ line -- }> line snd-print .stdout ;
+                make-soft-port set-*stdout* value stdout-io
+     mmaakkee--ssoofftt--ppoorrtt ( :key args -- prt )
+          Return new soft port IO object with corresponding procs.  Not all
+          procs are required.  Recognized keyword options:
+                ::cclloossee ( -- )
+                     Proc for closing soft port.
+                ::ffaamm _r_/_o | _w_/_o (default) | _r_/_w
+                     For read-only use constant rr//oo, for write-only use
+                     constant ww//oo and for read-write use constant rr//ww.
+                ::fflluusshh ( -- )
+                     Proc for flushing port buffer.
+                ::ppoorrtt--nnaammee _"_s_o_f_t_-_p_o_r_t_"
+                     Name for IO object, default is "soft-port".
+                ::rreeaadd--cchhaarr ( -- c )
+                     Proc for reading one character.
+                ::rreeaadd--lliinnee ( -- line )
+                     Proc for reading one line.
+                ::wwrriittee--cchhaarr ( c -- )
+                     Proc for writing one character.
+                ::wwrriittee--lliinnee ( line -- )
+                     Proc for writing one line.
+          Input example, *stdin* IO object is preserved for later use:
+                :port-name "sndin"
+                :read-char lambda: <{ -- c }> *stdin* io-getc ;
+                :read-line lambda: <{ -- line }> *stdin* io-read ;
+                make-soft-port set-*stdin* value stdin-io
+          Output example, *stdout* IO object is preserved for later use:
+                :port-name "sndout"
+                :write-char lambda: <{ c -- }> c snd-print .stdout ;
+                :write-line lambda: <{ line -- }> line snd-print .stdout ;
+                make-soft-port set-*stdout* value stdout-io
+     ppoorrtt-->>ssttrriinngg ( prt -- str )
+          Return content of _p_r_t object as string if available, otherwise #f.
+     ppoorrtt--cclloossee ( prt -- )
+          File and IO ports close their streams, other kind of ports do
+          nothing.
+     ppoorrtt--cclloosseedd?? ( prt -- f )
+          Return #t if _i_o object is closed, otherwise #f.
+     ppoorrtt--ddiissppllaayy ( prt obj -- )
+          Write the string representation of _o_b_j to _p_r_t object.  If _p_r_t is #f,
+          write to current output port (stout).
+     ppoorrtt--fflluusshh ( prt -- )
+          File and IO ports flush their streams, other kind of ports do
+          nothing.
+     ppoorrtt--ggeettcc ( prt -- c )
+          Return next character from _p_r_t IO object.  If _p_r_t is #f, read from
+          current input port (stdin).
+     ppoorrtt--ggeettss ( prt -- str )
+          Return one line from _p_r_t IO object.  If _p_r_t is #f, read from current
+          input port (stdin).
+     ppoorrtt--iinnppuutt?? ( obj -- f )
+          Return #t if _o_b_j is an input IO object or #f, otherwise #f.
+     ppoorrtt--oouuttppuutt?? ( obj -- f )
+          Return #t if _o_b_j is an output IO object or #f, otherwise #f.
+     ppoorrtt--ppuuttcc ( prt c -- )
+          Write character _c to _p_r_t IO object.  If _p_r_t is #f, write to current
+          output port (stout).
+     ppoorrtt--ppuuttss ( prt str -- )
+          Write _s_t_r to _p_r_t IO object.  If _p_r_t is #f, write to current output
+          port (stout).
+     ppoorrtt--ppuuttss--ffoorrmmaatt ( prt fmt fmt-args -- )
+          Write string built from _f_m_t and array _f_m_t_-_a_r_g_s to _p_r_t IO object.  If
+          _p_r_t is #f, write to current output port (stdout).  For example,
+          write "hello, world" to stdout (#f) port:
+                #f "hello, %s" #( "world" ) port-puts-format
+                  => hello, world
+     ppoorrtt--rreeaadd ( prt -- str ) alias for _p_o_r_t_-_g_e_t_s
+     ppoorrtt--wwrriittee ( prt str -- ) alias for _p_o_r_t_-_p_u_t_s
+     ppoorrtt--wwrriittee--ffoorrmmaatt ( prt fmt fmt-args -- ) alias for _p_o_r_t_-_p_u_t_s_-_f_o_r_m_a_t
+     ppoorrtt?? ( obj -- f )
+          Return #t if _o_b_j is an IO object or #f, otherwise #f.
+
+     The following words recognize these options:
+           ::ffiilleennaammee _s_t_r_i_n_g
+                      ::ffaamm _r_/_o | _w_/_o (default) | _r_/_w
+                           For read-only use constant rr//oo, for write-only use
+                           constant ww//oo and for read-write use constant rr//ww.
+           ::ccoommmmaanndd _s_t_r_i_n_g _| _a_r_r_a_y_-_o_f_-_s_t_r_i_n_g_s
+                      ::ffaamm _r_/_o | _w_/_o (default) | _r_/_w
+                           For read-only use constant rr//oo, for write-only use
+                           constant ww//oo and for read-write use constant rr//ww.
+           ::ssoocckkeett _s_t_r_i_n_g
+                      ::ddoommaaiinn _d_o_m_a_i_n (AF_INET | AF_UNIX)
+                      ::ppoorrtt _p_o_r_t (default 1024)
+           ::ssoofftt--ppoorrtt _s_t_r_i_n_g
+                      ::cclloossee ( -- )
+                           Proc for closing soft port.
+                      ::ffaamm _r_/_o | _w_/_o (default) | _r_/_w
+                           For read-only use constant rr//oo, for write-only use
+                           constant ww//oo and for read-write use constant rr//ww.
+                      ::fflluusshh ( -- )
+                           Proc for flushing port buffer.
+                      ::ppoorrtt--nnaammee _"_s_o_f_t_-_p_o_r_t_"
+                           Name for IO object, default is "soft-port".
+                      ::rreeaadd--cchhaarr ( -- c )
+                           Proc for reading one character.
+                      ::rreeaadd--lliinnee ( -- line )
+                           Proc for reading one line.
+                      ::wwrriittee--cchhaarr ( c -- )
+                           Proc for writing one character.
+                      ::wwrriittee--lliinnee ( line -- )
+                           Proc for writing one line.
+     wwiitthh--eerrrroorr--ttoo--ppoorrtt ( obj :key args -- )
+          Open IO object for output and point IO to _*_s_t_d_e_r_r_*.  If _o_b_j is a
+          string, write string to IO object, otherwise execute _o_b_j as proc or
+          xt with stack effect ( -- ).  Close IO object.  _*_s_t_d_e_r_r_* will be
+          reset to its previous value.
+                lambda: <{ -- }>
+                        "hello\n" .stderr
+                ; :filename "file.test" with-error-to-port
+                % cat test.file
+                hello
+                %
+                "" value s
+                lambda: <{ -- }>
+                        *stderr* "hello" io-write
+                ; :string s with-error-to-port
+                s => "hello"
+                "file.test" file-delete
+                "hello\n" :filename "file.test" with-error-to-port
+                % cat file.test
+                hello
+                %
+     wwiitthh--iinnppuutt--ffrroomm--ppoorrtt ( obj :key args -- str )
+          Open IO object for input and point IO to _*_s_t_d_i_n_*.  If _o_b_j is _n_i_l,
+          read first line from IO object, otherwise execute _o_b_j as proc or xt
+          with stack effect ( -- str ).  Close IO object and return resulting
+          string.  _*_s_t_d_i_n_* will be reset to its previous value.
+                % cat file.test
+                hello
+                %
+                lambda: <{ -- str }>
+                        *stdin* io-read
+                ; :filename "file.test" with-input-from-port => "hello\n"
+                "hello" value s
+                lambda: <{ -- str }>
+                        *stdin* io-read
+                ; :string s with-input-from-port => "hello"
+                nil :filename "file.test" with-input-from-port => "hello"
+     wwiitthh--iinnppuutt--ppoorrtt ( obj :key args -- str )
+          Open IO object for input.  If _o_b_j _i_s _n_i_l, read first line from IO
+          object, otherwise execute _o_b_j as a proc or xt with stack effect ( io
+          -- str ).  Close IO object and return resulting string.
+                % cat file.test
+                hello
+                %
+                lambda: <{ io -- str }>
+                        io io-read
+                ; :filename "file.test" with-input-port => "hello\n"
+                "hello" value s
+                lambda: <{ io -- str }>
+                        io io-read
+                ; :string s with-input-port => "hello"
+                nil :filename "file.test" with-input-port => "hello\n"
+     wwiitthh--oouuttppuutt--ppoorrtt ( obj :key args -- )
+          Open IO object for output.  If _o_b_j is a string, write string to IO
+          object, otherwise execute _o_b_j as proc or xt with stack effect ( io
+          -- ).  Close IO object.
+                lambda: <{ io -- }>
+                        io "hello\n" io-write
+                ; :filename "file.test" with-output-port
+                % cat file.test
+                hello
+                %
+                "" value s
+                lambda: <{ io -- }>
+                        io "hello" io-write
+                ; :string s with-output-port
+                s => "hello"
+                "file.test" file-delete
+                "hello\n" :filename "file.test" with-output-port
+                % cat file.test
+                hello
+                %
+     wwiitthh--oouuttppuutt--ttoo--ppoorrtt ( obj :key args -- )
+          Open IO object for output and point IO to _*_s_t_d_o_u_t_*.  If _o_b_j is a
+          string, write string to IO object, otherwise execute _o_b_j as proc or
+          xt with stack effect ( -- ).  Close IO object.  _*_s_t_d_o_u_t_* will be
+          reset to its previous value.
+                lambda: <{ -- }>
+                        ." hello" cr
+                ; :filename "file.test" with-output-to-port
+                % cat test.file
+                hello
+                %
+                "" value s
+                lambda: <{ -- }>
+                        *stdout* "hello" io-write
+                ; :string s with-output-to-port
+                s => "hello"
+                "file.test" file-delete
+                "hello\n" :filename "file.test" with-output-to-port
+                % cat file.test
+                hello
+                %
+
+   PPrrooccss aanndd XXttss
+     *filename*
+          Current file name.
+     *lineno*
+          Current line number.
+     ..pprroocc ( prc -- )
+          Print proc object _p_r_c to current output.
+     <<''sseett>> ( "name" -- set-name|#f )
+          Parse _n_a_m_e and search for word _s_e_t_-_n_a_m_e.  Return xt of _s_e_t_-_n_a_m_e or
+          #f if not found.
+                <'set> object-print-length => set-object-print-length
+     <<{{ ( -- )
+          Turn current colon definition in a proc object.  Takes tokens up to
+          closing `}>' as local variables, `--' start a comment ignoring rest
+          to closing `}>'.  In addition to other local variable words like {{ }}
+          and {{{{ }}}} this form handles two keywords, ::kkeeyy and ::ooppttiioonnaall.
+          Variable names are taken from keyword and optional names.  This word
+          can span over more than one lines but without empty lines or
+          comments in between.  If :key and :optional is used together, :key
+          must come first.  All keyword and optional variables must have
+          default values.  This word is immediate and compile only and can
+          only be used in word definitions.
+                : optkey-test <{ a b c
+                  :key d 10 e 20 :optional f 30 g 40 -- ary }>
+                        #( a b c d e f g )
+                ;
+                1 2 3 optkey-test => #( 1 2 3 10 20 30 40 )
+                :d 11 1 :e 22 2 3 4 optkey-test => #( 1 2 3 11 22  4 40 )
+     <<{{}}>> ( -- )
+          Turn current colon definition in a proc object.  This word is
+          immediate and compile only and can only be used in word definitions.
+                : we-dont-need-args <{}> ;
+                <'> we-dont-need-args proc? => #t
+     ddeeffiinneedd?? ( "name" -- f )
+          Return #t if _n_a_m_e is defined in the dictionary, otherwise #f.
+                defined?  10 => #f
+                defined? nil => #t
+                defined?   + => #t
+     ddoocc"" ( <ccc>" -- )
+          Add input buffer to next double quote character `"' to documentation
+          of current word.  Escape double quote character with backslash if
+          required in documentation.  It is not necessary to repeat the stack
+          effect if it already exist in the word definition.  This word is
+          immediate and compile only and can only be used in word definitions.
+                : new-word ( -- )
+                        doc" our documentation may contain \
+                \"double quotes\".  \
+                Escape them with a backslash."
+                        \ we do nothing
+                ;
+                help new-word => new-word  ( -- )  our documentation may
+                contain qdouble quotes".  Escape them with a backslash.
+     ddooccuummeennttaattiioonn--rreeff ( obj -- str )
+          Return documentation string of _o_b_j (Forth word, object or topic) or
+          #f.
+     ddooccuummeennttaattiioonn--sseett!! ( obj str -- )
+          Set documentation of _o_b_j (Forth word, object or topic) to _s_t_r.
+     ggeett--ffuunncc--nnaammee ( -- name )
+          Return name of current xt in word definition as string.  This word
+          is immediate and compile only and can only be used in word
+          definitions.
+                : new-word
+                        get-func-name .$
+                        space
+                        10
+                ;
+                new-word => new-word 10
+     ggeett--ooppttaarrgg ( req def -- val )
+          Return either default value _d_e_f or a value found on stack.  _r_e_q is
+          the sum of required and following optional arguments.  It simulates
+          the :optional keyword in Lisp/Scheme.
+                : optarg-test ( a b c=33 d=44 e=55 -- ary )
+                        4 55 get-optarg { e }
+                        3 44 get-optarg { d }
+                        2 33 get-optarg { c }
+                        { a b }
+                        #( a b c d e )
+                ;
+                1 2 optarg-test => #( 1 2 33 44 55 )
+                1 2 3 4 optarg-test => #( 1 2  3  4 55 )
+                1 2 3 4 5 6 7 optarg-test => 1 2 #( 3 4  5  6  7 )
+     ggeett--ooppttaarrggss ( lst req -- vals )
+          The plural form of get-optarg.  _a_r_g_s is an array with default
+          values, _r_e_q is number of required arguments.  Return _r_e_q + _a_r_g_s
+          length values on stack, either default ones or from stack.
+                : optargs-test ( a b c=33 d=44 e=55 -- ary )
+                        #( 33 44 55 ) 2 get-optargs { a b c d e }
+                        #( a b c d e )
+                ;
+                1 2 optargs-test => #( 1 2 33 44 55 )
+                1 2 3 4 optargs-test => #( 1 2  3  4 55 )
+                1 2 3 4 5 6 7 optargs-test => 1 2 #( 3 4  5  6  7 )
+     ggeett--ooppttkkeeyy ( key def -- val )
+          Return either default value _d_e_f or a value found on stack determined
+          by keyword _k_e_y.  It simulates the :key keyword in Lisp/Scheme.
+                : optkey-test ( start dur keyword-args -- ary )
+                        :frequency 440.0 get-optkey { freq }
+                        :initial-phase pi get-optkey { phase }
+                        { start dur }
+                        #( start dur freq phase )
+                ;
+                0 1 optkey-test => #( 0.0 1.0 440.0 3.14159 )
+                0 2 :frequency 330.0 optkey-test => #( 0.0 2.0 330.0 3.14159 )
+     ggeett--ooppttkkeeyyss ( ary req -- vals )
+          The plural form of get-optkey.  _a_r_y is an array of key-value pairs,
+          _r_e_q is number of required arguments.  Return _r_e_q + _a_r_y length / 2
+          values on stack, either default ones or from stack.
+                : optkeys-test ( start dur keyword-args -- ary )
+                        #( :frequency 440.0
+                           :initial-phase pi )
+                            2 get-optkeys { start dur freq phase }
+                        #( start dur freq phase )
+                ;
+                0 1 optkeys-test => #( 0.0 1.0 440.0 3.14159 )
+                0 2 :frequency 330.0 optkeys-test => #( 0.0 2.0 330.0 3.14159 )
+     hheellpp ( "name" -- )
+          Print documentation of _n_a_m_e (Forth word or topic) or "no
+          documentation available".
+                help make-array \ Forth word
+                help array      \ topic
+     hheellpp--aadddd!! ( obj str -- )
+          Append _s_t_r to documentation of _o_b_j.
+     hheellpp--rreeff ( obj -- str )
+          Return documentation of _o_b_j (Forth word, object or topic) or "no
+          documentation available".
+     hheellpp--sseett!! ( obj str -- )
+          Set documentation of _o_b_j (Forth word or object) to _s_t_r.
+                #( "behemoth" "pumpkin" "mugli" ) value hosts
+                hosts "local-net hostnames" help-set!
+                hosts help-ref => "local-net hostnames"
+     llaammbbddaa:: ( -- xt )
+          Start nameless word definition and set variable latestxt to word.
+          Stack-effect or normal comment immediately at the beginning will be
+          used as documentation.  Return xt after closing semicolon `;'.
+                lambda: ( a b -- c ) + ; value plus
+                plus help-ref => lambda-009  ( a b -- c )
+                1 2 plus execute => 3
+                1 2 lambda: ( a b -- c ) * ; execute => 2
+     llaatteessttxxtt ( -- xt )
+          Return latest defined xt.
+     llooccaall--vvaarriiaabblleess ( -- vars )
+          Return array of local variable name-value pairs up to the location
+          in definition.  This word is immediate and compile only and can only
+          be used in word definitions.
+                : word-with-locals { foo -- }
+                        10 { bar }
+                        local-variables each
+                                .$ space
+                        end-each
+                ;
+                20 word-with-locals => #( "bar" 10 ) #( "foo" 20 )
+     mmaakkee--pprroocc ( xt arity -- prc )
+          Return new proc object.  _a_r_i_t_y can be an integer or an array of
+          length 3, #( req opt rest ).
+                <'> +  2  make-proc => +
+                lambda: ( a b -- c )
+                        +
+                ; #( 2 0 #f ) make-proc => lambda-009
+     pprroocc-->>xxtt ( prc -- xt )
+          Return the actual word (the execution token xt) of _p_r_c.
+     pprroocc--aappppllyy ( prc args -- res )
+          Execute proc object _p_r_c with arguments _a_r_g_s and return result or #f.
+          _a_r_g_s can be an array of arguments or a single argument.  If
+          execution fails, raise _e_v_a_l_-_e_r_r_o_r exception, if length of _a_r_g_s is
+          less than required arity of _p_r_c, raise _b_a_d_-_a_r_i_t_y exception.
+                <'> +  2  make-proc value plus
+                plus #( 5 6 ) proc-apply => 11
+     pprroocc--aarriittyy ( prc -- arity )
+          Return arity array #( req opt rest ) of proc object _p_r_c, or #f if
+          not a proc object.
+     pprroocc--ccrreeaattee ( arity -- prc )
+          Create nameless proc object with _a_r_i_t_y.  Like ccrreeaattee it goes with
+          ddooeess>>.
+                : input-fn ( gen -- proc; dir self -- r )
+                        { gen }
+                        1 proc-create   \ return proc with one argument
+                        gen ,           \ store gen for later use in DOES
+                  does> { dir self -- r  } \ dir (ignored here) self (address)
+                        self @          \ return our gen
+                        readin          \ return readin value
+                ;
+                instrument: src-simp <{ start dur amp sr sr-env fname -- }>
+                        :file fname find-file make-readin { f }
+                        :input  f INPUT-FN  :srate sr   make-src { sc }
+                        :envelope sr-env  :duration dur make-env { en }
+                        start dur run
+                                i sc en env #f src amp f* *output* outa drop
+                        loop
+                        f mus-close drop
+                ;instrument
+                0 1.5 0.5 0.2 #( 0 0 50 1 100 0 ) "fyow.snd"
+                    <'> src-simp with-sound
+     pprroocc--nnaammee ( prc -- name )
+          Return name of proc object _p_r_c if found, otherwise an empty string.
+     pprroocc--ssoouurrccee--rreeff ( prc -- str )
+          Return source string property of _p_r_c, or #f if not available.
+     pprroocc--ssoouurrccee--sseett!! ( prc str -- )
+          Set source string property of _p_r_c to _s_t_r.
+     pprroocc?? ( obj -- f )
+          Return #t if _o_b_j is a proc object.
+     rruunn--pprroocc ( prc args -- res ) alias for _p_r_o_c_-_a_p_p_l_y
+     rruunnnniinngg--wwoorrdd ( -- xt )
+          Return current xt in word definition.  This word is immediate and
+          compile only and can only be used in word definitions.
+                : new-word
+                        running-word xt->name .$
+                        space
+                        10
+                ; new-word => new-word 10
+     sseeee22 ( "name" -- )
+          Show word definition of _n_a_m_e.
+     sseett!! ( "name" -- )
+          Parse _n_a_m_e and execute word _s_e_t_-_n_a_m_e if found, otherwise raise
+          _u_n_d_e_f_i_n_e_d_-_w_o_r_d exception.  The following two lines do the same:
+                128 set! object-print-length
+                128 set-object-print-length
+     sseett--eexxeeccuuttee ( xt -- ?? )
+          Execute _s_e_t_-_x_t if found, otherwise raise _u_n_d_e_f_i_n_e_d_-_w_o_r_d exception.
+          The following two lines do the same:
+                128 <'> object-print-length set-execute
+                128 set-object-print-length
+     sseett--xxtt ( xt1 -- xt2 )
+          Return _s_e_t_-_x_t if found, otherwise #f.
+                <'> object-print-length set-xt => set-object-print-length
+     ssoouurrccee--ffiillee ( xt -- file )
+          Return source file where _x_t was created or #f if _x_t is a primitive
+          or not defined.
+     ssoouurrccee--lliinnee ( xt -- line )
+          Return source line number where _x_t was created or #f if _x_t is a
+          primitive or not defined.
+     ssoouurrccee--rreeff ( obj -- str )
+          Return source string of _o_b_j, a proc or xt, or #f if not found.
+     ssoouurrccee--sseett!! ( obj str -- )
+          Set source string of _o_b_j, a proc or xt, to _s_t_r.
+     tthhuunnkk?? ( obj -- f )
+          Return #t if _o_b_j is a proc object with no required, optional and
+          rest arguments.  If its arity is not #( 0 0 #f ), return #f.
+     ttrraaccee--vvaarr ( var proc-or-xt -- )
+          Add _p_r_o_c_-_o_r_-_x_t to global _v_a_r hook which is utilized on every call of
+          ttoo.  The stack effect of _p_r_o_c_-_o_r_-_x_t must be ( val -- res ).
+                clm-default-frequency => 0.0
+                0.0 value *clm-default-frequency*
+                <'> *clm-default-frequency* lambda: <{ val -- res }>
+                        val set-clm-default-frequency
+                ; trace-var
+                440.0 to *clm-default-frequency*
+                *clm-default-frequency* => 440.0
+                clm-default-frequency   => 440.0
+                <'> *clm-default-frequency* untrace-var
+     uunnttrraaccee--vvaarr ( var -- )
+          Remove previously installed hook from _v_a_r.
+     wwoorrdd?? ( obj -- f )
+          Return #t if _o_b_j is a proc object or an xt (execution token, address
+          of a Ficl word), otherwise #f.
+     wwoorrdd--ccrreeaattee ( name -- )
+          Create word _n_a_m_e in dictionary with does>-part as body.
+                : make-setter ( name -- ; hs val self -- )
+                        { name }
+                        name "!" $+ word-create
+                        name ,
+                  does> { hs val self -- }
+                        hs self @ ( slot ) val hash-set!
+                ;
+                "user-time" make-setter ' creates setter word user-time!
+                #{} value hs
+                hs 3.2 user-time!
+                hs ' #{ "user-time" => 3.2 }
+     xxtt-->>nnaammee ( xt -- str )
+          Return name of _x_t if found, otherwise an empty string.
+     xxtt-->>oorriiggiinn ( xt -- str )
+          Return name, source file and source line number where _x_t was defined
+          (name:file:line).  If _x_t is a C-primitive, return (name:primitive),
+          if not defined, return an empty string.
+     xxtt?? ( obj -- f )
+          Return #t if _o_b_j is an xt (execution token, address of a Ficl word),
+          otherwise #f.
+
+   RReeggeexxpp oobbjjeecctt ttyyppee
+     *re-syntax-options*
+          This regexp variable can be set with the following constants.  If
+          more than one constant is used, combine them with oorr, see regex(3).
+               REG_EXTENDED  Compile modern regex, default.
+               REG_ICASE     Compile for matching ignore case.
+               REG_NEWLINE   Compile for newline-sensitive matching.
+               REG_NOSUB     Compile without creating subexpression.
+          For example, set matching to ignore case before creating a new
+          regexp
+                REG_EXTENDED REG_ICASE or  to *re-syntax-options*
+     // ( <ccc>/ -- reg )
+          Prefix character `/' start a regular expression object delimited by
+          a second `/'.
+                /(B|b)+/ => /(B|b)+/
+     mmaakkee--rreeggeexxpp ( str -- reg )
+          Return new regexp object from _s_t_r which may contain regular
+          expression.
+                "(B|b)+" make-regexp value reg
+     rree--mmaattcchh ( reg str start -- n )
+          Return count of matched characters or -1 for no match.
+                /a*/ "aaaaab" 2 re-match => 3
+     rree--sseeaarrcchh ( reg str start range -- n )
+          Return index of match or -1 for no match.
+                /a*/ "aaaaab" 2 4 re-search => 2
+     rree// ( space<ccc>/ -- reg )
+          Parse regexp _c_c_c delimited by `/' at compile time and at interpret
+          time return parsed regexp.  Note the space after the initial rree//.
+          It exist to satisfy fontifying in Emacs forth-mode.  See _/ for an
+          alternative.
+                re/ (B|b)+/ => /(B|b)+/
+     rree== ( reg str -- len|#f ) alias for _r_e_g_e_x_p_-_m_a_t_c_h
+     rreeggeexxpp--mmaattcchh ( reg str -- len|#f )
+          Return count of matched characters or #f.  Possible matched group
+          results or #f can be found in regexp object _r_e_g, in read-only
+          variables *re1* to *re9* and in read-only array *re*.
+                /.*(bar)/ value reg
+                reg "foobar" regexp-match => 6
+                reg 0 apply => foobar
+                reg 1 apply => bar
+                reg 2 apply => #f
+     rreeggeexxpp== ( reg str -- len|#f ) alias for _r_e_g_e_x_p_-_m_a_t_c_h
+     rreeggeexxpp--rreeppllaaccee ( reg str1 replace -- str2 )
+          Replace 1st occurrence of _r_e_g in _s_t_r_1 with _r_e_p_l_a_c_e if found.
+          References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
+          subexpressions.  If no corresponding subexpression exist, raise
+          _r_e_g_e_x_p_-_e_r_r_o_r exception.
+                /(foo)/ "foo-bar" "***\\1***" regexp-replace
+                  => ***foo***-bar
+          Note the double quotes on back reference characters .
+     rreeggeexxpp--sseeaarrcchh ( reg str :key start 0 range -1 -- pos|f )
+          Return index of match or #f.  If index is zero, return #t to fool
+          Forth' iiff.  If keyword _r_a_n_g_e is -1 (default), the entire string will
+          be searched.  Possible matched group results or #f can be found in
+          regexp object _r_e_g, in read-only variables *re1* to *re9* and in
+          read-only array *re*.
+                /foo/ "foobar" :start 0 :range 6 regexp-search => #t (pos 0)
+                /(bar)/ value reg
+                reg "foobar" :start 0 :range 2 regexp-search => #f
+                reg "foobar" :start 3 :range 2 regexp-search => 3
+                reg 0 apply => bar
+                reg 1 apply => bar
+                reg 2 apply => #f
+     rreeggeexxpp?? ( obj -- f )
+          Return #t if _o_b_j is a regexp object, otherwise #f.
+                /^s/ regexp? => #t
+
+   SSttrriinngg oobbjjeecctt ttyyppee
+     "" ( <ccc>" -- str )
+          Prefix character `"' start a string object delimited by a second
+          `"'.
+                "pumpkin" => "pumpkin"
+     """" ( -- str )
+          Return empty string object ("").
+     $$"" ( space<ccc>" -- str )
+          Parse string _c_c_c delimited by `"' at compile time and at interpret
+          time return parsed string.  Note the space after the initial $$"".  It
+          exist to satisfy fontifying in Emacs forth-mode.  See _" for an
+          alternative.
+                $" pumpkin" => "pumpkin"
+     $$++ ( str1 str2 -- str3 ) alias for _s_t_r_i_n_g_-_a_p_p_e_n_d
+     $$>>ssttrriinngg ( addr len -- str )
+          Return Forth string _a_d_d_r _l_e_n as string object.  Standard words like
+          ttyyppee and eevvaalluuaattee require this kind of string.
+     $$ccrr ( -- str )
+          Return carriage return string object ("\n").
+     $$ssppaaccee ( -- str )
+          Return string of one space (" ").
+     $$ssppaacceess ( len -- str )
+          Return string of _l_e_n spaces.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n <
+          0.
+     ..$$ ( obj -- ) alias for _._s_t_r_i_n_g
+     ..ddeebbuugg ( obj -- )
+          Print string representation of _o_b_j to stderr wrapped in ##<<DDEEBBUUGG((FF))::
+          ......>>.
+     ..eerrrroorr ( obj -- )
+          Print string representation of _o_b_j to current error output.
+     ..gg ( obj -- ) alias for _._s_t_r_i_n_g
+     ..ssttddeerrrr ( obj -- )
+          Print string representation of _o_b_j to stderr.
+     ..ssttddoouutt ( obj -- )
+          Print string representation of _o_b_j to stdout.
+     ..ssttrriinngg ( obj -- )
+          Print string representation of _o_b_j to current output.
+     <<<< ( str val -- str'  ) alias for _s_t_r_i_n_g_-_p_u_s_h
+     >>ssttrriinngg ( chars len -- str ) alias for _s_t_r_i_n_g_-_c_o_n_c_a_t
+     cchhaarr?? ( obj -- )
+          Return #t if _o_b_j is a character, otherwise #f.
+     ddiiee ( str -- )
+          Print _s_t_r wrappen in ##<<ddiiee:: ......>> to current stderr and exit
+          interpreter with return code 1.
+     eerrrroorr ( str -- )
+          Print _s_t_r wrappen in ##<<eerrrroorr:: ......>> to current stderr and throw
+          exception.
+     ffoorrmmaatt ( fmt args -- ) alias for _s_t_r_i_n_g_-_f_o_r_m_a_t
+     fftthh--ddiiee ( fmt :optional args -- )
+          Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<ddiiee::
+          ......>> to current stderr and exit interpreter with return code 1; _a_r_g_s
+          is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
+     fftthh--eerrrroorr ( fmt :optional args -- )
+          Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<eerrrroorr::
+          ......>> to current stderr and throw exception; _a_r_g_s is optional.   See
+          _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
+     fftthh--ffoorrmmaatt ( fmt :optional args -- str  )
+          Return string object from sprintf(3) _f_m_t string and _a_r_g_s array
+          containing corresponding arguments; _a_r_g_s is optional.  See _s_t_r_i_n_g_-
+          _f_o_r_m_a_t for _f_m_t description.
+     fftthh--pprriinntt ( fmt :optional args -- )
+          Print _f_m_t string with corresponding _a_r_g_s array to current stdout;
+          _a_r_g_s is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
+     fftthh--wwaarrnniinngg ( fmt :optional args -- )
+          Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<wwaarrnniinngg::
+          ......>> to current stderr; _a_r_g_s is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for
+          _f_m_t description.
+     mmaakkee--ssttrriinngg ( len :key initial-element ' ' -- str )
+          Return a new string of length _l_e_n filled with _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t
+          characters, default space.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+                3 :initial-element <char> x make-string => "xxx"
+     ssttrriinngg-->>aarrrraayy ( str -- ary )
+          Convert _s_t_r to an array of characters.
+                "foo" string->array => #( 102 111 111 )
+     ssttrriinngg--aappppeenndd ( str1 str2 -- str3 )
+          Return new string _s_t_r_1 + _s_t_r_2.
+     ssttrriinngg--ccaappiittaalliizzee ( str1 -- str2 )
+          Return new string with first character capitalized and remaining
+          characters lowercase.
+     ssttrriinngg--ccaappiittaalliizzee!! ( str -- str' )
+          Return _s_t_r changed to first character capitalized and remaining
+          characters lowercase.
+     ssttrriinngg--cchhoommpp ( str1 -- str2 )
+          Return new string object with possible trailing \n removed.
+     ssttrriinngg--cchhoommpp!! ( str -- str' )
+          Return changed _s_t_r with possible trailing \n removed.
+     ssttrriinngg--ccoonnccaatt ( objs len -- str )
+          Return new string with _l_e_n objects from stack converted to their
+          string representation.
+                0 1 2 " foo " "b" "a" "r"  7 >string
+                  => "012 foo bar"
+     ssttrriinngg--ccooppyy ( str1 -- str2 )
+          Return copy of _s_t_r_1.
+     ssttrriinngg--ddeelleettee!! ( str idx -- val )
+          Delete and return character at position _i_d_x from _s_t_r; negative index
+          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
+          in range of string.
+     ssttrriinngg--ddoowwnnccaassee ( str1 -- str2 )
+          Return new string with all characters lowercase.
+     ssttrriinngg--ddoowwnnccaassee!! ( str -- str' )
+          Return _s_t_r changed to all characters lowercase.
+     ssttrriinngg--eevvaall ( str -- ?? )
+          Evaluate _s_t_r; values already on stack can be accessed, resulting
+          values remain on stack.
+                7 "3 4 + +" string-eval => 14
+     ssttrriinngg--eevvaall--wwiitthh--ssttaattuuss ( str -- ?? status )
+          Evaluate _s_t_r and return eval-status on top of stack; values already
+          on stack can be accessed, resulting values remain on stack.  Eval-
+          status can be one of the following constants:
+               BREAK         Ficl Break.
+               ERROR_EXIT    Ficl Error Exit.
+               INNER_EXIT    Ficl Inner Exit.
+               OUT_OF_TEXT   Ficl Out of Text.
+               RESTART       Ficl Restart.
+               USER_EXIT     Ficl User Exit.
+     ssttrriinngg--ffiillll ( str char -- str' )
+          Fill _s_t_r with _c_h_a_r and return changed string object.
+     ssttrriinngg--ffiinndd ( str1 key -- str2|#f )
+          Return match if string or regexp _k_e_y exist in _s_t_r, otherwise #f.
+                "hello world" "l" string-find => "llo world"
+                "hello world" /ell/ string-find => "lo world"
+     ssttrriinngg--ffoorrmmaatt ( fmt args -- )
+          _f_m_t is a sprintf(3) format string and _a_r_g_s the needed arguments
+          which may be an array, a single argument or #f.
+                "%04d %8.2f %b %X %o"  #( 128 pi 255 255 255 ) string-format
+                  => "0128     3.14 11111111 FF 377"
+          The format string can have zero or more of the following flags:
+                `##'       The value will be converted to an alternate form.
+                          For bb, BB, oo and OO conversions prepend a zero before
+                          output, for xx and XX conversions prepend a `0x'
+                          respective `0X' before output.  For aa, AA, ee, EE, ff,
+                          FF, gg and GG conversions the result will always have a
+                          decimal point.
+                `--'       Flush output left.
+                `00' (zero)
+                          Padding with `0' (zero) rather than blank.
+          The following conversion specifiers are known:
+                %%         A `%' is written.
+                aaAAeeEEffFFggGG  Floating point output like _s_p_r_i_n_t_f _3.
+                cc         Single character output.
+                bbddoouuxxXX    Integer output in binary, decimal, octal, unsigned
+                          and hexadecimal form.
+                pp         Inspect string output of any Forth object with
+                          oobbjjeecctt--iinnssppeecctt.
+                ss         String representation of any Forth object with
+                          oobbjjeecctt-->>ssttrriinngg.
+                SS         Dump string output of any Forth object with
+                          oobbjjeecctt--dduummpp.
+     ssttrriinngg--iinnddeexx ( str key -- idx )
+          Return index of string _k_e_y in _s_t_r or -1 if not found.
+                "hello world" "orl" string-index => 7
+     ssttrriinngg--iinnsseerrtt!! ( str idx val -- str' )
+          Insert string representation of _v_a_l to _s_t_r at position _i_d_x; negative
+          index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index
+          is not in range of string.
+     ssttrriinngg--lleennggtthh ( str -- len )
+          If _s_t_r is a string object, return its length, otherwise -1.
+     ssttrriinngg--mmeemmbbeerr?? ( str key -- f )
+          Return #t if string _k_e_y exist in _s_t_r, otherwise #f.
+                "hello world" "ell" string-member? => #t
+     ssttrriinngg--ppoopp ( str -- char )
+          Remove and return last character.  If _s_t_r is empty, return #f.
+     ssttrriinngg--ppuusshh ( str val -- str' )
+          Append string representation of _v_a_l to _s_t_r and return changed string
+          object.
+     ssttrriinngg--rreeff ( str idx -- val )
+          Return character at position _i_d_x; negative index counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range of
+          string.
+     ssttrriinngg--rreeppllaaccee ( str1 from to -- str2 )
+          Return new string object with string _f_r_o_m replaced by string _t_o.
+     ssttrriinngg--rreeppllaaccee!! ( str from to -- str' )
+          Return changed _s_t_r with string _f_r_o_m replaced by string _t_o.
+     ssttrriinngg--rreevveerrssee ( str1-- str2 )
+          Return _s_t_r_1 reversed as new string object.
+     ssttrriinngg--rreevveerrssee!! ( str -- str' )
+          Return _s_t_r reversed.
+     ssttrriinngg--sseett!! ( str idx val -- )
+          Store character _c_h_a_r at index _i_d_x; negative index counts from
+          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range of
+          string.
+     ssttrriinngg--sshhiifftt ( str -- char )
+          Remove and return first character.  If _s_t_r is empty, return #f.
+     ssttrriinngg--sspplliitt ( str sep -- ary )
+          Split _s_t_r using _s_e_p as delimiter and return result as array of
+          strings.  If _s_e_p is not a string or regexp, delimiter is space.
+                "foo:bar:baz" =:" string-split
+                  => #( "foo" "bar" "baz" )
+     ssttrriinngg--ssuubbssttrriinngg ( str1 start end -- str2 )
+          Return new string from _s_t_r_1 index _s_t_a_r_t to but excluding index _e_n_d.
+          If index _e_n_d is not an integer, _e_n_d will be set to length of _s_t_r_1;
+          negative index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
+          if _s_t_a_r_t is not in range of string.
+                "hello world" 2 4 string-substring => "ll"
+                "hello world" -4 -2 string-substring => "or"
+                "hello world" -4 nil string-substring => "orld"
+     ssttrriinngg--uunnsshhiifftt ( str val -- str' )
+          Prepend string representation of _v_a_l to _s_t_r and return changed
+          string object.
+     ssttrriinngg--uuppccaassee ( str1 -- str2 )
+          Return new string with all characters uppercase.
+     ssttrriinngg--uuppccaassee!! ( str -- str' )
+          Return _s_t_r changed to all characters uppercase.
+     ssttrriinngg--ccmmpp ( str1 str2 -- n )
+          Return -1 if _s_t_r_1 is less than _s_t_r_2, 1 if _s_t_r_1 is greater than _s_t_r_2,
+          and 0 if _s_t_r_1 is equal to _s_t_r_2.  It may be used with sort functions.
+     ssttrriinngg<< ( str1 str2 -- f )
+          Return #t if _s_t_r_1 is lexicographically lesser than _s_t_r_2, otherwise
+          #f.
+     ssttrriinngg<<>> ( str1 str2 -- f )
+          Return #t if strings are not equal, otherwise #f.
+     ssttrriinngg== ( str1 str2 -- f )
+          Return #t if strings are equal, otherwise #f.
+     ssttrriinngg>> ( str1 str2 -- f )
+          Return #t if _s_t_r_1 is lexicographically greater than _s_t_r_2, otherwise
+          #f.
+     ssttrriinngg>>$$ ( str -- addr len )
+          Return string object _s_t_r converted to a Forth string with _a_d_d_r _l_e_n.
+          Standard words like ttyyppee and eevvaalluuaattee require this kind of string.
+     ssttrriinngg?? ( obj -- f )
+          Return #t if _o_b_j is a string object, otherwise #f.
+     wwaarrnn ( str -- ) alias for _w_a_r_n_i_n_g
+     wwaarrnniinngg ( str -- )
+          Print _s_t_r wrappen in ##<<wwaarrnniinngg:: ......>> to current stderr.
+
+   SSyymmbboollss
+     ..ssyymmbbooll ( sym -- )
+          Print symbol _s_y_m to current output.
+     ccrreeaattee--ssyymmbbooll ( "name" -- )
+          Create symbol _n_a_m_e prepended by `''.  Symbols are actually values
+          (variables) named _'_n_a_m_e.
+                create-symbol new-symbol => create symbol 'new-symbol
+     mmaakkee--ssyymmbbooll ( name -- sym )
+          Return symbol _n_a_m_e prepended by `''.  Symbols are actually values
+          (variables) named _'_n_a_m_e.
+                "new-symbol" make-symbol => 'new-symbol
+     ssyymmbbooll--nnaammee ( sym -- str )
+          Return name of symbol _s_y_m.
+                'new-symbol symbol-name => "new-symbol"
+     ssyymmbbooll== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are symbols with identical name,
+          otherwise #f.
+     ssyymmbbooll?? ( obj -- f )
+          Return #t if _o_b_j is a symbol, otherwise #f.
+
+   KKeeyywwoorrddss
+     ..kkeeyywwoorrdd ( kw -- )
+          Print keyword _k_w to current output.
+     ccrreeaattee--kkeeyywwoorrdd ( "name" -- )
+          Create keyword _n_a_m_e prepended by `:'.  Keywords are actually values
+          (variables) named _:_n_a_m_e.
+                create-keyword new-keyword => create keyword :new-keyword
+     kkeeyywwoorrdd--nnaammee ( kw -- name )
+          Return name of keyword _k_w.
+                :new-keyword keyword-name => "new-keyword"
+     kkeeyywwoorrdd== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are keywords with identical name,
+          otherwise #f.
+     kkeeyywwoorrdd?? ( obj -- f )
+          Return #t if _o_b_j is a keyword, otherwise #f.
+     mmaakkee--kkeeyywwoorrdd ( name -- kw )
+          Return keyword _n_a_m_e prepended by `:'.  Keywords are actually values
+          (variables) named _:_n_a_m_e.
+                "new-keyword" make-keyword => :new-keyword
+
+   EExxcceeppttiioonnss
+     *last-exception*
+          Hold last raised exception.
+     ..eexxcceeppttiioonn ( ex -- )
+          Print exception _e_x to current output.
+     ccrreeaattee--eexxcceeppttiioonn ( msg "name" -- )
+          Create exception named _n_a_m_e with message _m_s_g, _m_s_g can be #f.  The
+          exception has a symbol name, that means it has prefix `'' before
+          _n_a_m_e.
+                "New test exception" create-exception new-exception
+                  => create 'new-exception
+     eexxcceeppttiioonn--llaasstt--mmeessssaaggee--rreeff ( ex -- msg )
+          Return last message of exception _e_x.  Last message was set after an
+          exception was thrown with e.g.  fftthh--tthhrrooww or fftthh--rraaiissee.
+     eexxcceeppttiioonn--llaasstt--mmeessssaaggee--sseett!! ( ex msg -- )
+          Set _m_s_g, a string or #f, as last message of exception _e_x.  This will
+          be set automatically after an exception was thrown with e.g.
+          fftthh--tthhrrooww or fftthh--rraaiissee.
+     eexxcceeppttiioonn--mmeessssaaggee--rreeff ( ex -- msg )
+          Return message of exception _e_x.
+     eexxcceeppttiioonn--mmeessssaaggee--sseett!! ( ex msg -- )
+          Set _m_s_g, a string or #f to exception _e_x.
+     eexxcceeppttiioonn--nnaammee ( ex -- name )
+          Return name of exception _e_x.
+                'new-exception exception-name => "new-exception"
+     eexxcceeppttiioonn== ( obj1 obj2 -- f )
+          Return #t if _o_b_j_1 and _o_b_j_2 are exeptions with identical name,
+          otherwise #f.
+     eexxcceeppttiioonn?? ( obj -- f )
+          Return #t if _o_b_j is a exception, otherwise #f.
+     mmaakkee--eexxcceeppttiioonn ( name msg -- ex )
+          Return exception named _n_a_m_e with message _m_s_g, _m_s_g can be #f.  The
+          exception has a symbol name, that means it has prefix `'' before
+          _n_a_m_e.
+                "New test exception" create-exception new-exception
+                  => create 'new-exception
+     ssyymmbbooll-->>eexxcceeppttiioonn ( sym -- ex )
+          Return symbol _s_y_m as exception.
+
+EENNVVIIRROONNMMEENNTT
+     FTH_DICTIONARY_SIZE
+          Overwrite default dictionary size (1024 * 1024).
+     FTH_LOCALS_SIZE
+          Overwrite default number of locals (2048).
+     FTH_RETURN_SIZE
+          Overwrite default size of return stack (1024).
+     FTH_STACK_SIZE
+          Overwrite default size of parameter stack (8192).
+     FTH_FTHPATH
+          A colon separated list of paths pointing to Forth script files.
+          These paths will be prepended to *load-path*.
+     FTH_HISTORY
+          Overwrite default history file name _~_/_._f_t_h_-_h_i_s_t_o_r_y.
+     FTH_HISTORY_LENGTH
+          Overwrite default history file length (100).
+     FTH_INIT_FILE
+          Overwrite default initialization file name _~_/_._f_t_h_r_c.
+     FTH_LIBPATH
+          A colon separated list of paths pointing to C extension libraries.
+          These paths will be prepended to *load-lib-path*.
+
+FFIILLEESS
+     _/_u_s_r_/_l_o_c_a_l_/_e_t_c_/_f_t_h_r_c
+          Global initialization file for system wide configuration.
+     _~_/_._f_t_h_r_c
+          Local initialization file for user configuration.  The name can be
+          changed with FTH_INIT_FILE.
+     _~_/_._f_t_h_-_h_i_s_t_o_r_y
+          Local history file.  The name can be changed with FTH_HISTORY.
+
+EEXXIITT SSTTAATTUUSS
+     The fftthh utility exits 0 on success, and >0 if an error occurs.
+
+EEXXAAMMPPLLEESS
+     The following are examples of typical usage of the fftthh command:
+
+     Print 32 Fahrenheit as Celsius (0.0)
+
+           % fth -e "32 f2c . cr"
+
+     Load C extension library _l_i_b_x_m with initialization function IInniitt__lliibbxxmm()
+     and Forth source file _m_o_t_i_f_-_s_c_r_i_p_t_._f_s with at least one word mmaaiinn defined
+     in it, execute word mmaaiinn and exit if finished
+
+           % fth -S "libxm Init_libxm" -e "main" motif-script.fs
+
+     Prepend path _~_/_s_h_a_r_e_/_f_o_r_t_h to *load-path*, load Forth source file
+     _s_o_u_n_d_-_s_c_r_i_p_t_._f_s and start the repl showing a prompt.  Initialization
+     files _/_u_s_r_/_l_o_c_a_l_/_e_t_c_/_f_t_h_r_c and _~_/_._f_t_h_r_c are loaded if they exist
+
+           % fth -I ~/share/forth sound-script.fs
+
+     Run Forth script _c_h_e_c_k_._f_t_h and provide options --aabb _1_0 to the script which
+     should handle at least these two; exit if finished
+
+           % fth -s check.fth -ab 10
+
+     Rename _c_o_n_f_i_g_._h to _c_o_n_f_i_g_._h_._o_r_i_g and read it line by line.  If a line
+     with
+           #define HAVE_COMPLEX_DOUBLE
+     occures, replace it with
+           /* #undef HAVE_COMPLEX_DOUBLE */
+     otherwise write original to _c_o_n_f_i_g_._h.  The first --ee set the global Forth
+     variable reg to a regexp object, the second --ee uses this variable for
+     testing.  The _p_a_t_t_e_r_n of the first --ee is evaluated in interpret state
+     before reading file while the _p_a_t_t_e_r_n of the second --ee is evaluated in
+     compile state in a nameless llaammbbddaa:: <<{{}}>> ppaatttteerrnn ;; word during reading
+     file line by line.
+
+     % fth -ni.orig -e '/#define HAVE_COMPLEX_DOUBLE/ value reg' \
+                    -e 'reg *line* re= if \
+                          "/* #undef HAVE_COMPLEX_DOUBLE */\n" \
+                        else \
+                          *line* \
+                        then' config.h
+
+     Stand-alone executable Forth scripts have a first line of at least
+           #! /usr/local/bin/fth -s
+     but may have more options; adjust the path to the interpreter.  Note the
+     space after ##!!.  It's a Forth word starting a comment and must be
+     separated by at least one space.
+
+     % cat hello-world.fth
+     #! /usr/local/bin/fth -s
+     ." Hello, World!" cr
+
+     Add option --vv to turn on verbose mode.  _N_o_t_e_: Option --ss must be the last;
+     fftthh doesn't process options after --ss, they are transfered to the script
+     and can be processed there with Forth word ggeettoopptt, see below.
+
+     % cat hello-world.fth
+     #! /usr/local/bin/fth -Ds
+     ." Hello, World!" cr
+
+     The getopt(3) example in Forth:
+
+     % cat getopt-test.fth
+     #! /usr/local/bin/fth -Ds
+     : main ( -- )
+             #f #f { bflag ffile }
+             #t to opterr    \ getopt prints error messages
+             begin
+                     *argv* "bf:" getopt ( ch ) dup
+             while ( ch )
+                     case
+                             <char> b of #t     to bflag endof
+                             <char> f of optarg to ffile endof
+                             <char> ? of
+                                     "usage: [-b] [-f file]\n" #()
+                                         fth-print
+                                     1 (bye) \ exit with return code 1
+                             endof
+                     endcase
+             repeat ( ch ) drop
+             optind 0 ?do *argv* array-shift drop loop
+             *argv* array-length to *argc*
+             "-b: %s, -f: %s\n" #( bflag ffile ) fth-print
+     ;
+     main
+     0 (bye)                 \ exit with return code 0
+     % ./getopt-test.fth
+     -b: #f, -f: #f
+     % ./getopt-test.fth -b
+     -b: #t, -f: #f
+     % ./getopt-test.fth -bf outfile
+     -b: #t, -f: outfile
+     % ./getopt-test.fth -f
+     fth: option requires an argument -- f
+     usage: [-b] [-f file]
+     % ./getopt-test.fth -h
+     fth: illegal option -- h
+     usage: [-b] [-f file]
+
+DDIIAAGGNNOOSSTTIICCSS
+     The command may fail for one of the following reasons:
+
+     bbaadd--aarriittyy  Arity doesn't match for a given proc object.
+
+     bbaadd--ssyynnttaaxx  Paren mismatch for array, list or hash objects.
+
+     bbiiggnnuumm--eerrrroorr  Bignum error.
+
+     ccaattcchh--eerrrroorr  Catch-throw mismatch.
+
+     eevvaall--eerrrroorr  Evaluation error.
+
+     ffiiccll--eerrrroorr  Ficl evaluation error.
+
+     ffoorrtthh--eerrrroorr  Forth error.
+
+     llooaadd--eerrrroorr  Error while loading a Forth file.
+
+     mmaatthh--eerrrroorr  Math error occured.
+
+     nnuullll--ssttrriinngg  Empty string occured.
+
+     nnoo--mmeemmoorryy--eerrrroorr  Memory exhausted.
+
+     ooppttkkeeyy--eerrrroorr  Error while evaluating option key functions.
+
+     oouutt--ooff--rraannggee  Argument is out of range.
+
+     rreeggeexxpp--eerrrroorr  Regexp error occured.
+
+     ssiiggnnaall--ccaauugghhtt  Signal received.
+
+     ssoocckkeett--eerrrroorr  Error while processing sockets.
+
+     ssoo--ffiillee--eerrrroorr  Dynamic library load error.
+
+     ssyysstteemm--eerrrroorr  General system function error occured.
+
+     wwrroonngg--nnuummbbeerr--ooff--aarrggss  Wrong number of arguments provided.
+
+     wwrroonngg--ttyyppee--aarrgg  Wrong argument type provided.
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     fftthh conforms only partly to _A_N_S _F_o_r_t_h.  The double word set doesn't take
+     two stack entries and is actually of type _f_i_c_l_2_I_n_t_e_g_e_r.
+
+     fftthh has no extra floating point stack; floats are of type _f_i_c_l_F_l_o_a_t.
+
+SSEEEE AALLSSOO
+     csh(1), snd(1), tcsh(1), vi(1), accept(2), bind(2), connect(2),
+     listen(2), recv(2), recvfrom(2), send(2), sendto(2), shutdown(2),
+     socket(2), fopen(3), getopt(3), getservbyname(3), getservbyport(3),
+     gl_prompt_style(3), libfth(3), realpath(3), regex(3), sethostname(3),
+     sprintf(3), strftime(3), time(3), times(3), tecla(7)
+
+SSTTAANNDDAARRDDSS
+     fftthh conforms only partly to _A_N_S _F_o_r_t_h; see _C_O_M_P_A_T_I_B_I_L_I_T_Y.
+
+HHIISSTTOORRYY
+     This manual page describes version 1.3.7.  fftthh is based on _F_i_c_l,
+     _F_o_r_t_h_-_i_n_s_p_i_r_e_d _c_o_m_m_a_n_d _l_a_n_g_u_a_g_e, version 4.0.31 written by John Sadler.
+
+AAUUTTHHOORRSS
+     fftthh and this manual page was written by Michael Scholz
+     <mi-scholz@users.sourceforge.net>.
+
+BBUUGGSS
+     Please report bugs to the author.
+
+NetBSD 7.99.3                  February 19, 2014                 NetBSD 7.99.3

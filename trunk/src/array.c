@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)array.c	1.140 9/13/13
+ * @(#)array.c	1.141 12/28/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1087,7 +1087,7 @@ ficl_array_insert(ficlVm *vm)
 ary1 1 10 array-insert value ary2\n\
 ary1 => #( 0 1 2 )\n\
 ary2 => #( 0 10 1 2 )\n\
-ary1 1 #( 4 5 6 ) array-insert => #( 0 4 5 6 10 1 2 )\n\
+ary2 1 #( 4 5 6 ) array-insert => #( 0 4 5 6 10 1 2 )\n\
 Insert VAL to ARY1 at position IDX and return new array.  \
 VAL can be an array or any other object.  \
 Negative IDX counts from backward.  \

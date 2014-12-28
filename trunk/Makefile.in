@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.130 12/8/14
+# @(#)Makefile.in	1.131 12/28/14
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -56,6 +56,8 @@ fthsite		= ${top_srcdir}/examples/site-lib
 INSTALL		= @INSTALL@
 INSTALL_DATA	= ${INSTALL} -m 0644
 MANDOC		= @MANDOC@
+MANZIP		= gzip
+ZIP		= bzip2
 CP		= cp -p
 CPD		= cp -pR
 RM		= rm -f
@@ -114,7 +116,10 @@ all: all-dep
 		(cd $${f} && ${MAKE} all); \
 	done
 
-all-dep: Makefile fth-config.h config.h ${top_srcdir}/common.mk
+all-dep: Makefile fth-config.h config.h \
+	    ${top_srcdir}/common.mk \
+	    ${top_srcdir}/fth.0 \
+	    ${top_srcdir}/libfth.0
 
 install: all
 	${SHELL} ${top_srcdir}/mkinstalldirs ${libdir}
@@ -138,17 +143,23 @@ install: all
 	for f in ${SITE_LIB}; do \
 		${INSTALL_DATA} ${fthsite}/$${f} ${pkgdatadir}/site-fth/$${f}; \
 	done
+	${INSTALL_DATA} ${top_srcdir}/fth.m4 ${aclocaldir}/fth.m4
+	${RM} ${mandir}/man1/fth.1*
+	${INSTALL_DATA} ${top_srcdir}/fth.1 ${mandir}/man1/fth.1
+	${MANZIP} -f ${mandir}/man1/fth.1
+	${RM} ${mandir}/man3/libfth.3*
+	${INSTALL_DATA} ${top_srcdir}/libfth.3 ${mandir}/man3/libfth.3
+	${MANZIP} -f ${mandir}/man3/libfth.3
 	if test -d ${mandir}/cat1; then \
-		${RM} ${mandir}/cat1/fth.1*; \
+		${RM} ${mandir}/cat1/fth.*; \
+		${INSTALL_DATA} ${top_srcdir}/fth.0 ${mandir}/cat1/; \
+		${MANZIP} -f ${mandir}/cat1/fth.0; \
 	fi
 	if test -d ${mandir}/cat3; then \
-		${RM} ${mandir}/cat3/libfth.3*; \
+		${RM} ${mandir}/cat3/libfth.*; \
+		${INSTALL_DATA} ${top_srcdir}/libfth.0 ${mandir}/cat3/; \
+		${MANZIP} -f ${mandir}/cat3/libfth.0; \
 	fi
-	${INSTALL_DATA} ${top_srcdir}/fth.m4 ${aclocaldir}/fth.m4
-	${INSTALL_DATA} ${top_srcdir}/fth.1 ${mandir}/man1/fth.1
-	${INSTALL_DATA} ${top_srcdir}/libfth.3 ${mandir}/man3/libfth.3
-	gzip -f ${mandir}/man1/fth.1
-	gzip -f ${mandir}/man3/libfth.3
 
 install-site-fth: install
 
@@ -215,7 +226,9 @@ DIST_FILES = \
 	fth-config.h.in \
 	config.h.in \
 	fth.1 \
+	fth.0 \
 	libfth.3 \
+	libfth.0 \
 	fth.m4 \
 	fth.sh.in \
 	install-sh \
@@ -228,8 +241,6 @@ SCR_DIST = \
 	install.fth.in \
 	play-sound.fth.in \
 	xm.fth.in \
-	xg.fth.in \
-	fth-additions.el \
 	coretest.fth \
 	tester.fs
 SITE_LIB_DIST = \
@@ -237,7 +248,10 @@ SITE_LIB_DIST = \
 	README \
 	install.fth
 
-dist: all-dep ${top_srcdir}/README
+dist: all-dep \
+	    ${top_srcdir}/README \
+	    ${top_srcdir}/fth.0 \
+	    ${top_srcdir}/libfth.0
 	${RMD} ${distdir}*
 	for f in ${distpaths}; do \
 		${SHELL} ${top_srcdir}/mkinstalldirs ${distdir}/$${f}; \
@@ -269,7 +283,7 @@ dist: all-dep ${top_srcdir}/README
 	(cd ${top_srcdir}/src && \
 	    ${CP} *.[ch] *.in ${distdir}/src/)
 	chmod -R +w ${distdir}
-	tar -cof - ${distfile} | bzip2 -9c > ${distfile}.tar.bz2
+	tar -cof - ${distfile} | ${ZIP} -9c > ${distfile}.tar.bz2
 	${RMD} ${distdir}
 
 test: all
@@ -293,8 +307,7 @@ maintainer-clean: clean
 	done
 	${RM} Makefile config.[lc]* config.st* stamp-h \
 	    fth-config.h config.h fth.sh tags
-	${RMD} *~ ${distdir}*
-	find ${top_srcdir} -name "*~" -exec rm {} ';'
+	${RMD} ${distdir}*
 
 depend:
 	env MKDEP_CPP="${CC} -E" MKDEP_CPP_OPTS=-MM mkdep \
@@ -302,8 +315,12 @@ depend:
 	    -I${srcdir}/ficl -I${srcdir}/lib -I${srcdir}/src \
 	    ${srcdir}/ficl/*.c ${srcdir}/src/*.c
 
+tags:	ctags
 ctags:
-	(cd ${top_srcdir} && ctags -dw ./ficl/*.[ch] ./src/*.[ch])
+	ctags -dw \
+		${top_srcdir}/ficl/*.[ch] \
+		${top_srcdir}/src/*.[ch] \
+		${top_srcdir}/examples/*/*.[ch]
 
 ${top_srcdir}/aclocal.m4: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac
 	(cd ${top_srcdir} && aclocal)
@@ -332,9 +349,13 @@ ${top_builddir}/config.status: ${top_srcdir}/configure
 	(cd ${top_builddir} && ${SHELL} ./config.status --recheck)
 
 ${top_srcdir}/README: ${top_srcdir}/README.man
-	${MANDOC} -Tascii ${top_srcdir}/README.man | \
-	col -b | \
-	sed -n '3,/apple-darwin/p' > $@
+	${MANDOC} $> | col -b > $@
+
+${top_srcdir}/fth.0: ${top_srcdir}/fth.1
+	${MANDOC} $> > $@
+
+${top_srcdir}/libfth.0: ${top_srcdir}/libfth.3
+	${MANDOC} $> > $@
 
 .PHONY: all install fth-shared fth-static install-shared install-static \
 	install-strip install-site-fth uninstall \

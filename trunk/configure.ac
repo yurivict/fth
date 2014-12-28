@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.177 1/4/14
+dnl @(#)configure.ac	1.178 12/28/14
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -421,8 +421,6 @@ AC_CONFIG_FILES([examples/scripts/play-sound.fth],
     [chmod +x examples/scripts/play-sound.fth])
 AC_CONFIG_FILES([examples/scripts/xm.fth],
     [chmod +x examples/scripts/xm.fth])
-AC_CONFIG_FILES([examples/scripts/xg.fth],
-    [chmod +x examples/scripts/xg.fth])
 AC_CONFIG_FILES([stamp-h], [echo timestamp > stamp-h])
 AC_CONFIG_FILES([fth.sh], [chmod +x fth.sh])
 AC_OUTPUT
