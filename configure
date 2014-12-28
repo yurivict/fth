@@ -6379,8 +6379,6 @@ ac_config_files="$ac_config_files examples/scripts/play-sound.fth"
 
 ac_config_files="$ac_config_files examples/scripts/xm.fth"
 
-ac_config_files="$ac_config_files examples/scripts/xg.fth"
-
 ac_config_files="$ac_config_files stamp-h"
 
 ac_config_files="$ac_config_files fth.sh"
@@ -7103,7 +7101,6 @@ do
     "examples/scripts/install.fth") CONFIG_FILES="$CONFIG_FILES examples/scripts/install.fth" ;;
     "examples/scripts/play-sound.fth") CONFIG_FILES="$CONFIG_FILES examples/scripts/play-sound.fth" ;;
     "examples/scripts/xm.fth") CONFIG_FILES="$CONFIG_FILES examples/scripts/xm.fth" ;;
-    "examples/scripts/xg.fth") CONFIG_FILES="$CONFIG_FILES examples/scripts/xg.fth" ;;
     "stamp-h") CONFIG_FILES="$CONFIG_FILES stamp-h" ;;
     "fth.sh") CONFIG_FILES="$CONFIG_FILES fth.sh" ;;
 
@@ -7688,7 +7685,6 @@ ATEOF
     "examples/scripts/install.fth":F) chmod +x examples/scripts/install.fth ;;
     "examples/scripts/play-sound.fth":F) chmod +x examples/scripts/play-sound.fth ;;
     "examples/scripts/xm.fth":F) chmod +x examples/scripts/xm.fth ;;
-    "examples/scripts/xg.fth":F) chmod +x examples/scripts/xg.fth ;;
     "stamp-h":F) echo timestamp > stamp-h ;;
     "fth.sh":F) chmod +x fth.sh ;;
 

@@ -1,4 +1,4 @@
-.\" Copyright (c) 2012-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2012-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.25 10/15/13
+.\" @(#)README.man	1.28 12/28/14
 .\"
-.Dd October 15, 2013
+.Dd December 28, 2014
 .Dt README
 .Os
 .\"
@@ -80,7 +80,7 @@ The interactive Fth interpreter supports tcsh-like command-line editing
 with the
 .Xr tecla 7 
 library.  You can find a copy at
-.Pa http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.2.tar.gz .
+.Pa http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.3.tar.gz .
 If you won't use 
 .Xr tecla 7 ,
 you can configure Fth without it, see
@@ -245,8 +245,8 @@ AC_ARG_WITH([forth],
 Fth builds and runs on these systems:
 .Ss Current builds
 .Bd -literal -compact
-FTH 1.3.7 (2013/10/05) [amd64-portbld-freebsd9.2]
-FTH 1.3.7 (2013/10/05) [i386-portbld-freebsd8.4]
+FTH 1.3.7 (2014/12/28) [amd64-pkgsrc-netbsd7.99]
+FTH 1.3.7 (2014/12/28) [amd64-portbld-freebsd8.4]
 FTH 1.3.7 (2013/10/05) [i386-mnet-freebsd9.0] (arbornet.org)
 FTH 1.3.7 (2013/10/05) [i386-intel-openbsd5.0] (grex.org)
 FTH 1.3.7 (2013/10/05) [amd64-sdf-netbsd6.1] (sdf.org)
@@ -258,26 +258,4 @@ FTH 1.3.7 (2013/10/05) [amd64-vbox-freebsd11.0]
 FTH 1.3.7 (2013/10/05) [amd64-vbox-netbsd6.99.24]
 FTH 1.3.7 (2013/10/05) [amd64-vbox-openbsd5.4]
 FTH 1.3.7 (2013/10/05) [x86_64-vboxdebian-linux-gnu3.10]
-#
-FTH 1.3.0 (01-Mar-2012) [i686-vbox-minix3.1.8]
-FTH 1.3.0 (01-Mar-2012) [i686-ubuntu-linux-gnu3.0.0]
-FTH 1.3.0 (01-Mar-2012) [i686-centos-linux-gnu2.6.32]
-.Ed
-.Ss More machines
-With much help from Bill Schottstaedt, the author of the sound editor
-Snd, Fth could be tested on these machines:
-.Pp
-.Bd -literal -compact
-FTH 0.12.00 (13-Oct-06) [sparc-sun-solaris2.9]      okay
-FTH 0.12.00 (13-Sep-06) [i386-pc-solaris2.10]       okay
-FTH 0.10.22 (13-Sep-06) [i386-pc-solaris2.9]        okay
-FTH 0.10.22 (13-Sep-06) [i686-pc-linux-gnu]         okay
-FTH 0.10.22 (13-Sep-06) [powerpc64-linux-gnu]       okay
-FTH 0.10.22 (13-Sep-06) [x86_64-linux-gnu]          okay
-FTH 0.10.22 (13-Sep-06) [alphaev67-linux-gnu]       not yet
-FTH 0.10.22 (13-Sep-06) [i386-freebsd5.4]           okay
-FTH 0.10.22 (13-Sep-06) [i386-netbsdelf2.0.2]       okay
-FTH 0.10.22 (13-Sep-06) [i386-openbsd3.8]           okay
-FTH 0.10.20 (04-Sep-06) [i686-apple-darwin8.7.1]    okay
-.Ed
 .\" README.man ends here

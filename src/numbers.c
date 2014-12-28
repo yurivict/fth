@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.164 1/23/14
+ * @(#)numbers.c	1.166 12/28/14
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -81,16 +81,14 @@ static FRatio	fth_rt_zero;
 #define FTH_MATH_ERROR_THROW(Desc)					\
 	fth_throw(FTH_MATH_ERROR, "%s: %s", RUNNING_WORD(), Desc)
 
-#if !defined(HAVE_LOG2)
-static double	log2(double x);
-#endif
-#if !defined(HAVE_RINT)
-static ficlFloat fth_round(ficlFloat r);
-#endif
-
+static ficlFloat fth_pow(ficlFloat x, ficlFloat y);
+static ficlFloat fth_floor(ficlFloat x);
+static ficlFloat fth_ceil(ficlFloat x);
+static ficlFloat fth_rint(ficlFloat x);
+static ficlFloat fth_trunc(ficlFloat x);
 static ficlFloat fth_log(ficlFloat x);
-static ficlFloat fth_log10(ficlFloat x);
 static ficlFloat fth_log2(ficlFloat x);
+static ficlFloat fth_log10(ficlFloat x);
 static FTH	make_object_number_type(const char *name, 
 		    fobj_t type, int flags);
 
@@ -306,11 +304,23 @@ make_object_number_type(const char *name, fobj_t type, int flags)
 #define FTH_POW(x, y)		FTH_NOT_IMPLEMENTED(pow)
 #endif
 
+static ficlFloat
+fth_pow(ficlFloat x, ficlFloat y)
+{
+	return (FTH_POW(x, y));
+}
+
 #if defined(HAVE_FLOOR)
 #define FTH_FLOOR(r)		floor(r)
 #else
 #define FTH_FLOOR(r)		((ficlFloat)((ficlInteger)(r)))
 #endif
+
+static ficlFloat
+fth_floor(ficlFloat x)
+{
+	return (FTH_FLOOR(x));
+}
 
 #if defined(HAVE_CEIL)
 #define FTH_CEIL(r)		ceil(r)
@@ -318,27 +328,37 @@ make_object_number_type(const char *name, fobj_t type, int flags)
 #define FTH_CEIL(r)		((ficlFloat)((ficlInteger)((r) + 1.0)))
 #endif
 
+static ficlFloat
+fth_ceil(ficlFloat x)
+{
+	return (FTH_CEIL(x));
+}
+
 #if defined(HAVE_RINT)
 #define FTH_ROUND(r)		rint(r)
 #else
+#define FTH_ROUND(r)		fth_rint(r)
+#endif
+
 static ficlFloat
-fth_round(ficlFloat r)
+fth_rint(ficlFloat x)
 {
-	if (r != FTH_FLOOR(r)) {
+#if defined(HAVE_RINT)
+	return (rint(x));
+#else
+	if (x != FTH_FLOOR(x)) {
 		ficlFloat half, half2, res;
 
-		half = r + 0.5;
+		half = x + 0.5;
 		half2 = half * 0.5;
 		res = FTH_FLOOR(half);
 		if (half == res && half2 != FTH_FLOOR(half2))
 			return (res - 1.0);
 		return (res);
 	}
-	return (r);
-}
-
-#define FTH_ROUND(r)		fth_round(r)
+	return (x);
 #endif
+}
 
 #if defined(HAVE_TRUNC)
 #define FTH_TRUNC(r)		trunc(r)
@@ -346,10 +366,16 @@ fth_round(ficlFloat r)
 #define FTH_TRUNC(r)		(((r) < 0.0) ? -FTH_FLOOR(-(r)) : FTH_FLOOR(r))
 #endif
 
+static ficlFloat
+fth_trunc(ficlFloat x)
+{
+	return (FTH_TRUNC(x));
+}
+
 #if defined(INFINITY)
 #define FTH_INF			(ficlFloat)INFINITY
 #else
-static double	fth_infinity;
+static ficlFloat fth_infinity;
 #define FTH_INF			fth_infinity
 #endif
 
@@ -379,13 +405,10 @@ fth_isnan(ficlFloat x)
 #endif
 }
 
-#if !defined(HAVE_LOG2)
-static double
-log2(double x)
-{
-	return (log10(x) / log10(2.0));
-}
-
+#if defined(HAVE_LOG2)
+#define FTH_LOG2(r)		log2(r)
+#else
+#define FTH_LOG2(r)		(log10(r) / log10(2.0))
 #endif
 
 static ficlFloat
@@ -402,7 +425,7 @@ static ficlFloat
 fth_log2(ficlFloat x)
 {
 	if (x >= 0.0)
-		return (log2(x));
+		return (FTH_LOG2(x));
 	FTH_MATH_ERROR_THROW("log2, x < 0");
 	/* NOTREACHED */
 	return (0.0);
@@ -419,7 +442,7 @@ fth_log10(ficlFloat x)
 }
 
 /*
- * Minix seems to lack asinh, acosh, atanh
+ * Minix seems to lack asinh, acosh, atanh.
  */
 #if !defined(HAVE_ASINH)
 ficlFloat
@@ -427,7 +450,6 @@ asinh(ficlFloat x)
 {
 	return (log(x + sqrt(x * x + 1.0)));
 }
-
 #endif
 
 #if !defined(HAVE_ACOSH)
@@ -436,7 +458,6 @@ acosh(ficlFloat x)
 {
 	return (log(x + sqrt(x * x - 1.0)));
 }
-
 #endif
 
 #if !defined(HAVE_ATANH)
@@ -1904,10 +1925,10 @@ ficl_fsincos(ficlVm *vm)
 }
 
 N_FUNC_ONE_ARG(fabs, fabs, Float);
-N_FUNC_ONE_ARG(floor, floor, Float);
-N_FUNC_ONE_ARG(fceil, ceil, Float);
-N_FUNC_ONE_ARG(ftrunc, trunc, Float);
-N_FUNC_ONE_ARG(fround, rint, Float);
+N_FUNC_ONE_ARG(floor, fth_floor, Float);
+N_FUNC_ONE_ARG(fceil, fth_ceil, Float);
+N_FUNC_ONE_ARG(ftrunc, fth_trunc, Float);
+N_FUNC_ONE_ARG(fround, fth_rint, Float);
 N_FUNC_ONE_ARG(fsqrt, sqrt, Float);
 N_FUNC_ONE_ARG(fexp, exp, Float);
 N_FUNC_ONE_ARG(flog, fth_log, Float);
@@ -1926,7 +1947,7 @@ N_FUNC_ONE_ARG(fasinh, asinh, Float);
 N_FUNC_ONE_ARG(facosh, acosh, Float);
 N_FUNC_ONE_ARG(fatanh, atanh, Float);
 N_FUNC_TWO_ARGS(fmod, fmod, Float);
-N_FUNC_TWO_ARGS(fpow, pow, Float);
+N_FUNC_TWO_ARGS(fpow, fth_pow, Float);
 N_FUNC_TWO_ARGS(fatan2, atan2, Float);
 
 /*

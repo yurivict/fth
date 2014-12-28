@@ -1,3 +1,8 @@
+2014-12-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/scripts/fth-additions.el: File removed.
+	* examples/scripts/xg.fth: File removed.
+
 2014-12-08  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* Makefile.in: add chmod -R +w ${distdir} to target dist.

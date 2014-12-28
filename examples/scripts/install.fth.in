@@ -3,13 +3,12 @@
 \ install.fth -- installs executable files in ${prefix}/bin
 
 let:
-  "./play-sound.fth" { src }
-  src file-exists? if
-    src ".fth" file-basename { dest }
-    src file-mtime config-prefix "/bin/" $+ dest $+ file-mtime b> if
-      "install -v -c %s %s/bin/%s" #( src config-prefix dest ) string-format file-system drop
-    then
-  then
+	"./play-sound.fth" { src }
+	src file-exists? if
+		src ".fth" file-basename { rdst }
+		config-prefix "/bin/" $+ rdst $+ { dst }
+		"install -c -m 0755 " src $+ $space $+ dst $+ file-system drop
+	then
 ;let
 
 \ install.fth ends here
