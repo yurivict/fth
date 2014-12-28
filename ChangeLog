@@ -1,6 +1,6 @@
 2014-12-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
-	* fth.0, libfth.0: Formatted version of manual pages added.
+	* configure.ac: New version number: 1.3.8
 
 	* examples/scripts/fth-additions.el: File removed.
 	* examples/scripts/xg.fth: File removed.

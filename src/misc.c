@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.647 12/28/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.648 12/28/14";
 #endif /* not lint */
 
 #define FTH_DATE                        "2014/12/28"
@@ -3542,15 +3542,15 @@ forth_init(void)
 	/* Load Ficl source files. */
 	{
 		char *sf[] = {"softcore.fr",
-		    "ifbrack.fr",
-		    "prefix.fr",
-		    "ficl.fr",
-		    "jhlocal.fr",
-		    "marker.fr",
-		    "fileaccess.fr",
-		    "assert.fs",
-		    "compat.fs",
-		    NULL};
+			"ifbrack.fr",
+			"prefix.fr",
+			"ficl.fr",
+			"jhlocal.fr",
+			"marker.fr",
+			"fileaccess.fr",
+			"assert.fs",
+			"compat.fs",
+		NULL};
 		char **softcore = sf;
 
 		while (*softcore) {

@@ -913,7 +913,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF || at_write_fail=1
-FTH 1.3.7 test suite: primitive test groups:
+FTH 1.3.8 test suite: primitive test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -954,7 +954,7 @@ _ATEOF
   exit $at_write_fail
 fi
 if $at_version_p; then
-  $as_echo "$as_me (FTH 1.3.7)" &&
+  $as_echo "$as_me (FTH 1.3.8)" &&
   cat <<\_ATEOF || at_write_fail=1
 
 Copyright (C) 2012 Free Software Foundation, Inc.
@@ -1131,11 +1131,11 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 $as_echo "## -------------------------------- ##
-## FTH 1.3.7 test suite: primitive. ##
+## FTH 1.3.8 test suite: primitive. ##
 ## -------------------------------- ##"
 {
   $as_echo "## -------------------------------- ##
-## FTH 1.3.7 test suite: primitive. ##
+## FTH 1.3.8 test suite: primitive. ##
 ## -------------------------------- ##"
   echo
 
@@ -1979,7 +1979,7 @@ _ASBOX
   $as_echo "Please send $at_msg and all information you think might help:
 
    To: <mi-scholz@users.sourceforge.net>
-   Subject: [FTH 1.3.7] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
+   Subject: [FTH 1.3.8] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
 
 You may investigate any problem if you feel able to do so, in which
 case the test suite provides a good starting point.  Its output may

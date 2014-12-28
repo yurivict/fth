@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.28 12/28/14
+.\" @(#)README.man	1.29 12/28/14
 .\"
 .Dd December 28, 2014
 .Dt README
@@ -245,12 +245,13 @@ AC_ARG_WITH([forth],
 Fth builds and runs on these systems:
 .Ss Current builds
 .Bd -literal -compact
-FTH 1.3.7 (2014/12/28) [amd64-pkgsrc-netbsd7.99]
-FTH 1.3.7 (2014/12/28) [amd64-portbld-freebsd8.4]
-FTH 1.3.7 (2013/10/05) [i386-mnet-freebsd9.0] (arbornet.org)
-FTH 1.3.7 (2013/10/05) [i386-intel-openbsd5.0] (grex.org)
+FTH 1.3.8 (2014/12/28) [amd64-pkgsrc-netbsd7.99]
+FTH 1.3.8 (2014/12/28) [amd64-portbld-freebsd8.4]
+FTH 1.3.8 (2014/12/28) [x86_64-amd-linux3.2]
+FTH 1.3.8 (2014/12/28) [i386-mnet-freebsd9.0] (arbornet.org)
+FTH 1.3.8 (2014/12/28) [i386-intel-openbsd5.0] (grex.org)
+FTH 1.3.8 (2014/12/28) [x86_64-debian-linux-gnu3.2.0] (freeshell.de)
 FTH 1.3.7 (2013/10/05) [amd64-sdf-netbsd6.1] (sdf.org)
-FTH 1.3.7 (2013/10/05) [x86_64-debian-linux-gnu3.2.0] (freeshell.de)
 .Ed
 .Ss VirtualBox
 .Bd -literal -compact
