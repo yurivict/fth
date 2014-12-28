@@ -3542,15 +3542,15 @@ forth_init(void)
 	/* Load Ficl source files. */
 	{
 		char *sf[] = {"softcore.fr",
-			"ifbrack.fr",
-			"prefix.fr",
-			"ficl.fr",
-			"jhlocal.fr",
-			"marker.fr",
-			"fileaccess.fr",
-			"assert.fs",
-			"compat.fs",
-		NULL};
+		    "ifbrack.fr",
+		    "prefix.fr",
+		    "ficl.fr",
+		    "jhlocal.fr",
+		    "marker.fr",
+		    "fileaccess.fr",
+		    "assert.fs",
+		    "compat.fs",
+		    NULL};
 		char **softcore = sf;
 
 		while (*softcore) {
