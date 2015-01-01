@@ -1,4 +1,4 @@
-.\" Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2004-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.128 12/28/14
+.\" @(#)fth.1	1.130 1/1/15
 .\"
-.Dd December 28, 2014
+.Dd January 01, 2015
 .Dt FTH 1
 .Os
 .\"
@@ -315,12 +315,12 @@ Return array of all features.
 .\" *filename*
 .\"
 .It Ev *filename*
-Current file name.
+Current filename.
 .\"
 .\" *fname*
 .\"
 .It Ev *fname*
-Current in\(hyplace file name.
+Current in\(hyplace filename.
 .\"
 .\" *fnr*
 .\"
@@ -571,7 +571,7 @@ initiates word completion.  If the Forth dictionary has more than
 one entry starting with characters before the cursor, show all, if
 only one definition exists, complete it and add a space after the
 completed word.  If the Forth dictionary has no entries starting with
-the characters before the cursor, try file name completion.  For
+the characters before the cursor, try filename completion.  For
 complete key listings and function descriptions, see
 .Xr tecla 7 .
 .Pp
@@ -1873,7 +1873,7 @@ depending on
 .Ar ext
 may be #f, nil/undef, a string or a regexp.  If
 .Ar ext
-is #f, return file name without path name.  If
+is #f, return filename without pathname.  If
 .Ar ext
 is nil or undef, discard the part from the last dot to the end of
 basename
@@ -1970,7 +1970,7 @@ exist, delete it, otherwise do nothing.
 .\" file-dir
 .\"
 .It Cm file-dir No (\ dir -- files-ary\ )
-Return an array of all file names found in
+Return an array of all filenames found in
 .Ar dir .
 .\"
 .\" file-dirname
@@ -1993,10 +1993,15 @@ to
 .Ev *loaded-files*
 if it wasn't there.  It's similar to
 .Cm include
-except that file name must be on stack (include is a parseword).  With
-file-eval one can load files from within word definitions.  Raise
+except that
+.Ar name
+must be on stack (include is a parse word).  With
+.Cm file-eval
+one can load files from within word definitions.  Raise
 .Ar load-error
-exception if file-eval fails.
+exception if
+.Cm file-eval
+fails.
 .\"
 .\" file-fullpath
 .\"
@@ -2062,7 +2067,7 @@ is a file, return its length in bytes, otherwise #f.
 .\" file-match-dir
 .\"
 .It Cm file-match-dir No (\ dir reg -- files-ary\ )
-Return an array of file names in
+Return an array of filenames in
 .Ar dir
 matching regexp
 .Ar reg .
@@ -2906,9 +2911,9 @@ err-io io-flush \(rA \(dqour error log\(dq (on stderr)
 .\" io-filename
 .\"
 .It Cm io-filename No (\ io -- fname\ )
-Return file name of
+Return filename of
 .Ar io
-object or #f if file name is not available.
+object or #f if filename is not available.
 .\"
 .\" io-fileno
 .\"
@@ -3068,7 +3073,7 @@ and close
 .Ar io1 .
 If
 .Ar name
-is not a string, for example #f or nil, use file name from
+is not a string, for example #f or nil, use filename from
 .Ar io1 .
 If keyword
 .Ar fam
@@ -3157,7 +3162,7 @@ Return #t if
 .Ar obj1
 and
 .Ar obj2
-are IO objects with equal file names, modes and file positions,
+are IO objects with equal filenames, modes and file positions,
 otherwise #f.
 .\"
 .\" io?
@@ -3724,9 +3729,17 @@ in first writeable path found in
 (*.fs[m]) or
 .Ev *load-lib-path*
 (*.so).
+In the last example the trailing
+.Fl e
+is necessary because the last occurrence of
+.Fl e
+will be compiled.
+.Cm install
+is a parse word and won't work in compile state.
 .Bd -literal -offset indent -compact
 install snd-test.fs
 install sndlib.so
+% fth \(hyve \(dqinstall sndlib.so\(dq -e \(dq\(dq
 .Ed
 .\"
 .\" install-file
@@ -3734,8 +3747,12 @@ install sndlib.so
 .It Cm install-file No (\ file --\ )
 Install
 .Ar file
-in first writeable path found in *load-path* (*.fs[m]) or
-*load-lib-path* (*.so).
+in first writeable path found in
+.Ev *load-path*
+(*.fs[m]) or
+.Ev *load-lib-path*
+(*.so).
+A warning is given if no writable path is found.
 .Bd -literal -offset indent -compact
 \(dqsnd-test.fs\(dq install-file
 \(dqsndlib.so\(dq install-file
@@ -6582,7 +6599,7 @@ hello
 .\" *filename*
 .\"
 .It Ev *filename*
-Current file name.
+Current filename.
 .\"
 .\" *lineno*
 .\"
@@ -8290,12 +8307,12 @@ A colon separated list of paths pointing to Forth script files.  These
 paths will be prepended to
 .Ev *load-path* .
 .It Ev FTH_HISTORY
-Overwrite default history file name
+Overwrite default history filename
 .Pa ~/.fth-history .
 .It Ev FTH_HISTORY_LENGTH
 Overwrite default history file length (100).
 .It Ev FTH_INIT_FILE
-Overwrite default initialization file name
+Overwrite default initialization filename
 .Pa ~/.fthrc .
 .It Ev FTH_LIBPATH
 A colon separated list of paths pointing to C extension libraries.

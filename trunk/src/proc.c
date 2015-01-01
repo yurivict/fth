@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.161 1/30/14
+ * @(#)proc.c	1.162 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1406,9 +1406,9 @@ See also running-word and latestxt."
 static void
 ficl_filename_im(ficlVm *vm)
 {
-#define h_filename_im "( -- str )  return current file name\n\
+#define h_filename_im "( -- str )  return current filename\n\
 *filename* => \"repl-eval\"\n\
-Return currently read file name.\n\
+Return currently read filename.\n\
 See also *lineno*."
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
@@ -2405,7 +2405,7 @@ proc_from_proc_or_xt(FTH proc_or_xt, int req, int opt, bool rest)
 }
 
 /*
- * Return name of word with possible source file name and source line
+ * Return name of word with possible source filename and source line
  * number of the definition as FTH String if defined in the dictionary
  * or "unknown word 0xxxxxxxx".
  */

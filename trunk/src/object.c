@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.213 11/10/14
+ * @(#)object.c	1.215 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -403,8 +403,8 @@ backtrace =>\n\
 Print last word list from stack frame to error output.\n\
 TIB: last line in Terminal Input Buffer before backtrace call\n\
  BT: level of backtrace, here 0\n\
- AT: file-name:line-number, source file name and line number of definition.  \
-file name here is the REPL."
+ AT: filename:line number, source filename and line number of definition.  \
+filename here is the REPL."
 	FTH_STACK_CHECK(vm, 0, 0);
 	if (last_frames == NULL)
 		fth_set_backtrace(fth_last_exception);

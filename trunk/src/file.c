@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)file.c	1.85 9/13/13
+ * @(#)file.c	1.86 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -598,7 +598,7 @@ ficl_file_basename(ficlVm *vm)
 \"/home/mike/cage.snd\" /\\.(snd|wave)$/ file-basename => \"cage\"\n\
 Return basename of file NAME depending on EXT.  \
 EXT may be #f, nil/undef, a string or a regexp.  \
-If EXT is #f, return file name without path name.  \
+If EXT is #f, return filename without path name.  \
 If EXT is NIL or UNDEF, discard the part \
 from the last dot to the end of basename NAME.  \
 If EXT is a string or a regexp, discard found EXT from basename NAME."
@@ -857,7 +857,7 @@ ficl_file_eval(ficlVm *vm)
 \"test.fs\" file-eval\n\
 Load and eval content of file NAME \
 and add NAME to *loaded-files* if it wasn't there.  \
-It's similar to INCLUDE except that file name \
+It's similar to INCLUDE except that filename \
 must be on stack (INCLUDE is a parseword).  \
 With file-eval one can load files from within word definitions.  \
 Raise LOAD-ERROR exception if file-eval fails.\n\
@@ -1456,7 +1456,7 @@ ficl_file_dir(ficlVm *vm)
 {
 #define h_file_dir "( dir -- files-array )  return files in dir\n\
 \".\" file-dir => #( \"./xdef\" \"./xdef.bak\" ... )\n\
-Return an array of all file names found in DIR.  \
+Return an array of all filenames found in DIR.  \
 " h_system_error_info("opendir(3)")
 	FTH dir, res;
 
@@ -1472,7 +1472,7 @@ fth_file_match_dir(FTH string, FTH regexp)
 #define h_f_match_dir "( dir reg -- files-array )  return matching files\n\
 \".\" /(bak|out)$/ file-match-dir\n\
   => #( \"./xdef.bak\" \"./xdef.out\" ... )\n\
-Return an array of file names in DIR matching regexp REG.  \
+Return an array of filenames in DIR matching regexp REG.  \
 " h_system_error_info("opendir(3)")
 #if defined(HAVE_OPENDIR)
 	FTH array, fs;

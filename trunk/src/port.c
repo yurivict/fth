@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)port.c	1.63 1/23/14
+ * @(#)port.c	1.64 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -700,7 +700,7 @@ File and IO ports close their streams, other kind of ports do nothing."
 /* --- with-input-port, with-output-port --- */
 
 /*
- * :filename     file name         (string)
+ * :filename     filename          (string)
  *   :fam        r/o
  * :command      cmd               (string or array-of-strings)
  *   :fam        r/o
