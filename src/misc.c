@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.648 12/28/14";
+const char libfth_sccsid[] = "@(#)misc.c	1.649 1/1/15";
 #endif /* not lint */
 
-#define FTH_DATE                        "2014/12/28"
+#define FTH_DATE                        "2015/01/01"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -1163,7 +1163,7 @@ fth_load_file(const char *name)
 static void
 ficl_include_file(ficlVm *vm)
 {
-#define h_include_file "( \"name\" -- )  load file name (parse word)\n\
+#define h_include_file "( \"name\" -- )  load filename (parse word)\n\
 include hello\n\
 Load Forth source file NAME and add NAME to *loaded-files* \
 if it wasn't already there.  \
@@ -1230,7 +1230,7 @@ fth_require_file(const char *name)
 static void
 ficl_require_file(ficlVm *vm)
 {
-#define h_require_file "( \"name\" -- )  load file name (parse word)\n\
+#define h_require_file "( \"name\" -- )  load filename (parse word)\n\
 require hello\n\
 If Forth source file NAME doesn't exist in the array *loaded-files*, \
 load it and add NAME to *loaded-files*.  \
@@ -1268,7 +1268,7 @@ See also include, before-load-hook and after-load-hook."
 FTH
 fth_load_init_file(const char *init_file)
 {
-	/* If no file name was given ... */
+	/* If no filename was given ... */
 	if (init_file == NULL) {
 		/* ... and no environment variable was set ... */
 		init_file = fth_getenv(FTH_ENV_INIT_FILE, NULL);
@@ -1519,8 +1519,9 @@ fth_install_file(FTH fname)
 \"snd-test.fs\" install-file\n\
 \"sndlib.so\" install-file\n\
 Install FILE in first writeable path \
-found in *load-path* (*.fs[m]) or *load-lib-path* (*.so).\n\
-See also install."
+found in *load-path* (*.fs[m]) or *load-lib-path* (*.so).  \
+A warning is given if no writable path was found.\n\
+See also install and file-install."
 	char *lname, *pname, *tname;
 	FTH path_array, fs;
 	mode_t mode;
@@ -1582,13 +1583,16 @@ See also install."
 void
 fth_install(void)
 {
-#define h_install "( \"file\" -- )  install library\n\
+#define h_install "( \"file\" -- )  install library (parse word)\n\
 install snd-test.fs\n\
 install sndlib.so\n\
-fth -ve \"install sndlib.so\"\n\
+fth -ve 'install sndlib.so' -e ''\n\
 Install FILE in first writeable path found \
 in *load-path* (*.fs[m]) or *load-lib-path* (*.so).\n\
-See also install-file."
+In the last example the trailing \"-e ''\" is necessary \
+because the last occurrence of \"-e pattern\" will be compiled.  \
+INSTALL is a parse word and won't work in compile state.\n\
+See also install-file and file-install."
 	ficlVmGetWordToPad(FTH_FICL_VM());
 	fth_install_file(fth_make_string(FTH_FICL_VM()->pad));
 }

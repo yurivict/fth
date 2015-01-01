@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.154 9/13/13
+ * @(#)io.c	1.155 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -897,10 +897,10 @@ fth_io_length(FTH io)
 static void
 ficl_io_filename(ficlVm *vm)
 {
-#define h_io_filename "( io -- filename|#f )  return file name\n\
+#define h_io_filename "( io -- filename|#f )  return filename\n\
 \".fthrc\" io-open-read value io\n\
 io io-filename => \".fthrc\"\n\
-Return file name of IO object or #f if file name is not available."
+Return filename of IO object or #f if filename is not available."
 	FTH io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -1312,7 +1312,7 @@ io2 io-closed? => #t\n\
 \"2-test\" readlines => #( \"world\" )\n\
 *stderr* \"error.log\" io-reopen value err-io\n\
 Return new IO object as copy of IO1 and close IO1.  \
-If NAME is not a string, e.g. #f or nil, use file name from IO1.  \
+If NAME is not a string, e.g. #f or nil, use filename from IO1.  \
 If keyword FAM was not given, use mode from IO1, otherwise use FAM.  \
 All restrictions on reopen apply, \
 ie. a file opened for reading can't reopened for writing etc.\n\
@@ -2255,7 +2255,7 @@ ficl_io_equal_p(ficlVm *vm)
 io1 io1 io= => #t\n\
 io1 io2 io= => #t\n\
 io1 io3 io= => #f\n\
-Return #t if OBJ1 and OBJ2 are IO objects with equal file names, \
+Return #t if OBJ1 and OBJ2 are IO objects with equal filenames, \
 modes and file positions, otherwise #f."
 	FTH obj1, obj2;
 
@@ -2713,10 +2713,10 @@ fth_set_io_stdin(FTH io)
 
 	if (!IO_INPUT_P(io))
 		return (FTH_FALSE);
-	old_io = ficlVmGetPortIn(FTH_FICL_VM());
-	ficlVmGetPortIn(FTH_FICL_VM()) = io;
-	ficlVmGetStdin(FTH_FICL_VM()) = FTH_IO_DATA(io);
-	ficlVmGetFilenoIn(FTH_FICL_VM()) = fileno((FILE *)FTH_IO_DATA(io));
+	old_io = FTH_FICL_VM()->callback.port_in;
+	FTH_FICL_VM()->callback.port_in = io;
+	FTH_FICL_VM()->callback.stdin_ptr = FTH_IO_DATA(io);
+	FTH_FICL_VM()->callback.stdin_fileno = fileno((FILE *)FTH_IO_DATA(io));
 	return (old_io);
 }
 
@@ -2727,10 +2727,10 @@ fth_set_io_stdout(FTH io)
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
-	old_io = ficlVmGetPortOut(FTH_FICL_VM());
-	ficlVmGetPortOut(FTH_FICL_VM()) = io;
-	ficlVmGetStdout(FTH_FICL_VM()) = FTH_IO_DATA(io);
-	ficlVmGetFilenoOut(FTH_FICL_VM()) = fileno((FILE *)FTH_IO_DATA(io));
+	old_io = FTH_FICL_VM()->callback.port_out;
+	FTH_FICL_VM()->callback.port_out = io;
+	FTH_FICL_VM()->callback.stdout_ptr = FTH_IO_DATA(io);
+	FTH_FICL_VM()->callback.stdout_fileno = fileno((FILE *)FTH_IO_DATA(io));
 	return (old_io);
 }
 
@@ -2741,10 +2741,10 @@ fth_set_io_stderr(FTH io)
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
-	old_io = ficlVmGetPortErr(FTH_FICL_VM());
-	ficlVmGetPortErr(FTH_FICL_VM()) = io;
-	ficlVmGetStderr(FTH_FICL_VM()) = FTH_IO_DATA(io);
-	ficlVmGetFilenoErr(FTH_FICL_VM()) = fileno((FILE *)FTH_IO_DATA(io));
+	old_io = FTH_FICL_VM()->callback.port_err;
+	FTH_FICL_VM()->callback.port_err = io;
+	FTH_FICL_VM()->callback.stderr_ptr = FTH_IO_DATA(io);
+	FTH_FICL_VM()->callback.stderr_fileno = fileno((FILE *)FTH_IO_DATA(io));
 	return (old_io);
 }
 
@@ -2756,7 +2756,7 @@ ficl_io_stdin(ficlVm *vm)
 Return current standard input IO object.\n\
 See also set-*stdin*, *stdout*, set-*stdout*, *stderr*, set-*stderr*."
 	FTH_STACK_CHECK(vm, 0, 1);
-	fth_push_ficl_cell(vm, ficlVmGetPortIn(vm));
+	fth_push_ficl_cell(vm, vm->callback.port_in);
 }
 
 static void
@@ -2781,7 +2781,7 @@ ficl_io_stdout(ficlVm *vm)
 Return current standard output IO object.\n\
 See also *stdin*, set-*stdin*, set-*stdout*, *stderr*, set-*stderr*."
 	FTH_STACK_CHECK(vm, 0, 1);
-	fth_push_ficl_cell(vm, ficlVmGetPortOut(vm));
+	fth_push_ficl_cell(vm, vm->callback.port_out);
 }
 
 static void
@@ -2806,7 +2806,7 @@ ficl_io_stderr(ficlVm *vm)
 Return current standard error IO object.\n\
 See also *stdin*, set-*stdin*, *stdout*, set-*stdout*, set-*stderr*."
 	FTH_STACK_CHECK(vm, 0, 1);
-	fth_push_ficl_cell(vm, ficlVmGetPortErr(vm));
+	fth_push_ficl_cell(vm, vm->callback.port_err);
 }
 
 static void

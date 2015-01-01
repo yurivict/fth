@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.221 12/4/14
+ * @(#)utils.c	1.222 1/1/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1147,7 +1147,7 @@ repl_command_generator(WordCompletion *cpl,
 						    NULL, " ");
 	matches = cpl_recall_matches(cpl);
 	/*
-	 * If nothing was found, check for file name completion.
+	 * If nothing was found, check for filename completion.
 	 */
 	if (matches->nmatch == 0)
 		cpl_file_completions(cpl, NULL, line, word_end);
@@ -1761,7 +1761,7 @@ Default is #t.");
 	fth_define_variable("*farray*", FTH_FALSE,
 	    "auto-splitted array of current line");
 	fth_define_variable("*fname*", fth_make_string("-"),
-	    "current in-place file name");
+	    "current in-place filename");
 	fth_define_variable("*fs*", fth_make_string(" "),
 	    "input field separator");
 	fth_define_variable("*fnr*", FTH_ZERO,

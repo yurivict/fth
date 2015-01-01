@@ -86,9 +86,9 @@ DDEESSCCRRIIPPTTIIOONN
      *features*
           Return array of all features.
      *filename*
-          Current file name.
+          Current filename.
      *fname*
-          Current in-place file name.
+          Current in-place filename.
      *fnr*
           Input record number in current file.
      *fs*
@@ -207,7 +207,7 @@ DDEESSCCRRIIPPTTIIOONN
      more than one entry starting with characters before the cursor, show all,
      if only one definition exists, complete it and add a space after the
      completed word.  If the Forth dictionary has no entries starting with the
-     characters before the cursor, try file name completion.  For complete key
+     characters before the cursor, try filename completion.  For complete key
      listings and function descriptions, see tecla(7).
 
      If the first character of the command-line is an exclamation point !!, try
@@ -663,9 +663,9 @@ DDEESSCCRRIIPPTTIIOONN
           can convert the number in a readable string with ttiimmee-->>ssttrriinngg.
      ffiillee--bbaasseennaammee ( name ext -- base )
           Return basename of file _n_a_m_e depending on _e_x_t.  _e_x_t may be #f,
-          nil/undef, a string or a regexp.  If _e_x_t is #f, return file name
-          without path name.  If _e_x_t is nil or undef, discard the part from
-          the last dot to the end of basename _n_a_m_e.  If _e_x_t is a string or a
+          nil/undef, a string or a regexp.  If _e_x_t is #f, return filename
+          without pathname.  If _e_x_t is nil or undef, discard the part from the
+          last dot to the end of basename _n_a_m_e.  If _e_x_t is a string or a
           regexp, discard found _e_x_t from basename _n_a_m_e.
                 "/home/mike/cage.snd" #f file-basename => "cage.snd"
                 "/home/mike/cage.snd" nil file-basename => "cage"
@@ -694,16 +694,16 @@ DDEESSCCRRIIPPTTIIOONN
      ffiillee--ddeelleettee ( name -- )
           If file _n_a_m_e exist, delete it, otherwise do nothing.
      ffiillee--ddiirr ( dir -- files-ary )
-          Return an array of all file names found in _d_i_r.
+          Return an array of all filenames found in _d_i_r.
      ffiillee--ddiirrnnaammee ( name -- path )
           Return directory part of file _n_a_m_e.
                 "/home/mike/cage.snd" file-dirname => "/home/mike"
      ffiillee--eevvaall ( name -- )
           Load and eval content of file _n_a_m_e and add _n_a_m_e to *loaded-files* if
-          it wasn't there.  It's similar to iinncclluuddee except that file name must
-          be on stack (include is a parseword).  With file-eval one can load
+          it wasn't there.  It's similar to iinncclluuddee except that _n_a_m_e must be
+          on stack (include is a parse word).  With ffiillee--eevvaall one can load
           files from within word definitions.  Raise _l_o_a_d_-_e_r_r_o_r exception if
-          file-eval fails.
+          ffiillee--eevvaall fails.
      ffiillee--ffuullllppaatthh ( name -- path )
           Return current working directory prepended to file _n_a_m_e.  If name
           starts with a slash, return _n_a_m_e unchanged.
@@ -725,7 +725,7 @@ DDEESSCCRRIIPPTTIIOONN
      ffiillee--lleennggtthh ( name -- len )
           If _n_a_m_e is a file, return its length in bytes, otherwise #f.
      ffiillee--mmaattcchh--ddiirr ( dir reg -- files-ary )
-          Return an array of file names in _d_i_r matching regexp _r_e_g.
+          Return an array of filenames in _d_i_r matching regexp _r_e_g.
      ffiillee--mmkkddiirr ( name mode -- )
           Create directory named _n_a_m_e with access mode _m_o_d_e.  You can write
           _m_o_d_e with octal numbers: prepend the number with `0o', this is
@@ -994,7 +994,7 @@ DDEESSCCRRIIPPTTIIOONN
                 err-io "our error log" io-write
                 err-io io-flush => "our error log" (on stderr)
      iioo--ffiilleennaammee ( io -- fname )
-          Return file name of _i_o object or #f if file name is not available.
+          Return filename of _i_o object or #f if filename is not available.
      iioo--ffiilleennoo ( io -- fd )
           Return file descriptor of _i_o.
      iioo--fflluusshh ( io -- )
@@ -1050,7 +1050,7 @@ DDEESSCCRRIIPPTTIIOONN
           line.
      iioo--rreeooppeenn ( io1 name :key fam io1-fam -- io2 )
           Return new IO object as copy of _i_o_1 and close _i_o_1.  If _n_a_m_e is not a
-          string, for example #f or nil, use file name from _i_o_1.  If keyword
+          string, for example #f or nil, use filename from _i_o_1.  If keyword
           _f_a_m was not given, use mode from _i_o_1, otherwise use _f_a_m.  All
           restrictions on reopen apply, for example, a file opened for reading
           cannot reopened for writing etc.
@@ -1083,7 +1083,7 @@ DDEESSCCRRIIPPTTIIOONN
      iioo--wwrriitteelliinneess ( io array-of-lines -- )
           Write _a_r_r_a_y_-_o_f_-_l_i_n_e_s to _i_o object.
      iioo== ( obj1 obj2 -- f )
-          Return #t if _o_b_j_1 and _o_b_j_2 are IO objects with equal file names,
+          Return #t if _o_b_j_1 and _o_b_j_2 are IO objects with equal filenames,
           modes and file positions, otherwise #f.
      iioo?? ( obj -- f )
           Return #t if _o_b_j is an IO object, otherwise #f.
@@ -1309,12 +1309,16 @@ DDEESSCCRRIIPPTTIIOONN
                 include hello
      iinnssttaallll ( "file" -- )
           Install _f_i_l_e in first writeable path found in *load-path* (*.fs[m])
-          or *load-lib-path* (*.so).
+          or *load-lib-path* (*.so).  In the last example the trailing --ee is
+          necessary because the last occurrence of --ee will be compiled.
+          iinnssttaallll is a parse word and won't work in compile state.
                 install snd-test.fs
                 install sndlib.so
+                % fth -ve "install sndlib.so" -e ""
      iinnssttaallll--ffiillee ( file -- )
           Install _f_i_l_e in first writeable path found in *load-path* (*.fs[m])
-          or *load-lib-path* (*.so).
+          or *load-lib-path* (*.so).  A warning is given if no writable path
+          is found.
                 "snd-test.fs" install-file
                 "sndlib.so" install-file
      llooaadd--iinniitt--ffiillee ( file -- )
@@ -2554,7 +2558,7 @@ DDEESSCCRRIIPPTTIIOONN
 
    PPrrooccss aanndd XXttss
      *filename*
-          Current file name.
+          Current filename.
      *lineno*
           Current line number.
      ..pprroocc ( prc -- )
@@ -3213,11 +3217,11 @@ EENNVVIIRROONNMMEENNTT
           A colon separated list of paths pointing to Forth script files.
           These paths will be prepended to *load-path*.
      FTH_HISTORY
-          Overwrite default history file name _~_/_._f_t_h_-_h_i_s_t_o_r_y.
+          Overwrite default history filename _~_/_._f_t_h_-_h_i_s_t_o_r_y.
      FTH_HISTORY_LENGTH
           Overwrite default history file length (100).
      FTH_INIT_FILE
-          Overwrite default initialization file name _~_/_._f_t_h_r_c.
+          Overwrite default initialization filename _~_/_._f_t_h_r_c.
      FTH_LIBPATH
           A colon separated list of paths pointing to C extension libraries.
           These paths will be prepended to *load-lib-path*.
@@ -3404,4 +3408,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.3                  December 28, 2014                 NetBSD 7.99.3
+NetBSD 7.99.3                   January 1, 2015                  NetBSD 7.99.3
