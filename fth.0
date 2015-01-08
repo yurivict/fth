@@ -3086,7 +3086,9 @@ DDEESSCCRRIIPPTTIIOONN
      ssttrriinngg--sspplliitt ( str sep -- ary )
           Split _s_t_r using _s_e_p as delimiter and return result as array of
           strings.  If _s_e_p is not a string or regexp, delimiter is space.
-                "foo:bar:baz" =:" string-split
+                "foo:bar:baz" ":" string-split
+                  => #( "foo" "bar" "baz" )
+                "foo:bar:baz" "/:/" string-split
                   => #( "foo" "bar" "baz" )
      ssttrriinngg--ssuubbssttrriinngg ( str1 start end -- str2 )
           Return new string from _s_t_r_1 index _s_t_a_r_t to but excluding index _e_n_d.
@@ -3408,4 +3410,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.3                   January 1, 2015                  NetBSD 7.99.3
+NetBSD 7.99.4                   January 8, 2015                  NetBSD 7.99.4

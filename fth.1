@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.130 1/1/15
+.\" @(#)fth.1	1.132 1/8/15
 .\"
-.Dd January 01, 2015
+.Dd January 08, 2015
 .Dt FTH 1
 .Os
 .\"
@@ -7922,7 +7922,9 @@ as delimiter and return result as array of strings.  If
 .Ar sep
 is not a string or regexp, delimiter is space.
 .Bd -literal -offset indent -compact
-\(dqfoo:bar:baz\(dq \(eq:\(dq string-split
+\(dqfoo:bar:baz\(dq \(dq:\(dq string-split
+  \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq )
+\(dqfoo:bar:baz\(dq \(dq/:/\(dq string-split
   \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq )
 .Ed
 .\"
