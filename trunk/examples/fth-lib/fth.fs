@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,10 +22,8 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth.fs	1.64 2/19/14
+\ @(#)fth.fs	1.65 1/7/15
 
-\ Commentary:
-\
 \ alias			( xt "name" -- ; self -- ?? )
 \ shell-alias		( cmd-str "cmd" -- ; self -- f )
 \ unless		( f -- )
@@ -76,8 +74,9 @@
 \ assert-type		( condition obj pos msg -- )
 \ 
 \ make-?obj		( class-var "name" --; obj self -- f )
-\ create-struct		( names "name" -- ; self -- st )
+\ create-struct		( names "name" -- ; self -- obj )
 \ create-instance-struct ( names "name" -- ; class-var self -- obj )
+\ struct?               ( obj -- f )
 \ secs->hh:mm:ss	( secs -- str )
 \
 \ timer?		( obj -- f )
@@ -101,25 +100,25 @@
 : rdrop  ( R:w -- )   r> drop ;
 : 2rdrop ( R:w R:w -- )   2r> 2drop ;
 
-: alias ( xt "name" --; self -- ?? )
+: alias ( xt "name" --; self -- )
 	create ,
-  does> ( self -- ?? )
+  does> ( self -- )
 	@ execute
 ;
 
 : shell-alias ( cmd-str "cmd" -- ; self -- f )
 	doc" alias for shell command\n\
-\"ls -loAFG\" shell-alias l\n\
-\"vi\"        shell-alias vi\n\
+\"ls -AFlo\" shell-alias l\n\
+\"vi\"       shell-alias vi\n\
 \\ use them to execute these shell commands:\n\
-l                => ls -loAFG\n\
+l                => ls -AFlo\n\
 l /usr/local/bin => ls -loAFG /usr/local/bin\n\
 vi ~/.fthrc      => vi ~/.fthrc\n\
 Create word CMD which feeds CMD-STR to file-system.  \
-Appends rest of line as arguments to CMD-STR, if any.  \
+Appends rest of line as arguments to CMD-STR if any.  \
 Returns #t for success and #f otherwise.\n\
 See also file-system."
-	create ( str ) $space $+ ,
+	create ( cmd-str ) $space $+ ,
   does> ( self -- f )
 	@ parse-word $>string $+ file-system
 ;
@@ -729,23 +728,7 @@ previous
 ;
 
 hide
-: create-setter ( slot idx --; ary val self -- )
-	{ slot idx }
-	slot "!" $+ word-create
-	idx ,
-  does> ( ary val self -- )
-	@ ( idx ) swap array-set!
-;
-
-: create-getter ( slot idx --; ary self -- val )
-	{ slot idx }
-	slot "@" $+ word-create
-	idx ,
-  does> ( ary self -- val )
-	@ ( idx ) array-ref
-;
-
-: create-instance-setter ( slot idx --; gen val self -- )
+: create-setter ( slot idx --; gen val self -- )
 	{ slot idx }
 	slot "!" $+ word-create
 	idx ,
@@ -753,39 +736,75 @@ hide
 	gen instance-gen-ref @ ( ary ) self @ ( idx ) val array-set!
 ;
 
-: create-instance-getter ( slot idx --; gen self -- val )
+: create-getter ( slot idx --; gen self -- val )
 	{ slot idx }
 	slot "@" $+ word-create
 	idx ,
   does> { gen self -- val }
 	gen instance-gen-ref @ ( ary ) self @ ( idx ) array-ref
 ;
-set-current
 
-: create-struct ( names "name" -- ; self -- st )
-	{ names }
+: build-getter-and-setter { names -- len }
 	names each { name }
 		name i create-getter
 		name i create-setter
 	end-each
-	create
-	names length ,
-  does> ( self -- st )
-	@ ( length ) :initial-element 0 make-array
+	names length
+;
+set-current
+
+"struct" make-object-type constant fth-struct
+fth-struct make-?obj struct?
+
+: create-struct ( names "name" --; self -- obj )
+	doc" create a struct\n\
+In two steps one can create getter, setter, and actual objects.  \
+In the first step one creates the getter and setter:\n\
+#( \"timer-base-real\" ... ) create-struct make-timer-struct\n\
+Now these words exist:\n\
+timer-base-real@ ( tm -- val ) getter\n\
+timer-base-real! ( tm val -- ) setter\n\
+etc. and\n\
+make-timer-struct ( -- tm )\n\
+In the second step actual objects can be created with MAKE-TIMER-STRUCT:\n\
+: make-timer ( -- tm )\n\
+  make-timer-struct { tm }\n\
+  tm 0.0 timer-base-real!\n\
+  [...]\n\
+  tm
+;\n\
+See also create-instance-struct."
+	( names ) build-getter-and-setter ( len )
+	create ( len ) ,
+  does> { self -- obj }
+	1 cells allocate throw { gen }
+	self @ ( length ) :initial-element 0 make-array ( ary ) gen !
+	gen fth-struct make-instance
 ;
 
-: create-instance-struct ( names "name" -- ; class-var self -- obj )
-	{ names }
-	names each { name }
-		name i create-instance-getter
-		name i create-instance-setter
-	end-each
-	create
-	names length ,
+: create-instance-struct ( names "name" --; class-var self -- obj )
+	doc" create an instance struct\n\
+In two steps one can create getter, setter, and actual objects.  \
+In the first step one creates the getter and setter:\n\
+#( \"timer-base-real\" ... ) create-instance-struct make-timer-instance\n\
+Now these words exist:\n\
+timer-base-real@ ( tm -- val ) getter\n\
+timer-base-real! ( tm val -- ) setter\n\
+etc. and\n\
+make-timer-instance ( class-var -- obj )\n\ 
+In the second step actual objects can be created with MAKE-TIMER-INSTANCE:\n\
+: make-timer ( -- tm )\n\
+  fth-timer make-timer-instance { tm }\n\
+  tm 0.0 timer-base-real!\n\
+  [...]\n\
+  tm
+;\n\
+See also create-struct."
+	( names ) build-getter-and-setter ( len )
+	create ( len ) ,
   does> { class-var self -- obj }
-	self @ ( length ) :initial-element 0 make-array { ary }
 	1 cells allocate throw { gen }
-	ary gen !
+	self @ ( length ) :initial-element 0 make-array ( ary ) gen !
 	gen class-var make-instance
 ;
 previous
@@ -817,7 +836,6 @@ fth-timer make-?obj timer?
    "timer-result-real"
    "timer-result-user"
    "timer-result-system" ) create-instance-struct make-timer-instance
-   \ make-instance-slots
 
 \ TIMER-INSPECT
 lambda: <{ tm -- str }>
