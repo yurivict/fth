@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.132 1/8/15
+.\" @(#)fth.1	1.133 1/10/15
 .\"
-.Dd January 08, 2015
+.Dd January 10, 2015
 .Dt FTH 1
 .Os
 .\"
@@ -7612,12 +7612,12 @@ Return new string
 .\"
 .It Cm string-capitalize No (\ str1 -- str2\ )
 Return new string with first character capitalized and remaining
-characters lowercase.
+characters in lowercase.
 .It Cm string-capitalize! No (\ str -- str\(aq\ )
 Return
 .Ar str
 changed to first character capitalized and remaining characters
-lowercase.
+to lowercase.
 .\"
 .\" string-chomp
 .\" string-chomp!
@@ -7873,6 +7873,12 @@ Return new string object with string
 .Ar from
 replaced by string
 .Ar to .
+If
+.Ar to
+is the empty string, delete the
+.Ar from
+part from
+.Ar str1 .
 .It Cm string-replace! No (\ str from to -- str\(aq\ )
 Return changed
 .Ar str
@@ -7880,6 +7886,12 @@ with string
 .Ar from
 replaced by string
 .Ar to .
+If
+.Ar to
+is the empty string, delete the
+.Ar from
+part from
+.Ar str .
 .\"
 .\" string-reverse
 .\" string-reverse!

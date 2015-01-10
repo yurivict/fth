@@ -2978,10 +2978,10 @@ DDEESSCCRRIIPPTTIIOONN
           Return new string _s_t_r_1 + _s_t_r_2.
      ssttrriinngg--ccaappiittaalliizzee ( str1 -- str2 )
           Return new string with first character capitalized and remaining
-          characters lowercase.
+          characters in lowercase.
      ssttrriinngg--ccaappiittaalliizzee!! ( str -- str' )
           Return _s_t_r changed to first character capitalized and remaining
-          characters lowercase.
+          characters to lowercase.
      ssttrriinngg--cchhoommpp ( str1 -- str2 )
           Return new string object with possible trailing \n removed.
      ssttrriinngg--cchhoommpp!! ( str -- str' )
@@ -3070,9 +3070,11 @@ DDEESSCCRRIIPPTTIIOONN
           backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range of
           string.
      ssttrriinngg--rreeppllaaccee ( str1 from to -- str2 )
-          Return new string object with string _f_r_o_m replaced by string _t_o.
+          Return new string object with string _f_r_o_m replaced by string _t_o.  If
+          _t_o is the empty string, delete the _f_r_o_m part from _s_t_r_1.
      ssttrriinngg--rreeppllaaccee!! ( str from to -- str' )
-          Return changed _s_t_r with string _f_r_o_m replaced by string _t_o.
+          Return changed _s_t_r with string _f_r_o_m replaced by string _t_o.  If _t_o is
+          the empty string, delete the _f_r_o_m part from _s_t_r.
      ssttrriinngg--rreevveerrssee ( str1-- str2 )
           Return _s_t_r_1 reversed as new string object.
      ssttrriinngg--rreevveerrssee!! ( str -- str' )
@@ -3410,4 +3412,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.4                   January 8, 2015                  NetBSD 7.99.4
+NetBSD 7.99.4                  January 10, 2015                  NetBSD 7.99.4

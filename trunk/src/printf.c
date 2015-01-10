@@ -32,7 +32,7 @@
  * SUCH DAMAGE.
  */
 /*-
- * Copyright (c) 2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2012-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)printf.c	1.20 9/13/13
+ * @(#)printf.c	1.21 1/10/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -186,12 +186,23 @@ doprnt(void (*addchar)(int), const char *sfmt, va_list ap)
 			}
 		}
 		if (*f == 'z') {	/* size_t format */
-			do_size_t ++;
+			do_size_t++;
 			f++;
 		}
 		fmt = (unsigned char)*f;
 		bp = buf;
 		switch (fmt) {		/* do the format */
+		case 'c':
+			i = va_arg(ap, int);
+			f_width--;	/* adjust for one char [ms] */
+			if (!flush_left)
+				while (f_width-- > 0)
+					(*addchar)(pad);
+			(*addchar)(i);
+			if (flush_left)
+				while (f_width-- > 0)
+					(*addchar)(' ');
+			break;
 		case 'd':
 			switch (do_long) {
 			case 0:
@@ -319,10 +330,6 @@ out_d:
 			if (flush_left)
 				while (f_width-- > 0)
 					(*addchar)(' ');
-			break;
-		case 'c':
-			i = va_arg(ap, int);
-			(*addchar)(i);
 			break;
 			/* [ms] ficlFloat added */
 		case 'A':
@@ -1037,6 +1044,18 @@ string_doprnt(void (*addchar)(int), const char *sfmt, FTH ap)
 		fmt = (unsigned char)*f;
 		bp = buf;
 		switch (fmt) {	/* do the format */
+		case 'c':
+			val = VA_ARG();
+			i = FTH_INT_REF(val);
+			f_width--;	/* adjust for one char [ms] */
+			if (!flush_left)
+				while (f_width-- > 0)
+					(*addchar)(pad);
+			(*addchar)((int)i);
+			if (flush_left)
+				while (f_width-- > 0)
+					(*addchar)(' ');
+			break;
 		case 'd':
 			val = VA_ARG();
 			l = FTH_LONG_REF(val);
@@ -1125,11 +1144,6 @@ out_d:
 			if (flush_left)
 				while (f_width-- > 0)
 					(*addchar)(' ');
-			break;
-		case 'c':
-			val = VA_ARG();
-			i = FTH_INT_REF(val);
-			(*addchar)((int)i);
 			break;
 		/* [ms] ficlFloat added */
 		case 'f':

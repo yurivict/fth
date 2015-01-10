@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.161 1/8/15
+ * @(#)string.c	1.163 1/10/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1750,12 +1750,12 @@ static void
 ficl_string_capitalize(ficlVm *vm)
 {
 #define h_str_cap "( str1 -- str2 )  capitalize first char\n\
-\"foo\" value s1\n\
+\"foO\" value s1\n\
 s1 string-capitalize value s2\n\
-s1 => \"foo\"\n\
+s1 => \"foO\"\n\
 s2 => \"Foo\"\n\
 Return new string with first character capitalized and \
-remaining characters lowercase.\n\
+remaining characters in lowercase.\n\
 See also string-capitalize!, string-upcase, string-downcase."
 	FTH fs;
 
@@ -1768,11 +1768,11 @@ static void
 ficl_string_capitalize_bang(ficlVm *vm)
 {
 #define h_str_c_b "( str -- str' )  capitalize first char\n\
-\"foo\" value s1\n\
+\"foO\" value s1\n\
 s1 string-capitalize! drop\n\
 s1 => \"Foo\"\n\
 Return STR changed to first character capitalized and \
-remaining characters lowercase.\n\
+remaining characters to lowercase.\n\
 See also string-capitalize, string-upcase, string-downcase."
 	FTH fs;
 
@@ -1846,6 +1846,8 @@ fth_string_replace(FTH fs, FTH from, FTH to)
 		memmove(b + i, FTH_STRING_DATA(to), st);
 		FTH_STRING_LENGTH(fs) += lt;
 		b[FTH_STRING_LENGTH(fs)] = '\0';
+		/* skip over added "to" string */
+		tmp += lt;
 	}
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
@@ -1858,10 +1860,13 @@ ficl_string_replace(ficlVm *vm)
 \"foo\" value s1\n\
 s1 \"o\"  \"a\" string-replace value s2\n\
 s1 \"oo\" \"a\" string-replace value s3\n\
+s1 \"o\"  \"\"  string-replace value s4\n\
 s1 => \"foo\"\n\
 s2 => \"faa\"\n\
 s3 => \"fa\"\n\
-Return new string object with string FROM replaced by string TO.\n\
+s4 => \"f\"\n\
+Return new string object with string FROM replaced by string TO.  \
+If TO is the empty string, delete the FROM part from STR1.\n\
 See also string-replace!."
 	FTH str, from, to;
 
@@ -1878,11 +1883,15 @@ ficl_string_replace_bang(ficlVm *vm)
 #define h_str_rep_bang "( str from to -- str' )  replace in string\n\
 \"foo\" value s1\n\
 \"foo\" value s2\n\
+\"foo\" value s3\n\
 s1 \"o\"  \"a\" string-replace! drop\n\
 s2 \"oo\" \"a\" string-replace! drop\n\
+s3 \"o\"  \"\"  string-replace! drop\n\
 s1 => \"faa\"\n\
 s2 => \"fa\"\n\
-Return changed STR with string FROM replaced by string TO.\n\
+s3 => \"f\"\n\
+Return changed STR with string FROM replaced by string TO.  \
+If TO is the empty string, delete the FROM part from STR.\n\
 See also string-replace."
 	FTH str, from, to;
 
