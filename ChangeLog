@@ -1,3 +1,10 @@
+2015-01-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/printf.c (doprnt, string_doprnt): Format %c accepts
+	field width like %s.
+
+	* src/string.c (fth_string_replace): Bugfix.
+
 2014-12-28  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* configure.ac: New version number: 1.3.8
