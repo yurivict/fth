@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)symbol.c	1.97 1/30/14
+ * @(#)symbol.c	1.98 1/12/15
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -478,7 +478,7 @@ static void
 ficl_exception_p(ficlVm *vm)
 {
 #define h_exception_p "( obj -- f )  test if OBJ is an exception\n\
-'test  exception? => #t\n\
+'test symbol->exception exception? => #t\n\
 \"test\" exception? => #f\n\
 Return #t if OBJ is an exception, otherwise #f."
 	FTH obj;

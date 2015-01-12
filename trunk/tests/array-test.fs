@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,22 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)array-test.fs	1.27 9/13/13
+\ @(#)array-test.fs	1.28 1/11/15
 
 require test-utils.fs
+
+: fnumb-cmp ( a b -- -1|0|1 )
+	{ a b }
+	a b f< if
+		-1
+	else
+		a b f= if
+			0
+		else
+			1
+		then
+	then
+;
 
 : array<> ( x y -- f )
 	array= not

@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,26 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)numbers-test.fs	1.26 9/13/13
+\ @(#)numbers-test.fs	1.27 1/11/15
 
 require test-utils.fs
+
+: fneq-err ( r1 r2 err -- f )
+	-rot f- fabs f<=
+;
+
+: cneq-err { c1 c2 err -- f }
+	c1 real-ref c2 real-ref err fneq-err
+	c1 imag-ref c2 imag-ref err fneq-err or
+;
+
+: fneq ( a b -- f )
+	0.001 fneq-err
+;
+
+: cneq ( a b -- f )
+	0.001 cneq-err
+;
 
 'complex provided? [if]
 	: complex-test ( -- )
