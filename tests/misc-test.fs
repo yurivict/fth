@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,18 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)misc-test.fs	1.23 9/13/13
+\ @(#)misc-test.fs	1.24 1/11/15
 
 require test-utils.fs
+
+: fth-test-proc { n -- }
+	n 0= if
+		'math-error '( "%s: %s" get-func-name n ) fth-throw
+	then
+	n 1 = if
+		'math-error "(fth-raise) %s: %s" '( get-func-name n ) fth-raise
+	then
+;
 
 : misc-test ( -- )
 	\ add-load-path

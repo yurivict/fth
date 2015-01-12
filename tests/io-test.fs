@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,10 +22,72 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)io-test.fs	1.46 9/13/13
+\ @(#)io-test.fs	1.47 1/11/15
 
 require test-utils.fs
 
+undef set-version-control
+
+'socket provided? [if]
+	: unix-server { name -- io }
+		AF_UNIX SOCK_STREAM net-socket { fd }
+		fd name -1 AF_UNIX net-bind
+		fd net-listen
+		fd name AF_UNIX net-accept
+	;
+
+	: unix-client { name -- io }
+		AF_UNIX SOCK_STREAM net-socket { fd }
+		fd name -1 AF_UNIX net-connect
+	;
+
+	: inet-server { host port -- io }
+		AF_INET SOCK_STREAM net-socket { fd }
+		fd host port AF_INET net-bind
+		fd net-listen
+		fd host AF_INET net-accept
+	;
+
+	: inet-client { host port -- io }
+		AF_INET SOCK_STREAM net-socket { fd }
+		fd host port AF_INET net-connect
+	;
+[then]
+
+nil value *io*
+
+:port-name "fth-test"
+:write-line lambda: <{ line -- }>
+	*io* line io-write
+; make-soft-port value io-test-stdout-port
+
+:port-name "fth-test"
+:fam r/o
+:read-line lambda: <{ -- line }>
+	*io* io-read
+; make-soft-port value io-test-stdin-port
+
+: test-with-input-port <{ io -- val }>
+	io io-read
+;
+
+: test-with-output-port <{ io -- val }>
+	io "hello" io-write
+;
+
+: test-with-input-from-port <{ -- val }>
+	*stdin* io-read
+;
+
+: test-with-output-to-port <{ -- val }>
+	*stdout* "hello" io-write
+;
+
+: test-with-error-to-port <{ -- val }>
+	*stderr* "hello" io-write
+;
+
+\ io-test.fs ends here
 \ Check if pwd accepts option -P:
 "sh -c pwd -P 2>&1 /dev/null" file-shell drop
 exit-status [if] "pwd" [else] "pwd -P" [then] constant *io-test-pwd-cmd*
