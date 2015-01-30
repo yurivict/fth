@@ -1,3 +1,7 @@
+2015-01-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs (read-ascii): new-sound args changed.
+
 2015-01-10  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/printf.c (doprnt, string_doprnt): Format %c accepts
