@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 14/11/12 16:45:42
+\ Changed: 15/02/01 01:15:17
 \
-\ @(#)clm.fs	1.118 11/12/14
+\ @(#)clm.fs	1.119 2/1/15
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -261,11 +261,9 @@ previous
 
 hide
 : notelength ( scale "name" --; self -- r )
-	rhythm->seconds { secs }
-	create
-	secs ,
+	create ,
   does> ( self -- r )
-	@
+	@ ( scale ) rhythm->seconds ( secs )
 ;
 set-current
 
@@ -283,7 +281,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2014/11/12"  value *clm-version*
+"fth 2015/02/01"  value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
