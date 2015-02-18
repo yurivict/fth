@@ -1,3 +1,8 @@
+2015-02-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs: Replace audio-output-device
+	with mus-audio-default.
+
 2015-02-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs (notelength): Computation should
