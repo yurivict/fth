@@ -1,3 +1,8 @@
+2015-02-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/clm.fs: Remove global variable
+	*clm-output-device*.
+
 2015-02-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs: Replace audio-output-device
