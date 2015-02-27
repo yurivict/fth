@@ -1,3 +1,8 @@
+2015-02-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/hooks.fs: Remove deprecated hooks
+	output-name-hook, info-popup-hook, peak-env-hook, start-hook.
+
 2015-02-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs: Remove global variable
