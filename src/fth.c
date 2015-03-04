@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.107 1/2/15";
+const char fth_sccsid[] = "@(#)fth.c	1.109 3/4/15";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -81,14 +81,14 @@ eval_with_error_exit(void *p, int kind)
 {
 	ficlVm *vm;
 	FTH val;
-	ficlInteger depth, i;
+	ficlInteger depth, new_depth, i;
 	int status;
 
+	val = FTH_UNDEF;
 	if (p == NULL)
-		return (FTH_UNDEF);
+		return (val);
 	fth_eval_p = true;
 	vm = FTH_FICL_VM();
-	val = FTH_UNDEF;
 	depth = FTH_STACK_DEPTH(vm);
 	switch (kind) {
 	case REPL_COMPILE:
@@ -108,14 +108,19 @@ eval_with_error_exit(void *p, int kind)
 			fth_exit(EXIT_FAILURE);
 		break;
 	default:
-		depth = FTH_STACK_DEPTH(vm) - depth;
-		if (depth == 1)
+		new_depth = FTH_STACK_DEPTH(vm) - depth;
+		switch (new_depth) {
+		case 0:
+			val = FTH_UNDEF;
+			break;
+		case 1:
 			val = fth_pop_ficl_cell(vm);
-		else if (depth > 1) {
-			val = fth_make_array_len(depth);
-			for (i = 0; i < depth; i++)
-				val = fth_array_set(val, i,
-				    fth_pop_ficl_cell(vm));
+			break;
+		default:
+			val = fth_make_array_len(new_depth);
+			for (i = 0; i < new_depth; i++)
+				fth_array_set(val, i, fth_pop_ficl_cell(vm));
+			break;
 		}
 		break;
 	}

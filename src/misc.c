@@ -755,21 +755,22 @@ fth_catch_eval(const char *buffer)
 
 /*
  * Evaluate C string BUFFER.
- * If BUFFER is NULL, return #undef,
- * if BUFFER evaluate to FTH_BYE,
+ * If BUFFER is NULL,
+ *      return #<undef>,
+ * if BUFFER evaluates to FTH_BYE,
  *	exit program,
- * if BUFFER evaluate to no value,
- *	return #undef,
- * if BUFFER evaluate to a single value,
+ * if BUFFER evaluates to no value,
+ *	return #<undef>,
+ * if BUFFER evaluates to a single value,
  *	remove it from stack and return it,
- * if BUFFER evaluate to more than one value,
- *	remove them from stackand and return them as Fth array.
+ * if BUFFER evaluates to multiple values,
+ *	remove them from stack and return them all in an array.
  */
 FTH
 fth_eval(const char *buffer)
 {
 	static ficlInteger lineno = 0;
-	ficlInteger old_line, new_depth, i, len;
+	ficlInteger old_line, new_depth, i;
 	ficlVm *vm;
 	FTH val, old_file;
 	int depth;
@@ -787,14 +788,18 @@ fth_eval(const char *buffer)
 		fth_exit(EXIT_SUCCESS);
 	vm = FTH_FICL_VM();
 	new_depth = FTH_STACK_DEPTH(vm) - depth;
-	val = FTH_UNDEF;
-	if (new_depth == 1)
+	switch (new_depth) {
+	case 0:
+		val = FTH_UNDEF;
+		break;
+	case 1:
 		val = fth_pop_ficl_cell(vm);
-	else if (new_depth > 1) {
-		len = new_depth;
-		val = fth_make_array_len(len);
-		for (i = 0; i < len; i++)
-			val = fth_array_set(val, i, fth_pop_ficl_cell(vm));
+		break;
+	default:
+		val = fth_make_array_len(new_depth);
+		for (i = 0; i < new_depth; i++)
+			fth_array_set(val, i, fth_pop_ficl_cell(vm));
+		break;
 	}
 	fth_current_file = old_file;
 	fth_current_line = old_line;
