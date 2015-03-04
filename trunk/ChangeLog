@@ -1,3 +1,8 @@
+2015-03-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (fth_eval), src/fth.c (eval_with_error_exit):
+	Fix bug if multiple values evaluated.
+
 2015-02-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/hooks.fs: Remove deprecated hooks
