@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.658 2/27/15";
+const char libfth_sccsid[] = "@(#)misc.c	1.660 3/4/15";
 #endif /* not lint */
 
-#define FTH_DATE		"2015/02/27"
+#define FTH_DATE		"2015/03/04"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -788,7 +788,7 @@ fth_eval(const char *buffer)
 		fth_exit(EXIT_SUCCESS);
 	vm = FTH_FICL_VM();
 	new_depth = FTH_STACK_DEPTH(vm) - depth;
-	switch (new_depth) {
+	switch(new_depth) {
 	case 0:
 		val = FTH_UNDEF;
 		break;
