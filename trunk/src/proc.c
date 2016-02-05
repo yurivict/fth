@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.162 1/1/15
+ * @(#)proc.c	1.164 2/5/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -547,15 +547,113 @@ execute_proc(ficlVm *vm, ficlWord *word, int depth, const char *caller)
 }
 
 /*
+ * Executes NAME, a C string, with LEN arguments of type FTH.
+ * CALLER can be any C string used for error message.  Raise an
+ * EVAL_ERROR exception if an error occured during evaluation.
+ *
+ * If the xt with NAME doesn't leave a return value on stack, return
+ * FTH_FALSE, if a single value remains on stack, return it, if
+ * more than one values remain on stack, return them as Array
+ * object.
+ *
+ * no ret	=> #f
+ * ret		=> ret
+ * ret1 ret2	=> #( ret1 ret2 ... )
+ *
+ * FTH fs = fth_make_string("hello, world!");
+ * FTH re = fth_make_regexp(", (.*)!");
+ *
+ * fth_xt_call("regexp-match", __func__, 2, re, fs);	=> 8
+ * return (fth_xt_call("*re1*", __func__, 0));		=> "world"
+ */
+FTH
+fth_xt_call(const char *name, const char *caller, int len,...)
+{
+	int depth;
+	va_list list;
+	ficlInteger i;
+	ficlWord *xt;
+	ficlVm *vm;
+	ficlString s;
+
+	if (name == NULL || *name == '\0')
+		return (FTH_FALSE);
+	s.text = (char *)name;
+	s.length = strlen(name);
+	xt = ficlDictionaryLookup(FTH_FICL_DICT(), s);
+	if (xt == NULL)
+		return (FTH_FALSE);
+	vm = FTH_FICL_VM();
+	depth = FTH_STACK_DEPTH(vm);
+	va_start(list, len);
+	for (i = 0; i < len; i++)
+		fth_push_ficl_cell(vm, va_arg(list, FTH));
+	va_end(list);
+	return (execute_proc(vm, xt, depth, caller));
+}
+
+/*
+ * Executes Name, a C string, with array length arguments of type
+ * FTH.  CALLER can be any C string used for error message.  Raise
+ * an EVAL_ERROR exception if an error occured during evaluation.
+ *
+ * If the xt with NAME doesn't leave a return value on stack, return
+ * FTH_FALSE, if a single value remains on stack, return it, if
+ * more than one values remain on stack, return them as Array
+ * object.
+ *
+ * no ret	=> #f
+ * ret		=> ret
+ * ret1 ret2	=> #( ret1 ret2 ... )
+ *
+ * FTH fs = fth_make_string("hello, world!");
+ * FTH re = fth_make_regexp(", (.*)!");
+ * FTH ary = fth_make_array_var(2, re, fs);
+ *
+ * fth_xt_apply("regexp-match", ary, __func__);		=> 8
+ * return (fth_xt_apply("*re1*", FTH_FALSE, __func__));	=> "world"
+ */
+FTH
+fth_xt_apply(const char *name, FTH args, const char *caller)
+{
+	int depth, len;
+	ficlInteger i;
+	ficlWord *xt;
+	ficlVm *vm;
+	ficlString s;
+
+	if (name == NULL || *name == '\0')
+		return (FTH_FALSE);
+	s.text = (char *)name;
+	s.length = strlen(name);
+	xt = ficlDictionaryLookup(FTH_FICL_DICT(), s);
+	if (xt == NULL)
+		return (FTH_FALSE);
+	len = 0;
+	if (FTH_ARRAY_P(args))
+		len = (int)fth_array_length(args);
+	vm = FTH_FICL_VM();
+	depth = FTH_STACK_DEPTH(vm);
+	for (i = 0; i < len; i++)
+		fth_push_ficl_cell(vm, fth_array_fast_ref(args, i));
+	return (execute_proc(vm, xt, depth, caller));
+}
+
+/*
  * If PROC is a Proc object, execute its ficlWord with LEN arguments
- * on stack.  CALLER can be any C string used for error message.  Raise
+ * on stack.  CALLER can be any C string used for error message.  Raise a
  * BAD_ARITY exception if PROC has more required arguments than LEN.
- * Raise EVAL_ERROR exception if an error occured during evaluation.
+ * Raise an EVAL_ERROR exception if an error occured during evaluation.
  *
  * If PROC is not a Proc object, return FTH_FALSE, if PROC doesn't
  * leave a return value on stack, return FTH_FALSE, if PROC leaves a
- * singel value on stack, return it, if PROC leaves more than one
+ * single value on stack, return it, if PROC leaves more than one
  * values on stack, return them as Array object.
+ *
+ * !proc	=> #f
+ * no ret	=> #f
+ * ret		=> ret
+ * ret1 ret2	=> #( ret1 ret2 ... )
  */
 FTH
 fth_proc_call(FTH proc, const char *caller, int len,...)
@@ -585,14 +683,19 @@ fth_proc_call(FTH proc, const char *caller, int len,...)
 /*
  * If PROC is a Proc object, execute its ficlWord with Array object
  * ARGS as arguments on stack.  CALLER can be any C string used for
- * error message.  Raise BAD_ARITY exception if PROC has more required
- * arguments than length of ARGS.  Raise EVAL_ERROR exception if an
+ * error message.  Raise a BAD_ARITY exception if PROC has more required
+ * arguments than length of ARGS.  Raise an EVAL_ERROR exception if an
  * error occured during evaluation.
  *
  * If PROC is not a Proc object, return FTH_FALSE, if PROC doesn't
  * leave a return value on stack, return FTH_FALSE, if PROC leaves a
- * singel value on stack, return it, if PROC leaves more than one
+ * single value on stack, return it, if PROC leaves more than one
  * values on stack, return them as Array object.
+ *
+ * !proc	=> #f
+ * no ret	=> #f
+ * ret		=> ret
+ * ret1 ret2	=> #( ret1 ret2 ... )
  */
 FTH
 fth_proc_apply(FTH proc, FTH args, const char *caller)

@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.37 12/28/14
+.\" @(#)libfth.3	1.39 2/5/16
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd December 28, 2014
+.Dd 2016/02/05
 .Dt LIBFTH 3
 .Os
 .\"
@@ -203,7 +203,7 @@ is an Array object, return its length, otherwise -1.
 .It Ft FTH Fn fth_array_ref "FTH array" "ficlInteger index"
 Return value at position
 .Ar index .
-Negative index counts from backward.  Raise 
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in 
 .Ar array's
@@ -220,7 +220,7 @@ at position
 .Ar index
 and return 
 .Ar value .
-Negative index counts from backward.  Raise 
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in 
 .Ar array's
@@ -387,7 +387,7 @@ otherwise FTH_FALSE.
 .It Ft FTH Fn fth_list_ref "FTH list" "ficlInteger index"
 Return element at position 
 .Ar index .
-Negative index counts from backward.  Raise
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in 
 .Ar list's
@@ -407,7 +407,7 @@ at position
 .Ar index
 and return 
 .Ar value .
-Negative index counts from backward.  Raise 
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in
 .Ar list's
@@ -526,7 +526,7 @@ Add hook procedure
 .Ar proc
 to
 .Ar hook .
-Raise 
+Raise a
 .Ar bad-arity
 exception if 
 .Ar proc's
@@ -754,7 +754,7 @@ library run hook
 if not empty.  If this hook returns #f, return immediately without
 loading the library and return FTH_FALSE.  If loading finishes
 successfully or library was already loaded, return FTH_TRUE, otherwise
-raise
+raise a
 .Ar so-file-error
 exception.  After loading the dynamic library run hook
 .Cm after-load-hook
@@ -1598,13 +1598,13 @@ Array object
 .Ar args
 as arguments on stack.
 .Ar caller
-can be any C string used for error message.  Raise 
+can be any C string used for error message.  Raise a
 .Ar bad-arity
 exception if 
 .Ar proc
 has more required arguments than 
 .Ar len .
-Raise
+Raise an
 .Ar eval-error
 exception if an error occured during evaluation.
 .Pp
@@ -1615,7 +1615,7 @@ If
 .Ar proc
 doesn't leave a return value on stack, return FTH_FALSE, if
 .Ar proc
-leaves a singel value on stack, return it, if 
+leaves a single value on stack, return it, if 
 .Ar proc
 leaves more than one values on stack, return them as Array object.
 .\"
@@ -1636,13 +1636,13 @@ is a Proc object, execute its ficlWord with
 .Ar len
 arguments on stack.
 .Ar caller
-can be any C string used for error message.  Raise 
+can be any C string used for error message.  Raise a
 .Ar bad-arity
 exception if 
 .Ar proc
 has more required arguments than 
 .Ar len .
-Raise
+Raise an
 .Ar eval-error
 exception if an error occured during evaluation.
 .Pp
@@ -1653,7 +1653,7 @@ If
 .Ar proc
 doesn't leave a return value on stack, return FTH_FALSE, if
 .Ar proc
-leaves a singel value on stack, return it, if 
+leaves a single value on stack, return it, if 
 .Ar proc
 leaves more than one values on stack, return them as Array object.
 .\"
@@ -1685,6 +1685,55 @@ to
 .It Ft FTH Fn fth_source_ref "FTH obj"
 .It Ft void Fn fth_source_set "FTH obj" "FTH source"
 .It Ft ficlWord* Fn fth_word_doc_set "ficlWord *word" "const char *str"
+.\"
+.\" fth_xt_apply
+.\"
+.It Ft FTH Fn fth_xt_apply "const char *name" "FTH args" "const char *caller"
+Executes
+.Ar name ,
+a C string, with array length arguments of type FTH.
+.Ar caller
+can be any C string used for error message.  Raise an
+.Ar eval-error
+exception if an error occured during evaluation.
+.Pp
+If the xt with
+.Ar name
+doesn't leave a return value on stack, return FTH_FALSE, if a single
+value remains on stack, return it, if more than one values remain
+on stack, return them as Array object.
+.Bd -literal -compact
+FTH fs = fth_make_string("hello, world!");
+FTH re = fth_make_regexp(", (.*)!");
+FTH ary = fth_make_array_var(2, re, fs);
+fth_xt_apply("regexp-match", ary, __func__); \(rA 8
+fth_xt_apply("*re1*", FTH_FALSE, __func__); \(rA "world"
+.Ed
+.\"
+.\" fth_xt_call
+.\"
+.It Ft FTH Fn fth_xt_call "const char *name" "FTH args" "const char *caller"
+Executes
+.Ar name ,
+a C string, with
+.Ar len
+arguments of type FTH.
+.Ar caller
+can be any C string used for error message.  Raise an
+.Ar eval-error
+exception if an error occured during evaluation.
+.Pp
+If the xt with
+.Ar name
+doesn't leave a return value on stack, return FTH_FALSE, if a single
+value remains on stack, return it, if more than one values remain
+on stack, return them as Array object.
+.Bd -literal -compact
+FTH fs = fth_make_string("hello, world!");
+FTH re = fth_make_regexp(", (.*)!");
+fth_xt_call("regexp-match", __func__, 2, re, fs); \(rA 8
+fth_xt_call("*re1*", __func__, 0); \(rA "world"
+.Ed
 .It Ft FTH Fn proc_from_proc_or_xt "FTH proc_or_xt" "int req" "int opt" "bool rest"
 .El
 .\"
@@ -1783,6 +1832,15 @@ is a regexp object, otherwise false.
 Return new regexp object from
 .Ar reg
 which may contain regular expression.
+.Bd -literal -compact
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("bar");
+fth_regexp_search(re, fs, 0, -1); \(rA 3
+
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("(B|b)+");
+fth_regexp_search(re, fs, 0, -1); \(rA 3
+.Ed
 .\"
 .\" fth_regexp_find
 .\"
@@ -1793,6 +1851,22 @@ Return match index or -1 if not found.
 .\"
 .It Ft ficlInteger Fn fth_regexp_match "FTH regexp" "FTH string"
 Return match length or -1 if not found.
+.Bd -literal -compact
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("foo");
+fth_regexp_match(re, fs); \(rA 3
+
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("(bar)");
+fth_regexp_match(re, fs); \(rA 3
+
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp(".*(bar)");
+fth_regexp_match(re, fs); \(rA 6
+fth_object_value_ref(re, 0); \(rA "foobar"
+fth_object_value_ref(re, 1); \(rA "bar"
+fth_object_value_ref(re, 2); \(rA #f
+.Ed
 .\"
 .\" fth_regexp_replace
 .\"
@@ -1809,6 +1883,17 @@ will be replaced by corresponding subexpressions.  If no corresponding
 subexpression exist, an
 .Ar regexp-error
 exception will be raised.
+.Bd -literal -compact
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("(bar)");
+FTH rp = fth_make_string("BAR");
+fth_regexp_replace(re, fs, rp); \(rA "fooBAR"
+
+FTH fs = fth_make_string("foo-bar");
+FTH re = fth_make_regexp("(foo)");
+FTH rp = fth_make_string("***\e\e1***");
+fth_regexp_replace(re, fs, rp); \(rA "***foo***-bar"
+.Ed
 .\"
 .\" fth_regexp_search
 .\"
@@ -1816,6 +1901,19 @@ exception will be raised.
 Return match index or -1 if not found.  If
 .Ar range
 is -1, search entire string.
+.Bd -literal -compact
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("foo");
+fth_regexp_search(re, fs, 0, 2); \(rA 0 (means #t)
+
+FTH fs = fth_make_string("foobar");
+FTH re = fth_make_regexp("(bar)");
+fth_regexp_search(re, fs, 0, 2); \(rA -1 (means #f)
+fth_regexp_search(re, fs, 3, 2); \(rA 3
+fth_object_value_ref(re, 0); \(rA "bar"
+fth_object_value_ref(re, 1); \(rA "bar"
+fth_object_value_ref(re, 2); \(rA #f
+.Ed
 .El
 .\"
 .\" String object type (string.c)
