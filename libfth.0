@@ -1,7 +1,7 @@
 LIBFTH(3)                  Library Functions Manual                  LIBFTH(3)
 
 NNAAMMEE
-     lliibbfftthh -- Forth script and extension language library
+     lliibbfftthh - Forth script and extension language library
 
 LLIIBBRRAARRYY
      library ``libfth''
@@ -128,14 +128,14 @@ DDEESSCCRRIIPPTTIIOONN
      _F_T_H fftthh__aarrrraayy__ppuusshh(_F_T_H _a_r_r_a_y, _F_T_H _v_a_l_u_e)
      _F_T_H fftthh__aarrrraayy__rreeff(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
           Return value at position _i_n_d_e_x.  Negative index counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_r_a_y_'_s
-          range.
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in
+          _a_r_r_a_y_'_s range.
      _F_T_H fftthh__aarrrraayy__rreejjeecctt(_F_T_H _a_r_r_a_y, _F_T_H _p_r_o_c___o_r___x_t, _F_T_H _a_r_g_s)
      _F_T_H fftthh__aarrrraayy__rreevveerrssee(_F_T_H _a_r_r_a_y)
      _F_T_H fftthh__aarrrraayy__sseett(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
           Store _v_a_l_u_e at position _i_n_d_e_x and return _v_a_l_u_e.  Negative index
-          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
-          in _a_r_r_a_y_'_s range.
+          counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is
+          not in _a_r_r_a_y_'_s range.
      _F_T_H fftthh__aarrrraayy__sshhiifftt(_F_T_H _a_r_r_a_y)
      _F_T_H fftthh__aarrrraayy__ssoorrtt(_F_T_H _a_r_r_a_y, _F_T_H _p_r_o_c___o_r___x_t)
      _F_T_H fftthh__aarrrraayy__ssuubbaarrrraayy(_F_T_H _a_r_r_a_y, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t, _f_i_c_l_I_n_t_e_g_e_r _e_n_d)
@@ -204,14 +204,14 @@ DDEESSCCRRIIPPTTIIOONN
           Return FTH_TRUE if _k_e_y exists in _l_i_s_t, otherwise FTH_FALSE.
      _F_T_H fftthh__lliisstt__rreeff(_F_T_H _l_i_s_t, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
           Return element at position _i_n_d_e_x.  Negative index counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _l_i_s_t_'_s
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _l_i_s_t_'_s
           range.
      _F_T_H fftthh__lliisstt__rreevveerrssee(_F_T_H _l_i_s_t)
           Return new list with elements reversed.
      _F_T_H fftthh__lliisstt__sseett(_F_T_H _l_i_s_t, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
           Store _v_a_l_u_e at position _i_n_d_e_x and return _v_a_l_u_e.  Negative index
-          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
-          in _l_i_s_t_'_s range.
+          counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is
+          not in _l_i_s_t_'_s range.
      _F_T_H fftthh__lliisstt__ttoo__aarrrraayy(_F_T_H _l_i_s_t)
      _F_T_H fftthh__mmaakkee__eemmppttyy__lliisstt(_v_o_i_d)
      _F_T_H fftthh__mmaakkee__lliisstt__lleenn(_f_i_c_l_I_n_t_e_g_e_r _l_e_n)
@@ -295,7 +295,7 @@ DDEESSCCRRIIPPTTIIOONN
      _b_o_o_l FFTTHH__HHOOOOKK__PP(_o_b_j)
           Return true if _o_b_j is a hook object, otherwise false.
      _v_o_i_d fftthh__aadddd__hhooookk(_F_T_H _h_o_o_k, _F_T_H _p_r_o_c)
-          Add hook procedure _p_r_o_c to _h_o_o_k.  Raise _b_a_d_-_a_r_i_t_y exception if
+          Add hook procedure _p_r_o_c to _h_o_o_k.  Raise a _b_a_d_-_a_r_i_t_y exception if
           _p_r_o_c_'_s arity doesn't match _h_o_o_k_'_s arity.
      _F_T_H fftthh__hhooookk__aappppllyy(_F_T_H _h_o_o_k, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
      _i_n_t fftthh__hhooookk__aarriittyy(_F_T_H _h_o_o_k)
@@ -411,7 +411,7 @@ DDEESSCCRRIIPPTTIIOONN
           hook bbeeffoorree--llooaadd--hhooookk if not empty.  If this hook returns #f, return
           immediately without loading the library and return FTH_FALSE.  If
           loading finishes successfully or library was already loaded, return
-          FTH_TRUE, otherwise raise _s_o_-_f_i_l_e_-_e_r_r_o_r exception.  After loading
+          FTH_TRUE, otherwise raise a _s_o_-_f_i_l_e_-_e_r_r_o_r exception.  After loading
           the dynamic library run hook aafftteerr--llooaadd--hhooookk if not empty.  If _n_a_m_e
           has no file extension, ".so" will be added.  If _n_a_m_e or _n_a_m_e plus
           ".so" doesn't exist, try all path names from *load-lib-path* with
@@ -775,26 +775,26 @@ DDEESSCCRRIIPPTTIIOONN
      _F_T_H fftthh__pprroocc__aappppllyy(_F_T_H _p_r_o_c, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
           If _p_r_o_c is a Proc object, execute its ficlWord with Array object
           _a_r_g_s as arguments on stack.  _c_a_l_l_e_r can be any C string used for
-          error message.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_o_c has more required
-          arguments than _l_e_n.  Raise _e_v_a_l_-_e_r_r_o_r exception if an error occured
-          during evaluation.
+          error message.  Raise a _b_a_d_-_a_r_i_t_y exception if _p_r_o_c has more
+          required arguments than _l_e_n.  Raise an _e_v_a_l_-_e_r_r_o_r exception if an
+          error occured during evaluation.
 
           If _p_r_o_c is not a Proc object, return FTH_FALSE, If _p_r_o_c doesn't
           leave a return value on stack, return FTH_FALSE, if _p_r_o_c leaves a
-          singel value on stack, return it, if _p_r_o_c leaves more than one
+          single value on stack, return it, if _p_r_o_c leaves more than one
           values on stack, return them as Array object.
      _i_n_t fftthh__pprroocc__aarriittyy(_F_T_H _p_r_o_c)
           If _p_r_o_c is a Proc object, return required arguments as C int,
           otherwise return 0.
      _F_T_H fftthh__pprroocc__ccaallll(_F_T_H _p_r_o_c, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r, _i_n_t _l_e_n, _._._.)
           If _p_r_o_c is a Proc object, execute its ficlWord with _l_e_n arguments on
-          stack.  _c_a_l_l_e_r can be any C string used for error message.  Raise
+          stack.  _c_a_l_l_e_r can be any C string used for error message.  Raise a
           _b_a_d_-_a_r_i_t_y exception if _p_r_o_c has more required arguments than _l_e_n.
-          Raise _e_v_a_l_-_e_r_r_o_r exception if an error occured during evaluation.
+          Raise an _e_v_a_l_-_e_r_r_o_r exception if an error occured during evaluation.
 
           If _p_r_o_c is not a Proc object, return FTH_FALSE, If _p_r_o_c doesn't
           leave a return value on stack, return FTH_FALSE, if _p_r_o_c leaves a
-          singel value on stack, return it, if _p_r_o_c leaves more than one
+          single value on stack, return it, if _p_r_o_c leaves more than one
           values on stack, return them as Array object.
      _c_h_a_r_* fftthh__pprroocc__nnaammee(_F_T_H _o_b_j)
           If _o_b_j is a ficlWord, return name as C string, otherwise return
@@ -810,6 +810,31 @@ DDEESSCCRRIIPPTTIIOONN
      _F_T_H fftthh__ssoouurrccee__rreeff(_F_T_H _o_b_j)
      _v_o_i_d fftthh__ssoouurrccee__sseett(_F_T_H _o_b_j, _F_T_H _s_o_u_r_c_e)
      _f_i_c_l_W_o_r_d_* fftthh__wwoorrdd__ddoocc__sseett(_f_i_c_l_W_o_r_d _*_w_o_r_d, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+     _F_T_H fftthh__xxtt__aappppllyy(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
+          Executes _n_a_m_e, a C string, with array length arguments of type FTH.
+          _c_a_l_l_e_r can be any C string used for error message.  Raise an
+          _e_v_a_l_-_e_r_r_o_r exception if an error occured during evaluation.
+
+          If the xt with _n_a_m_e doesn't leave a return value on stack, return
+          FTH_FALSE, if a single value remains on stack, return it, if more
+          than one values remain on stack, return them as Array object.
+          FTH fs = fth_make_string("hello, world!");
+          FTH re = fth_make_regexp(", (.*)!");
+          FTH ary = fth_make_array_var(2, re, fs);
+          fth_xt_apply("regexp-match", ary, __func__); => 8
+          fth_xt_apply("*re1*", FTH_FALSE, __func__); => "world"
+     _F_T_H fftthh__xxtt__ccaallll(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
+          Executes _n_a_m_e, a C string, with _l_e_n arguments of type FTH.  _c_a_l_l_e_r
+          can be any C string used for error message.  Raise an _e_v_a_l_-_e_r_r_o_r
+          exception if an error occured during evaluation.
+
+          If the xt with _n_a_m_e doesn't leave a return value on stack, return
+          FTH_FALSE, if a single value remains on stack, return it, if more
+          than one values remain on stack, return them as Array object.
+          FTH fs = fth_make_string("hello, world!");
+          FTH re = fth_make_regexp(", (.*)!");
+          fth_xt_call("regexp-match", __func__, 2, re, fs); => 8
+          fth_xt_call("*re1*", __func__, 0); => "world"
      _F_T_H pprroocc__ffrroomm__pprroocc__oorr__xxtt(_F_T_H _p_r_o_c___o_r___x_t, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t)
 
    DDeeffiinnee VVaarriiaabblleess
@@ -846,19 +871,60 @@ DDEESSCCRRIIPPTTIIOONN
      _F_T_H fftthh__mmaakkee__rreeggeexxpp(_c_o_n_s_t _c_h_a_r _*_r_e_g)
           Return new regexp object from _r_e_g which may contain regular
           expression.
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("bar");
+          fth_regexp_search(re, fs, 0, -1); => 3
+
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("(B|b)+");
+          fth_regexp_search(re, fs, 0, -1); => 3
      _i_n_t fftthh__rreeggeexxpp__ffiinndd(_c_o_n_s_t _c_h_a_r _*_r_e_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
           Return match index or -1 if not found.
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__mmaattcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g)
           Return match length or -1 if not found.
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("foo");
+          fth_regexp_match(re, fs); => 3
+
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("(bar)");
+          fth_regexp_match(re, fs); => 3
+
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp(".*(bar)");
+          fth_regexp_match(re, fs); => 6
+          fth_object_value_ref(re, 0); => "foobar"
+          fth_object_value_ref(re, 1); => "bar"
+          fth_object_value_ref(re, 2); => #f
      _F_T_H fftthh__rreeggeexxpp__rreeppllaaccee(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _F_T_H _r_e_p_l_a_c_e)
           Replace 1st occurrence of _r_e_g_e_x_p in _s_t_r_i_n_g with _r_e_p_l_a_c_e if found.
           References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
           subexpressions.  If no corresponding subexpression exist, an
           _r_e_g_e_x_p_-_e_r_r_o_r exception will be raised.
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("(bar)");
+          FTH rp = fth_make_string("BAR");
+          fth_regexp_replace(re, fs, rp); => "fooBAR"
+
+          FTH fs = fth_make_string("foo-bar");
+          FTH re = fth_make_regexp("(foo)");
+          FTH rp = fth_make_string("***\\1***");
+          fth_regexp_replace(re, fs, rp); => "***foo***-bar"
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__sseeaarrcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t,
           _f_i_c_l_I_n_t_e_g_e_r _r_a_n_g_e)
           Return match index or -1 if not found.  If _r_a_n_g_e is -1, search
           entire string.
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("foo");
+          fth_regexp_search(re, fs, 0, 2); => 0 (means #t)
+
+          FTH fs = fth_make_string("foobar");
+          FTH re = fth_make_regexp("(bar)");
+          fth_regexp_search(re, fs, 0, 2); => -1 (means #f)
+          fth_regexp_search(re, fs, 3, 2); => 3
+          fth_object_value_ref(re, 0); => "bar"
+          fth_object_value_ref(re, 1); => "bar"
+          fth_object_value_ref(re, 2); => #f
 
    SSttrriinngg oobbjjeecctt ttyyppee
      _b_o_o_l FFTTHH__SSTTRRIINNGG__PP(_o_b_j)
@@ -1049,4 +1115,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.3                  December 28, 2014                 NetBSD 7.99.3
+NetBSD 7.99.26                    2016/02/05                    NetBSD 7.99.26

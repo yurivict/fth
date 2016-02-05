@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	1.102 1/23/14
+ * @(#)regexp.c	1.104 2/5/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -178,6 +178,15 @@ Return #t if OBJ is a regexp object, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, FTH_REGEXP_P(obj));
 }
 
+/*
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("bar");
+ * fth_regexp_search(re, fs, 0, -1);		=> 3
+ *
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("(B|b)+");
+ * fth_regexp_search(re, fs, 0, -1);		=> 3
+ */
 FTH
 fth_make_regexp(const char *reg)
 {
@@ -329,6 +338,21 @@ fth_regexp_find(const char *reg, const char *str)
 
 /*
  * Return match-length or -1.
+ *
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("foo");
+ * fth_regexp_match(re, fs);		=> 3
+ *
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("(bar)");
+ * fth_regexp_match(re, fs);		=> 3
+ *
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp(".*(bar)");
+ * fth_regexp_match(re, fs);		=> 6
+ * fth_object_value_ref(re, 0);		=> "foobar"
+ * fth_object_value_ref(re, 1);		=> "bar"
+ * fth_object_value_ref(re, 2);		=> #f
  */
 ficlInteger
 fth_regexp_match(FTH regexp, FTH string)
@@ -382,6 +406,17 @@ static char regexp_scratch[BUFSIZ];
 /*
  * Return match-index or -1.
  * If range == -1, search entire string.
+ *
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("foo");
+ * fth_regexp_search(re, fs, 0, 2);		=> 0 (means #t)
+ *
+ * FTH re = fth_make_regexp("(bar)");
+ * fth_regexp_search(re, fs, 0, 2);		=> -1 (means #f)
+ * fth_regexp_search(re, fs, 3, 2);		=> 3
+ * fth_object_value_ref(re, 0);			=> "bar"
+ * fth_object_value_ref(re, 1);			=> "bar"
+ * fth_object_value_ref(re, 2);			=> #f
  */
 ficlInteger
 fth_regexp_search(FTH regexp, FTH string, ficlInteger start, ficlInteger range)
@@ -466,6 +501,17 @@ See regex(3) for more information."
 		ficlStackPushInteger(vm->dataStack, result);
 }
 
+/*
+ * FTH fs = fth_make_string("foobar");
+ * FTH re = fth_make_regexp("(bar)");
+ * FTH rp = fth_make_string("BAR");
+ * fth_regexp_replace(re, fs, rp);		=> "fooBAR"
+ *
+ * FTH fs = fth_make_string("foo-bar");
+ * FTH re = fth_make_regexp("(foo)");
+ * FTH rp = fth_make_string("***\\1***");
+ * fth_regexp_replace(re, fs, rp);		=> "***foo***-bar"
+ */
 FTH
 fth_regexp_replace(FTH regexp, FTH string, FTH replace)
 {
@@ -476,7 +522,7 @@ Note the double quotes on back reference characters.\n\
 Replace 1st occurrence of REG in STR1 with REPLACE if found.  \
 References \\1 to \\9 in REPLACE will be replaced by \
 corresponding subexpressions.  \
-If no corresponding subexpression exist, raise REGEXP-ERROR exception.  \
+If no corresponding subexpression exist, raise a REGEXP-ERROR exception.  \
 Return a new string in any case, with or without replacement."
 	ficlInteger pos, fs_len, rpl_len, reg_len, found_len;
 	char *str, *rpl;
@@ -660,14 +706,8 @@ See regex(3) for more information."
 /*
  * Global read-only variables *RE* and *RE0* ... *RE9* are actually
  * functions.
+ * On the C side we have fth_regexp_var_ref().
  */
-#define FTH_RE_VAR(numb)						\
-static void								\
-ficl_re_ ## numb (ficlVm *vm)						\
-{									\
-	fth_push_ficl_cell(vm,						\
-	    fth_array_ref(regexp_results, (ficlInteger)numb));		\
-}
 
 static void
 ficl_re(ficlVm *vm)
@@ -675,7 +715,30 @@ ficl_re(ficlVm *vm)
 	ficlStackPushFTH(vm->dataStack, regexp_results);
 }
 
-/* Create ten functions: static void ficl_re_0(ficl *vm); */
+/*
+ * If index == -1 return entire regexp-array,
+ * otherwise return index'th element.
+ */
+FTH
+fth_regexp_var_ref(ficlInteger index)
+{
+	if (index == -1)
+		return (regexp_results);
+	return (fth_array_ref(regexp_results, index));
+}
+
+#define FTH_RE_VAR(Numb)						\
+static void								\
+ficl_re_ ## Numb (ficlVm *vm)						\
+{									\
+	fth_push_ficl_cell(vm,						\
+	    fth_array_ref(regexp_results, (ficlInteger)Numb));		\
+}
+
+/*
+ * We create ten functions:
+ *	static void ficl_re_X(ficl *vm);
+ */
 FTH_RE_VAR(0)
 FTH_RE_VAR(1)
 FTH_RE_VAR(2)

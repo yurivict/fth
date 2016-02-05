@@ -1,7 +1,10 @@
-2015-03-04  Michael Scholz  <mi-scholz@users.sourceforge.net>
+2016-02-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
-	* src/misc.c (fth_eval), src/fth.c (eval_with_error_exit):
-	Fix bug if multiple values evaluated.
+	* src/proc.c (fth_xt_call, fth_xt_apply): New global
+	functions added.
+
+	* src/regexp.c (fth_regexp_var_ref): New global function
+	added.
 
 2015-02-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
 

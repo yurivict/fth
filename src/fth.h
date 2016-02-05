@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.212 1/23/14
+ * @(#)fth.h	1.214 2/5/16
  */
 
 #if !defined(_FTH_H_)
@@ -934,6 +934,8 @@ FTH		fth_source_line(FTH obj);
 FTH		fth_source_ref(FTH obj);
 void		fth_source_set(FTH obj, FTH source);
 ficlWord       *fth_word_doc_set(ficlWord *word, const char *str);
+FTH		fth_xt_apply(const char *name, FTH args, const char *caller);
+FTH		fth_xt_call(const char *name, const char *caller, int len,...);
 FTH		proc_from_proc_or_xt(FTH proc_or_xt,
 		    int req, int opt, bool rest);
 /* define, variable */
@@ -959,6 +961,7 @@ ficlInteger	fth_regexp_match(FTH regexp, FTH string);
 FTH		fth_regexp_replace(FTH regexp, FTH string, FTH replace);
 ficlInteger	fth_regexp_search(FTH regexp, FTH string,
 		    ficlInteger beg, ficlInteger len);
+FTH		fth_regexp_var_ref(ficlInteger index);
 
 /* === string.c === */
 /* string */
@@ -1056,7 +1059,7 @@ void		push_cstring(ficlVm *vm, char *s);
 
 __END_DECLS
 
-#endif				/* _FTH_H_ */
+#endif	/* _FTH_H_ */
 
 /*
  * fth.h ends here
