@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.661 2/5/16";
+const char libfth_sccsid[] = "@(#)misc.c	1.662 2/6/16";
 #endif /* not lint */
 
-#define FTH_DATE		"2016/02/05"
+#define FTH_DATE		"2016/02/06"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"

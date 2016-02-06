@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.109 3/4/15";
+const char fth_sccsid[] = "@(#)fth.c	1.111 2/6/16";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,7 +36,7 @@ const char fth_sccsid[] = "@(#)fth.c	1.109 3/4/15";
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2015 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2016 Michael Scholz"
 
 static FTH	 eval_with_error_exit(void *p, int kind);
 static void	 repl_in_place(char *in, FTH out, ficlWord *word,
@@ -255,9 +255,10 @@ main(int argc, char **argv)
 	script_p = false;	/* -s */
 	finish_getopt = false;	/* -s */
 	script = NULL;		/* -s file */
-	/*
-	 * verbose: -1 not set --> true in interactive repl 0 -q quiet 1 -v
-	 * verbose
+	/*-
+	 * verbose: -1 not set --> true in interactive repl
+	 *           0 -q quiet
+	 *           1 -v verbose
 	 */
 	verbose = -1;		/* -v 1 || -q 0 */
 	opterr = 1;		/* show getopt's error message */

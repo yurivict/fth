@@ -16,86 +16,96 @@ DDEESSCCRRIIPPTTIIOONN
      for each:
 
    HHeelllloo--WWoorrlldd aapppplliiccaattiioonn::
-     % cat hello.c
-     #include <fth.h>
-     int
-     main(int argc, char *argv[])
-     {
-             fth_init();
-             fth_printf("%s, World%c\n", "Hello", '!');
-             return (EXIT_SUCCESS);
-     }
+           % cat hello.c
+           #include <fth.h>
+           int
+           main(int argc, char *argv[])
+           {
+                   fth_init();
+                   fth_printf("%s, World%c\n", "Hello", '!');
+                   return (EXIT_SUCCESS);
+           }
      Compile and link it with:
-     % cc -I/usr/local/include/fth -I/usr/local/include -c hello.c
-     % cc hello.o -o hello -L/usr/local/lib -lfth -lm
+           % cc -I/usr/local/include/fth -c hello.c
+           % cc hello.o -o hello -L/usr/local/lib -lfth -lm
      A test run looks like this:
            % ./hello => Hello, World!
 
    HHeelllloo--WWoorrlldd lliibbrraarryy::
-     % cat libhello.c
-     #include <fth.h>
+           % cat libhello.c
+           #include <fth.h>
 
-     /*
-      * hello-prim ( str1 -- str2 )
-      * intro hello-prim => "Hello, World!"
-      */
-     static void
-     ficl_hello_primitive(ficlVm *vm)
-     {
-             FTH intro, world, result;
+           /*
+            * hello-prim ( str1 -- str2 )
+            * intro hello-prim => "Hello, World!"
+            */
+           static void
+           ficl_hello_primitive(ficlVm *vm)
+           {
+                   FTH intro, world, result;
 
-             FTH_STACK_CHECK(vm, 1, 1);
-             intro = fth_pop_ficl_cell(vm);
-             world = fth_variable_ref("world");
-             result = fth_make_string_format("%S, %S!", intro, world);
-             fth_push_ficl_cell(vm, result);
-     }
+                   FTH_STACK_CHECK(vm, 1, 1);
+                   intro = fth_pop_ficl_cell(vm);
+                   world = fth_variable_ref("world");
+                   result = fth_make_string_format("%S, %S!", intro, world);
+                   fth_push_ficl_cell(vm, result);
+           }
 
-     /*
-      * hello-proc ( str1 -- str2 )
-      * intro hello-proc => "Hello, World!"
-      */
-     static FTH
-     fth_hello_procedure(FTH intro)
-     {
-             FTH world, result;
+           /*
+            * hello-proc ( str1 -- str2 )
+            * intro hello-proc => "Hello, World!"
+            */
+           static FTH
+           fth_hello_procedure(FTH intro)
+           {
+                   FTH world, result;
 
-             world = fth_variable_ref("world");
-             result = fth_make_string_format("%S, %S!", intro, world);
-             return (result);
-     }
+                   world = fth_variable_ref("world");
+                   result = fth_make_string_format("%S, %S!", intro, world);
+                   return (result);
+           }
 
-     void
-     Init_libhello(void)
-     {
-             fth_define_variable("intro",
-                 fth_make_string("Hello"), NULL);
-             fth_define_constant("world",
-                 fth_make_string("World"), NULL);
-             FTH_PRI1("hello-prim",
-                 ficl_hello_primitive, NULL);
-             FTH_PROC("hello-proc",
-                 fth_hello_procedure, 1, 0, 0, NULL);
-     }
+           void
+           Init_libhello(void)
+           {
+                   fth_define_variable("intro",
+                       fth_make_string("Hello"), NULL);
+                   fth_define_constant("world",
+                       fth_make_string("World"), NULL);
+                   FTH_PRI1("hello-prim",
+                       ficl_hello_primitive, NULL);
+                   FTH_PROC("hello-proc",
+                       fth_hello_procedure, 1, 0, 0, NULL);
+           }
      Compile and link it with:
-     % cc -fPIC -I/usr/local/include/fth -I/usr/local/include -c libhello.c
-     % cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
-     Installing isn't necessarily required for testing.  Start fth and load
+           % cc -fPIC -I/usr/local/include/fth -c libhello.c
+           % cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
+     Installing isn't necessarily required for testing.  Start fftthh and load
      the new library with
            dl-load ./libhello.so Init_libhello
+     or start fftthh and load the library direct from the command line
+           % fth -S "./libhello.so Init_libhello"
      The new words hheelllloo--pprriimm and hheelllloo--pprroocc as well as the variable iinnttrroo and
-     the constant wwoorrlldd are available.
-     % fth
-     fth> dl-load ./libhello.so Init_libhello
-     fth> intro hello-prim => "Hello, World!"
-     fth> intro hello-proc => "Hello, World!"
-     fth> "Goodbye" to intro
-     fth> intro hello-prim => "Goodbye, World!"
-     fth> "Bye" hello-proc => "Bye, World!"
-     fth> bye
-     %
+     the constant wwoorrlldd are available.  In the following, `%%' is the shell
+     prompt and `ookk' is the forth prompt
+           % fth -Qq
+           ok dl-load ./libhello.so Init_libhello
+           ok intro hello-prim => "Hello, World!"
+           ok intro hello-proc => "Hello, World!"
+           ok "Goodbye" to intro
+           ok intro hello-prim => "Goodbye, World!"
+           ok "Bye" hello-proc => "Bye, World!"
+           ok bye
+           %
+     Or test it from the command line:
+           % fth -S "./libhello.so Init_libhello" \
+                   -e 'intro hello-prim . cr' \
+                   -e 'intro hello-proc . cr' \
+                   -e '"Goodbye" to intro' \
+                   -e 'intro hello-prim . cr' \
+                   -e '"Bye" hello-proc . cr'
      If the new library is finished, one can install it with
-           % fth -ve "install libhello.so"
+           % fth -ve "install libhello.so" -e ""
      After installing you can load your new library with
            dl-load libhello Init_libhello
 
@@ -818,11 +828,11 @@ DDEESSCCRRIIPPTTIIOONN
           If the xt with _n_a_m_e doesn't leave a return value on stack, return
           FTH_FALSE, if a single value remains on stack, return it, if more
           than one values remain on stack, return them as Array object.
-          FTH fs = fth_make_string("hello, world!");
-          FTH re = fth_make_regexp(", (.*)!");
-          FTH ary = fth_make_array_var(2, re, fs);
-          fth_xt_apply("regexp-match", ary, __func__); => 8
-          fth_xt_apply("*re1*", FTH_FALSE, __func__); => "world"
+                FTH fs = fth_make_string("hello, world!");
+                FTH re = fth_make_regexp(", (.*)!");
+                FTH ary = fth_make_array_var(2, re, fs);
+                fth_xt_apply("regexp-match", ary, __func__);    => 8
+                fth_xt_apply("*re1*", FTH_FALSE, __func__)      => "world"
      _F_T_H fftthh__xxtt__ccaallll(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
           Executes _n_a_m_e, a C string, with _l_e_n arguments of type FTH.  _c_a_l_l_e_r
           can be any C string used for error message.  Raise an _e_v_a_l_-_e_r_r_o_r
@@ -831,10 +841,10 @@ DDEESSCCRRIIPPTTIIOONN
           If the xt with _n_a_m_e doesn't leave a return value on stack, return
           FTH_FALSE, if a single value remains on stack, return it, if more
           than one values remain on stack, return them as Array object.
-          FTH fs = fth_make_string("hello, world!");
-          FTH re = fth_make_regexp(", (.*)!");
-          fth_xt_call("regexp-match", __func__, 2, re, fs); => 8
-          fth_xt_call("*re1*", __func__, 0); => "world"
+                FTH fs = fth_make_string("hello, world!");
+                FTH re = fth_make_regexp(", (.*)!");
+                fth_xt_call("regexp-match", __func__, 2, re, fs);       => 8
+                fth_xt_call("*re1*", __func__, 0); => "world"
      _F_T_H pprroocc__ffrroomm__pprroocc__oorr__xxtt(_F_T_H _p_r_o_c___o_r___x_t, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t)
 
    DDeeffiinnee VVaarriiaabblleess
@@ -871,60 +881,60 @@ DDEESSCCRRIIPPTTIIOONN
      _F_T_H fftthh__mmaakkee__rreeggeexxpp(_c_o_n_s_t _c_h_a_r _*_r_e_g)
           Return new regexp object from _r_e_g which may contain regular
           expression.
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("bar");
-          fth_regexp_search(re, fs, 0, -1); => 3
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("bar");
+                fth_regexp_search(re, fs, 0, -1);       => 3
 
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("(B|b)+");
-          fth_regexp_search(re, fs, 0, -1); => 3
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("(B|b)+");
+                fth_regexp_search(re, fs, 0, -1);       => 3
      _i_n_t fftthh__rreeggeexxpp__ffiinndd(_c_o_n_s_t _c_h_a_r _*_r_e_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
           Return match index or -1 if not found.
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__mmaattcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g)
           Return match length or -1 if not found.
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("foo");
-          fth_regexp_match(re, fs); => 3
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("foo");
+                fth_regexp_match(re, fs);               => 3
 
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("(bar)");
-          fth_regexp_match(re, fs); => 3
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("(bar)");
+                fth_regexp_match(re, fs);               => 3
 
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp(".*(bar)");
-          fth_regexp_match(re, fs); => 6
-          fth_object_value_ref(re, 0); => "foobar"
-          fth_object_value_ref(re, 1); => "bar"
-          fth_object_value_ref(re, 2); => #f
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp(".*(bar)");
+                fth_regexp_match(re, fs);               => 6
+                fth_object_value_ref(re, 0);            => "foobar"
+                fth_object_value_ref(re, 1);            => "bar"
+                fth_object_value_ref(re, 2);            => #f
      _F_T_H fftthh__rreeggeexxpp__rreeppllaaccee(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _F_T_H _r_e_p_l_a_c_e)
           Replace 1st occurrence of _r_e_g_e_x_p in _s_t_r_i_n_g with _r_e_p_l_a_c_e if found.
           References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
           subexpressions.  If no corresponding subexpression exist, an
           _r_e_g_e_x_p_-_e_r_r_o_r exception will be raised.
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("(bar)");
-          FTH rp = fth_make_string("BAR");
-          fth_regexp_replace(re, fs, rp); => "fooBAR"
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("(bar)");
+                FTH rp = fth_make_string("BAR");
+                fth_regexp_replace(re, fs, rp);         => "fooBAR"
 
-          FTH fs = fth_make_string("foo-bar");
-          FTH re = fth_make_regexp("(foo)");
-          FTH rp = fth_make_string("***\\1***");
-          fth_regexp_replace(re, fs, rp); => "***foo***-bar"
+                FTH fs = fth_make_string("foo-bar");
+                FTH re = fth_make_regexp("(foo)");
+                FTH rp = fth_make_string("***\\1***");
+                fth_regexp_replace(re, fs, rp);         => "***foo***-bar"
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__sseeaarrcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t,
           _f_i_c_l_I_n_t_e_g_e_r _r_a_n_g_e)
           Return match index or -1 if not found.  If _r_a_n_g_e is -1, search
           entire string.
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("foo");
-          fth_regexp_search(re, fs, 0, 2); => 0 (means #t)
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("foo");
+                fth_regexp_search(re, fs, 0, 2);        => 0 (means #t)
 
-          FTH fs = fth_make_string("foobar");
-          FTH re = fth_make_regexp("(bar)");
-          fth_regexp_search(re, fs, 0, 2); => -1 (means #f)
-          fth_regexp_search(re, fs, 3, 2); => 3
-          fth_object_value_ref(re, 0); => "bar"
-          fth_object_value_ref(re, 1); => "bar"
-          fth_object_value_ref(re, 2); => #f
+                FTH fs = fth_make_string("foobar");
+                FTH re = fth_make_regexp("(bar)");
+                fth_regexp_search(re, fs, 0, 2);        => -1 (means #f)
+                fth_regexp_search(re, fs, 3, 2);        => 3
+                fth_object_value_ref(re, 0);            => "bar"
+                fth_object_value_ref(re, 1);            => "bar"
+                fth_object_value_ref(re, 2);            => #f
 
    SSttrriinngg oobbjjeecctt ttyyppee
      _b_o_o_l FFTTHH__SSTTRRIINNGG__PP(_o_b_j)
@@ -1115,4 +1125,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/05                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/02/06                    NetBSD 7.99.26
