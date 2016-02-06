@@ -1,4 +1,4 @@
-.\" Copyright (c) 2012-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2012-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.39 2/5/16
+.\" @(#)libfth.3	1.41 2/6/16
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd 2016/02/05
+.Dd 2016/02/06
 .Dt LIBFTH 3
 .Os
 .\"
@@ -56,7 +56,7 @@ and
 One can include Fth library functions in applications and in C
 extension libraries.  The following shows example for each:
 .Ss Hello-World application:
-.Bd -literal -compact
+.Bd -literal -offset indent -compact
 % cat hello.c
 #include <fth.h>
 int
@@ -68,14 +68,12 @@ main(int argc, char *argv[])
 }
 .Ed
 Compile and link it with:
-.Bd -literal -compact
-% cc -I/usr/local/include/fth -I/usr/local/include -c hello.c
-% cc hello.o -o hello -L/usr/local/lib -lfth -lm
-.Ed
+.Dl % cc -I/usr/local/include/fth -c hello.c
+.Dl % cc hello.o -o hello -L/usr/local/lib -lfth -lm
 A test run looks like this:
 .Dl % ./hello \(rA Hello, World!
 .Ss Hello-World library:
-.Bd -literal -compact
+.Bd -literal -offset indent -compact
 % cat libhello.c
 #include <fth.h>
 
@@ -123,35 +121,51 @@ Init_libhello(void)
 }
 .Ed
 Compile and link it with:
-.Bd -literal -compact
-% cc -fPIC -I/usr/local/include/fth -I/usr/local/include -c libhello.c
-% cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
-.Ed
-Installing isn't necessarily required for testing.  Start fth and
-load the new library with 
+.Dl % cc -fPIC -I/usr/local/include/fth -c libhello.c
+.Dl % cc -shared -o libhello.so libhello.o -L/usr/local/lib -lfth -lm
+Installing isn't necessarily required for testing.  Start
+.Cm fth
+and load the new library with
 .Dl dl-load ./libhello.so Init_libhello
+or start
+.Cm fth
+and load the library direct from the command line
+.Dl % fth -S \(dq./libhello.so Init_libhello\(dq
 The new words 
-.Cm hello-prim
+.Ic hello-prim
 and 
-.Cm hello-proc
+.Ic hello-proc
 as well as the variable
-.Sy intro
+.Ic intro
 and the constant 
-.Sy world
-are available.
-.Bd -literal -compact
-% fth
-fth> dl-load ./libhello.so Init_libhello
-fth> intro hello-prim \(rA \(dqHello, World!\(dq
-fth> intro hello-proc \(rA \(dqHello, World!\(dq
-fth> \(dqGoodbye\(dq to intro
-fth> intro hello-prim \(rA \(dqGoodbye, World!\(dq
-fth> \(dqBye\(dq hello-proc \(rA \(dqBye, World!\(dq
-fth> bye
+.Ic world
+are available.  In the following,
+.Sq Cm %
+is the shell prompt and
+.Sq Cm ok
+is the forth prompt
+.Bd -literal -offset indent -compact
+% fth -Qq
+ok dl-load ./libhello.so Init_libhello
+ok intro hello-prim \(rA \(dqHello, World!\(dq
+ok intro hello-proc \(rA \(dqHello, World!\(dq
+ok \(dqGoodbye\(dq to intro
+ok intro hello-prim \(rA \(dqGoodbye, World!\(dq
+ok \(dqBye\(dq hello-proc \(rA \(dqBye, World!\(dq
+ok bye
 %
 .Ed
+Or test it from the command line:
+.Bd -literal -offset indent -compact
+% fth -S \(dq./libhello.so Init_libhello\(dq \e
+	-e \(aqintro hello-prim . cr\(aq \e
+	-e \(aqintro hello-proc . cr\(aq \e
+	-e \(aq\(dqGoodbye\(dq to intro\(aq \e
+	-e \(aqintro hello-prim . cr\(aq \e
+	-e \(aq\(dqBye\(dq hello-proc . cr\(aq
+.Ed
 If the new library is finished, one can install it with
-.Dl % fth -ve \(dqinstall libhello.so\(dq
+.Dl % fth -ve \(dqinstall libhello.so\(dq -e \(dq\(dq
 After installing you can load your new library with
 .Dl dl-load libhello Init_libhello
 .\"
@@ -1702,12 +1716,12 @@ If the xt with
 doesn't leave a return value on stack, return FTH_FALSE, if a single
 value remains on stack, return it, if more than one values remain
 on stack, return them as Array object.
-.Bd -literal -compact
-FTH fs = fth_make_string("hello, world!");
-FTH re = fth_make_regexp(", (.*)!");
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello, world!\(dq);
+FTH re = fth_make_regexp(\(dq, (.*)!\(dq);
 FTH ary = fth_make_array_var(2, re, fs);
-fth_xt_apply("regexp-match", ary, __func__); \(rA 8
-fth_xt_apply("*re1*", FTH_FALSE, __func__); \(rA "world"
+fth_xt_apply(\(dqregexp-match\(dq, ary, __func__);	\(rA 8
+fth_xt_apply(\(dq*re1*\(dq, FTH_FALSE, __func__)	\(rA "world"
 .Ed
 .\"
 .\" fth_xt_call
@@ -1728,11 +1742,11 @@ If the xt with
 doesn't leave a return value on stack, return FTH_FALSE, if a single
 value remains on stack, return it, if more than one values remain
 on stack, return them as Array object.
-.Bd -literal -compact
-FTH fs = fth_make_string("hello, world!");
-FTH re = fth_make_regexp(", (.*)!");
-fth_xt_call("regexp-match", __func__, 2, re, fs); \(rA 8
-fth_xt_call("*re1*", __func__, 0); \(rA "world"
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello, world!\(dq);
+FTH re = fth_make_regexp(\(dq, (.*)!\(dq);
+fth_xt_call(\(dqregexp-match\(dq, __func__, 2, re, fs);	\(rA 8
+fth_xt_call(\(dq*re1*\(dq, __func__, 0); \(rA \(dqworld\(dq
 .Ed
 .It Ft FTH Fn proc_from_proc_or_xt "FTH proc_or_xt" "int req" "int opt" "bool rest"
 .El
@@ -1832,14 +1846,14 @@ is a regexp object, otherwise false.
 Return new regexp object from
 .Ar reg
 which may contain regular expression.
-.Bd -literal -compact
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("bar");
-fth_regexp_search(re, fs, 0, -1); \(rA 3
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dqbar\(dq);
+fth_regexp_search(re, fs, 0, -1);	\(rA 3
 
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("(B|b)+");
-fth_regexp_search(re, fs, 0, -1); \(rA 3
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dq(B|b)+\(dq);
+fth_regexp_search(re, fs, 0, -1);	\(rA 3
 .Ed
 .\"
 .\" fth_regexp_find
@@ -1851,21 +1865,21 @@ Return match index or -1 if not found.
 .\"
 .It Ft ficlInteger Fn fth_regexp_match "FTH regexp" "FTH string"
 Return match length or -1 if not found.
-.Bd -literal -compact
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("foo");
-fth_regexp_match(re, fs); \(rA 3
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dqfoo\(dq);
+fth_regexp_match(re, fs);		\(rA 3
 
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("(bar)");
-fth_regexp_match(re, fs); \(rA 3
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dq(bar)\(dq);
+fth_regexp_match(re, fs);		\(rA 3
 
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp(".*(bar)");
-fth_regexp_match(re, fs); \(rA 6
-fth_object_value_ref(re, 0); \(rA "foobar"
-fth_object_value_ref(re, 1); \(rA "bar"
-fth_object_value_ref(re, 2); \(rA #f
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dq.*(bar)\(dq);
+fth_regexp_match(re, fs);		\(rA 6
+fth_object_value_ref(re, 0);		\(rA \(dqfoobar\(dq
+fth_object_value_ref(re, 1);		\(rA \(dqbar\(dq
+fth_object_value_ref(re, 2);		\(rA #f
 .Ed
 .\"
 .\" fth_regexp_replace
@@ -1883,16 +1897,16 @@ will be replaced by corresponding subexpressions.  If no corresponding
 subexpression exist, an
 .Ar regexp-error
 exception will be raised.
-.Bd -literal -compact
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("(bar)");
-FTH rp = fth_make_string("BAR");
-fth_regexp_replace(re, fs, rp); \(rA "fooBAR"
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dq(bar)\(dq);
+FTH rp = fth_make_string(\(dqBAR\(dq);
+fth_regexp_replace(re, fs, rp);		\(rA \(dqfooBAR\(dq
 
-FTH fs = fth_make_string("foo-bar");
-FTH re = fth_make_regexp("(foo)");
-FTH rp = fth_make_string("***\e\e1***");
-fth_regexp_replace(re, fs, rp); \(rA "***foo***-bar"
+FTH fs = fth_make_string(\(dqfoo-bar\(dq);
+FTH re = fth_make_regexp(\(dq(foo)\(dq);
+FTH rp = fth_make_string(\(dq***\e\e1***\(dq);
+fth_regexp_replace(re, fs, rp);		\(rA \(dq***foo***-bar\(dq
 .Ed
 .\"
 .\" fth_regexp_search
@@ -1901,18 +1915,18 @@ fth_regexp_replace(re, fs, rp); \(rA "***foo***-bar"
 Return match index or -1 if not found.  If
 .Ar range
 is -1, search entire string.
-.Bd -literal -compact
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("foo");
-fth_regexp_search(re, fs, 0, 2); \(rA 0 (means #t)
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dqfoo\(dq);
+fth_regexp_search(re, fs, 0, 2);	\(rA 0 (means #t)
 
-FTH fs = fth_make_string("foobar");
-FTH re = fth_make_regexp("(bar)");
-fth_regexp_search(re, fs, 0, 2); \(rA -1 (means #f)
-fth_regexp_search(re, fs, 3, 2); \(rA 3
-fth_object_value_ref(re, 0); \(rA "bar"
-fth_object_value_ref(re, 1); \(rA "bar"
-fth_object_value_ref(re, 2); \(rA #f
+FTH fs = fth_make_string(\(dqfoobar\(dq);
+FTH re = fth_make_regexp(\(dq(bar)\(dq);
+fth_regexp_search(re, fs, 0, 2);	\(rA -1 (means #f)
+fth_regexp_search(re, fs, 3, 2);	\(rA 3
+fth_object_value_ref(re, 0);		\(rA \(dqbar\(dq
+fth_object_value_ref(re, 1);		\(rA \(dqbar\(dq
+fth_object_value_ref(re, 2);		\(rA #f
 .Ed
 .El
 .\"
