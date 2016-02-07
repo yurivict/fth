@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.163 1/10/15
+ * @(#)string.c	1.164 2/7/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -305,6 +305,13 @@ fth_string_ref(FTH obj)
 	return (FTH_STRING_P(obj) ? FTH_STRING_DATA(obj) : NULL);
 }
 
+/*
+ * Return length of a Fth string object or -1 if not a string.
+ *
+ * FTH fs = fth_make_string("hello");
+ * fth_string_length(fs);			=> 5
+ * fth_string_length((FTH)5);			=> -1 (means false)
+ */
 ficlInteger
 fth_string_length(FTH obj)
 {
@@ -386,6 +393,13 @@ make_string_instance(FString *s)
 
 /*
  * Return a new Fth string object constructed from C string STR.
+ * If C string is "" or NULL, return Fth string "" in contrast to
+ * fth_make_string_or_false().
+ *
+ * FTH fs = fth_make_string("hello");		=> "hello"
+ * fth_string_length(fs);			=> 5
+ * FTH fs = fth_make_string("");		=> ""
+ * fth_string_length(fs);			=> 0
  */
 FTH
 fth_make_string(const char *str)
@@ -401,6 +415,14 @@ fth_make_string(const char *str)
 	return (make_string_instance(s));
 }
 
+/*
+ * If C string is "", return #f, otherwise as fth_make_string().
+ *
+ * FTH fs = fth_make_string_or_false("hello");	=> "hello"
+ * fth_string_length(fs);			=> 5
+ * FTH fs = fth_make_string_or_false("");	=> #f
+ * fth_string_length(fs);			=> -1 (means false)
+ */
 FTH
 fth_make_string_or_false(const char *str)
 {
@@ -417,7 +439,13 @@ fth_make_string_or_false(const char *str)
 
 /*
  * Return a new Fth string object constructed from C string STR
- * with at most LEN characters.
+ * with at most LEN characters.  If the C string STR is shorter
+ * than LEN, return a Fth string object of STR length only.
+ *
+ * FTH fs = fth_make_string_len("     ", 0);	=> ""
+ * FTH fs = fth_make_string_len("     ", 3);	=> "   "
+ * FTH fs = fth_make_string_len("xxxxx", 3);	=> "xxx"
+ * FTH fs = fth_make_string_len("xxx", 5);	=> "xxx"
  */
 FTH
 fth_make_string_len(const char *str, ficlInteger len)
@@ -427,20 +455,40 @@ fth_make_string_len(const char *str, ficlInteger len)
 
 	if (str == NULL || *str == '\0')
 		str = "";
-	s = make_string_len(len);
 	slen = strlen(str);
 	blen = FICL_MIN((size_t)len, slen);
+	s = make_string_len(blen);
 	memmove(s->data, str, blen);
 	s->data[blen] = '\0';
 	return (make_string_instance(s));
 }
 
+/*
+ * Return a Fth string object of length 0.
+ *
+ * FTH fs = fth_make_empty_string();		=> ""
+ * fth_string_length(fs);			=> 0
+ */
 FTH
 fth_make_empty_string(void)
 {
-	return (fth_make_string_len("", 0L));
+	FString *s;
+
+	s = make_string_len(0);
+	s->data[0] = '\0';
+	return (make_string_instance(s));
 }
 
+/*-
+ * Return a Fth string object according to the (extended) printf(3)
+ * fmt args.  The extensions are:
+ *
+ *	%I - fth_to_c_inspect	print inspect string of Fth object
+ *	%S - fth_to_c_string	print string representation of object
+ *      %M - fth_to_c_string_2  as fth_to_c_string but encloses
+ *				strings in double quotes
+ *	%D - fth_to_c_dump	print dump string of Fth object
+ */
 FTH
 fth_make_string_format(const char *fmt,...)
 {
@@ -456,13 +504,20 @@ fth_make_string_format(const char *fmt,...)
 	return (fs);
 }
 
-/*
- * These functions add C char-pointer to FTH string:
+/*-
+ * These functions add C strings to an already existing Fth string
+ * object, the extended printf(3) fmt args are available for the
+ * last two of them.  See fth_make_string_format above.
  *
  * fth_string_scat    (FTH string, const char *str)
  * fth_string_sncat   (FTH string, const char *str, ficlInteger len)
  * fth_string_sformat (FTH string, const char *fmt, ...)
  * fth_string_vsformat(FTH string, const char *fmt, va_list ap)
+ *
+ * FTH fs = fth_make_empty_string();		=> ""
+ * fth_string_scat(fs, "hello");		=> "hello"
+ * fth_string_sncat(fs, ",  ", 2);		=> "hello, "
+ * fth_string_sformat(fs, "%s!\n", "world");	=> "hello, world!\n"
  */
 FTH
 fth_string_scat(FTH fs, const char *str)
@@ -477,11 +532,12 @@ fth_string_sncat(FTH fs, const char *str, ficlInteger len)
 }
 
 /*
- * Append fmt and args to string.
+ * Add extended printf(3) fmt args to an already existing Fth string
+ * object.  See fth_make_string_format above.
  *
- * FTH fs;
- * fs = fth_make_string("we want to ");
+ * FTH fs = fth_make_string("we want to ");	=> "we want to "
  * fth_string_sformat(fs, "print %d times %f\n", 10, 3.14);
+ *	=> "we want to print 10 times 3.140000\n"
  */
 FTH
 fth_string_sformat(FTH fs, const char *fmt,...)
@@ -496,7 +552,7 @@ fth_string_sformat(FTH fs, const char *fmt,...)
 }
 
 /*
- * Append fmt and args-list to string.
+ * The same as fth_string_sformat except for va_list args.
  */
 FTH
 fth_string_vsformat(FTH fs, const char *fmt, va_list ap)
@@ -507,7 +563,6 @@ fth_string_vsformat(FTH fs, const char *fmt, va_list ap)
 	str = fth_vformat(fmt, ap);
 	s = fth_make_string(str);
 	FTH_FREE(str);
-	va_end(ap);
 	return (fth_string_push(fs, s));
 }
 
@@ -768,6 +823,17 @@ See also .stdout and .stderr."
 	fth_fprintf(stderr, "#<DEBUG(F): %M>\n", fth_pop_ficl_cell(vm));
 }
 
+/*
+ * Compare two strings with strcmp(3) and return 1 for equal and
+ * 0 for not equal (not -1 0 1 like strcmp).
+ *
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_make_string("bar");
+ * FTH s3 = fth_make_string("foo");
+ * fth_string_equal_p(s1, s2);			=> 0
+ * fth_string_equal_p(s1, s3);			=> 1
+ * fth_string_equal_p(s3, s3);			=> 1
+ */
 bool
 fth_string_equal_p(FTH obj1, FTH obj2)
 {
@@ -836,6 +902,17 @@ See also string<>, string<, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_equal_p(obj1, obj2));
 }
 
+/*
+ * Compare two strings with strcmp(3) and return 0 for equal and
+ * 1 for not equal (not -1 0 1 like strcmp).
+ *
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_make_string("bar");
+ * FTH s3 = fth_make_string("foo");
+ * fth_string_not_equal_p(s1, s2);		=> 1
+ * fth_string_not_equal_p(s1, s3);		=> 0
+ * fth_string_not_equal_p(s3, s3);		=> 0
+ */
 bool
 fth_string_not_equal_p(FTH obj1, FTH obj2)
 {
@@ -870,6 +947,17 @@ See also string=, string<, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_not_equal_p(obj1, obj2));
 }
 
+/*
+ * Compare two strings with strcmp(3) and return 1 for less than and
+ * 0 for equal or greater.
+ *
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_make_string("bar");
+ * FTH s3 = fth_make_string("foo");
+ * fth_string_less_p(s1, s2);			=> 0
+ * fth_string_less_p(s1, s3);			=> 0
+ * fth_string_less_p(s3, s3);			=> 0
+ */
 bool
 fth_string_less_p(FTH obj1, FTH obj2)
 {
@@ -904,6 +992,17 @@ See also string=, string<>, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_less_p(obj1, obj2));
 }
 
+/*
+ * Compare two strings with strcmp(3) and return 1 for greater than and
+ * 0 for equal or less than.
+ *
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_make_string("bar");
+ * FTH s3 = fth_make_string("foo");
+ * fth_string_greater_p(s1, s2);		=> 1
+ * fth_string_greater_p(s1, s3);		=> 0
+ * fth_string_greater_p(s3, s3);		=> 0
+ */
 bool
 fth_string_greater_p(FTH obj1, FTH obj2)
 {
@@ -938,6 +1037,10 @@ See also string=, string<>, string<, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_greater_p(obj1, obj2));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_to_array(fs);			=> #( 102 111 111 )
+ */
 FTH
 fth_string_to_array(FTH fs)
 {
@@ -948,6 +1051,14 @@ Convert STR to an array of characters."
 	return (str_to_array(fs));
 }
 
+/*
+ * Return a new copy of the Fth string object.
+ *
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_string_copy(s1);
+ * s1 == s2					=> 0
+ * fth_string_equal_p(s1, s2);			=> 1
+ */
 FTH
 fth_string_copy(FTH fs)
 {
@@ -962,6 +1073,9 @@ Return copy of STR1."
 	return (str_to_string(fs));
 }
 
+/*
+ * FIXME: to be continued
+ */
 char
 fth_string_c_char_ref(FTH fs, ficlInteger idx)
 {
