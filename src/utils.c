@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.222 1/1/15
+ * @(#)utils.c	1.223 2/9/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -831,18 +831,18 @@ fth_set_argv(int from, int to, char **argv)
 	int i;
 	FTH args;
 
-	if (from > to)
-		return (FTH_FALSE);
-	if (!in_set_argv) {
-		in_set_argv = true;
-		args = FTH_LIST_1(fth_make_string(fth_basename(argv[from++])));
-		for (i = from; i < to; i++)
-			fth_array_push(args, fth_make_string(argv[i]));
-		fth_variable_set("*argc*",
-		    fth_make_int(fth_array_length(args)));
-		return (fth_variable_set("*argv*", args));
+	if (in_set_argv)
+		return (fth_variable_ref("*argv*"));
+	in_set_argv = true;
+	if (from >= to || argv == NULL) {
+		fth_variable_set("*argc*", FTH_ZERO);
+		return (fth_variable_set("*argv*", FTH_NIL));
 	}
-	return (fth_variable_ref("*argv*"));
+	args = FTH_LIST_1(fth_make_string(fth_basename(argv[from++])));
+	for (i = from; i < to; i++)
+		fth_array_push(args, fth_make_string(argv[i]));
+	fth_variable_set("*argc*", INT_TO_FIX(fth_array_length(args)));
+	return (fth_variable_set("*argv*", args));
 }
 
 static FTH	before_repl_hook;
