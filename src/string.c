@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.164 2/7/16
+ * @(#)string.c	1.165 2/9/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1074,7 +1074,8 @@ Return copy of STR1."
 }
 
 /*
- * FIXME: to be continued
+ * FTH fs = fth_make_string("foo");
+ * char c = fth_string_c_char_ref(fs, 1);	=> 'o' (111)
  */
 char
 fth_string_c_char_ref(FTH fs, ficlInteger idx)
@@ -1094,6 +1095,10 @@ fth_string_c_char_fast_ref(FTH fs, ficlInteger idx)
 	return (FTH_STRING_DATA(fs)[idx]);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * FTH ch = fth_string_char_ref(fs, 1);		=> 111
+ */
 FTH
 fth_string_char_ref(FTH fs, ficlInteger idx)
 {
@@ -1119,6 +1124,10 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_push_ficl_cell(vm, fth_string_char_ref(string, idx));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_c_char_set(fs, 1, 'e');		=> "feo"
+ */
 char
 fth_string_c_char_set(FTH fs, ficlInteger idx, char c)
 {
@@ -1139,6 +1148,10 @@ fth_string_c_char_fast_set(FTH fs, ficlInteger idx, char c)
 	return (FTH_STRING_DATA(fs)[idx] = c);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_char_set(fs, 1, CHAR_TO_FTH('e')); => "feo"
+ */
 FTH
 fth_string_char_set(FTH fs, ficlInteger idx, FTH value)
 {
@@ -1167,6 +1180,11 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_string_char_set(string, idx, value);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_push(fs, fth_make_string(" "));	=> "foo "
+ * fth_string_push(fs, INT_TO_FIX(10));		=> "foo 10"
+ */
 FTH
 fth_string_push(FTH fs, FTH add)
 {
@@ -1208,6 +1226,13 @@ See also string-pop, string-unshift, string-shift."
 	return (fs);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_pop(fs);				=> 111 ('o')
+ * fth_string_pop(fs);				=> 111 ('o')
+ * fth_string_pop(fs);				=> 102 ('f')
+ * fth_string_pop(fs);				=> #f
+ */
 FTH
 fth_string_pop(FTH fs)
 {
@@ -1240,6 +1265,11 @@ See also string-push, string-unshift, string-shift."
 	return (c);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_unshift(fs, fth_make_string(" ")); => " foo"
+ * fth_string_unshift(fs, INT_TO_FIX(10));	=> "10 foo"
+ */
 FTH
 fth_string_unshift(FTH fs, FTH add)
 {
@@ -1300,6 +1330,13 @@ See also string-push, string-pop, string-shift."
 	return (fs);
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_shift(fs);			=> 102 ('f')
+ * fth_string_shift(fs);			=> 111 ('o')
+ * fth_string_shift(fs);			=> 111 ('o')
+ * fth_string_shift(fs);			=> #f
+ */
 FTH
 fth_string_shift(FTH fs)
 {
@@ -1341,6 +1378,11 @@ See also string-push, string-pop, string-unshift."
 	return (c);
 }
 
+/*
+ * FTH s1 = fth_make_string("foo");
+ * FTH s2 = fth_make_string("bar");
+ * fth_string_append(s1, s2);			=> "foobar"
+ */
 FTH
 fth_string_append(FTH fs1, FTH fs2)
 {
@@ -1362,6 +1404,10 @@ See also string-concat and string-push."
 	return (fth_make_string_format("%s%s", b1, b2));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_reverse(fs);			=> "oof"
+ */
 FTH
 fth_string_reverse(FTH fs)
 {
@@ -1404,6 +1450,10 @@ See also string-reverse."
 	ficlStackPushFTH(vm->dataStack, fth_string_reverse(fs));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_insert(fs, 1, INT_TO_FIX(10));	=> "f10oo"
+ */
 FTH
 fth_string_insert(FTH fs, ficlInteger idx, FTH ins)
 {
@@ -1466,6 +1516,11 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	ficlStackPushFTH(vm->dataStack, fth_string_insert(str, idx, ins));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");
+ * fth_string_delete(fs, 1);			=> 111 ('o')
+ * fth_printf("%S", fs);			=> "fo"
+ */
 FTH
 fth_string_delete(FTH fs, ficlInteger idx)
 {
@@ -1519,6 +1574,11 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_push_ficl_cell(vm, fth_string_delete(str, idx));
 }
 
+/*
+ * FTH fs = fth_make_string("foo");		=> "foo"
+ * fth_string_fill(fs, CHAR_TO_FTH('a'));	=> "aaa"
+ * fth_printf("%S", fs);			=> "aaa"
+ */
 FTH
 fth_string_fill(FTH fs, FTH fill_char)
 {
@@ -1537,6 +1597,12 @@ Fill STRING with CHAR and return changed string object."
 	return (fs);
 }
 
+/*
+ * FTH fs = fth_make_string("hello world");
+ * FIX_TO_INT(fth_string_index(fs, fth_make_string("l")));	=> 2
+ * FIX_TO_INT(fth_string_index(fs, fth_make_string("orl")));	=> 7
+ * FIX_TO_INT(fth_string_index(fs, fth_make_string("k")));	=> -1 (false)
+ */
 FTH
 fth_string_index(FTH fs, FTH key)
 {
@@ -1556,6 +1622,12 @@ See also string-member? and string-find."
 	return (FTH_ONE_NEG);
 }
 
+/*
+ * FTH fs = fth_make_string("hello world");
+ * fth_string_member_p(fs, fth_make_string("l"));	=> 1
+ * fth_string_member_p(fs, fth_make_string("ell"));	=> 1
+ * fth_string_member_p(fs, fth_make_string("k"));	=> 0
+ */
 bool
 fth_string_member_p(FTH fs, FTH key)
 {
@@ -1581,15 +1653,23 @@ See also string-index and string-find."
 	ficlStackPushBoolean(vm->dataStack, fth_string_member_p(str, key));
 }
 
+/*
+ * FTH fs = fth_make_string("hello world");
+ * fth_string_find(fs, fth_make_string("l"));	=> "llo world"
+ * fth_string_find(fs, fth_make_string("ell"));	=> "ello world"
+ * fth_string_find(fs, fth_make_regexp("ell"));	=> "ello world"
+ * fth_string_find(fs, fth_make_regexp("k"));	=> #f
+ */
 FTH
 fth_string_find(FTH fs, FTH key)
 {
 #define h_string_find "( str1 key -- str2|#f )  find KEY\n\
 \"hello world\" \"l\"   string-find => \"llo world\"\n\
-\"hello world\" /ell/ string-find => \"lo world\"\n\
+\"hello world\" \"ell\" string-find => \"ello world\"\n\
+\"hello world\" /ell/ string-find => \"ello world\"\n\
 \"hello world\" /k/   string-find => #f\n\
 Return match if string or regexp KEY exist in STR, otherwise #f.\n\
-See also string-index and string-member?."
+See also string-index, string-member? and regexp-match."
 	ficlInteger pos;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
@@ -1606,16 +1686,19 @@ See also string-index and string-member?."
 			return (fth_make_string(substr));
 		return (FTH_FALSE);
 	}
-	pos = fth_regexp_match(key, fs);
+	pos = fth_regexp_search(key, fs, 0, -1);
 	if (pos == -1)
 		return (FTH_FALSE);
-	if (pos == 0)
-		return (fth_make_empty_string());
-	if (FTH_FALSE_P(fth_variable_ref("*re0*")))
-		return (fth_string_substring(fs, pos, FTH_STRING_LENGTH(fs)));
-	return (fth_variable_ref("*re0*"));
+	return (fth_string_substring(fs, pos, FTH_STRING_LENGTH(fs)));
 }
 
+/*
+ * FTH fs = fth_make_string("foo:bar:baz");
+ * fth_string_split(fs, fth_make_string(":"));	=> #( "foo" "bar" "baz")
+ * fth_string_split(fs, fth_make_regexp(":"));	=> #( "foo" "bar" "baz")
+ * FTH fs = fth_make_string("foo bar baz");
+ * fth_string_split(fs, FTH_NIL);		=> #( "foo" "bar" "baz")
+ */
 FTH
 fth_string_split(FTH fs, FTH reg)
 {
@@ -1665,9 +1748,12 @@ If SEP is not a string or regexp, delimiter is space."
 }
 
 /*
+ * Not a public function.
+ *
  * The split string or regexp won't be removed (for io.c, fth_readlines()).
  *
- * "foo\nbar\nbaz" => #( "foo\n" "bar\n" "baz" )
+ * FTH fs = fth_make_string("foo\nbar\nbaz");
+ * fth_make_string_2(fs, fth_make_string("\n")); => #( "foo\n" "bar\n" "baz" )
  */
 FTH
 fth_string_split_2(FTH fs, FTH reg)
@@ -1702,6 +1788,13 @@ fth_string_split_2(FTH fs, FTH reg)
 	return (result);
 }
 
+/*
+ * FTH fs = fth_make_string("hello world");
+ * fth_string_substring(fs, 2, 4);		=> "ll"
+ * fth_string_substring(fs, -4, -2);		=> "or"
+ * fth_string_substring(fs, -4, fth_string_length(fs));
+ *						=> "orld"
+ */
 FTH
 fth_string_substring(FTH fs, ficlInteger start, ficlInteger end)
 {
@@ -1745,6 +1838,13 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	ficlStackPushFTH(vm->dataStack, fth_string_substring(fs, beg, end));
 }
 
+/*
+ * Return the string, not a copy, changed to chars upcase.
+ *
+ * FTH fs = fth_make_string("Foo");
+ * fth_string_upcase(fs);			=> "FOO"
+ * fth_printf("%S", fs);			=> "FOO"
+ */
 FTH
 fth_string_upcase(FTH fs)
 {
@@ -1794,6 +1894,13 @@ See also string-upcase, string-downcase, string-capitalize."
 	ficlStackPushFTH(vm->dataStack, fth_string_upcase(fs));
 }
 
+/*
+ * Return the string, not a copy, changed to chars downcase.
+ *
+ * FTH fs = fth_make_string("Foo");
+ * fth_string_downcase(fs);			=> "foo"
+ * fth_printf("%S", fs);			=> "foo"
+ */
 FTH
 fth_string_downcase(FTH fs)
 {
@@ -1843,6 +1950,14 @@ See also string-downcase, string-upcase, string-capitalize."
 	ficlStackPushFTH(vm->dataStack, fth_string_downcase(fs));
 }
 
+/*
+ * Return the string, not a copy, changed to first char upcase and
+ * the rest downcase.
+ *
+ * FTH fs = fth_make_string("foO");
+ * fth_string_capitalize(fs);			=> "Foo"
+ * fth_printf("%S", fs);			=> "Foo"
+ */
 FTH
 fth_string_capitalize(FTH fs)
 {
@@ -1895,6 +2010,27 @@ See also string-capitalize, string-upcase, string-downcase."
 	ficlStackPushFTH(vm->dataStack, fth_string_capitalize(fs));
 }
 
+/*
+ * Return the string, not a copy, replaced FROM with TO.
+ *
+ * FTH fs = fth_make_string("foo");
+ * FTH from = fth_make_string("o"); 
+ * FTH to = fth_make_string("a");
+ * fth_string_replace(fs, from, to);		=> "faa"
+ * fth_printf("%S", fs);			=> "faa"
+ *
+ * FTH fs = fth_make_string("foo");
+ * FTH from = fth_make_string("oo"); 
+ * FTH to = fth_make_string("a");
+ * fth_string_replace(fs, from, to);		=> "fa"
+ * fth_printf("%S", fs);			=> "fa"
+ *
+ * FTH fs = fth_make_string("foo");
+ * FTH from = fth_make_string("o"); 
+ * FTH to = fth_make_string("");
+ * fth_string_replace(fs, from, to);		=> "f"
+ * fth_printf("%S", fs);			=> "f"
+ */
 FTH
 fth_string_replace(FTH fs, FTH from, FTH to)
 {
@@ -2016,6 +2152,14 @@ See also string-replace."
 	ficlStackPushFTH(vm->dataStack, fth_string_replace(str, from, to));
 }
 
+/*
+ * Return the string, not a copy, with possible trailing \n removed.
+ *
+ * FTH fs = fth_make_string("foo\n");
+ * fth_string_chomp(fs);			=> "foo"
+ * FTH fs = fth_make_string("bar");
+ * fth_string_chomp(fs);			=> "bar"
+ */
 FTH
 fth_string_chomp(FTH fs)
 {
@@ -2061,6 +2205,18 @@ See also string-chomp."
 	ficlStackPushFTH(vm->dataStack, fth_string_chomp(fs));
 }
 
+/*
+ * Return a formatted string.
+ *
+ * FTH fmt = fth_make_string("%04d %8.2f %b %X %o");
+ * FTH args = fth_make_array_var(5,
+ *		INT_TO_FIX(128),
+ *		fth_make_float(M_PI),
+ *		INT_TO_FIX(255),
+ *		INT_TO_FIX(255),
+ *		INT_TO_FIX(255));
+ * fth_string_format(fmt, args);	=> "0128     3.14 11111111 FF 377"
+ */
 FTH
 fth_string_format(FTH fs, FTH args)
 {
@@ -2096,6 +2252,23 @@ See also fth-format."
 	return (fth_string_vformat(fmt, args));
 }
 
+/*
+ * Evaluates the string.
+ *
+ * ficlVm *vm = FTH_FICL_VM();
+ * FTH fs = fth_make_string("3 4 +");
+ * fth_string_eval(fs);				=> puts 7 on stack
+ * ficlStackPopInteger(vm->dataStack);		=> 7
+ *
+ * ficlStackPushInteger(vm->dataStack, 7);	=> puts 7 on stack
+ * FTH fs = fth_make_string("3 4 + +");
+ * fth_string_eval(fs);				=> puts 14 on stack
+ * ficlStackPopInteger(vm->dataStack);		=> 14
+ *
+ * ficlStackPushInteger(vm->dataStack, 7);	=> puts 7 on stack
+ * FTH fs = fth_make_string("3 4 + + . cr");
+ * fth_string_eval(fs);				=> prints 14
+ */
 int
 fth_string_eval(FTH fs)
 {

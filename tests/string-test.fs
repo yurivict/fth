@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)string-test.fs	1.32 1/10/15
+\ @(#)string-test.fs	1.33 2/9/16
 
 require test-utils.fs
 
@@ -191,7 +191,7 @@ require test-utils.fs
 	"hello world" "k"   string-member? #f <> "string-member? (3)" test-expr
 	"hello world" "l" string-find "llo world" string<>
 	    "string-find (1)" test-expr
-	"hello world" /ell/ string-find "lo world" string<>
+	"hello world" /ell/ string-find "ello world" string<>
 	    "string-find (2)" test-expr
 	"hello world" /k/ string-find #f <>
 	    "string-find (3)" test-expr
