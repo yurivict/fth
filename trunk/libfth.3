@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.41 2/6/16
+.\" @(#)libfth.3	1.42 2/11/16
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd 2016/02/06
+.Dd 2016/02/11
 .Dt LIBFTH 3
 .Os
 .\"
@@ -1472,7 +1472,7 @@ A
 is written.
 .It Cm aAeEfFgG
 Floating point output like
-.Xr sprintf 3 .
+.Xr printf 3 .
 .It Cm bBdoOpuUxX
 Integer output in binary, decimal, octal, void pointer, unsigned and
 hexadecimal form.
@@ -1720,8 +1720,8 @@ on stack, return them as Array object.
 FTH fs = fth_make_string(\(dqhello, world!\(dq);
 FTH re = fth_make_regexp(\(dq, (.*)!\(dq);
 FTH ary = fth_make_array_var(2, re, fs);
-fth_xt_apply(\(dqregexp-match\(dq, ary, __func__);	\(rA 8
-fth_xt_apply(\(dq*re1*\(dq, FTH_FALSE, __func__)	\(rA "world"
+fth_xt_apply(\(dqregexp-match\(dq, ary, __func__); \(rA 8
+fth_xt_apply(\(dq*re1*\(dq, FTH_FALSE, __func__) \(rA "world"
 .Ed
 .\"
 .\" fth_xt_call
@@ -1745,7 +1745,7 @@ on stack, return them as Array object.
 .Bd -literal -offset indent -compact
 FTH fs = fth_make_string(\(dqhello, world!\(dq);
 FTH re = fth_make_regexp(\(dq, (.*)!\(dq);
-fth_xt_call(\(dqregexp-match\(dq, __func__, 2, re, fs);	\(rA 8
+fth_xt_call(\(dqregexp-match\(dq, __func__, 2, re, fs); \(rA 8
 fth_xt_call(\(dq*re1*\(dq, __func__, 0); \(rA \(dqworld\(dq
 .Ed
 .It Ft FTH Fn proc_from_proc_or_xt "FTH proc_or_xt" "int req" "int opt" "bool rest"
@@ -1849,11 +1849,11 @@ which may contain regular expression.
 .Bd -literal -offset indent -compact
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dqbar\(dq);
-fth_regexp_search(re, fs, 0, -1);	\(rA 3
+fth_regexp_search(re, fs, 0, -1); \(rA 3
 
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dq(B|b)+\(dq);
-fth_regexp_search(re, fs, 0, -1);	\(rA 3
+fth_regexp_search(re, fs, 0, -1); \(rA 3
 .Ed
 .\"
 .\" fth_regexp_find
@@ -1868,18 +1868,18 @@ Return match length or -1 if not found.
 .Bd -literal -offset indent -compact
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dqfoo\(dq);
-fth_regexp_match(re, fs);		\(rA 3
+fth_regexp_match(re, fs); \(rA 3
 
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dq(bar)\(dq);
-fth_regexp_match(re, fs);		\(rA 3
+fth_regexp_match(re, fs); \(rA 3
 
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dq.*(bar)\(dq);
-fth_regexp_match(re, fs);		\(rA 6
-fth_object_value_ref(re, 0);		\(rA \(dqfoobar\(dq
-fth_object_value_ref(re, 1);		\(rA \(dqbar\(dq
-fth_object_value_ref(re, 2);		\(rA #f
+fth_regexp_match(re, fs); \(rA 6
+fth_object_value_ref(re, 0); \(rA \(dqfoobar\(dq
+fth_object_value_ref(re, 1); \(rA \(dqbar\(dq
+fth_object_value_ref(re, 2); \(rA #f
 .Ed
 .\"
 .\" fth_regexp_replace
@@ -1901,12 +1901,12 @@ exception will be raised.
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dq(bar)\(dq);
 FTH rp = fth_make_string(\(dqBAR\(dq);
-fth_regexp_replace(re, fs, rp);		\(rA \(dqfooBAR\(dq
+fth_regexp_replace(re, fs, rp); \(rA \(dqfooBAR\(dq
 
 FTH fs = fth_make_string(\(dqfoo-bar\(dq);
 FTH re = fth_make_regexp(\(dq(foo)\(dq);
 FTH rp = fth_make_string(\(dq***\e\e1***\(dq);
-fth_regexp_replace(re, fs, rp);		\(rA \(dq***foo***-bar\(dq
+fth_regexp_replace(re, fs, rp); \(rA \(dq***foo***-bar\(dq
 .Ed
 .\"
 .\" fth_regexp_search
@@ -1918,15 +1918,15 @@ is -1, search entire string.
 .Bd -literal -offset indent -compact
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dqfoo\(dq);
-fth_regexp_search(re, fs, 0, 2);	\(rA 0 (means #t)
+fth_regexp_search(re, fs, 0, 2); \(rA 0 (means #t)
 
 FTH fs = fth_make_string(\(dqfoobar\(dq);
 FTH re = fth_make_regexp(\(dq(bar)\(dq);
-fth_regexp_search(re, fs, 0, 2);	\(rA -1 (means #f)
-fth_regexp_search(re, fs, 3, 2);	\(rA 3
-fth_object_value_ref(re, 0);		\(rA \(dqbar\(dq
-fth_object_value_ref(re, 1);		\(rA \(dqbar\(dq
-fth_object_value_ref(re, 2);		\(rA #f
+fth_regexp_search(re, fs, 0, 2); \(rA -1 (means #f)
+fth_regexp_search(re, fs, 3, 2); \(rA 3
+fth_object_value_ref(re, 0); \(rA \(dqbar\(dq
+fth_object_value_ref(re, 1); \(rA \(dqbar\(dq
+fth_object_value_ref(re, 2); \(rA #f
 .Ed
 .El
 .\"
@@ -1940,7 +1940,13 @@ fth_object_value_ref(re, 2);		\(rA #f
 .It Ft bool Fn FTH_STRING_P "obj"
 Return true if
 .Ar obj
-is a string object, otherwise false.
+is a Fth string object, otherwise false.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello\(dq);
+FTH_STRING_P(fs); \(rA 1
+FTH fs = FTH_NIL;
+FTH_STRING_P(fs); \(rA 0
+.Ed
 .\"
 .\" FTH_CHAR_P
 .\" fth_char_p
@@ -1950,14 +1956,69 @@ is a string object, otherwise false.
 Both return true if
 .Ar obj
 is an ASCII character, otherwise false.
+.Bd -literal -offset indent -compact
+FTH ch = CHAR_TO_FTH('A');
+FTH_CHAR_P(ch); \(rA 1
+FTH ch = INT_TO_FIX(65);
+FTH_CHAR_P(ch); \(rA 1
+FTH ch = INT_TO_FIX(10);
+FTH_CHAR_P(ch); \(rA 0
+.Ed
+.\"
+.\" fth_make_empty_string
+.\"
 .It Ft FTH Fn fth_make_empty_string "void"
+Return a Fth string object of length 0.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_empty_string(); \(rA \(dq\(dq
+fth_string_length(fs); \(rA 0
+.Ed
 .\"
 .\" fth_make_string
 .\"
 .It Ft FTH Fn fth_make_string "const char *str"
 Return a new Fth string object constructed from C string
 .Ar str .
+If C string is \(dq\(dq or NULL, return Fth string \(dq\(dq in
+contrast to
+.Sx fth_make_string_or_false() .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello\(dq); \(rA \(dqhello\(dq
+fth_string_length(fs); \(rA 5
+FTH fs = fth_make_string(\(dq\(dq); \(rA \(dq\(dq
+fth_string_length(fs); \(rA 0
+.Ed
+.\"
+.\" fth_make_string_format
+.\"
 .It Ft FTH Fn fth_make_string_format "const char *fmt" "..."
+Return a Fth string object according to the extended
+.Xr printf 3
+.Ar fmt
+args.  The extensions are:
+.Bl -tag -width MMM -compact
+.It Cm I No fth_to_c_inspect
+print inspect string of any Fth object.
+.It Cm S No fth_to_c_string
+print string representation of any Fth object.
+.It Cm M No fth_to_c_string_2
+as
+.Xr fth_to_c_string
+but encloses strings in double quotes.
+.It Cm D No fth_to_c_dump
+print dump string of any Fth object.
+.El
+.Bd -literal -offset indent -compact
+FTH arg = fth_make_array_var(1, fth_make_string(\(dqfoo\(dq));
+FTH fs = fth_make_string_format(\(dq%I\(dq, arg);
+    \(rA \(aq#<array[1]:  #<string[3]: \(dqfoo\(dq>>\(aq
+FTH fs = fth_make_string_format(\(dq%S\(dq, arg);
+    \(rA \(aq#( \(dqfoo\(dq )\(aq
+FTH fs = fth_make_string_format(\(dq%M\(dq, arg);
+    \(rA \(aq#( \(dqfoo\(dq )\(aq
+FTH fs = fth_make_string_format(\(dq%D\(dq, arg);
+    \(rA \(aq#( \(dqfoo\(dq )\(aq
+.Ed
 .\"
 .\" fth_make_string_len
 .\"
@@ -1966,53 +2027,643 @@ Return a new Fth string object constructed from C string
 .Ar str
 with at most
 .Ar len
-characters.
+characters.  If the C string
+.Ar str
+is shorter than
+.Ar len ,
+return a Fth string object of
+.Ar str
+length only.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string_len(\(dq     \(dq, 0); \(rA \(dq\(dq
+FTH fs = fth_make_string_len(\(dq     \(dq, 3); \(rA \(dq   \(dq
+FTH fs = fth_make_string_len(\(dqxxxxx\(dq, 3); \(rA \(dqxxx\(dq
+FTH fs = fth_make_string_len(\(dqxxx\(dq, 5); \(rA \(dqxxx\(dq
+.Ed
+.\"
+.\" fth_make_string_or_false
+.\"
 .It Ft FTH Fn fth_make_string_or_false "const char *str"
+If C string is \(dq\(dq, return #f, otherwise like
+.Sx fth_make_string() .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string_or_false(\(dqhello\(dq); \(rA \(dqhello\(dq
+fth_string_length(fs); \(rA 5
+FTH fs = fth_make_string_or_false(\(dq\(dq); \(rA #f
+fth_string_length(fs); \(rA -1 (means false)
+.Ed
+.\"
+.\" fth_string_append
+.\"
 .It Ft FTH Fn fth_string_append "FTH string1" "FTH string2"
+Return new string from
+.Ar string1
++
+.Ar string2 .
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_make_string(\(dqbar\(dq);
+fth_string_append(s1, s2); \(rA \(dqfoobar\(dq
+.Ed
+.\"
+.\" fth_string_capitalize
+.\"
 .It Ft FTH Fn fth_string_capitalize "FTH string"
-.It Ft FTH Fn fth_string_char_ref "FTH string" "ficlInteger index"
-.It Ft FTH Fn fth_string_char_set "FTH string" "ficlInteger index" "FTH value"
-.It Ft FTH Fn fth_string_chomp "FTH string"
-.It Ft FTH Fn fth_string_copy "FTH string"
+Return the string, not a copy, changed to first char upcase and
+the rest downcase.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoO\(dq);
+fth_string_capitalize(fs); \(rA \(dqFoo\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqFoo\(dq
+.Ed
+.\"
+.\" fth_string_c_char_ref
+.\"
 .It Ft char Fn fth_string_c_char_ref "FTH string" "ficlInteger index"
+Return character as C char at position
+.Ar index ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+char c = fth_string_c_char_ref(fs, 1); \(rA 111
+.Ed
+.\"
+.\" fth_string_c_char_set
+.\"
 .It Ft char Fn fth_string_c_char_set "FTH string" "ficlInteger index" "char c"
+Store C char character
+.Ar c
+at position
+.Ar index ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+char c = fth_string_c_char_set(fs, 1, \(aqe\(aq); \(rA 101
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfeo\(dq
+.Ed
+.\"
+.\" fth_string_char_ref
+.\"
+.It Ft FTH Fn fth_string_char_ref "FTH string" "ficlInteger index"
+Return character as FTH object at position
+.Ar index ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+FTH ch = fth_string_char_ref(fs, 1); \(rA 111
+.Ed
+.\"
+.\" fth_string_char_set
+.\"
+.It Ft FTH Fn fth_string_char_set "FTH string" "ficlInteger index" "FTH ch"
+Store Fth object character
+.Ar ch 
+at position
+.Ar index ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+FTH ch = fth_string_char_set(fs, 1, CHAR_TO_FTH(\(aqe\(aq)); \(rA 101
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfeo\(dq
+.Ed
+.\"
+.\" fth_string_chomp
+.\"
+.It Ft FTH Fn fth_string_chomp "FTH string"
+Return the string, not a copy, with possible trailing
+.Sq \en
+removed.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\en\(dq);
+fth_string_chomp(fs); \(rA \(dqfoo\(dq
+FTH fs = fth_make_string(\(dqbar\(dq);
+fth_string_chomp(fs); \(rA \(dqbar\(dq
+.Ed
+.\"
+.\" fth_string_copy
+.\"
+.It Ft FTH Fn fth_string_copy "FTH string"
+Return a new copy of the Fth string object
+.Ar string .
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_string_copy(s1);
+s1 == s2 \(rA 0
+fth_string_equal_p(s1, s2); \(rA 1
+.Ed
+.\"
+.\" fth_string_delete
+.\"
 .It Ft FTH Fn fth_string_delete "FTH string" "ficlInteger index"
+Delete and return character at position
+.Ar index
+from
+.Ar string ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_delete(fs, 1); \(rA 111 (\(aqo\(aq)
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfo\(dq
+.Ed
+.\"
+.\" fth_string_downcase
+.\"
 .It Ft FTH Fn fth_string_downcase "FTH string"
+Return the string, not a copy, changed to all chars downcase.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqFoo\(dq);
+fth_string_downcase(fs); \(rA \(dqfoo\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfoo\(dq
+.Ed
+.\"
+.\" fth_string_equal_p
+.\"
 .It Ft bool Fn fth_string_equal_p "FTH obj1" "FTH obj2"
+Compare two strings with
+.Xr strcmp 3
+and return true for equal and false for not equal (not -1 0 1 like
+strcmp).
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_make_string(\(dqbar\(dq);
+FTH s3 = fth_make_string(\(dqfoo\(dq);
+fth_string_equal_p(s1, s2); \(rA 0
+fth_string_equal_p(s1, s3); \(rA 1
+fth_string_equal_p(s3, s3); \(rA 1
+.Ed
+.\"
+.\" fth_string_eval
+.\"
 .It Ft int Fn fth_string_eval "FTH string"
+Evaluate
+.Ar string ;
+values already on stack can be accessed, resulting values remain
+on stack.
+.Bd -literal -offset indent -compact
+ficlVm *vm = FTH_FICL_VM();
+FTH fs = fth_make_string(\(dq3 4 +\(dq);
+fth_string_eval(fs); \(rA puts 7 on stack
+ficlStackPopInteger(vm->dataStack); \(rA 7
+
+ficlStackPushInteger(vm->dataStack, 7); \(rA puts 7 on stack
+FTH fs = fth_make_string(\(dq3 4 + +\(dq);
+fth_string_eval(fs); \(rA puts 14 on stack
+ficlStackPopInteger(vm->dataStack); \(rA 14
+
+ficlStackPushInteger(vm->dataStack, 7); \(rA puts 7 on stack
+FTH fs = fth_make_string(\(dq3 4 + + . cr\(dq);
+fth_string_eval(fs); \(rA prints 14
+.Ed
+.\"
+.\" fth_string_fill
+.\"
 .It Ft FTH Fn fth_string_fill "FTH string" "FTH fill_char"
+Fill
+.Ar string
+with
+.Ar fill_char
+and return changed Fth string object.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_fill(fs, CHAR_TO_FTH(\(aqa\(aq)); \(rA \(dqaaa\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqaaa\(dq
+.Ed
+.\"
+.\" fth_string_find
+.\"
 .It Ft FTH Fn fth_string_find "FTH string" "FTH key"
+Return match if string or regexp
+.Ar key
+exist in
+.Ar string ,
+otherwise #f.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello world\(dq);
+FTH rs fth_make_string(\(dql\(dq);
+fth_string_find(fs, rs); \(rA \(dqllo world\(dq
+FTH rs = fth_make_string(\(dqell\(dq);
+fth_string_find(fs, rs); \(rA \(dqello world\(dq
+FTH rs = fth_make_regexp(\(dqell\(dq);
+fth_string_find(fs, rs); \(rA \(dqello world\(dq
+FTH rs = fth_make_regexp(\(dqk\(dq);
+fth_string_find(fs, rs); \(rA #f
+.Ed
+.\"
+.\" fth_string_format
+.\"
 .It Ft FTH Fn fth_string_format "FTH string" "FTH args_list"
+Return a formatted string created from the extended
+.Xr printf 3
+format string
+.Ar string
+and possible arguments in
+.Ar args_list .
+.Ar args_list
+can be an array, any single object, FTH_FALSE or FTH_NIL.  If
+.Ar args_list
+is an array, it should have as many elements as required by the
+format string, if
+.Ar args_list
+is a single object, the format string should only have one format
+sign, if
+.Ar args_list
+is FTH_FALSE or FTH_NIL,
+.Ar args_list
+is ignored and the format string itself is returned.  If
+.Ar string
+is the empty string, an empty string is returned, no matter what's
+in
+.Ar args_list .
+See
+.Sx fth_make_string_format
+for extra format signs.
+.Bd -literal -offset indent -compact
+FTH fmt = fth_make_string(\(dq%04d %8.2f %b %X %o\(dq);
+FTH args = fth_make_array_var(5,
+    INT_TO_FIX(128),
+    fth_make_float(M_PI),
+    INT_TO_FIX(255),
+    INT_TO_FIX(255),
+    INT_TO_FIX(255));
+fth_string_format(fmt, args);
+    \(rA \(dq0128     3.14 11111111 FF 377\(dq
+
+FTH fmt = fth_make_string(\(dqwe print %S\(dq);
+FTH arg = INT_TO_FIX(10);
+fth_string_format(fmt, arg); \(rA \(dqwe print 10\(dq
+
+FTH fs = fth_make_string(\(dqsimple string\(dq);
+fth_string_format(fs, FTH_FALSE); \(rA \(dqsimple string\(dq
+fth_string_format(fs, FTH_NIL); \(rA \(dqsimple string\(dq
+
+FTH fs = fth_make_empty_string();
+fth_string_format(fs, args); \(rA \(dq\(dq
+.Ed
+.\"
+.\" fth_string_greater_p
+.\"
 .It Ft bool Fn fth_string_greater_p "FTH obj1" "FTH obj2"
+Compare two strings with
+.Xr strcmp 3
+and return true for greater than and false for less than.
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_make_string(\(dqbar\(dq);
+FTH s3 = fth_make_string(\(dqfoo\(dq);
+fth_string_greater_p(s1, s2); \(rA 0
+fth_string_greater_p(s1, s3); \(rA 0
+fth_string_greater_p(s3, s3); \(rA 0
+.Ed
+.\"
+.\" fth_string_index
+.\"
 .It Ft FTH Fn fth_string_index "FTH string" "FTH key"
+Return index of string
+.Ar key
+in
+.Ar string
+or -1 if not found.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello world\(dq);
+FTH rs fth_make_string(\(dql\(dq);
+fth_string_index(fs, rs); \(rA 2
+FTH rs = fth_make_string(\(dqorl\(dq);
+fth_string_index(fs, rs); \(rA 7
+FTH rs = fth_make_string(\(dqk\(dq);
+fth_string_index(fs, rs); \(rA -1 (false)
+.Ed
+.\"
+.\" fth_string_insert
+.\"
 .It Ft FTH Fn fth_string_insert "FTH string" "ficlInteger index" "FTH value"
+Insert string representation of
+.Ar value
+to
+.Ar string
+at position
+.Ar index ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of string.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_insert(fs, 1, INT_TO_FIX(10)); \(rA \(dqf10oo\(dq
+.Ed
+.\"
+.\" fth_string_length
+.\"
 .It Ft ficlInteger Fn fth_string_length "FTH string"
+Return length of a Fth
+.Ar string
+object or -1 if not a Fth string object.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello\(dq);
+fth_string_length(fs); \(rA 5
+fth_string_length((FTH)5); \(rA -1 (means false)
+.Ed
+.\"
+.\" fth_string_less_p
+.\"
 .It Ft bool Fn fth_string_less_p "FTH obj1" "FTH obj2"
+Compare two strings with
+.Xr strcmp 3
+and return true for less than and false for greater then.
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_make_string(\(dqbar\(dq);
+FTH s3 = fth_make_string(\(dqfoo\(dq);
+fth_string_less_p(s1, s2); \(rA 0
+fth_string_less_p(s1, s3); \(rA 0
+fth_string_less_p(s3, s3); \(rA 0
+.Ed
+.\"
+.\" fth_string_member_p
+.\"
 .It Ft bool Fn fth_string_member_p "FTH string" "FTH key"
+Return true if string
+.Ar key
+exist in
+.Ar string ,
+otherwise false.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello world\(dq);
+FTH rs fth_make_string(\(dql\(dq);
+fth_string_member_p(fs, rs); \(rA 1
+FTH rs = fth_make_string(\(dqell\(dq);
+fth_string_member_p(fs, rs); \(rA 1
+FTH rs = fth_make_string(\(dqk\(dq);
+fth_string_member_p(fs, rs); \(rA 0
+.Ed
+.\"
+.\" fth_string_not_equal_p
+.\"
 .It Ft bool Fn fth_string_not_equal_p "FTH obj1" "FTH obj2"
+Compare two strings with
+.Xr strcmp 3
+and return true for not equal and false for not equal (not -1 0 1
+like strcmp).
+.Bd -literal -offset indent -compact
+FTH s1 = fth_make_string(\(dqfoo\(dq);
+FTH s2 = fth_make_string(\(dqbar\(dq);
+FTH s3 = fth_make_string(\(dqfoo\(dq);
+fth_string_not_equal_p(s1, s2); \(rA 1
+fth_string_not_equal_p(s1, s3); \(rA 0
+fth_string_not_equal_p(s3, s3); \(rA 0
+.Ed
+.\"
+.\" fth_string_pop
+.\"
 .It Ft FTH Fn fth_string_pop "FTH string"
+Remove and return last character of
+.Ar string .
+If
+.Ar string
+is empty, return #f.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_pop(fs); \(rA 111 (\(aqo\(aq)
+fth_string_pop(fs); \(rA 111 (\(aqo\(aq)
+fth_string_pop(fs); \(rA 102 (\(aqf\(aq)
+fth_string_pop(fs); \(rA #f
+.Ed
+.\"
+.\" fth_string_push
+.\"
 .It Ft FTH Fn fth_string_push "FTH string" "FTH add_str"
+Append string representation of
+.Ar add_str
+to
+.Ar string
+and return changed Fth string object.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_push(fs, fth_make_string(\(dq \(dq)); \(rA \(dqfoo \(dq
+fth_string_push(fs, INT_TO_FIX(10)); \(rA \(dqfoo 10\(dq
+.Ed
 .\"
 .\" fth_string_ref
 .\"
 .It Ft char* Fn fth_string_ref "FTH string"
 Return C string from Fth
 .Ar string
-or NULL.
+or NULL if not a Fth string object.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello\(dq);
+fth_string_ref(fs); \(rA \(dqhello\(dq
+FTH fs = fth_make_empty_string();
+fth_string_ref(fs); \(rA \(dq\(dq
+FTH fs = FTH_FALSE;
+fth_string_ref(fs); \(rA NULL
+.Ed
+.\"
+.\" fth_string_replace
+.\"
 .It Ft FTH Fn fth_string_replace "FTH string" "FTH from" "FTH to"
+Return the string, not a copy, replaced
+.Ar from
+with
+.Ar to .
+If
+.Ar to
+is the empty string, delete the
+.Ar from
+part from
+.Ar string .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+FTH from = fth_make_string(\(dqo\(dq);
+FTH to = fth_make_string(\(dqa\(dq);
+fth_string_replace(fs, from, to); \(rA \(dqfaa\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfaa\(dq
+
+FTH fs = fth_make_string(\(dqfoo\(dq);
+FTH from = fth_make_string(\(dqoo\(dq);
+FTH to = fth_make_string(\(dqa\(dq);
+fth_string_replace(fs, from, to); \(rA \(dqfa\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqfa\(dq
+
+FTH fs = fth_make_string(\(dqfoo\(dq);
+FTH from = fth_make_string(\(dqo\(dq);
+FTH to = fth_make_string(\(dq\(dq);
+fth_string_replace(fs, from, to); \(rA \(dqf\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqf\(dq
+.Ed
+.\"
+.\" fth_string_reverse
+.\"
 .It Ft FTH Fn fth_string_reverse "FTH string"
+Return the same Fth string object
+.Ar string
+reversed.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_reverse(fs); \(rA \(dqoof\(dq
+.Ed
+.\"
+.\" fth_string_scat
+.\"
 .It Ft FTH Fn fth_string_scat "FTH string" "const char *str"
+Add C string
+.Ar str
+to an already existing Fth string object
+.Ar string .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_empty_string(); \(rA \(dq\(dq
+fth_string_scat(fs, \(dqhello\(dq); \(rA \(dqhello\(dq
+.Ed
+.\"
+.\" fth_string_sformat
+.\"
 .It Ft FTH Fn fth_string_sformat "FTH string" "const char *fmt" "..."
+Add extended
+.Xr printf 3
+fmt args to an already existing Fth string object.  See
+.Sx fth_make_string_format .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqwe want to \(dq);
+fth_string_sformat(fs, \(dqprint %d times %f\en\(dq, 10, 3.14);
+  \(rA \(dqwe want to print 10 times 3.140000\en\(dq
+.Ed
+.\"
+.\" fth_string_shift
+.\"
 .It Ft FTH Fn fth_string_shift "FTH string"
+Remove and return first character of
+.Ar string .
+If
+.Ar string
+is empty, return #f.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_shift(fs); \(rA 102 (\(aqf\(aq)
+fth_string_shift(fs); \(rA 111 (\(aqo\(aq)
+fth_string_shift(fs); \(rA 111 (\(aqo\(aq)
+fth_string_shift(fs); \(rA #f
+.Ed
+.\"
+.\" fth_string_sncat
+.\"
 .It Ft FTH Fn fth_string_sncat "FTH string" "const char *str" "ficlInteger len"
+Add C string
+.Ar str
+of length
+.Ar len
+to an already existing Fth string object
+.Ar string .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_empty_string(); \(rA \(dq\(dq
+fth_string_sncat(fs, \(dq,  \(dq, 2); \(rA \(dqhello, \(dq
+.Ed
+.\"
+.\" fth_string_split
+.\"
 .It Ft FTH Fn fth_string_split "FTH string" "FTH sep_str"
+Split
+.Ar string
+using
+.Ar sep_str
+as delimiter and return result as array of strings.  If
+.Ar sep_str
+is not a string or regexp, delimiter is space.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo:bar:baz\(dq);
+FTH sp = fth_make_string(\(dq:\(dq);
+fth_string_split(fs, sp); \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq)
+FTH sp = fth_make_regexp(\(dq:\(dq);
+fth_string_split(fs, sp); \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq)
+FTH fs = fth_make_string(\(dqfoo bar baz\(dq);
+fth_string_split(fs, FTH_NIL); \(rA #( \(dqfoo\(dq \(dqbar\(dq \(dqbaz\(dq)
+.Ed
+.\"
+.\" fth_string_substring
+.\"
 .It Ft FTH Fn fth_string_substring "FTH string" "ficlInteger start" "ficlInteger end"
+Return new string from position
+.Ar start
+to, but excluding, position
+.Ar end ;
+negative index counts from backward.  Raise an
+.Ar out-of-range
+exception if index is not in range of
+.Ar string .
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqhello world\(dq);
+fth_string_substring(fs, 2, 4); \(rA \(dqll\(dq
+fth_string_substring(fs, -4, -2); \(rA \(dqor\(dq
+fth_string_substring(fs, -4, fth_string_length(fs)); \(rA \(dqorld\(dq
+.Ed
+.\"
+.\" fth_string_to_array
+.\"
 .It Ft FTH Fn fth_string_to_array "FTH string"
+Convert
+.Ar string
+to an array of characters.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_to_array(fs); \(rA #( 102 111 111 )
+.Ed
+.\"
+.\" fth_string_unshift
+.\"
 .It Ft FTH Fn fth_string_unshift "FTH string" "FTH add_str"
+Prepends string representation of
+.Ar add_str
+to
+.Ar string
+and return changed Fth string object.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqfoo\(dq);
+fth_string_unshift(fs, fth_make_string(\(dq \(dq)); \(rA \(dq foo\(dq
+fth_string_unshift(fs, INT_TO_FIX(10)); \(rA \(dq10 foo\(dq
+.Ed
+.\"
+.\" fth_string_upcase
+.\"
 .It Ft FTH Fn fth_string_upcase "FTH string"
-.\" Next is actually from printf.c,
+Return the string, not a copy, changed to all chars upcase.
+.Bd -literal -offset indent -compact
+FTH fs = fth_make_string(\(dqFoo\(dq);
+fth_string_upcase(fs); \(rA \(dqFOO\(dq
+fth_printf(\(dq%S\(dq, fs); \(rA \(dqFOO\(dq
+.Ed
+.\"
+.\" fth_string_vformat
+.\" actually from printf.c,
+.\"
 .It Ft FTH Fn fth_string_vformat "const char *fmt" "FTH args"
+Return formatted Fth string corresponding to C string
+.Ar fmt
+and Fth array
+.Ar args
+containing as much arguments as
+.Ar fmt
+requires.
+.Bd -literal -offset indent -compact
+FTH args = fth_make_array_var(2,
+    INT_TO_FIX(10),
+    fth_make_float(3.14));
+fth_string_vformat(\(dqprint %d times %f\(dq, args);
+    \(rA \(dqprint 10 times 3.140000\(dq
+.Ed
+.\"
+.\" fth_string_vsformat
+.\"
 .It Ft FTH Fn fth_string_vsformat "FTH string" "const char *fmt" "va_list ap"
+The same as
+.Sx fth_string_sformat
+except for a va_list
+.Ar ap .
 .El
 .\"
 .\" Symbols (symbol.c)
@@ -2243,7 +2894,8 @@ has no extra floating point stack; floats are of type
 .Sh SEE ALSO
 .Xr clang 1 ,
 .Xr fth 1 ,
-.Xr sprintf 3
+.Xr printf 3 ,
+.Xr strcmp 3 .
 .\"
 .\" STANDARDS
 .\"

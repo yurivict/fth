@@ -715,7 +715,7 @@ DDEESSCCRRIIPPTTIIOONN
            `zz'       Modifier for _s_i_z_e___t.
      The following conversion specifiers are known:
            %%         A `%' is written.
-           aaAAeeEEffFFggGG  Floating point output like sprintf(3).
+           aaAAeeEEffFFggGG  Floating point output like printf(3).
            bbBBddooOOppuuUUxxXX
                      Integer output in binary, decimal, octal, void pointer,
                      unsigned and hexadecimal form.
@@ -831,8 +831,8 @@ DDEESSCCRRIIPPTTIIOONN
                 FTH fs = fth_make_string("hello, world!");
                 FTH re = fth_make_regexp(", (.*)!");
                 FTH ary = fth_make_array_var(2, re, fs);
-                fth_xt_apply("regexp-match", ary, __func__);    => 8
-                fth_xt_apply("*re1*", FTH_FALSE, __func__)      => "world"
+                fth_xt_apply("regexp-match", ary, __func__); => 8
+                fth_xt_apply("*re1*", FTH_FALSE, __func__) => "world"
      _F_T_H fftthh__xxtt__ccaallll(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _F_T_H _a_r_g_s, _c_o_n_s_t _c_h_a_r _*_c_a_l_l_e_r)
           Executes _n_a_m_e, a C string, with _l_e_n arguments of type FTH.  _c_a_l_l_e_r
           can be any C string used for error message.  Raise an _e_v_a_l_-_e_r_r_o_r
@@ -843,7 +843,7 @@ DDEESSCCRRIIPPTTIIOONN
           than one values remain on stack, return them as Array object.
                 FTH fs = fth_make_string("hello, world!");
                 FTH re = fth_make_regexp(", (.*)!");
-                fth_xt_call("regexp-match", __func__, 2, re, fs);       => 8
+                fth_xt_call("regexp-match", __func__, 2, re, fs); => 8
                 fth_xt_call("*re1*", __func__, 0); => "world"
      _F_T_H pprroocc__ffrroomm__pprroocc__oorr__xxtt(_F_T_H _p_r_o_c___o_r___x_t, _i_n_t _r_e_q, _i_n_t _o_p_t, _b_o_o_l _r_e_s_t)
 
@@ -883,29 +883,29 @@ DDEESSCCRRIIPPTTIIOONN
           expression.
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("bar");
-                fth_regexp_search(re, fs, 0, -1);       => 3
+                fth_regexp_search(re, fs, 0, -1); => 3
 
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("(B|b)+");
-                fth_regexp_search(re, fs, 0, -1);       => 3
+                fth_regexp_search(re, fs, 0, -1); => 3
      _i_n_t fftthh__rreeggeexxpp__ffiinndd(_c_o_n_s_t _c_h_a_r _*_r_e_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
           Return match index or -1 if not found.
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__mmaattcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g)
           Return match length or -1 if not found.
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("foo");
-                fth_regexp_match(re, fs);               => 3
+                fth_regexp_match(re, fs); => 3
 
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("(bar)");
-                fth_regexp_match(re, fs);               => 3
+                fth_regexp_match(re, fs); => 3
 
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp(".*(bar)");
-                fth_regexp_match(re, fs);               => 6
-                fth_object_value_ref(re, 0);            => "foobar"
-                fth_object_value_ref(re, 1);            => "bar"
-                fth_object_value_ref(re, 2);            => #f
+                fth_regexp_match(re, fs); => 6
+                fth_object_value_ref(re, 0); => "foobar"
+                fth_object_value_ref(re, 1); => "bar"
+                fth_object_value_ref(re, 2); => #f
      _F_T_H fftthh__rreeggeexxpp__rreeppllaaccee(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _F_T_H _r_e_p_l_a_c_e)
           Replace 1st occurrence of _r_e_g_e_x_p in _s_t_r_i_n_g with _r_e_p_l_a_c_e if found.
           References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
@@ -914,81 +914,393 @@ DDEESSCCRRIIPPTTIIOONN
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("(bar)");
                 FTH rp = fth_make_string("BAR");
-                fth_regexp_replace(re, fs, rp);         => "fooBAR"
+                fth_regexp_replace(re, fs, rp); => "fooBAR"
 
                 FTH fs = fth_make_string("foo-bar");
                 FTH re = fth_make_regexp("(foo)");
                 FTH rp = fth_make_string("***\\1***");
-                fth_regexp_replace(re, fs, rp);         => "***foo***-bar"
+                fth_regexp_replace(re, fs, rp); => "***foo***-bar"
      _f_i_c_l_I_n_t_e_g_e_r fftthh__rreeggeexxpp__sseeaarrcchh(_F_T_H _r_e_g_e_x_p, _F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t,
           _f_i_c_l_I_n_t_e_g_e_r _r_a_n_g_e)
           Return match index or -1 if not found.  If _r_a_n_g_e is -1, search
           entire string.
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("foo");
-                fth_regexp_search(re, fs, 0, 2);        => 0 (means #t)
+                fth_regexp_search(re, fs, 0, 2); => 0 (means #t)
 
                 FTH fs = fth_make_string("foobar");
                 FTH re = fth_make_regexp("(bar)");
-                fth_regexp_search(re, fs, 0, 2);        => -1 (means #f)
-                fth_regexp_search(re, fs, 3, 2);        => 3
-                fth_object_value_ref(re, 0);            => "bar"
-                fth_object_value_ref(re, 1);            => "bar"
-                fth_object_value_ref(re, 2);            => #f
+                fth_regexp_search(re, fs, 0, 2); => -1 (means #f)
+                fth_regexp_search(re, fs, 3, 2); => 3
+                fth_object_value_ref(re, 0); => "bar"
+                fth_object_value_ref(re, 1); => "bar"
+                fth_object_value_ref(re, 2); => #f
 
    SSttrriinngg oobbjjeecctt ttyyppee
      _b_o_o_l FFTTHH__SSTTRRIINNGG__PP(_o_b_j)
-          Return true if _o_b_j is a string object, otherwise false.
+          Return true if _o_b_j is a Fth string object, otherwise false.
+                FTH fs = fth_make_string("hello");
+                FTH_STRING_P(fs); => 1
+                FTH fs = FTH_NIL;
+                FTH_STRING_P(fs); => 0
      _b_o_o_l FFTTHH__CCHHAARR__PP(_o_b_j)
      _b_o_o_l fftthh__cchhaarr__pp(_o_b_j)
           Both return true if _o_b_j is an ASCII character, otherwise false.
+                FTH ch = CHAR_TO_FTH('A');
+                FTH_CHAR_P(ch); => 1
+                FTH ch = INT_TO_FIX(65);
+                FTH_CHAR_P(ch); => 1
+                FTH ch = INT_TO_FIX(10);
+                FTH_CHAR_P(ch); => 0
      _F_T_H fftthh__mmaakkee__eemmppttyy__ssttrriinngg(_v_o_i_d)
+          Return a Fth string object of length 0.
+                FTH fs = fth_make_empty_string(); => ""
+                fth_string_length(fs); => 0
      _F_T_H fftthh__mmaakkee__ssttrriinngg(_c_o_n_s_t _c_h_a_r _*_s_t_r)
-          Return a new Fth string object constructed from C string _s_t_r.
+          Return a new Fth string object constructed from C string _s_t_r.  If C
+          string is "" or NULL, return Fth string "" in contrast to
+          _f_t_h___m_a_k_e___s_t_r_i_n_g___o_r___f_a_l_s_e_(_).
+                FTH fs = fth_make_string("hello"); => "hello"
+                fth_string_length(fs); => 5
+                FTH fs = fth_make_string(""); => ""
+                fth_string_length(fs); => 0
      _F_T_H fftthh__mmaakkee__ssttrriinngg__ffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+          Return a Fth string object according to the extended printf(3) _f_m_t
+          args.  The extensions are:
+          II fth_to_c_inspect
+               print inspect string of any Fth object.
+          SS fth_to_c_string
+               print string representation of any Fth object.
+          MM fth_to_c_string_2
+               as fth_to_c_string but encloses strings in double quotes.
+          DD fth_to_c_dump
+               print dump string of any Fth object.
+                FTH arg = fth_make_array_var(1, fth_make_string("foo"));
+                FTH fs = fth_make_string_format("%I", arg);
+                    => '#<array[1]:  #<string[3]: "foo">>'
+                FTH fs = fth_make_string_format("%S", arg);
+                    => '#( "foo" )'
+                FTH fs = fth_make_string_format("%M", arg);
+                    => '#( "foo" )'
+                FTH fs = fth_make_string_format("%D", arg);
+                    => '#( "foo" )'
      _F_T_H fftthh__mmaakkee__ssttrriinngg__lleenn(_c_o_n_s_t _c_h_a_r _*_s_t_r, _f_i_c_l_I_n_t_e_g_e_r _l_e_n)
           Return a new Fth string object constructed from C string _s_t_r with at
-          most _l_e_n characters.
+          most _l_e_n characters.  If the C string _s_t_r is shorter than _l_e_n,
+          return a Fth string object of _s_t_r length only.
+                FTH fs = fth_make_string_len("     ", 0); => ""
+                FTH fs = fth_make_string_len("     ", 3); => "   "
+                FTH fs = fth_make_string_len("xxxxx", 3); => "xxx"
+                FTH fs = fth_make_string_len("xxx", 5); => "xxx"
      _F_T_H fftthh__mmaakkee__ssttrriinngg__oorr__ffaallssee(_c_o_n_s_t _c_h_a_r _*_s_t_r)
+          If C string is "", return #f, otherwise like _f_t_h___m_a_k_e___s_t_r_i_n_g_(_).
+                FTH fs = fth_make_string_or_false("hello"); => "hello"
+                fth_string_length(fs); => 5
+                FTH fs = fth_make_string_or_false(""); => #f
+                fth_string_length(fs); => -1 (means false)
      _F_T_H fftthh__ssttrriinngg__aappppeenndd(_F_T_H _s_t_r_i_n_g_1, _F_T_H _s_t_r_i_n_g_2)
+          Return new string from _s_t_r_i_n_g_1 + _s_t_r_i_n_g_2.
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_make_string("bar");
+                fth_string_append(s1, s2); => "foobar"
      _F_T_H fftthh__ssttrriinngg__ccaappiittaalliizzee(_F_T_H _s_t_r_i_n_g)
-     _F_T_H fftthh__ssttrriinngg__cchhaarr__rreeff(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
-     _F_T_H fftthh__ssttrriinngg__cchhaarr__sseett(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
-     _F_T_H fftthh__ssttrriinngg__cchhoommpp(_F_T_H _s_t_r_i_n_g)
-     _F_T_H fftthh__ssttrriinngg__ccooppyy(_F_T_H _s_t_r_i_n_g)
+          Return the string, not a copy, changed to first char upcase and the
+          rest downcase.
+                FTH fs = fth_make_string("foO");
+                fth_string_capitalize(fs); => "Foo"
+                fth_printf("%S", fs); => "Foo"
      _c_h_a_r fftthh__ssttrriinngg__cc__cchhaarr__rreeff(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+          Return character as C char at position _i_n_d_e_x; negative index counts
+          from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in
+          range of string.
+                FTH fs = fth_make_string("foo");
+                char c = fth_string_c_char_ref(fs, 1); => 111
      _c_h_a_r fftthh__ssttrriinngg__cc__cchhaarr__sseett(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _c_h_a_r _c)
+          Store C char character _c at position _i_n_d_e_x; negative index counts
+          from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in
+          range of string.
+                FTH fs = fth_make_string("foo");
+                char c = fth_string_c_char_set(fs, 1, 'e'); => 101
+                fth_printf("%S", fs); => "feo"
+     _F_T_H fftthh__ssttrriinngg__cchhaarr__rreeff(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+          Return character as FTH object at position _i_n_d_e_x; negative index
+          counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is
+          not in range of string.
+                FTH fs = fth_make_string("foo");
+                FTH ch = fth_string_char_ref(fs, 1); => 111
+     _F_T_H fftthh__ssttrriinngg__cchhaarr__sseett(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _c_h)
+          Store Fth object character _c_h at position _i_n_d_e_x; negative index
+          counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is
+          not in range of string.
+                FTH fs = fth_make_string("foo");
+                FTH ch = fth_string_char_set(fs, 1, CHAR_TO_FTH('e')); => 101
+                fth_printf("%S", fs); => "feo"
+     _F_T_H fftthh__ssttrriinngg__cchhoommpp(_F_T_H _s_t_r_i_n_g)
+          Return the string, not a copy, with possible trailing `\n' removed.
+                FTH fs = fth_make_string("foo\n");
+                fth_string_chomp(fs); => "foo"
+                FTH fs = fth_make_string("bar");
+                fth_string_chomp(fs); => "bar"
+     _F_T_H fftthh__ssttrriinngg__ccooppyy(_F_T_H _s_t_r_i_n_g)
+          Return a new copy of the Fth string object _s_t_r_i_n_g.
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_string_copy(s1);
+                s1 == s2 => 0
+                fth_string_equal_p(s1, s2); => 1
      _F_T_H fftthh__ssttrriinngg__ddeelleettee(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x)
+          Delete and return character at position _i_n_d_e_x from _s_t_r_i_n_g; negative
+          index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          index is not in range of string.
+                FTH fs = fth_make_string("foo");
+                fth_string_delete(fs, 1); => 111 ('o')
+                fth_printf("%S", fs); => "fo"
      _F_T_H fftthh__ssttrriinngg__ddoowwnnccaassee(_F_T_H _s_t_r_i_n_g)
+          Return the string, not a copy, changed to all chars downcase.
+                FTH fs = fth_make_string("Foo");
+                fth_string_downcase(fs); => "foo"
+                fth_printf("%S", fs); => "foo"
      _b_o_o_l fftthh__ssttrriinngg__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+          Compare two strings with strcmp(3) and return true for equal and
+          false for not equal (not -1 0 1 like strcmp).
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_make_string("bar");
+                FTH s3 = fth_make_string("foo");
+                fth_string_equal_p(s1, s2); => 0
+                fth_string_equal_p(s1, s3); => 1
+                fth_string_equal_p(s3, s3); => 1
      _i_n_t fftthh__ssttrriinngg__eevvaall(_F_T_H _s_t_r_i_n_g)
+          Evaluate _s_t_r_i_n_g; values already on stack can be accessed, resulting
+          values remain on stack.
+                ficlVm *vm = FTH_FICL_VM();
+                FTH fs = fth_make_string("3 4 +");
+                fth_string_eval(fs); => puts 7 on stack
+                ficlStackPopInteger(vm->dataStack); => 7
+
+                ficlStackPushInteger(vm->dataStack, 7); => puts 7 on stack
+                FTH fs = fth_make_string("3 4 + +");
+                fth_string_eval(fs); => puts 14 on stack
+                ficlStackPopInteger(vm->dataStack); => 14
+
+                ficlStackPushInteger(vm->dataStack, 7); => puts 7 on stack
+                FTH fs = fth_make_string("3 4 + + . cr");
+                fth_string_eval(fs); => prints 14
      _F_T_H fftthh__ssttrriinngg__ffiillll(_F_T_H _s_t_r_i_n_g, _F_T_H _f_i_l_l___c_h_a_r)
+          Fill _s_t_r_i_n_g with _f_i_l_l___c_h_a_r and return changed Fth string object.
+                FTH fs = fth_make_string("foo");
+                fth_string_fill(fs, CHAR_TO_FTH('a')); => "aaa"
+                fth_printf("%S", fs); => "aaa"
      _F_T_H fftthh__ssttrriinngg__ffiinndd(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+          Return match if string or regexp _k_e_y exist in _s_t_r_i_n_g, otherwise #f.
+                FTH fs = fth_make_string("hello world");
+                FTH rs fth_make_string("l");
+                fth_string_find(fs, rs); => "llo world"
+                FTH rs = fth_make_string("ell");
+                fth_string_find(fs, rs); => "ello world"
+                FTH rs = fth_make_regexp("ell");
+                fth_string_find(fs, rs); => "ello world"
+                FTH rs = fth_make_regexp("k");
+                fth_string_find(fs, rs); => #f
      _F_T_H fftthh__ssttrriinngg__ffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _F_T_H _a_r_g_s___l_i_s_t)
+          Return a formatted string created from the extended printf(3) format
+          string _s_t_r_i_n_g and possible arguments in _a_r_g_s___l_i_s_t.  _a_r_g_s___l_i_s_t can be
+          an array, any single object, FTH_FALSE or FTH_NIL.  If _a_r_g_s___l_i_s_t is
+          an array, it should have as many elements as required by the format
+          string, if _a_r_g_s___l_i_s_t is a single object, the format string should
+          only have one format sign, if _a_r_g_s___l_i_s_t is FTH_FALSE or FTH_NIL,
+          _a_r_g_s___l_i_s_t is ignored and the format string itself is returned.  If
+          _s_t_r_i_n_g is the empty string, an empty string is returned, no matter
+          what's in _a_r_g_s___l_i_s_t.  See _f_t_h___m_a_k_e___s_t_r_i_n_g___f_o_r_m_a_t for extra format
+          signs.
+                FTH fmt = fth_make_string("%04d %8.2f %b %X %o");
+                FTH args = fth_make_array_var(5,
+                    INT_TO_FIX(128),
+                    fth_make_float(M_PI),
+                    INT_TO_FIX(255),
+                    INT_TO_FIX(255),
+                    INT_TO_FIX(255));
+                fth_string_format(fmt, args);
+                    => "0128     3.14 11111111 FF 377"
+
+                FTH fmt = fth_make_string("we print %S");
+                FTH arg = INT_TO_FIX(10);
+                fth_string_format(fmt, arg); => "we print 10"
+
+                FTH fs = fth_make_string("simple string");
+                fth_string_format(fs, FTH_FALSE); => "simple string"
+                fth_string_format(fs, FTH_NIL); => "simple string"
+
+                FTH fs = fth_make_empty_string();
+                fth_string_format(fs, args); => ""
      _b_o_o_l fftthh__ssttrriinngg__ggrreeaatteerr__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+          Compare two strings with strcmp(3) and return true for greater than
+          and false for less than.
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_make_string("bar");
+                FTH s3 = fth_make_string("foo");
+                fth_string_greater_p(s1, s2); => 0
+                fth_string_greater_p(s1, s3); => 0
+                fth_string_greater_p(s3, s3); => 0
      _F_T_H fftthh__ssttrriinngg__iinnddeexx(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+          Return index of string _k_e_y in _s_t_r_i_n_g or -1 if not found.
+                FTH fs = fth_make_string("hello world");
+                FTH rs fth_make_string("l");
+                fth_string_index(fs, rs); => 2
+                FTH rs = fth_make_string("orl");
+                fth_string_index(fs, rs); => 7
+                FTH rs = fth_make_string("k");
+                fth_string_index(fs, rs); => -1 (false)
      _F_T_H fftthh__ssttrriinngg__iinnsseerrtt(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _i_n_d_e_x, _F_T_H _v_a_l_u_e)
+          Insert string representation of _v_a_l_u_e to _s_t_r_i_n_g at position _i_n_d_e_x;
+          negative index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if index is not in range of string.
+                FTH fs = fth_make_string("foo");
+                fth_string_insert(fs, 1, INT_TO_FIX(10)); => "f10oo"
      _f_i_c_l_I_n_t_e_g_e_r fftthh__ssttrriinngg__lleennggtthh(_F_T_H _s_t_r_i_n_g)
+          Return length of a Fth _s_t_r_i_n_g object or -1 if not a Fth string
+          object.
+                FTH fs = fth_make_string("hello");
+                fth_string_length(fs); => 5
+                fth_string_length((FTH)5); => -1 (means false)
      _b_o_o_l fftthh__ssttrriinngg__lleessss__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+          Compare two strings with strcmp(3) and return true for less than and
+          false for greater then.
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_make_string("bar");
+                FTH s3 = fth_make_string("foo");
+                fth_string_less_p(s1, s2); => 0
+                fth_string_less_p(s1, s3); => 0
+                fth_string_less_p(s3, s3); => 0
      _b_o_o_l fftthh__ssttrriinngg__mmeemmbbeerr__pp(_F_T_H _s_t_r_i_n_g, _F_T_H _k_e_y)
+          Return true if string _k_e_y exist in _s_t_r_i_n_g, otherwise false.
+                FTH fs = fth_make_string("hello world");
+                FTH rs fth_make_string("l");
+                fth_string_member_p(fs, rs); => 1
+                FTH rs = fth_make_string("ell");
+                fth_string_member_p(fs, rs); => 1
+                FTH rs = fth_make_string("k");
+                fth_string_member_p(fs, rs); => 0
      _b_o_o_l fftthh__ssttrriinngg__nnoott__eeqquuaall__pp(_F_T_H _o_b_j_1, _F_T_H _o_b_j_2)
+          Compare two strings with strcmp(3) and return true for not equal and
+          false for not equal (not -1 0 1 like strcmp).
+                FTH s1 = fth_make_string("foo");
+                FTH s2 = fth_make_string("bar");
+                FTH s3 = fth_make_string("foo");
+                fth_string_not_equal_p(s1, s2); => 1
+                fth_string_not_equal_p(s1, s3); => 0
+                fth_string_not_equal_p(s3, s3); => 0
      _F_T_H fftthh__ssttrriinngg__ppoopp(_F_T_H _s_t_r_i_n_g)
+          Remove and return last character of _s_t_r_i_n_g.  If _s_t_r_i_n_g is empty,
+          return #f.
+                FTH fs = fth_make_string("foo");
+                fth_string_pop(fs); => 111 ('o')
+                fth_string_pop(fs); => 111 ('o')
+                fth_string_pop(fs); => 102 ('f')
+                fth_string_pop(fs); => #f
      _F_T_H fftthh__ssttrriinngg__ppuusshh(_F_T_H _s_t_r_i_n_g, _F_T_H _a_d_d___s_t_r)
+          Append string representation of _a_d_d___s_t_r to _s_t_r_i_n_g and return changed
+          Fth string object.
+                FTH fs = fth_make_string("foo");
+                fth_string_push(fs, fth_make_string(" ")); => "foo "
+                fth_string_push(fs, INT_TO_FIX(10)); => "foo 10"
      _c_h_a_r_* fftthh__ssttrriinngg__rreeff(_F_T_H _s_t_r_i_n_g)
-          Return C string from Fth _s_t_r_i_n_g or NULL.
+          Return C string from Fth _s_t_r_i_n_g or NULL if not a Fth string object.
+                FTH fs = fth_make_string("hello");
+                fth_string_ref(fs); => "hello"
+                FTH fs = fth_make_empty_string();
+                fth_string_ref(fs); => ""
+                FTH fs = FTH_FALSE;
+                fth_string_ref(fs); => NULL
      _F_T_H fftthh__ssttrriinngg__rreeppllaaccee(_F_T_H _s_t_r_i_n_g, _F_T_H _f_r_o_m, _F_T_H _t_o)
+          Return the string, not a copy, replaced _f_r_o_m with _t_o.  If _t_o is the
+          empty string, delete the _f_r_o_m part from _s_t_r_i_n_g.
+                FTH fs = fth_make_string("foo");
+                FTH from = fth_make_string("o");
+                FTH to = fth_make_string("a");
+                fth_string_replace(fs, from, to); => "faa"
+                fth_printf("%S", fs); => "faa"
+
+                FTH fs = fth_make_string("foo");
+                FTH from = fth_make_string("oo");
+                FTH to = fth_make_string("a");
+                fth_string_replace(fs, from, to); => "fa"
+                fth_printf("%S", fs); => "fa"
+
+                FTH fs = fth_make_string("foo");
+                FTH from = fth_make_string("o");
+                FTH to = fth_make_string("");
+                fth_string_replace(fs, from, to); => "f"
+                fth_printf("%S", fs); => "f"
      _F_T_H fftthh__ssttrriinngg__rreevveerrssee(_F_T_H _s_t_r_i_n_g)
+          Return the same Fth string object _s_t_r_i_n_g reversed.
+                FTH fs = fth_make_string("foo");
+                fth_string_reverse(fs); => "oof"
      _F_T_H fftthh__ssttrriinngg__ssccaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_s_t_r)
+          Add C string _s_t_r to an already existing Fth string object _s_t_r_i_n_g.
+                FTH fs = fth_make_empty_string(); => ""
+                fth_string_scat(fs, "hello"); => "hello"
      _F_T_H fftthh__ssttrriinngg__ssffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
+          Add extended printf(3) fmt args to an already existing Fth string
+          object.  See _f_t_h___m_a_k_e___s_t_r_i_n_g___f_o_r_m_a_t.
+                FTH fs = fth_make_string("we want to ");
+                fth_string_sformat(fs, "print %d times %f\n", 10, 3.14);
+                  => "we want to print 10 times 3.140000\n"
      _F_T_H fftthh__ssttrriinngg__sshhiifftt(_F_T_H _s_t_r_i_n_g)
+          Remove and return first character of _s_t_r_i_n_g.  If _s_t_r_i_n_g is empty,
+          return #f.
+                FTH fs = fth_make_string("foo");
+                fth_string_shift(fs); => 102 ('f')
+                fth_string_shift(fs); => 111 ('o')
+                fth_string_shift(fs); => 111 ('o')
+                fth_string_shift(fs); => #f
      _F_T_H fftthh__ssttrriinngg__ssnnccaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_s_t_r, _f_i_c_l_I_n_t_e_g_e_r _l_e_n)
+          Add C string _s_t_r of length _l_e_n to an already existing Fth string
+          object _s_t_r_i_n_g.
+                FTH fs = fth_make_empty_string(); => ""
+                fth_string_sncat(fs, ",  ", 2); => "hello, "
      _F_T_H fftthh__ssttrriinngg__sspplliitt(_F_T_H _s_t_r_i_n_g, _F_T_H _s_e_p___s_t_r)
+          Split _s_t_r_i_n_g using _s_e_p___s_t_r as delimiter and return result as array
+          of strings.  If _s_e_p___s_t_r is not a string or regexp, delimiter is
+          space.
+                FTH fs = fth_make_string("foo:bar:baz");
+                FTH sp = fth_make_string(":");
+                fth_string_split(fs, sp); => #( "foo" "bar" "baz")
+                FTH sp = fth_make_regexp(":");
+                fth_string_split(fs, sp); => #( "foo" "bar" "baz")
+                FTH fs = fth_make_string("foo bar baz");
+                fth_string_split(fs, FTH_NIL); => #( "foo" "bar" "baz")
      _F_T_H fftthh__ssttrriinngg__ssuubbssttrriinngg(_F_T_H _s_t_r_i_n_g, _f_i_c_l_I_n_t_e_g_e_r _s_t_a_r_t, _f_i_c_l_I_n_t_e_g_e_r _e_n_d)
+          Return new string from position _s_t_a_r_t to, but excluding, position
+          _e_n_d; negative index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if index is not in range of _s_t_r_i_n_g.
+                FTH fs = fth_make_string("hello world");
+                fth_string_substring(fs, 2, 4); => "ll"
+                fth_string_substring(fs, -4, -2); => "or"
+                fth_string_substring(fs, -4, fth_string_length(fs)); => "orld"
      _F_T_H fftthh__ssttrriinngg__ttoo__aarrrraayy(_F_T_H _s_t_r_i_n_g)
+          Convert _s_t_r_i_n_g to an array of characters.
+                FTH fs = fth_make_string("foo");
+                fth_string_to_array(fs); => #( 102 111 111 )
      _F_T_H fftthh__ssttrriinngg__uunnsshhiifftt(_F_T_H _s_t_r_i_n_g, _F_T_H _a_d_d___s_t_r)
+          Prepends string representation of _a_d_d___s_t_r to _s_t_r_i_n_g and return
+          changed Fth string object.
+                FTH fs = fth_make_string("foo");
+                fth_string_unshift(fs, fth_make_string(" ")); => " foo"
+                fth_string_unshift(fs, INT_TO_FIX(10)); => "10 foo"
      _F_T_H fftthh__ssttrriinngg__uuppccaassee(_F_T_H _s_t_r_i_n_g)
+          Return the string, not a copy, changed to all chars upcase.
+                FTH fs = fth_make_string("Foo");
+                fth_string_upcase(fs); => "FOO"
+                fth_printf("%S", fs); => "FOO"
      _F_T_H fftthh__ssttrriinngg__vvffoorrmmaatt(_c_o_n_s_t _c_h_a_r _*_f_m_t, _F_T_H _a_r_g_s)
+          Return formatted Fth string corresponding to C string _f_m_t and Fth
+          array _a_r_g_s containing as much arguments as _f_m_t requires.
+                FTH args = fth_make_array_var(2,
+                    INT_TO_FIX(10),
+                    fth_make_float(3.14));
+                fth_string_vformat("print %d times %f", args);
+                    => "print 10 times 3.140000"
      _F_T_H fftthh__ssttrriinngg__vvssffoorrmmaatt(_F_T_H _s_t_r_i_n_g, _c_o_n_s_t _c_h_a_r _*_f_m_t, _v_a___l_i_s_t _a_p)
+          The same as _f_t_h___s_t_r_i_n_g___s_f_o_r_m_a_t except for a va_list _a_p.
 
    SSyymmbboollss
      _b_o_o_l FFTTHH__SSYYMMBBOOLL__PP(_o_b_j)
@@ -1109,7 +1421,7 @@ CCOOMMPPAATTIIBBIILLIITTYY
      lliibbfftthh has no extra floating point stack; floats are of type _f_i_c_l_F_l_o_a_t.
 
 SSEEEE AALLSSOO
-     clang(1), fth(1), sprintf(3)
+     clang(1), fth(1), printf(3), strcmp(3).
 
 SSTTAANNDDAARRDDSS
      lliibbfftthh conforms only partly to _A_N_S _F_o_r_t_h.
@@ -1125,4 +1437,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/06                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/02/11                    NetBSD 7.99.26

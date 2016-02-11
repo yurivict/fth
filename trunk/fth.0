@@ -349,7 +349,7 @@ DDEESSCCRRIIPPTTIIOONN
           Print array object _a_r_y to current output.
      >>aarrrraayy ( vals len -- ary )
           Return array object with _l_e_n objects found on parameter stack.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
      aarrrraayy-->>aarrrraayy ( ary1 -- ary2 )
           Return copy of _a_r_y_1 only with references of each element in contrary
           to _a_r_r_a_y_-_c_o_p_y.  If _a_r_y_1 is not an array, return #( ary1 ).
@@ -388,8 +388,8 @@ DDEESSCCRRIIPPTTIIOONN
                 ary2 => #( 0 #{ 'foo 10 } 2 )
      aarrrraayy--ddeelleettee!! ( ary idx -- val )
           Delete and return one element from _a_r_y at position _i_d_x.  Negative
-          index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is
-          not in _a_r_y_'_s range.
+          index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x
+          is not in _a_r_y_'_s range.
      aarrrraayy--ddeelleettee--kkeeyy ( ary key -- val )
           Delete and return _k_e_y from _a_r_y if found, otherwise return #f.
      aarrrraayy--ffiillll ( ary val -- )
@@ -401,11 +401,11 @@ DDEESSCCRRIIPPTTIIOONN
      aarrrraayy--iinnsseerrtt ( ary1 idx val -- ary2 )
           Insert _v_a_l to _a_r_y_1 at position _i_d_x and return new array.  _v_a_l can be
           an array or any other object.  Negative _i_d_x counts from backward.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_1_'_s range.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_1_'_s range.
      aarrrraayy--iinnsseerrtt!! ( ary idx val -- ary' )
           Insert _v_a_l to _a_r_y at position _i_d_x and return changed array.  _v_a_l can
           be a single object or an array.  Negative _i_d_x counts from backward.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_'_s range.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _a_r_y_'_s range.
      aarrrraayy--jjooiinn ( ary sep -- str )
           Return string with all elements of _a_r_y converted to their string
           representation and joined together separated by the string _s_e_p.  If
@@ -424,7 +424,7 @@ DDEESSCCRRIIPPTTIIOONN
                 #( 0 1 2 ) 10 array-push => #( 0 1 2 10 )
      aarrrraayy--rreeff ( ary idx -- val )
           Return value at position _i_d_x.  Negative index counts from backward.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
      aarrrraayy--rreejjeecctt ( ary1 prc args -- ary2 )
           _p_r_c will be called with _a_r_g_s, an array of zero or more proc
           arguments, and the current array element set as first arg in _a_r_g_s
@@ -451,15 +451,15 @@ DDEESSCCRRIIPPTTIIOONN
           Return _a_r_y with elements reversed.
      aarrrraayy--sseett!! ( ary idx val -- )
           Store _v_a_l at position _i_d_x.  Negative index counts from backward.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in _a_r_y_'_s range.
      aarrrraayy--sshhiifftt ( ary -- val )
           Remove and return first element from _a_r_y.  If _a_r_y is empty, return
           #f.
      aarrrraayy--ssoorrtt ( ary1 prc -- ary2 )
           Return new sorted array.  _p_r_c compares two elements A and B and
           should return a negative integer if A < B, 0 if A == B, and a
-          positive integer if A > B.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c doesn't
-          take two arguments.
+          positive integer if A > B.  Raise a _b_a_d_-_a_r_i_t_y exception if _p_r_c
+          doesn't take two arguments.
                 #( 2 1 0 ) lambda: <{ a b -- f }>
                         a b < if
                                 -1
@@ -474,13 +474,13 @@ DDEESSCCRRIIPPTTIIOONN
      aarrrraayy--ssoorrtt!! ( ary prc -- ary' )
           Return the sorted _a_r_y.  _p_r_c compares two elements A and B and should
           return a negative integer if A < B, 0 if A == B, and a positive
-          integer if A > B.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c doesn't take two
-          arguments.
+          integer if A > B.  Raise a _b_a_d_-_a_r_i_t_y exception if _p_r_c doesn't take
+          two arguments.
      aarrrraayy--ssuubbaarrrraayy ( ary start end -- subary )
           Return array built from _a_r_y beginning with index _s_t_a_r_t up to but
           excluding index _e_n_d.  If _e_n_d is nil, up to end of array will be
-          returned.  Negative index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e
-          exception if _s_t_a_r_t is not in _a_r_y_'_s range.
+          returned.  Negative index counts from backward.  Raise an
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _s_t_a_r_t is not in _a_r_y_'_s range.
                 #( 0 1 2 3 4 ) 2 4 array-subarray => #( 2 3 )
                 #( 0 1 2 3 4 ) -3 -1 array-subarray => #( 2 3 4 )
                 #( 0 1 2 3 4 ) -3 nil array-subarray => #( 2 3 4 )
@@ -498,13 +498,13 @@ DDEESSCCRRIIPPTTIIOONN
           Return #t if _o_b_j is an array object, otherwise #f.
      mmaakkee--aarrrraayy ( len :key initial-element -- ary )
           Return array of length _l_e_n filled with keyword INITIAL-ELEMENT
-          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise
+          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise an
           _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
 
      Assoc arrays:
      >>aassssoocc ( vals len -- ary )
           Return assoc array object with _l_e_n / 2 key-value pairs found on
-          parameter stack.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
+          parameter stack.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
           even.
      aarrrraayy--aassssoocc ( ass key -- ret )
           If _k_e_y matches, return corresponding key-value pair, otherwise #f.
@@ -530,7 +530,7 @@ DDEESSCCRRIIPPTTIIOONN
           Print list object _l_s_t to current output.
      >>lliisstt ( vals len -- lst )
           Return list object with _l_e_n objects found on parameter stack.  Raise
-          _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+          an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
      ccaaddddddrr ( lst -- val )
           Return fourth entry, the cadddr, of _l_i_s_t or nil.
      ccaaddddrr ( lst -- val )
@@ -563,7 +563,7 @@ DDEESSCCRRIIPPTTIIOONN
                 ary2 => #( 0 #{ 'foo 30 } 2 )
      lliisstt--aappppeenndd ( arg0 arg1 ... argn n -- lst )
           Return list object with _n objects found on parameter stack.  Raise
-          _o_u_t_-_o_f_-_r_a_n_g_e exception if _n < 0.
+          an _o_u_t_-_o_f_-_r_a_n_g_e exception if _n < 0.
      lliisstt--ccooppyy ( lst1 -- ary2 )
           Return copy of _l_s_t_1 with all elements new created in contrary to
           _l_i_s_t_-_>_a_r_r_a_y.
@@ -585,7 +585,7 @@ DDEESSCCRRIIPPTTIIOONN
      lliisstt--iinnsseerrtt ( lst1 idx val -- lst2 )
           Insert _v_a_l to _l_s_t_1 at position _i_d_x and return new list.  _v_a_l can be
           a list or any other object.  Negative _i_d_x counts from backward.
-          Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_1_'_s range.
+          Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_1_'_s range.
      lliisstt--lleennggtthh ( obj -- len )
           If _o_b_j is a list (or array), return length of list, if _o_b_j is nil,
           return 0 otherwise -1.
@@ -593,21 +593,21 @@ DDEESSCCRRIIPPTTIIOONN
           Return #t if _k_e_y exists in _l_s_t, otherwise #f.
      lliisstt--rreeff ( lst idx -- val )
           Return value at position _i_d_x of _l_s_t.  Negative _i_d_x counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
           range.
      lliisstt--rreevveerrssee ( lst1 -- ary2 )
           Return new list with elements reversed.
      lliisstt--sseett!! ( lst idx val -- )
           Store element _v_a_l at position _i_d_x in _l_s_t.  Negative _i_d_x counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s
           range.
      lliisstt--sslliiccee ( lst1 idx :key count 1 -- lst2 )
-          Return new list without _c_o_u_n_t elements from _i_d_x on.  Raise
+          Return new list without _c_o_u_n_t elements from _i_d_x on.  Raise an
           _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_1_'_s range.
                 #( 0 1 1 2 ) 1 :count 2 list-slice => #( 0 2 )
      lliisstt--sslliiccee!! ( lst idx :key count 1 -- lst' )
-          Return _l_s_t without _c_o_u_n_t elements from _i_d_x on.  Raise _o_u_t_-_o_f_-_r_a_n_g_e
-          exception if _i_d_x is not in _l_s_t_'_s range.
+          Return _l_s_t without _c_o_u_n_t elements from _i_d_x on.  Raise an
+          _o_u_t_-_o_f_-_r_a_n_g_e exception if _i_d_x is not in _l_s_t_'_s range.
      lliisstt--ttaaiill ( lst1 idx -- lst2 )
           Return _i_d_x_'_t_h cdr of _l_s_t_1 up to the last entry in a new list or nil.
      lliisstt== ( lst1 lst2 -- f )
@@ -617,7 +617,7 @@ DDEESSCCRRIIPPTTIIOONN
           Return #t if _o_b_j is a list (nil or a cons pointer), otherwise #f.
      mmaakkee--lliisstt ( len :key initial-element nil -- lst )
           Return list of length _l_e_n filled with keyword _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t
-          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise
+          values.  _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t defaults to nil if not specified.  Raise an
           _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
      nniill?? ( obj -- f )
           Return #t if _o_b_j is nil, otherwise #f.
@@ -632,7 +632,7 @@ DDEESSCCRRIIPPTTIIOONN
      Assoc lists:
      >>aalliisstt ( vals len -- alst )
           Return assoc list object with _l_e_n / 2 key-value pairs found on
-          parameter stack. Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
+          parameter stack. Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
           even.
      aaccoonnss ( key val alst1 -- alst2 )
           Return new Lisp-like associated list from _k_e_y_-_v_a_l pair and _a_l_s_t_1.
@@ -686,7 +686,7 @@ DDEESSCCRRIIPPTTIIOONN
           user.
      ffiillee--ccooppyy ( src dst -- )
           Copy file _s_r_c to _d_s_t.  If _d_s_t is a directory, copy _s_r_c to _D_S_T_/_S_R_C.
-          Raise _s_y_s_t_e_m_-_e_r_r_o_r exception if fopen(3) fails on any of the two
+          Raise a _s_y_s_t_e_m_-_e_r_r_o_r exception if fopen(3) fails on any of the two
           files.
      ffiillee--ccttiimmee ( name -- time )
           If _n_a_m_e is a file, return its status change time, otherwise #f.  One
@@ -702,7 +702,7 @@ DDEESSCCRRIIPPTTIIOONN
           Load and eval content of file _n_a_m_e and add _n_a_m_e to *loaded-files* if
           it wasn't there.  It's similar to iinncclluuddee except that _n_a_m_e must be
           on stack (include is a parse word).  With ffiillee--eevvaall one can load
-          files from within word definitions.  Raise _l_o_a_d_-_e_r_r_o_r exception if
+          files from within word definitions.  Raise a _l_o_a_d_-_e_r_r_o_r exception if
           ffiillee--eevvaall fails.
      ffiillee--ffuullllppaatthh ( name -- path )
           Return current working directory prepended to file _n_a_m_e.  If name
@@ -823,7 +823,8 @@ DDEESSCCRRIIPPTTIIOONN
           Print _h_a_s_h object to current output.
      >>hhaasshh ( vals len -- hash )
           Take _l_e_n / 2 key-value pairs from parameter stack and return hash
-          object.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or _l_e_n is not even.
+          object.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or _l_e_n is not
+          even.
                 'foo 0  'bar 1  4 >hash =>  #{ 'foo => 0  'bar => 1 }
      hhaasshh-->>aarrrraayy ( hash -- ass )
           Return associated array with '( key . value ) pairs of _h_a_s_h_'_s
@@ -908,11 +909,11 @@ DDEESSCCRRIIPPTTIIOONN
           Return array of all _h_o_o_k procedures.
      hhooookk-->>lliisstt ( hook -- proc-list ) alias for _h_o_o_k_-_>_a_r_r_a_y
      hhooookk--aadddd ( hook prc -- )
-          Add hook procedure _p_r_c to _h_o_o_k.  Raise _b_a_d_-_a_r_i_t_y exception if _p_r_c_'_s
-          arity doesn't match _h_o_o_k_'_s arity.
+          Add hook procedure _p_r_c to _h_o_o_k.  Raise a _b_a_d_-_a_r_i_t_y exception if
+          _p_r_c_'_s arity doesn't match _h_o_o_k_'_s arity.
      hhooookk--aappppllyy ( hook args -- value-list )
           Run all hook procedures with _a_r_g_s, an array of arguments.  _a_r_g_s can
-          be an array of arguments or a single argument.  Raise _b_a_d_-_a_r_i_t_y
+          be an array of arguments or a single argument.  Raise a _b_a_d_-_a_r_i_t_y
           exception if _a_r_g_s_'_s length doesn't match _h_o_o_k_'_s arity.
                 2 make-hook value hk1
                 hk1  <'> + 2 make-proc  add-hook!
@@ -1018,7 +1019,7 @@ DDEESSCCRRIIPPTTIIOONN
           file before open it for writing or appending.  Possible iiff--eexxiissttss
           values:
                ::eerrrroorr
-                    raise _i_o_-_e_r_r_o_r exception if _n_a_m_e already exist
+                    raise an _i_o_-_e_r_r_o_r exception if _n_a_m_e already exist
                ::oovveerrwwrriittee
                     overwrite existing file (default)
                ::rreennaammee
@@ -1175,13 +1176,14 @@ DDEESSCCRRIIPPTTIIOONN
      Socket functions:
      iioo--nnooppeenn (host :key port 1024 domain AF_INET -- io)
           Connect to an already established server and return new IO object.
-          Raise an _s_o_c_k_e_t_-_e_r_r_o_r exception if an error occured.  _h_o_s_t is a host
-          name (AF_INET) or a path name (AF_UNIX).  If _h_o_s_t is not a string,
-          "localhost" will be used.  _p_o_r_t is the connection port (default
-          1024) if _d_o_m_a_i_n is AF_INET, otherwise unused, and _d_o_m_a_i_n can be one
-          of AF_INET (default) or AF_UNIX.  The socket is opened with _d_o_m_a_i_n,
-          hardcoded second argument SOCK_STREAM, and hardcoded third argument
-          of 0, see socket(2) and connect(2) for more information.
+          Raise an a _s_o_c_k_e_t_-_e_r_r_o_r exception if an error occured.  _h_o_s_t is a
+          host name (AF_INET) or a path name (AF_UNIX).  If _h_o_s_t is not a
+          string, "localhost" will be used.  _p_o_r_t is the connection port
+          (default 1024) if _d_o_m_a_i_n is AF_INET, otherwise unused, and _d_o_m_a_i_n
+          can be one of AF_INET (default) or AF_UNIX.  The socket is opened
+          with _d_o_m_a_i_n, hardcoded second argument SOCK_STREAM, and hardcoded
+          third argument of 0, see socket(2) and connect(2) for more
+          information.
                 "localhost" :port 25 io-nopen value io
                 io io-read => "220 fth-devel.net ESMTP Sendmail ..."
                 io "HELP\r\n" io-write
@@ -1198,54 +1200,55 @@ DDEESSCCRRIIPPTTIIOONN
           established connection.  _f_d is the socket descriptor, _h_o_s_t can be an
           arbitrary name, its only use is the name for the IO object, _d_o_m_a_i_n
           is one of AF_INET or AF_UNIX.  This is used on the server side of a
-          socket connection.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if accept(2) fails.
+          socket connection.  Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception if accept(2)
+          fails.
      nneett--bbiinndd ( fd host port domain -- )
           Assign a name to a socket.  _f_d is the socket descriptor, _h_o_s_t is a
           host name (AF_INET) or a path name (AF_UNIX), _p_o_r_t is the port if
           _d_o_m_a_i_n is AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or
           AF_UNIX.  This is used on the server side of a socket connection.
-          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if bind(2) fails.
+          Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception if bind(2) fails.
      nneett--ccoonnnneecctt ( fd host port domain -- io )
           Connect to a server and return IO object after an established
           connection.  _f_d is the socket descriptor, _h_o_s_t is a host name
           (AF_INET) or a name (AF_UNIX), _p_o_r_t is the port if _d_o_m_a_i_n is
           AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
-          This is used on the client side of a socket connection.  Raise
+          This is used on the client side of a socket connection.  Raise a
           _s_o_c_k_e_t_-_e_r_r_o_r exception if connect(2) fails.
      nneett--lliisstteenn ( fd -- )
           Inform the operating system that connection requests should be
           delivered.  _f_d is the previously opened socket descriptor.  This is
-          used on the server side of a socket connection.  Raise _s_o_c_k_e_t_-_e_r_r_o_r
-          exception if listen(2) fails.
+          used on the server side of a socket connection.  Raise a
+          _s_o_c_k_e_t_-_e_r_r_o_r exception if listen(2) fails.
      nneett--rreeccvv ( fd flags -- msg )
           Receive data via a socket and return it.  _f_d is the socket
-          descriptor and _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  Raise
+          descriptor and _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  Raise a
           _s_o_c_k_e_t_-_e_r_r_o_r exception if recv(2) fails.
      nneett--rreeccvvffrroomm ( fd flags host port domain -- msg )
           Receive data via a socket and return it.  _f_d is the socket
           descriptor, _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  _h_o_s_t is a host
           name (AF_INET) or a path name (AF_UNIX), _p_o_r_t is the port if is
           AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
-          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if recvfrom(2) fails.
+          Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception if recvfrom(2) fails.
      nneett--sseenndd ( fd msg flags -- )
           Send data via a socket.  _f_d is the socket descriptor, _m_s_g is the
-          data to send and _f_l_a_g_s can be 0, MSG_PEEK or MSG_OOB.  Raise
+          data to send and _f_l_a_g_s can be 0, MSG_PEEK or MSG_OOB.  Raise a
           _s_o_c_k_e_t_-_e_r_r_o_r exception if send(2) fails.
      nneett--sseennddttoo ( fd msg flags host port domain -- )
           Send data via a socket.  _f_d is the socket descriptor, _m_s_g is the
           data to send, _f_l_a_g_s can be 0, MSG_PEEK, or MSG_OOB.  _h_o_s_t is a host
           name (AF_INET) or a name (AF_UNIX), _p_o_r_t is the port if _d_o_m_a_i_n is
           AF_INET, otherwise unused, and _d_o_m_a_i_n is one of AF_INET or AF_UNIX.
-          Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if sendto(2) fails.
+          Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception if sendto(2) fails.
      nneett--sshhuuttddoowwnn ( fd how -- )
           Close socket connection.  _f_d is the socket descriptor and _h_o_w is one
-          of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if
+          of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception if
           shutdown(2) fails.
      nneett--ssoocckkeett ( domain type -- fd )
           Return socket descriptor.  _d_o_m_a_i_n can be AF_INET or AF_UNIX, _t_y_p_e
           can be SOCK_STREAM or SOCK_DGRAM.  The third argument to socket(2)
-          is 0 and cannot be set by the user.  Raise _s_o_c_k_e_t_-_e_r_r_o_r exception if
-          socket(2) fails.
+          is 0 and cannot be set by the user.  Raise a _s_o_c_k_e_t_-_e_r_r_o_r exception
+          if socket(2) fails.
                 AF_INET SOCK_STREAM net-socket value fd
                 fd "localhost" 1024 AF_INET net-bind
                 fd net-listen
@@ -1304,8 +1307,8 @@ DDEESSCCRRIIPPTTIIOONN
           `.fs'.  If _n_a_m_e doesn't exist, try each entry of *load-path* with
           _n_a_m_e.  With iinncclluuddee one can load a file more than once.  Before
           loading _n_a_m_e, run hook _b_e_f_o_r_e_-_l_o_a_d_-_h_o_o_k.  After loading _n_a_m_e, run
-          hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise _n_o_-_s_u_c_h_-_f_i_l_e exception if file doesn't
-          exist, raise _l_o_a_d_-_e_r_r_o_r if an error occured during load.
+          hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise a _n_o_-_s_u_c_h_-_f_i_l_e exception if file
+          doesn't exist, raise a _l_o_a_d_-_e_r_r_o_r if an error occured during load.
                 include hello
      iinnssttaallll ( "file" -- )
           Install _f_i_l_e in first writeable path found in *load-path* (*.fs[m])
@@ -1336,8 +1339,8 @@ DDEESSCCRRIIPPTTIIOONN
           specified, use `.fs'.  If _n_a_m_e doesn't exist, try each entry of
           *load-path* with _n_a_m_e.  With rreeqquuiirree one can load a file only one
           time.  Before loading _n_a_m_e, run hook _b_e_f_o_r_e_-_l_o_a_d_-_h_o_o_k.  After
-          loading _n_a_m_e, run hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise _n_o_-_s_u_c_h_-_f_i_l_e
-          exception if file doesn't exist, raise _l_o_a_d_-_e_r_r_o_r if an error
+          loading _n_a_m_e, run hook _a_f_t_e_r_-_l_o_a_d_-_h_o_o_k.  Raise a _n_o_-_s_u_c_h_-_f_i_l_e
+          exception if file doesn't exist, raise a _l_o_a_d_-_e_r_r_o_r if an error
           occured during load.
                 require hello
      uunnsshhiifftt--llooaadd--lliibb--ppaatthh ( path -- )
@@ -1473,7 +1476,7 @@ DDEESSCCRRIIPPTTIIOONN
      ttiimmee--rreesseett ( -- )
           Set global timeval struct variable to current time.
      uuttiimmee ( -- utime stime )
-          Return user and system time as ficlFloats.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d
+          Return user and system time as ficlFloats.  Raise a _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d
           exception if times(3) is not available.
                 utime => 0.171875 0.0234375
 
@@ -1515,12 +1518,12 @@ DDEESSCCRRIIPPTTIIOONN
           Return parent process id.
      ggeettsseerrvvbbyynnaammee ( str -- ary )
           Return array containing the service, an array of aliases, the port
-          number and the protocol.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
+          number and the protocol.  Raise a _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
           getservbyname(3) is not available.
                 "smtp" getservbyname => #( "smtp" #( "mail" ) 25 "tcp" )
      ggeettsseerrvvbbyyppoorrtt ( port -- ary )
           Return array containing the service, an array of aliases, the port
-          number and the protocol.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
+          number and the protocol.  Raise a _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if
           getservbyport(3) is not available.
                 25 getservbyport => #( "smtp" #( "mail" ) 25 "tcp" )
      ggeettuuiidd ( -- id )
@@ -1542,7 +1545,7 @@ DDEESSCCRRIIPPTTIIOONN
           or effective GID or the effective UID is that of the super user.
      sseetthhoossttnnaammee ( str -- )
           Set name of current host to _s_t_r.  This call is restricted to the
-          super-user.  Raise _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if sethostname(3) is
+          super-user.  Raise a _n_o_t_-_i_m_p_l_e_m_e_n_t_e_d exception if sethostname(3) is
           not available.
      sseettuuiidd ( id -- )
           Set real user _i_d.  This is only permitted if _i_d is equal real UID or
@@ -2188,21 +2191,21 @@ DDEESSCCRRIIPPTTIIOONN
      eemmppttyy?? ( obj -- f ) alias for _o_b_j_e_c_t_-_e_m_p_t_y_?
      eeqquuaall?? ( obj1 obj2 -- f ) alias for _o_b_j_e_c_t_-_e_q_u_a_l_?
      ffiirrsstt--rreeff ( obj -- val )
-          Return first element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
-          of _o_b_j is less than 1.
+          Return first element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          length of _o_b_j is less than 1.
      ffiirrsstt--sseett!! ( obj value -- )
-          Store _v_a_l_u_e to first element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
-          if length of _o_b_j is less than 1.
+          Store _v_a_l_u_e to first element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if length of _o_b_j is less than 1.
      hhaasshh--iidd ( obj -- id )
           Return hash id computed from string representation of _o_b_j.  Objects
           with the same content have the same id.
      iinnddeexx ( obj key -- index ) alias for _o_b_j_e_c_t_-_i_n_d_e_x
      llaasstt--rreeff ( obj -- val )
-          Return last element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
-          of _o_b_j is less than 1.
-     llaasstt--sseett!! ( obj value -- )
-          Store _v_a_l_u_e to last element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          Return last element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
           length of _o_b_j is less than 1.
+     llaasstt--sseett!! ( obj value -- )
+          Store _v_a_l_u_e to last element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception
+          if length of _o_b_j is less than 1.
      lleennggtthh ( obj -- len ) alias for _o_b_j_e_c_t_-_l_e_n_g_t_h
      mmeemmbbeerr?? ( obj key -- f ) alias for _o_b_j_e_c_t_-_m_e_m_b_e_r_?
      oobbjjeecctt-->>aarrrraayy ( obj -- ary )
@@ -2296,18 +2299,18 @@ DDEESSCCRRIIPPTTIIOONN
                 #( 6 2 8 1 ) <'> numb-sort object-sort => #( 1 2 6 8 )
      rraannggee?? ( obj index -- f ) alias for _o_b_j_e_c_t_-_r_a_n_g_e_?
      sseeccoonndd--rreeff ( obj -- val )
-          Return second element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          Return second element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
           length of _o_b_j is less than 2.
      sseeccoonndd--sseett!! ( obj value -- )
-          Store _v_a_l_u_e to second element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
-          if length of _o_b_j is less than 2.
+          Store _v_a_l_u_e to second element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if length of _o_b_j is less than 2.
      ssoorrtt ( obj cmp-xt -- ary ) alias for _o_b_j_e_c_t_-_s_o_r_t
      tthhiirrdd--rreeff ( obj -- val )
-          Return third element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if length
-          of _o_b_j is less than 3.
+          Return third element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          length of _o_b_j is less than 3.
      tthhiirrdd--sseett!! ( obj value -- )
-          Store _v_a_l_u_e to third element of _o_b_j.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
-          if length of _o_b_j is less than 3.
+          Store _v_a_l_u_e to third element of _o_b_j.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if length of _o_b_j is less than 3.
      xxmmoobbjj?? ( obj -- f )
           Return #t if _o_b_j is an XmObj (xm.c), otherwise #f.  It is a very
           special Snd XM test.  See snd(1) for more information.
@@ -2719,8 +2722,8 @@ DDEESSCCRRIIPPTTIIOONN
      pprroocc--aappppllyy ( prc args -- res )
           Execute proc object _p_r_c with arguments _a_r_g_s and return result or #f.
           _a_r_g_s can be an array of arguments or a single argument.  If
-          execution fails, raise _e_v_a_l_-_e_r_r_o_r exception, if length of _a_r_g_s is
-          less than required arity of _p_r_c, raise _b_a_d_-_a_r_i_t_y exception.
+          execution fails, raise an _e_v_a_l_-_e_r_r_o_r exception, if length of _a_r_g_s is
+          less than required arity of _p_r_c, raise a _b_a_d_-_a_r_i_t_y exception.
                 <'> +  2  make-proc value plus
                 plus #( 5 6 ) proc-apply => 11
      pprroocc--aarriittyy ( prc -- arity )
@@ -2768,13 +2771,13 @@ DDEESSCCRRIIPPTTIIOONN
      sseeee22 ( "name" -- )
           Show word definition of _n_a_m_e.
      sseett!! ( "name" -- )
-          Parse _n_a_m_e and execute word _s_e_t_-_n_a_m_e if found, otherwise raise
+          Parse _n_a_m_e and execute word _s_e_t_-_n_a_m_e if found, otherwise raise an
           _u_n_d_e_f_i_n_e_d_-_w_o_r_d exception.  The following two lines do the same:
                 128 set! object-print-length
                 128 set-object-print-length
      sseett--eexxeeccuuttee ( xt -- ?? )
-          Execute _s_e_t_-_x_t if found, otherwise raise _u_n_d_e_f_i_n_e_d_-_w_o_r_d exception.
-          The following two lines do the same:
+          Execute _s_e_t_-_x_t if found, otherwise raise an _u_n_d_e_f_i_n_e_d_-_w_o_r_d
+          exception.  The following two lines do the same:
                 128 <'> object-print-length set-execute
                 128 set-object-print-length
      sseett--xxtt ( xt1 -- xt2 )
@@ -2878,7 +2881,7 @@ DDEESSCCRRIIPPTTIIOONN
      rreeggeexxpp--rreeppllaaccee ( reg str1 replace -- str2 )
           Replace 1st occurrence of _r_e_g in _s_t_r_1 with _r_e_p_l_a_c_e if found.
           References \1 to \9 in _r_e_p_l_a_c_e will be replaced by corresponding
-          subexpressions.  If no corresponding subexpression exist, raise
+          subexpressions.  If no corresponding subexpression exist, raise a
           _r_e_g_e_x_p_-_e_r_r_o_r exception.
                 /(foo)/ "foo-bar" "***\\1***" regexp-replace
                   => ***foo***-bar
@@ -2922,8 +2925,8 @@ DDEESSCCRRIIPPTTIIOONN
      $$ssppaaccee ( -- str )
           Return string of one space (" ").
      $$ssppaacceess ( len -- str )
-          Return string of _l_e_n spaces.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n <
-          0.
+          Return string of _l_e_n spaces.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n
+          < 0.
      ..$$ ( obj -- ) alias for _._s_t_r_i_n_g
      ..ddeebbuugg ( obj -- )
           Print string representation of _o_b_j to stderr wrapped in ##<<DDEEBBUUGG((FF))::
@@ -2957,7 +2960,7 @@ DDEESSCCRRIIPPTTIIOONN
           ......>> to current stderr and throw exception; _a_r_g_s is optional.   See
           _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
      fftthh--ffoorrmmaatt ( fmt :optional args -- str  )
-          Return string object from sprintf(3) _f_m_t string and _a_r_g_s array
+          Return string object from printf(3) _f_m_t string and _a_r_g_s array
           containing corresponding arguments; _a_r_g_s is optional.  See _s_t_r_i_n_g_-
           _f_o_r_m_a_t for _f_m_t description.
      fftthh--pprriinntt ( fmt :optional args -- )
@@ -2969,7 +2972,8 @@ DDEESSCCRRIIPPTTIIOONN
           _f_m_t description.
      mmaakkee--ssttrriinngg ( len :key initial-element ' ' -- str )
           Return a new string of length _l_e_n filled with _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t
-          characters, default space.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0.
+          characters, default space.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n <
+          0.
                 3 :initial-element <char> x make-string => "xxx"
      ssttrriinngg-->>aarrrraayy ( str -- ary )
           Convert _s_t_r to an array of characters.
@@ -2995,8 +2999,8 @@ DDEESSCCRRIIPPTTIIOONN
           Return copy of _s_t_r_1.
      ssttrriinngg--ddeelleettee!! ( str idx -- val )
           Delete and return character at position _i_d_x from _s_t_r; negative index
-          counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not
-          in range of string.
+          counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is
+          not in range of string.
      ssttrriinngg--ddoowwnnccaassee ( str1 -- str2 )
           Return new string with all characters lowercase.
      ssttrriinngg--ddoowwnnccaassee!! ( str -- str' )
@@ -3022,8 +3026,8 @@ DDEESSCCRRIIPPTTIIOONN
                 "hello world" "l" string-find => "llo world"
                 "hello world" /ell/ string-find => "lo world"
      ssttrriinngg--ffoorrmmaatt ( fmt args -- )
-          _f_m_t is a sprintf(3) format string and _a_r_g_s the needed arguments
-          which may be an array, a single argument or #f.
+          _f_m_t is a printf(3) format string and _a_r_g_s the needed arguments which
+          may be an array, a single argument or #f.
                 "%04d %8.2f %b %X %o"  #( 128 pi 255 255 255 ) string-format
                   => "0128     3.14 11111111 FF 377"
           The format string can have zero or more of the following flags:
@@ -3038,7 +3042,7 @@ DDEESSCCRRIIPPTTIIOONN
                           Padding with `0' (zero) rather than blank.
           The following conversion specifiers are known:
                 %%         A `%' is written.
-                aaAAeeEEffFFggGG  Floating point output like _s_p_r_i_n_t_f _3.
+                aaAAeeEEffFFggGG  Floating point output like _p_r_i_n_t_f _3.
                 cc         Single character output.
                 bbddoouuxxXX    Integer output in binary, decimal, octal, unsigned
                           and hexadecimal form.
@@ -3053,8 +3057,8 @@ DDEESSCCRRIIPPTTIIOONN
                 "hello world" "orl" string-index => 7
      ssttrriinngg--iinnsseerrtt!! ( str idx val -- str' )
           Insert string representation of _v_a_l to _s_t_r at position _i_d_x; negative
-          index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index
-          is not in range of string.
+          index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if
+          index is not in range of string.
      ssttrriinngg--lleennggtthh ( str -- len )
           If _s_t_r is a string object, return its length, otherwise -1.
      ssttrriinngg--mmeemmbbeerr?? ( str key -- f )
@@ -3067,8 +3071,8 @@ DDEESSCCRRIIPPTTIIOONN
           object.
      ssttrriinngg--rreeff ( str idx -- val )
           Return character at position _i_d_x; negative index counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range of
-          string.
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range
+          of string.
      ssttrriinngg--rreeppllaaccee ( str1 from to -- str2 )
           Return new string object with string _f_r_o_m replaced by string _t_o.  If
           _t_o is the empty string, delete the _f_r_o_m part from _s_t_r_1.
@@ -3078,11 +3082,11 @@ DDEESSCCRRIIPPTTIIOONN
      ssttrriinngg--rreevveerrssee ( str1-- str2 )
           Return _s_t_r_1 reversed as new string object.
      ssttrriinngg--rreevveerrssee!! ( str -- str' )
-          Return _s_t_r reversed.
+          Return the same string object _s_t_r reversed.
      ssttrriinngg--sseett!! ( str idx val -- )
           Store character _c_h_a_r at index _i_d_x; negative index counts from
-          backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range of
-          string.
+          backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if index is not in range
+          of string.
      ssttrriinngg--sshhiifftt ( str -- char )
           Remove and return first character.  If _s_t_r is empty, return #f.
      ssttrriinngg--sspplliitt ( str sep -- ary )
@@ -3093,10 +3097,10 @@ DDEESSCCRRIIPPTTIIOONN
                 "foo:bar:baz" "/:/" string-split
                   => #( "foo" "bar" "baz" )
      ssttrriinngg--ssuubbssttrriinngg ( str1 start end -- str2 )
-          Return new string from _s_t_r_1 index _s_t_a_r_t to but excluding index _e_n_d.
-          If index _e_n_d is not an integer, _e_n_d will be set to length of _s_t_r_1;
-          negative index counts from backward.  Raise _o_u_t_-_o_f_-_r_a_n_g_e exception
-          if _s_t_a_r_t is not in range of string.
+          Return new string from position _s_t_a_r_t to, but excluding, position
+          _e_n_d.  If _e_n_d is not an integer, _e_n_d will be set to length of _s_t_r_1;
+          negative index counts from backward.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e
+          exception if _s_t_a_r_t is not in range of string.
                 "hello world" 2 4 string-substring => "ll"
                 "hello world" -4 -2 string-substring => "or"
                 "hello world" -4 nil string-substring => "orld"
@@ -3395,8 +3399,8 @@ SSEEEE AALLSSOO
      csh(1), snd(1), tcsh(1), vi(1), accept(2), bind(2), connect(2),
      listen(2), recv(2), recvfrom(2), send(2), sendto(2), shutdown(2),
      socket(2), fopen(3), getopt(3), getservbyname(3), getservbyport(3),
-     gl_prompt_style(3), libfth(3), realpath(3), regex(3), sethostname(3),
-     sprintf(3), strftime(3), time(3), times(3), tecla(7)
+     gl_prompt_style(3), libfth(3), printf(3), realpath(3), regex(3),
+     sethostname(3), strftime(3), time(3), times(3), tecla(7).
 
 SSTTAANNDDAARRDDSS
      fftthh conforms only partly to _A_N_S _F_o_r_t_h; see _C_O_M_P_A_T_I_B_I_L_I_T_Y.
@@ -3412,4 +3416,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/06                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/02/11                    NetBSD 7.99.26
