@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.135 2/6/16
+.\" @(#)fth.1	1.136 2/11/16
 .\"
-.Dd 2016/02/06
+.Dd 2016/02/11
 .Dt FTH 1
 .Os
 .\"
@@ -910,7 +910,7 @@ to current output.
 .It Cm >array No (\ vals len -- ary\ )
 Return array object with
 .Ar len
-objects found on parameter stack.  Raise
+objects found on parameter stack.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1004,7 +1004,7 @@ Delete and return one element from
 .Ar ary
 at position
 .Ar idx .
-Negative index counts from backward.  Raise
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1061,7 +1061,7 @@ and return new array.
 .Ar val
 can be an array or any other object.  Negative
 .Ar idx
-counts from backward.  Raise
+counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1079,7 +1079,7 @@ and return changed array.
 .Ar val
 can be a single object or an array.  Negative
 .Ar idx
-counts from backward.  Raise
+counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1144,7 +1144,7 @@ to
 .It Cm array-ref No (\ ary idx -- val\ )
 Return value at position
 .Ar idx .
-Negative index counts from backward.  Raise
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in
 .Ar ary's
@@ -1212,7 +1212,7 @@ Store
 .Ar val
 at position
 .Ar idx .
-Negative index counts from backward.  Raise
+Negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in
 .Ar ary's
@@ -1234,7 +1234,7 @@ is empty, return #f.
 Return new sorted array.
 .Ar prc
 compares two elements A and B and should return a negative integer if A
-< B, 0 if A == B, and a positive integer if A > B.  Raise
+< B, 0 if A == B, and a positive integer if A > B.  Raise a
 .Ar bad-arity
 exception if
 .Ar prc
@@ -1257,7 +1257,7 @@ Return the sorted
 .Ar ary .
 .Ar prc
 compares two elements A and B and should return a negative integer if A
-< B, 0 if A == B, and a positive integer if A > B.  Raise
+< B, 0 if A == B, and a positive integer if A > B.  Raise a
 .Ar bad-arity
 exception if
 .Ar prc
@@ -1275,7 +1275,7 @@ up to but excluding index
 If
 .Ar end
 is nil, up to end of array will be returned.  Negative index counts from
-backward.  Raise
+backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar start
@@ -1333,7 +1333,7 @@ Return array of length
 .Ar len
 filled with keyword INITIAL-ELEMENT values.
 .Ar initial-element
-defaults to nil if not specified.  Raise
+defaults to nil if not specified.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1348,7 +1348,7 @@ Assoc arrays:
 .It Cm >assoc No (\ vals len -- ary\ )
 Return assoc array object with
 .Ar len
-/ 2 key-value pairs found on parameter stack.  Raise
+/ 2 key-value pairs found on parameter stack.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1423,7 +1423,7 @@ to current output.
 .It Cm >list No (\ vals len -- lst\ )
 Return list object with
 .Ar len
-objects found on parameter stack.  Raise
+objects found on parameter stack.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1529,7 +1529,7 @@ ary2 \(rA #( 0 #{ \(aqfoo 30 } 2 )
 .It Cm list-append No (\ arg0 arg1 ... argn n -- lst\ )
 Return list object with
 .Ar n
-objects found on parameter stack.  Raise
+objects found on parameter stack.  Raise an
 .Ar out-of-range
 exception if
 .Ar n
@@ -1601,7 +1601,7 @@ and return new list.
 .Ar val
 can be a list or any other object.  Negative
 .Ar idx
-counts from backward.  Raise
+counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1636,7 +1636,7 @@ of
 .Ar lst .
 Negative
 .Ar idx
-counts from backward.  Raise
+counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1660,7 +1660,7 @@ in
 .Ar lst .
 Negative
 .Ar idx
-counts from backward.  Raise
+counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1676,7 +1676,7 @@ Return new list without
 .Ar count
 elements from
 .Ar idx
-on.  Raise
+on.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1693,7 +1693,7 @@ without
 .Ar count
 elements from
 .Ar idx
-on.  Raise
+on.  Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1735,7 +1735,7 @@ filled with keyword
 .Ar initial-element
 values.
 .Ar initial-element
-defaults to nil if not specified.  Raise
+defaults to nil if not specified.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1784,7 +1784,7 @@ Assoc lists:
 .It Cm >alist No (\ vals len -- alst\ )
 Return assoc list object with
 .Ar len
-/ 2 key-value pairs found on parameter stack. Raise
+/ 2 key-value pairs found on parameter stack. Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1945,7 +1945,7 @@ is a directory, copy
 .Ar src
 to
 .Ar DST/SRC .
-Raise
+Raise a
 .Ar system-error
 exception if
 .Xr fopen 3
@@ -1997,7 +1997,7 @@ except that
 .Ar name
 must be on stack (include is a parse word).  With
 .Cm file-eval
-one can load files from within word definitions.  Raise
+one can load files from within word definitions.  Raise a
 .Ar load-error
 exception if
 .Cm file-eval
@@ -2376,7 +2376,8 @@ object to current output.
 .It Cm >hash No (\ vals len -- hash\ )
 Take
 .Ar len
-/ 2 key-value pairs from parameter stack and return hash object.  Raise
+/ 2 key-value pairs from parameter stack and return hash object.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -2648,7 +2649,7 @@ Add hook procedure
 .Ar prc
 to
 .Ar hook .
-Raise
+Raise a
 .Ar bad-arity
 exception if
 .Ar prc's
@@ -2663,7 +2664,7 @@ Run all hook procedures with
 .Ar args ,
 an array of arguments.
 .Ar args
-can be an array of arguments or a single argument.  Raise
+can be an array of arguments or a single argument.  Raise a
 .Ar bad-arity
 exception if
 .Ar args's
@@ -2981,7 +2982,7 @@ writing or appending.  Possible
 values:
 .Bl -tag -offset ident -width MMM -compact
 .It Sy :error
-raise
+raise an
 .Ar io-error
 exception if
 .Ar name
@@ -3371,7 +3372,7 @@ Socket functions:
 .\"
 .It Cm io-nopen No ( host :key port 1024 domain AF_INET -- io )
 Connect to an already established server and return new IO object.
-Raise an
+Raise an a
 .Ar socket-error
 exception if an error occured.
 .Ar host
@@ -3419,7 +3420,7 @@ is the socket descriptor,
 can be an arbitrary name, its only use is the name for the IO object,
 .Ar domain
 is one of AF_INET or AF_UNIX.  This is used on the server side of a
-socket connection.  Raise
+socket connection.  Raise a
 .Ar socket-error
 exception if
 .Xr accept 2
@@ -3439,7 +3440,7 @@ is the port if
 is AF_INET, otherwise unused, and
 .Ar domain
 is one of AF_INET or AF_UNIX.  This is used on the server side of a
-socket connection.  Raise
+socket connection.  Raise a
 .Ar socket-error
 exception if
 .Xr bind 2
@@ -3460,7 +3461,7 @@ is the port if
 is AF_INET, otherwise unused, and
 .Ar domain
 is one of AF_INET or AF_UNIX.  This is used on the client side of a
-socket connection.  Raise
+socket connection.  Raise a
 .Ar socket-error
 exception if
 .Xr connect 2
@@ -3473,7 +3474,7 @@ Inform the operating system that connection requests should be
 delivered.
 .Ar fd
 is the previously opened socket descriptor.  This is used on the server
-side of a socket connection.  Raise
+side of a socket connection.  Raise a
 .Ar socket-error
 exception if
 .Xr listen 2
@@ -3486,7 +3487,7 @@ Receive data via a socket and return it.
 .Ar fd
 is the socket descriptor and
 .Ar flags
-can be 0, MSG_PEEK, or MSG_OOB.  Raise
+can be 0, MSG_PEEK, or MSG_OOB.  Raise a
 .Ar socket-error
 exception if
 .Xr recv 2
@@ -3507,7 +3508,7 @@ is the port if
 .AR domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  Raise
+is one of AF_INET or AF_UNIX.  Raise a
 .Ar socket-error
 exception if
 .Xr recvfrom 2
@@ -3522,7 +3523,7 @@ is the socket descriptor,
 .Ar msg
 is the data to send and
 .Ar flags
-can be 0, MSG_PEEK or MSG_OOB.  Raise
+can be 0, MSG_PEEK or MSG_OOB.  Raise a
 .Ar socket-error
 exception if
 .Xr send 2
@@ -3545,7 +3546,7 @@ is the port if
 .Ar domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  Raise
+is one of AF_INET or AF_UNIX.  Raise a
 .Ar socket-error
 exception if
 .Xr sendto 2
@@ -3558,7 +3559,7 @@ Close socket connection.
 .Ar fd
 is the socket descriptor and
 .Ar how
-is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise
+is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise a
 .Ar socket-error
 exception if
 .Xr shutdown 2
@@ -3573,7 +3574,7 @@ can be AF_INET or AF_UNIX,
 .Ar type
 can be SOCK_STREAM or SOCK_DGRAM.  The third argument to
 .Xr socket 2
-is 0 and cannot be set by the user.  Raise
+is 0 and cannot be set by the user.  Raise a
 .Ar socket-error
 exception if
 .Xr socket 2
@@ -3710,9 +3711,9 @@ After loading
 .Ar name ,
 run hook
 .Sx after-load-hook .
-Raise
+Raise a
 .Ar no-such-file
-exception if file doesn't exist, raise
+exception if file doesn't exist, raise a
 .Ar load-error
 if an error occured during load.
 .Bd -literal -offset indent -compact
@@ -3810,9 +3811,9 @@ After loading
 .Ar name ,
 run hook
 .Sx after-load-hook .
-Raise
+Raise a
 .Ar no-such-file
-exception if file doesn't exist, raise
+exception if file doesn't exist, raise a
 .Ar load-error
 if an error occured during load.
 .Bd -literal -offset indent -compact
@@ -4080,7 +4081,7 @@ Set global timeval struct variable to current time.
 .\" utime
 .\"
 .It Cm utime No (\ -- utime stime\ )
-Return user and system time as ficlFloats.  Raise
+Return user and system time as ficlFloats.  Raise a
 .Ar not-implemented
 exception if
 .Xr times 3
@@ -4188,7 +4189,7 @@ Return parent process id.
 .\"
 .It Cm getservbyname No (\ str -- ary\ )
 Return array containing the service, an array of aliases, the port
-number and the protocol.  Raise
+number and the protocol.  Raise a
 .Ar not-implemented
 exception if
 .Xr getservbyname 3
@@ -4201,7 +4202,7 @@ is not available.
 .\"
 .It Cm getservbyport No (\ port -- ary\ )
 Return array containing the service, an array of aliases, the port
-number and the protocol.  Raise
+number and the protocol.  Raise a
 .Ar not-implemented
 exception if
 .Xr getservbyport 3
@@ -4278,7 +4279,7 @@ super user.
 .It Cm sethostname No (\ str --\ )
 Set name of current host to
 .Ar str .
-This call is restricted to the super-user.  Raise
+This call is restricted to the super-user.  Raise a
 .Ar not-implemented
 exception if
 .Xr sethostname 3
@@ -5742,7 +5743,7 @@ Return current cycle-index of
 .It Cm first-ref No (\ obj -- val\ )
 Return first element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -5755,7 +5756,7 @@ Store
 .Ar value
 to first element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -5777,7 +5778,7 @@ Objects with the same content have the same id.
 .It Cm last-ref No (\ obj -- val\ )
 Return last element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -5790,7 +5791,7 @@ Store
 .Ar value
 to last element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -6072,7 +6073,7 @@ B, 0 if A == B, and a positive integer if A > B.
 .It Cm second-ref No (\ obj -- val\ )
 Return second element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -6085,7 +6086,7 @@ Store
 .Ar value
 to second element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -6100,7 +6101,7 @@ is less than 2.
 .It Cm third-ref No (\ obj -- val\ )
 Return third element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -6113,7 +6114,7 @@ Store
 .Ar value
 to third element of
 .Ar obj .
-Raise
+Raise an
 .Ar out-of-range
 exception if length of
 .Ar obj
@@ -6915,13 +6916,13 @@ with arguments
 and return result or #f.
 .Ar args
 can be an array of arguments or a single argument.  If execution fails,
-raise
+raise an
 .Ar eval-error
 exception, if length of
 .Ar args
 is less than required arity of
 .Ar prc ,
-raise
+raise a
 .Ar bad-arity
 exception.
 .Bd -literal -offset indent -compact
@@ -7026,7 +7027,7 @@ Parse
 .Ar name
 and execute word
 .Ar set-name
-if found, otherwise raise
+if found, otherwise raise an
 .Ar undefined-word
 exception.  The following two lines do the same:
 .Bd -literal -offset indent -compact
@@ -7039,7 +7040,7 @@ exception.  The following two lines do the same:
 .It Cm set-execute No (\ xt -- ??\ )
 Execute
 .Ar set-xt
-if found, otherwise raise
+if found, otherwise raise an
 .Ar undefined-word
 exception.  The following two lines do the same:
 .Bd -literal -offset indent -compact
@@ -7293,7 +7294,7 @@ with
 if found.  References \e1 to \e9 in
 .Ar replace
 will be replaced by corresponding subexpressions.  If no corresponding
-subexpression exist, raise
+subexpression exist, raise a
 .Ar regexp-error
 exception.
 .Bd -literal -offset indent -compact
@@ -7404,7 +7405,7 @@ Return string of one space (\(dq\ \(dq).
 .It Cm $spaces No (\ len -- str\ )
 Return string of
 .Ar len
-spaces.  Raise
+spaces.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -7529,7 +7530,7 @@ description.
 .\"
 .It Cm fth-format No (\ fmt :optional args -- str \ )
 Return string object from
-.Xr sprintf 3
+.Xr printf 3
 .Ar fmt
 string and
 .Ar args
@@ -7580,7 +7581,7 @@ Return a new string of length
 .Ar len
 filled with
 .Ar initial-element
-characters, default space.  Raise
+characters, default space.  Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -7653,7 +7654,7 @@ Delete and return character at position
 .Ar idx
 from
 .Ar str ;
-negative index counts from backward.  Raise
+negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7728,7 +7729,7 @@ otherwise #f.
 .It Cm string-format No (\ fmt args --\ )
 .Ar fmt
 is a
-.Xr sprintf 3
+.Xr printf 3
 format string and
 .Ar args
 the needed arguments which may be an array, a single argument or #f.
@@ -7780,7 +7781,7 @@ A
 is written.
 .It Cm aAeEfFgG
 Floating point output like
-.Sx sprintf 3 .
+.Sx printf 3 .
 .It Cm c
 Single character output.
 .It Cm bdouxX
@@ -7817,7 +7818,7 @@ to
 .Ar str
 at position
 .Ar idx ;
-negative index counts from backward.  Raise
+negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7861,7 +7862,7 @@ and return changed string object.
 .It Cm string-ref No (\ str idx -- val\ )
 Return character at position
 .Ar idx ;
-negative index counts from backward.  Raise
+negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7901,7 +7902,7 @@ Return
 .Ar str1
 reversed as new string object.
 .It Cm string-reverse! No (\ str -- str\(aq\ )
-Return
+Return the same string object
 .Ar str
 reversed.
 .\"
@@ -7912,7 +7913,7 @@ Store character
 .Ar char
 at index
 .Ar idx ;
-negative index counts from backward.  Raise
+negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7943,19 +7944,17 @@ is not a string or regexp, delimiter is space.
 .\" string-substring
 .\"
 .It Cm string-substring No (\ str1 start end -- str2\ )
-Return new string from
-.Ar str1
-index
+Return new string from position
 .Ar start
-to but excluding index
+to, but excluding, position
 .Ar end .
-If index
+If
 .Ar end
 is not an integer,
 .Ar end
 will be set to length of
 .Ar str1 ;
-negative index counts from backward.  Raise
+negative index counts from backward.  Raise an
 .Ar out-of-range
 exception if
 .Ar start
@@ -8596,14 +8595,14 @@ has no extra floating point stack; floats are of type
 .Xr getservbyport 3 ,
 .Xr gl_prompt_style 3 ,
 .Xr libfth 3 ,
+.Xr printf 3 ,
 .Xr realpath 3 ,
 .Xr regex 3 ,
 .Xr sethostname 3 ,
-.Xr sprintf 3 ,
 .Xr strftime 3 ,
 .Xr time 3 ,
 .Xr times 3 ,
-.Xr tecla 7
+.Xr tecla 7 .
 .\"
 .\" STANDARDS
 .\"

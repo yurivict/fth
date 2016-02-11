@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.165 2/9/16
+ * @(#)string.c	1.166 2/11/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -296,8 +296,15 @@ str_free(FTH self)
 	FTH_FREE(FTH_STRING_OBJECT(self));
 }
 
-/*
- * Return C string from Fth OBJ or NULL.
+/*-
+ * Return C string from Fth OBJ or NULL if not a Fth string object.
+ *
+ * FTH fs = fth_make_string("hello");
+ * fth_string_ref(fs);				=> "hello"
+ * FTH fs = fth_make_empty_string();
+ * fth_string_ref(fs);				=> ""
+ * FTH fs = FTH_FALSE;
+ * fth_string_ref(fs);				=> NULL
  */
 char *
 fth_string_ref(FTH obj)
@@ -305,8 +312,9 @@ fth_string_ref(FTH obj)
 	return (FTH_STRING_P(obj) ? FTH_STRING_DATA(obj) : NULL);
 }
 
-/*
- * Return length of a Fth string object or -1 if not a string.
+/*-
+ * Return length of a Fth string object or -1 if not a string
+ * object.
  *
  * FTH fs = fth_make_string("hello");
  * fth_string_length(fs);			=> 5
@@ -391,7 +399,7 @@ make_string_instance(FString *s)
 	return (FTH_FALSE);
 }
 
-/*
+/*-
  * Return a new Fth string object constructed from C string STR.
  * If C string is "" or NULL, return Fth string "" in contrast to
  * fth_make_string_or_false().
@@ -415,8 +423,8 @@ fth_make_string(const char *str)
 	return (make_string_instance(s));
 }
 
-/*
- * If C string is "", return #f, otherwise as fth_make_string().
+/*-
+ * If C string is "", return #f, otherwise like fth_make_string().
  *
  * FTH fs = fth_make_string_or_false("hello");	=> "hello"
  * fth_string_length(fs);			=> 5
@@ -437,7 +445,7 @@ fth_make_string_or_false(const char *str)
 	return (make_string_instance(s));
 }
 
-/*
+/*-
  * Return a new Fth string object constructed from C string STR
  * with at most LEN characters.  If the C string STR is shorter
  * than LEN, return a Fth string object of STR length only.
@@ -463,7 +471,7 @@ fth_make_string_len(const char *str, ficlInteger len)
 	return (make_string_instance(s));
 }
 
-/*
+/*-
  * Return a Fth string object of length 0.
  *
  * FTH fs = fth_make_empty_string();		=> ""
@@ -531,11 +539,11 @@ fth_string_sncat(FTH fs, const char *str, ficlInteger len)
 	return (fth_string_push(fs, fth_make_string_len(str, len)));
 }
 
-/*
+/*-
  * Add extended printf(3) fmt args to an already existing Fth string
  * object.  See fth_make_string_format above.
  *
- * FTH fs = fth_make_string("we want to ");	=> "we want to "
+ * FTH fs = fth_make_string("we want to ");
  * fth_string_sformat(fs, "print %d times %f\n", 10, 3.14);
  *	=> "we want to print 10 times 3.140000\n"
  */
@@ -575,7 +583,7 @@ ficl_make_string(ficlVm *vm)
 3 :initial-element <char> x make-string => \"xxx\"\n\
 Return a new string of length LEN filled with INITIAL-ELEMENT characters, \
 default space.  \
-Raise OUT-OF-RANGE exception if LEN < 0."
+Raise an OUT-OF-RANGE exception if LEN < 0."
 	FTH size;
 	ficlInteger len;
 	int init;
@@ -598,7 +606,7 @@ ficl_values_to_string(ficlVm *vm)
 0 1 2 \" foo \" \"b\" \"a\" \"r\"  7 >string => \"012 foo bar\"\n\
 Return new string with LEN objects from stack converted to their \
 string representation.  \
-Raise OUT-OF-RANGE exception if LEN < 0."
+Raise an OUT-OF-RANGE exception if LEN < 0."
 	ficlInteger i, len;
 	FTH fs, obj;
 
@@ -648,7 +656,7 @@ ficl_spaces_string(ficlVm *vm)
 3 $spaces => \"   \"\n\
 0 $spaces => \"\"\n\
 Return string object of LEN spaces.  \
-Raise OUT-OF-RANGE exception if LEN < 0."
+Raise an OUT-OF-RANGE exception if LEN < 0."
 	ficlInteger len;
 	FTH fs;
 
@@ -683,7 +691,7 @@ ficl_fth_format(FTH fmt, FTH args)
 \"hello\" fth-format => \"hello\"\n\
 \"hello %s %d times\\n\" #( \"pumpkin\" 10 ) fth-format\n\
   => \"hello pumpkin 10 times\\n\"\n\
-Return string object from sprintf(3) FMT string and ARGS \
+Return string object from printf(3) FMT string and ARGS \
 array containing corresponding arguments; ARGS is optional.\n\
 See string-format for FMT description."
 	if (FTH_UNDEF_P(args))
@@ -823,7 +831,7 @@ See also .stdout and .stderr."
 	fth_fprintf(stderr, "#<DEBUG(F): %M>\n", fth_pop_ficl_cell(vm));
 }
 
-/*
+/*-
  * Compare two strings with strcmp(3) and return 1 for equal and
  * 0 for not equal (not -1 0 1 like strcmp).
  *
@@ -902,9 +910,9 @@ See also string<>, string<, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_equal_p(obj1, obj2));
 }
 
-/*
- * Compare two strings with strcmp(3) and return 0 for equal and
- * 1 for not equal (not -1 0 1 like strcmp).
+/*-
+ * Compare two strings with strcmp(3) and return 1 for not equal
+ * and 0 for equal (not -1 0 1 like strcmp).
  *
  * FTH s1 = fth_make_string("foo");
  * FTH s2 = fth_make_string("bar");
@@ -947,9 +955,9 @@ See also string=, string<, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_not_equal_p(obj1, obj2));
 }
 
-/*
+/*-
  * Compare two strings with strcmp(3) and return 1 for less than and
- * 0 for equal or greater.
+ * 0 for equal or greater than.
  *
  * FTH s1 = fth_make_string("foo");
  * FTH s2 = fth_make_string("bar");
@@ -992,7 +1000,7 @@ See also string=, string<>, string>, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_less_p(obj1, obj2));
 }
 
-/*
+/*-
  * Compare two strings with strcmp(3) and return 1 for greater than and
  * 0 for equal or less than.
  *
@@ -1037,7 +1045,7 @@ See also string=, string<>, string<, string-cmp."
 	ficlStackPushBoolean(vm->dataStack, fth_string_greater_p(obj1, obj2));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_to_array(fs);			=> #( 102 111 111 )
  */
@@ -1051,7 +1059,7 @@ Convert STR to an array of characters."
 	return (str_to_array(fs));
 }
 
-/*
+/*-
  * Return a new copy of the Fth string object.
  *
  * FTH s1 = fth_make_string("foo");
@@ -1073,7 +1081,7 @@ Return copy of STR1."
 	return (str_to_string(fs));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * char c = fth_string_c_char_ref(fs, 1);	=> 'o' (111)
  */
@@ -1114,7 +1122,7 @@ ficl_string_ref(ficlVm *vm)
 #define h_string_ref "( string idx -- value )  return char\n\
 \"foo\" 1 string-ref => 111\n\
 Return character at position IDX; negative index counts from backward.  \
-Raise OUT-OF-RANGE exception if index is not in range of string."
+Raise an OUT-OF-RANGE exception if index is not in range of string."
 	ficlInteger idx;
 	FTH string;
 
@@ -1124,9 +1132,10 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_push_ficl_cell(vm, fth_string_char_ref(string, idx));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
- * fth_string_c_char_set(fs, 1, 'e');		=> "feo"
+ * fth_string_c_char_set(fs, 1, 'e');		=> 101
+ * fth_printf("%S", fs);			=> "feo"
  */
 char
 fth_string_c_char_set(FTH fs, ficlInteger idx, char c)
@@ -1148,9 +1157,10 @@ fth_string_c_char_fast_set(FTH fs, ficlInteger idx, char c)
 	return (FTH_STRING_DATA(fs)[idx] = c);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
- * fth_string_char_set(fs, 1, CHAR_TO_FTH('e')); => "feo"
+ * fth_string_char_set(fs, 1, CHAR_TO_FTH('e')); => 101
+ * fth_printf("%S", fs);			=> "feo"
  */
 FTH
 fth_string_char_set(FTH fs, ficlInteger idx, FTH value)
@@ -1169,7 +1179,7 @@ ficl_string_set(ficlVm *vm)
 s1 1 <char> e string-set!\n\
 s1 => \"feo\"\n\
 Store character CHAR at index IDX; negative index counts from backward.  \
-Raise OUT-OF-RANGE exception if index is not in range of string."
+Raise an OUT-OF-RANGE exception if index is not in range of string."
 	ficlInteger idx;
 	FTH string, value;
 
@@ -1180,7 +1190,7 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_string_char_set(string, idx, value);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_push(fs, fth_make_string(" "));	=> "foo "
  * fth_string_push(fs, INT_TO_FIX(10));		=> "foo 10"
@@ -1226,7 +1236,7 @@ See also string-pop, string-unshift, string-shift."
 	return (fs);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_pop(fs);				=> 111 ('o')
  * fth_string_pop(fs);				=> 111 ('o')
@@ -1265,7 +1275,7 @@ See also string-push, string-unshift, string-shift."
 	return (c);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_unshift(fs, fth_make_string(" ")); => " foo"
  * fth_string_unshift(fs, INT_TO_FIX(10));	=> "10 foo"
@@ -1330,7 +1340,7 @@ See also string-push, string-pop, string-shift."
 	return (fs);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_shift(fs);			=> 102 ('f')
  * fth_string_shift(fs);			=> 111 ('o')
@@ -1378,7 +1388,7 @@ See also string-push, string-pop, string-unshift."
 	return (c);
 }
 
-/*
+/*-
  * FTH s1 = fth_make_string("foo");
  * FTH s2 = fth_make_string("bar");
  * fth_string_append(s1, s2);			=> "foobar"
@@ -1404,7 +1414,7 @@ See also string-concat and string-push."
 	return (fth_make_string_format("%s%s", b1, b2));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_reverse(fs);			=> "oof"
  */
@@ -1441,7 +1451,7 @@ ficl_string_reverse_bang(ficlVm *vm)
 \"foo\" value s1\n\
 s1 string-reverse! drop\n\
 s1 => \"oof\"\n\
-Return STR reversed.\n\
+Return the same string object STR reversed.\n\
 See also string-reverse."
 	FTH fs;
 
@@ -1450,7 +1460,7 @@ See also string-reverse."
 	ficlStackPushFTH(vm->dataStack, fth_string_reverse(fs));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_insert(fs, 1, INT_TO_FIX(10));	=> "f10oo"
  */
@@ -1505,7 +1515,7 @@ s1 1 10 string-insert! drop\n\
 s1 => \"f10oo\"\n\
 Insert string representation of VALUE to STRING at position IDX; \
 negative index counts from backward.  \
-Raise OUT-OF-RANGE exception if index is not in range of string."
+Raise an OUT-OF-RANGE exception if index is not in range of string."
 	FTH str, ins;
 	ficlInteger idx;
 
@@ -1516,7 +1526,7 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	ficlStackPushFTH(vm->dataStack, fth_string_insert(str, idx, ins));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * fth_string_delete(fs, 1);			=> 111 ('o')
  * fth_printf("%S", fs);			=> "fo"
@@ -1564,7 +1574,7 @@ s1 1 string-delete! => 111\n\
 s1 => \"fo\"\n\
 Delete and return character at position IDX from STRING; \
 negative index counts from backward.  \
-Raise OUT-OF-RANGE exception if index is not in range of string."
+Raise an OUT-OF-RANGE exception if index is not in range of string."
 	FTH str;
 	ficlInteger idx;
 
@@ -1574,8 +1584,8 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	fth_push_ficl_cell(vm, fth_string_delete(str, idx));
 }
 
-/*
- * FTH fs = fth_make_string("foo");		=> "foo"
+/*-
+ * FTH fs = fth_make_string("foo");
  * fth_string_fill(fs, CHAR_TO_FTH('a'));	=> "aaa"
  * fth_printf("%S", fs);			=> "aaa"
  */
@@ -1597,11 +1607,14 @@ Fill STRING with CHAR and return changed string object."
 	return (fs);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("hello world");
- * FIX_TO_INT(fth_string_index(fs, fth_make_string("l")));	=> 2
- * FIX_TO_INT(fth_string_index(fs, fth_make_string("orl")));	=> 7
- * FIX_TO_INT(fth_string_index(fs, fth_make_string("k")));	=> -1 (false)
+ * FTH rs fth_make_string("l");
+ * fth_string_index(fs, rs);			=> 2
+ * FTH rs = fth_make_string("orl");
+ * fth_string_index(fs, rs);			=> 7
+ * FTH rs = fth_make_string("k");
+ * fth_string_index(fs, rs);			=> -1 (false)
  */
 FTH
 fth_string_index(FTH fs, FTH key)
@@ -1622,11 +1635,14 @@ See also string-member? and string-find."
 	return (FTH_ONE_NEG);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("hello world");
- * fth_string_member_p(fs, fth_make_string("l"));	=> 1
- * fth_string_member_p(fs, fth_make_string("ell"));	=> 1
- * fth_string_member_p(fs, fth_make_string("k"));	=> 0
+ * FTH rs fth_make_string("l");
+ * fth_string_member_p(fs, rs);			=> 1
+ * FTH rs = fth_make_string("ell");
+ * fth_string_member_p(fs, rs);			=> 1
+ * FTH rs = fth_make_string("k");
+ * fth_string_member_p(fs, rs);			=> 0
  */
 bool
 fth_string_member_p(FTH fs, FTH key)
@@ -1653,12 +1669,16 @@ See also string-index and string-find."
 	ficlStackPushBoolean(vm->dataStack, fth_string_member_p(str, key));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("hello world");
- * fth_string_find(fs, fth_make_string("l"));	=> "llo world"
- * fth_string_find(fs, fth_make_string("ell"));	=> "ello world"
- * fth_string_find(fs, fth_make_regexp("ell"));	=> "ello world"
- * fth_string_find(fs, fth_make_regexp("k"));	=> #f
+ * FTH rs fth_make_string("l");
+ * fth_string_find(fs, rs);			=> "llo world"
+ * FTH rs = fth_make_string("ell");
+ * fth_string_find(fs, rs);			=> "ello world"
+ * FTH rs = fth_make_regexp("ell");
+ * fth_string_find(fs, rs);			=> "ello world"
+ * FTH rs = fth_make_regexp("k");
+ * fth_string_find(fs, rs);			=> #f
  */
 FTH
 fth_string_find(FTH fs, FTH key)
@@ -1692,10 +1712,12 @@ See also string-index, string-member? and regexp-match."
 	return (fth_string_substring(fs, pos, FTH_STRING_LENGTH(fs)));
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo:bar:baz");
- * fth_string_split(fs, fth_make_string(":"));	=> #( "foo" "bar" "baz")
- * fth_string_split(fs, fth_make_regexp(":"));	=> #( "foo" "bar" "baz")
+ * FTH sp = fth_make_string(":");
+ * fth_string_split(fs, sp);			=> #( "foo" "bar" "baz")
+ * FTH sp = fth_make_regexp(":");
+ * fth_string_split(fs, sp);			=> #( "foo" "bar" "baz")
  * FTH fs = fth_make_string("foo bar baz");
  * fth_string_split(fs, FTH_NIL);		=> #( "foo" "bar" "baz")
  */
@@ -1747,7 +1769,7 @@ If SEP is not a string or regexp, delimiter is space."
 	return (result);
 }
 
-/*
+/*-
  * Not a public function.
  *
  * The split string or regexp won't be removed (for io.c, fth_readlines()).
@@ -1788,12 +1810,11 @@ fth_string_split_2(FTH fs, FTH reg)
 	return (result);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("hello world");
  * fth_string_substring(fs, 2, 4);		=> "ll"
  * fth_string_substring(fs, -4, -2);		=> "or"
- * fth_string_substring(fs, -4, fth_string_length(fs));
- *						=> "orld"
+ * fth_string_substring(fs, -4, fth_string_length(fs)); => "orld"
  */
 FTH
 fth_string_substring(FTH fs, ficlInteger start, ficlInteger end)
@@ -1823,10 +1844,10 @@ ficl_string_substring(ficlVm *vm)
 \"hello world\"  2   4 string-substring => \"ll\"\n\
 \"hello world\" -4  -2 string-substring => \"or\"\n\
 \"hello world\" -4 nil string-substring => \"orld\"\n\
-Return new string from STR index START to but excluding index END.  \
+Return new string from position START to, but excluding, position END.  \
 If END is not an integer, END will be set to length of STR1; \
 negative index counts from backward.  \
-Raise OUT-OF-RANGE exception if index is not in range of string."
+Raise an OUT-OF-RANGE exception if index is not in range of string."
 	FTH fs, last;
 	ficlInteger beg, end;
 
@@ -1838,8 +1859,8 @@ Raise OUT-OF-RANGE exception if index is not in range of string."
 	ficlStackPushFTH(vm->dataStack, fth_string_substring(fs, beg, end));
 }
 
-/*
- * Return the string, not a copy, changed to chars upcase.
+/*-
+ * Return the string, not a copy, changed to all chars upcase.
  *
  * FTH fs = fth_make_string("Foo");
  * fth_string_upcase(fs);			=> "FOO"
@@ -1894,8 +1915,8 @@ See also string-upcase, string-downcase, string-capitalize."
 	ficlStackPushFTH(vm->dataStack, fth_string_upcase(fs));
 }
 
-/*
- * Return the string, not a copy, changed to chars downcase.
+/*-
+ * Return the string, not a copy, changed to all chars downcase.
  *
  * FTH fs = fth_make_string("Foo");
  * fth_string_downcase(fs);			=> "foo"
@@ -1950,7 +1971,7 @@ See also string-downcase, string-upcase, string-capitalize."
 	ficlStackPushFTH(vm->dataStack, fth_string_downcase(fs));
 }
 
-/*
+/*-
  * Return the string, not a copy, changed to first char upcase and
  * the rest downcase.
  *
@@ -2010,23 +2031,23 @@ See also string-capitalize, string-upcase, string-downcase."
 	ficlStackPushFTH(vm->dataStack, fth_string_capitalize(fs));
 }
 
-/*
+/*-
  * Return the string, not a copy, replaced FROM with TO.
  *
  * FTH fs = fth_make_string("foo");
- * FTH from = fth_make_string("o"); 
+ * FTH from = fth_make_string("o");
  * FTH to = fth_make_string("a");
  * fth_string_replace(fs, from, to);		=> "faa"
  * fth_printf("%S", fs);			=> "faa"
  *
  * FTH fs = fth_make_string("foo");
- * FTH from = fth_make_string("oo"); 
+ * FTH from = fth_make_string("oo");
  * FTH to = fth_make_string("a");
  * fth_string_replace(fs, from, to);		=> "fa"
  * fth_printf("%S", fs);			=> "fa"
  *
  * FTH fs = fth_make_string("foo");
- * FTH from = fth_make_string("o"); 
+ * FTH from = fth_make_string("o");
  * FTH to = fth_make_string("");
  * fth_string_replace(fs, from, to);		=> "f"
  * fth_printf("%S", fs);			=> "f"
@@ -2152,7 +2173,7 @@ See also string-replace."
 	ficlStackPushFTH(vm->dataStack, fth_string_replace(str, from, to));
 }
 
-/*
+/*-
  * Return the string, not a copy, with possible trailing \n removed.
  *
  * FTH fs = fth_make_string("foo\n");
@@ -2205,8 +2226,16 @@ See also string-chomp."
 	ficlStackPushFTH(vm->dataStack, fth_string_chomp(fs));
 }
 
-/*
- * Return a formatted string.
+/*-
+ * Return a formatted string created from the extended printf(3)
+ * format string FMT and possible arguments in ARGS.  ARGS can be
+ * an array, any single object, FTH_FALSE or FTH_NIL.  If ARGS is
+ * an array, it should have as many elements as required by the
+ * format string, if ARGS is a single object, the format string
+ * should only have one format sign, if ARGS is FTH_FALSE or FTH_NIL,
+ * ARGS is ignored and the format string itself is returned.  If
+ * FMT is the empty string, an empty string is returned, no matter
+ * what's in ARGS.
  *
  * FTH fmt = fth_make_string("%04d %8.2f %b %X %o");
  * FTH args = fth_make_array_var(5,
@@ -2216,6 +2245,17 @@ See also string-chomp."
  *		INT_TO_FIX(255),
  *		INT_TO_FIX(255));
  * fth_string_format(fmt, args);	=> "0128     3.14 11111111 FF 377"
+ *
+ * FTH fmt = fth_make_string("we print %S");
+ * FTH arg = INT_TO_FIX(10);
+ * fth_string_format(fmt, arg);		=> "we print 10"
+ *
+ * FTH fmt = fth_make_string("simple string");
+ * fth_string_format(fmt, FTH_FALSE);	=> "simple string"
+ * fth_string_format(fmt, FTH_NIL);	=> "simple string"
+ *
+ * FTH fmt = fth_make_empty_string();
+ * fth_string_format(fmt, args);	=> ""
  */
 FTH
 fth_string_format(FTH fs, FTH args)
@@ -2223,7 +2263,7 @@ fth_string_format(FTH fs, FTH args)
 #define h_string_format "( fmt args -- str )  return formatted string\n\
 \"%04d %8.2f %b %X %o\"  #( 128 pi 255 255 255 ) string-format\n\
   => \"0128     3.14 11111111 FF 377\"\n\
-FMT is a sprintf(3) format string and ARGS the needed arguments \
+FMT is a printf(3) format string and ARGS the needed arguments \
 which may be an array, a single argument or #f.\n\
 %n.mX     n: entire format length\n\
           m: precision (float)\n\
@@ -2252,7 +2292,7 @@ See also fth-format."
 	return (fth_string_vformat(fmt, args));
 }
 
-/*
+/*-
  * Evaluates the string.
  *
  * ficlVm *vm = FTH_FICL_VM();
