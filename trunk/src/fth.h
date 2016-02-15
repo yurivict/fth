@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.214 2/5/16
+ * @(#)fth.h	1.215 2/15/16
  */
 
 #if !defined(_FTH_H_)
@@ -1054,8 +1054,9 @@ char	       *fth_strncpy(char *d, size_t size, const char *s, size_t count);
 void		fth_throw (FTH exc, const char *fmt,...);
 void		fth_throw_error(FTH exc, FTH args);
 void		fth_throw_list(FTH exc, FTH args);
-char           *pop_cstring(ficlVm *vm);
+char	       *pop_cstring(ficlVm *vm);
 void		push_cstring(ficlVm *vm, char *s);
+FTH		fth_set_argv(int from, int to, char **argv);
 
 __END_DECLS
 

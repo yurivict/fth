@@ -1403,6 +1403,7 @@ DDEESSCCRRIIPPTTIIOONN
           and ~S with %s.
      _c_h_a_r_* ppoopp__ccssttrriinngg(_f_i_c_l_V_m _*_v_m)
      _v_o_i_d ppuusshh__ccssttrriinngg(_f_i_c_l_V_m _*_v_m, _c_h_a_r _*_s)
+     _i_n_t fftthh__sseett__aarrggvv(_i_n_t _f_r_o_m, _i_n_t _t_o, _c_h_a_r _*_*_a_r_g_v)
 
 EENNVVIIRROONNMMEENNTT
      FTH_DICTIONARY_SIZE
@@ -1437,4 +1438,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/11                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/02/15                    NetBSD 7.99.26
