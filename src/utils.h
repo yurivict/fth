@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.h	1.121 1/20/14
+ * @(#)utils.h	1.122 2/15/16
  */
 
 #if !defined(_UTILS_H_)
@@ -354,11 +354,10 @@ void		push_forth_string(ficlVm *vm, char *string);
 char           *parse_input_buffer(ficlVm *vm, char *delimiter);
 char           *parse_tib_with_restart(ficlVm *, char *, int,
 		    ficlString (*) (ficlVm *, int));
-FTH		fth_set_argv(int from, int to, char **argv);
 
 __END_DECLS
 
-#endif				/* _UTILS_H_ */
+#endif	/* _UTILS_H_ */
 
 /*
  * utils.h ends here

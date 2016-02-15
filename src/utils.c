@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.223 2/9/16
+ * @(#)utils.c	1.224 2/15/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -827,13 +827,9 @@ simple_array_to_array(simple_array *ary)
 FTH
 fth_set_argv(int from, int to, char **argv)
 {
-	static bool in_set_argv = false;
 	int i;
 	FTH args;
 
-	if (in_set_argv)
-		return (fth_variable_ref("*argv*"));
-	in_set_argv = true;
 	if (from >= to || argv == NULL) {
 		fth_variable_set("*argc*", FTH_ZERO);
 		return (fth_variable_set("*argv*", FTH_NIL));

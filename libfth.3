@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.42 2/11/16
+.\" @(#)libfth.3	1.43 2/15/16
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd 2016/02/11
+.Dd 2016/02/15
 .Dt LIBFTH 3
 .Os
 .\"
@@ -2859,6 +2859,7 @@ The same like
 except for replacing format signs ~A and ~S with %s.
 .It Ft char* Fn pop_cstring "ficlVm *vm"
 .It Ft void Fn push_cstring "ficlVm *vm" "char *s"
+.It Ft int Fn fth_set_argv "int from" "int to" "char **argv"
 .El
 .\"
 .\" ENVIRONMENT
