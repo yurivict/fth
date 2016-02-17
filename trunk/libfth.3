@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.43 2/15/16
+.\" @(#)libfth.3	1.45 2/17/16
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd 2016/02/15
+.Dd 2016/02/17
 .Dt LIBFTH 3
 .Os
 .\"
@@ -654,8 +654,6 @@ Predicate functions:
 .It Ft bool Fn fth_boolean_p "FTH obj"
 .It Ft bool Fn fth_instance_flag_p "FTH obj" "int flags"
 .It Ft bool Fn fth_instance_type_p "FTH obj" "int type"
-.It Ft bool Fn fth_word_defined_p "FTH obj"
-.It Ft bool Fn fth_word_type_p "FTH obj" "int type"
 .El
 .\"
 .\" Initialization functions
@@ -1524,6 +1522,46 @@ String representation of any Forth object with
 .\"
 .Ss Procs
 .Bl -tag -width MMM -compact
+.\"
+.\" fth_word_defined_p
+.\"
+.It Ft bool Fn fth_word_defined_p "FTH obj"
+Test if
+.Ar obj
+is an already defined word, a variable or constant or any other
+object in the dictionary.
+.Bd -literal -offset indent -compact
+FTH x = (FTH)FICL_WORD_NAME_REF(\(dqbye\(dq);
+fth_word_defined_p(x); \(rA 1
+fth_variable_set(\(dqhello\(dq, FTH_FALSE);
+FTH x = (FTH)FICL_WORD_NAME_REF(\(dqhello\(dq);
+fth_word_defined_p(x); \(rA 1
+fth_word_defined_p(FTH_FALSE); \(rA 0
+.Ed
+.\"
+.\" fth_word_type_p
+.\"
+.It Ft bool Fn fth_word_type_p "FTH obj" "int type"
+Test if
+.Ar obj
+is of
+.Ar type
+where type can be one of the following:
+.Bl -diag
+.It FW_WORD
+.It FW_PROC
+.It FW_SYMBOL
+.It FW_KEYWORD
+.It FW_EXCEPTION
+.It FW_VARIABLE
+.It FW_TRACE_VAR
+.El
+.Pp
+.Bd -literal -offset indent -compact
+FTH x = (FTH)FICL_WORD_NAME_REF(\(dqbye\(dq);
+fth_word_type_p(x, FW_WORD); \(rA 1
+fth_word_type_p(x, FW_KEYWORD); \(rA 0
+.Ed
 .\"
 .\" FTH_PROC_P
 .\"

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.164 2/5/16
+ * @(#)proc.c	1.166 2/17/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -161,18 +161,39 @@ xt->name            ( xt -- str )\n\
 xt->origin          ( xt -- str )\n\
 xt?                 ( obj -- f )"
 
+/*-
+ * Test if OBJ is an already defined word, a variable or constant
+ * or any other object in the dictionary.
+ *
+ * FTH x = (FTH)FICL_WORD_NAME_REF("bye");
+ * fth_word_defined_p(x);			=> true
+ * fth_variable_set("hello", FTH_FALSE);
+ * FTH x = (FTH)FICL_WORD_NAME_REF("hello");
+ * fth_word_defined_p(x);			=> true
+ * fth_word_defined_p(FTH_FALSE);		=> false
+ */
 bool
 fth_word_defined_p(FTH obj)
 {
-	if (obj && !IMMEDIATE_P(obj)) {
-		ficlWord *word;
-
-		word = FICL_WORD_REF(obj);
-		return (ficlDictionaryIncludes(FTH_FICL_DICT(), word));
-	}
-	return (false);
+	if (obj == 0 || IMMEDIATE_P(obj))
+		return (false);
+	return (ficlDictionaryIncludes(FTH_FICL_DICT(), FICL_WORD_REF(obj)));
 }
 
+/*
+ * Test if OBJ is of TYPE where type can be:
+ *	FW_WORD
+ *	FW_PROC
+ *	FW_SYMBOL
+ *	FW_KEYWORD
+ *	FW_EXCEPTION
+ *	FW_VARIABLE
+ *	FW_TRACE_VAR
+ *
+ * FTH x = (FTH)FICL_WORD_NAME_REF("bye");
+ * fth_word_type_p(x, FW_WORD);			=> true
+ * fth_word_type_p(x, FW_KEYWORD);		=> false
+ */
 bool
 fth_word_type_p(FTH obj, int type)
 {
