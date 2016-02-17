@@ -376,8 +376,6 @@ DDEESSCCRRIIPPTTIIOONN
      _b_o_o_l fftthh__bboooolleeaann__pp(_F_T_H _o_b_j)
      _b_o_o_l fftthh__iinnssttaannccee__ffllaagg__pp(_F_T_H _o_b_j, _i_n_t _f_l_a_g_s)
      _b_o_o_l fftthh__iinnssttaannccee__ttyyppee__pp(_F_T_H _o_b_j, _i_n_t _t_y_p_e)
-     _b_o_o_l fftthh__wwoorrdd__ddeeffiinneedd__pp(_F_T_H _o_b_j)
-     _b_o_o_l fftthh__wwoorrdd__ttyyppee__pp(_F_T_H _o_b_j, _i_n_t _t_y_p_e)
 
      Initialization functions:
      _v_o_i_d fftthh__eexxiitt(_i_n_t _n)
@@ -753,6 +751,29 @@ DDEESSCCRRIIPPTTIIOONN
      _i_n_t fftthh__wwaarrnniinngg(_c_o_n_s_t _c_h_a_r _*_f_m_t, _._._.)
 
    PPrrooccss
+     _b_o_o_l fftthh__wwoorrdd__ddeeffiinneedd__pp(_F_T_H _o_b_j)
+          Test if _o_b_j is an already defined word, a variable or constant or
+          any other object in the dictionary.
+                FTH x = (FTH)FICL_WORD_NAME_REF("bye");
+                fth_word_defined_p(x); => 1
+                fth_variable_set("hello", FTH_FALSE);
+                FTH x = (FTH)FICL_WORD_NAME_REF("hello");
+                fth_word_defined_p(x); => 1
+                fth_word_defined_p(FTH_FALSE); => 0
+     _b_o_o_l fftthh__wwoorrdd__ttyyppee__pp(_F_T_H _o_b_j, _i_n_t _t_y_p_e)
+          Test if _o_b_j is of _t_y_p_e where type can be one of the following:
+
+          FFWW__WWOORRDD
+          FFWW__PPRROOCC
+          FFWW__SSYYMMBBOOLL
+          FFWW__KKEEYYWWOORRDD
+          FFWW__EEXXCCEEPPTTIIOONN
+          FFWW__VVAARRIIAABBLLEE
+          FFWW__TTRRAACCEE__VVAARR
+
+                FTH x = (FTH)FICL_WORD_NAME_REF("bye");
+                fth_word_type_p(x, FW_WORD); => 1
+                fth_word_type_p(x, FW_KEYWORD); => 0
      _b_o_o_l FFTTHH__PPRROOCC__PP(_o_b_j)
           Return true if _o_b_j is a proc object, otherwise false.
      _b_o_o_l FFTTHH__WWOORRDD__PP(_o_b_j)
@@ -1438,4 +1459,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/15                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/02/17                    NetBSD 7.99.26
