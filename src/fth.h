@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.215 2/15/16
+ * @(#)fth.h	1.216 3/2/16
  */
 
 #if !defined(_FTH_H_)
@@ -151,11 +151,11 @@
 #define FIXNUM_FLAG		0x01
 #define FIXNUM_P(Obj)		(((SIGNED_FTH)(Obj)) & FIXNUM_FLAG)
 
-#define INT_TO_FIX(Obj)		((FTH)(((SIGNED_FTH)(Obj)) << 1L | FIXNUM_FLAG))
+#define INT_TO_FIX(Obj)		((FTH)(((FTH)(Obj)) << 1L | FIXNUM_FLAG))
 #define FIX_TO_INT(Obj)		(((SIGNED_FTH)(Obj)) >> 1L)
 #define FIX_TO_INT32(Obj)	(int)FIX_TO_INT(Obj)
-#define UNSIGNED_TO_FIX(Obj)	((FTH)(((FTH)(Obj)) << 1UL | FIXNUM_FLAG))
-#define FIX_TO_UNSIGNED(Obj)	(((FTH)(Obj)) >> 1UL)
+#define UNSIGNED_TO_FIX(Obj)	INT_TO_FIX(Obj)
+#define FIX_TO_UNSIGNED(Obj)	(((FTH)(Obj)) >> 1L)
 
 #define IMMEDIATE_MASK		0x03
 #define IMMEDIATE_P(Obj)	((FTH)(Obj) & IMMEDIATE_MASK)
