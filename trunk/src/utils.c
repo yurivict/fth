@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.224 2/15/16
+ * @(#)utils.c	1.225 3/2/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -123,10 +123,14 @@ fth_realloc(void *p, size_t n)
 void *
 fth_calloc(size_t count, size_t eltsize)
 {
-	size_t size;
+	void *p;
 
-	size = count * eltsize;
-	return (memset(fth_malloc(size), 0, size));
+	p = calloc(count, eltsize);
+	if (p == NULL) {
+		p = fixup_null_alloc(count * eltsize, "fth_calloc");
+		memset(p, 0, 1);
+	}
+	return (p);
 }
 
 void
@@ -939,7 +943,6 @@ gl-clear: clear all history events."
 	int len, n;
 	FTH action, arg;
 
-	action = FTH_FALSE;
 	arg = FTH_FALSE;
 	n = -1;
 	gl = ficlVmGetRepl(vm);
@@ -1069,8 +1072,11 @@ See tecla(7) for key-bindings and actions."
 		 *	gl-nobeep	bindkey
 		 */
 		key = fth_pop_ficl_cell(vm);
-		if (gl_config(gl, key))
+		if (gl_config(gl, key)) {
 			FTH_GL_ERROR(gl);
+			/* NOTREACHED */
+			return;
+		}
 		break;
 	case 2:
 	default:
@@ -1091,8 +1097,11 @@ See tecla(7) for key-bindings and actions."
 		simple_array_push(fgl_getline_bindkey, k);
 		simple_array_push(fgl_getline_bindkey, a);
 		if (gl != NULL)
-			if (gl_bind_keyseq(gl, GL_USER_KEY, k, a))
+			if (gl_bind_keyseq(gl, GL_USER_KEY, k, a)) {
 				FTH_GL_ERROR(gl);
+				/* NOTREACHED */
+				return;
+			}
 		break;
 	}
 }
@@ -1241,7 +1250,7 @@ repl_append_history(GetLine *gl, char *line)
 	GlHistoryLine hline;
 
 	/* replace '\n' */
-	line[strlen(line) - 1] = '\0';
+	line[strlen(line)] = '\0';
 	if (FGL_HISTDUP_ALL_P()) {
 		gl_range_of_history(gl, &range);
 		for (id = range.newest; id > range.oldest; id--)
@@ -1288,11 +1297,13 @@ repl_expand_history(GetLine *gl, char *line)
 	ln = strlen(line);
 	if (ln < 2)
 		return (line);
+	/* skip '!' sign */
 	strcpy(s, line + 1);
 	ln--;
-	s[ln - 1] = '\0';
-	/* adjust 'ln' for use below (strncmp) */
+	/* adjust length to minus trailing '\n' */
 	ln--;
+	/* remove trailing '\n' */
+	s[ln] = '\0';
 	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
@@ -1315,7 +1326,7 @@ repl_expand_history(GetLine *gl, char *line)
 		char *r;
 
 		r = s + 1;
-		sl = strlen(r) - 1;
+		sl = strlen(r);
 		if (r[sl] == '?')
 			r[sl] = '\0';
 		for (; id > range.oldest; id--)
@@ -1333,11 +1344,14 @@ repl_expand_history(GetLine *gl, char *line)
 					break;
 				}
 	if (res == NULL) {
+		int i;
+
+		i = 0;
 		if (*s == '!')
-			line++;
+			i++;
 		if (*s == '?')
-			line++;
-		fth_printf("%s: event not found\n", s);
+			i++;
+		fth_printf("%s: event not found\n", s + i);
 	}
 	return (res);
 }
@@ -1472,8 +1486,11 @@ fth_repl(int argc, char **argv)
 	 * will skip further implicite calls of gl_configure_getline() (via
 	 * gl_get_line() etc).
 	 */
-	if (gl_configure_getline(gl, NULL, NULL, FGL_TECLA_RC))
+	if (gl_configure_getline(gl, NULL, NULL, FGL_TECLA_RC)) {
 		FTH_GL_ERROR(gl);
+		/* NOTREACHED */
+		return;
+	}
 	/*
 	 * Delayed init of config and bindkey sequences from ~/.fthrc.
 	 */
@@ -1482,8 +1499,11 @@ fth_repl(int argc, char **argv)
 		char *app;
 
 		app = simple_array_ref(fgl_getline_config, i);
-		if (gl_configure_getline(gl, app, NULL, NULL))
+		if (gl_configure_getline(gl, app, NULL, NULL)) {
 			FTH_GL_ERROR(gl);
+			/* NOTREACHED */
+			return;
+		}
 	}
 	len = simple_array_length(fgl_getline_bindkey);
 	for (i = 0; i < len; i += 2) {
@@ -1491,8 +1511,11 @@ fth_repl(int argc, char **argv)
 
 		k = simple_array_ref(fgl_getline_bindkey, i);
 		a = simple_array_ref(fgl_getline_bindkey, i + 1);
-		if (gl_bind_keyseq(gl, GL_USER_KEY, k, a))
+		if (gl_bind_keyseq(gl, GL_USER_KEY, k, a)) {
 			FTH_GL_ERROR(gl);
+			/* NOTREACHED */
+			return;
+		}
 	}
 	gl_automatic_history(gl, 0);
 	gl_customize_completion(gl, NULL, repl_command_generator);
@@ -1553,8 +1576,12 @@ fth_repl(int argc, char **argv)
 				status = FTH_BYE;
 				continue;
 			}
-			if (rs == GLR_ERROR)	
+			if (rs == GLR_ERROR) {
 				FTH_GL_ERROR(gl);
+				/* NOTREACHED */
+				return;
+			}
+			continue;
 		}
 		/*
 		 * If command line starts with !, try to substitute with

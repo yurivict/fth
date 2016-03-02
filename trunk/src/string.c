@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.166 2/11/16
+ * @(#)string.c	1.167 3/1/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2114,7 +2114,7 @@ fth_string_replace(FTH fs, FTH from, FTH to)
 		st = (size_t)(FTH_STRING_LENGTH(fs) - i);
 		memmove(FTH_STRING_DATA(fs) + i + lt, b + i, st);
 		st = (size_t)lt;
-		memmove(b + i, FTH_STRING_DATA(to), st);
+		memmove(b + i, ct, st);
 		FTH_STRING_LENGTH(fs) += lt;
 		b[FTH_STRING_LENGTH(fs)] = '\0';
 		/* skip over added "to" string */
