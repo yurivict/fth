@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.225 3/2/16
+ * @(#)utils.c	1.226 3/4/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -882,8 +882,8 @@ static FTH	fgl_nobeep;	/* nobeep */
 /* integer */
 #define FGL_HISTORY_REF()	fth_variable_ref("*history*")
 #define FGL_HISTORY_SET(Val)	fth_variable_set("*history*", (Val))
-#define FGL_HISTORY_CSET(Val)	FGL_HISTORY_SET(FIX_TO_INT(Val))
 #define FGL_HISTORY_CINT()	FIX_TO_INT(FGL_HISTORY_REF())
+#define FGL_HISTORY_CSET(Val)	FGL_HISTORY_SET(INT_TO_FIX(Val))
 
 /* boolean */
 #define FGL_PROMPTSTYLE_P()	FTH_TRUE_P(fth_variable_ref("*promptstyle*"))
@@ -1177,10 +1177,11 @@ repl_init_history(void)
 	fs = FGL_HISTFILE_REF();
 	if (fth_string_length(fs) <= 0) {
 		tmp_str = getenv(FTH_ENV_HIST);
-		fs = (tmp_str != NULL) ?
-		    fth_make_string(tmp_str) :
-		    fth_make_string_format("%s/" FTH_HIST_FILE,
-			fth_getenv("HOME", "/tmp"));
+		if (tmp_str == NULL)
+			fs = fth_make_string_format("%s/" FTH_HIST_FILE,
+			    fth_getenv("HOME", "/tmp"));
+		else
+			fs = fth_make_string(tmp_str);
 		FGL_HISTFILE_SET(fs);
 	}
 	/*-
