@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.131 12/28/14
+# @(#)Makefile.in	1.132 3/7/16
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -168,6 +168,12 @@ fth-shared: all
 
 fth-static: all
 	(cd ${top_builddir}/src && ${MAKE} fth-static)
+
+fth-llvm: all
+	(cd ${top_builddir}/src && ${MAKE} fth-llvm)
+
+fth-llvm.sh: all
+	(cd ${top_builddir}/src && ${MAKE} fth-llvm.sh)
 
 install-shared: install
 	(cd ${top_builddir}/src && ${MAKE} install-shared)

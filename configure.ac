@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.179 12/28/14
+dnl @(#)configure.ac	1.180 3/7/16
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,8 @@ AC_PROG_RANLIB
 AC_CHECK_TOOL([AR], [ar], [:])
 AC_CHECK_TOOL([STRIP], [strip], [:])
 AC_CHECK_TOOL([MANDOC], [mandoc], [:])
+AC_CHECK_TOOL([LLI], [lli], [:])
+AC_CHECK_TOOL([LLC], [llc], [:])
 
 dnl
 dnl Check for header files.
