@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.82 9/13/13
+# @(#)Makefile.in	1.83 3/7/16
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -48,6 +48,7 @@ AR		= @AR@
 ARFLAGS		= cr
 RANLIB		= @RANLIB@
 INSTALL		= @INSTALL@
+INSTALL_DATA	= ${INSTALL} -m 0644
 STRIP		= @STRIP@
 SO_LD		= @SO_LD@
 CFLAGS		= @CFLAGS@
@@ -65,8 +66,19 @@ LIB_OBJS	= \
 		echo ${top_builddir}/lib/*.o; \
 	fi`
 LDFLAGS		= @LDFLAGS@
-SO_LDFLAGS	= @SO_LDFLAGS@ ${LDFLAGS}
+SO_LDFLAGS	= @SO_LDFLAGS@
 LIBS		= @LIBS@
+
+LLI		= @LLI@
+LLIFLAGS	= -O3
+LLILIBS		= -load ${FTH_SO_LIB}
+LLC		= @LLC@
+LLCFLAGS	= -O3 -filetype asm
+LLCLIBS		= -load ${FTH_SO_LIB}
+
+FTH_O		= fth.o
+FTH_BC		= fth.bc
+FTH_LLVM	= fth-llvm
 
 MISC_EXTRA	= \
 	-DFTH_PREFIX_PATH=\"${prefix}\" \
@@ -105,6 +117,8 @@ FICL_OBJECTS = \
 	${ficlbuilddir}/vm.o \
 	${ficlbuilddir}/word.o
 
+LIBFTH_OBJS = ${FTH_OBJECTS} ${FICL_OBJECTS} ${LIB_OBJS}
+
 all: Makefile fth
 
 include ${top_srcdir}/common.mk
@@ -113,20 +127,29 @@ fth: ${FTH_LIB}
 	${MAKE} ${FTH_PROG}
 	cp ${FTH_PROG} $@
 
-fth-shared: ${FTH_SO_LIB}
-	${CC} ${LDFLAGS} -o $@ fth.o ${FTH_SO_LIB} -lm
+fth-shared: ${FTH_O} ${FTH_SO_LIB}
+	${CC} -o $@ ${FTH_O} ${LDFLAGS} ${FTH_SO_LIB} ${LIBS}
 
-fth-static: ${FTH_A_LIB}
-	${CC} ${LDFLAGS} -o $@ fth.o ${FTH_A_LIB} ${LIBS}
+fth-static: ${FTH_O} ${FTH_A_LIB}
+	${CC} -o $@ ${FTH_O} ${LDFLAGS} ${FTH_A_LIB} ${LIBS}
 
-${FTH_A_LIB}: fth.o ${FTH_OBJECTS} ${FICL_OBJECTS}
+${FTH_LLVM}: ${FTH_BC} ${FTH_SO_LIB}
+	${LLC} ${LLCFLAGS} ${LLCLIBS} -o $@.s ${FTH_BC}
+	${CC} -o $@ $@.s ${LDFLAGS} ${FTH_SO_LIB} ${LIBS}
+	cp $@ fth
+
+${FTH_LLVM}.sh:
+	echo "#! /bin/sh" > $@
+	echo "${LLI} ${LLIFLAGS} ${LLILIBS} ${FTH_BC} \"\$$@\"" >> $@
+	chmod 0755 $@
+
+${FTH_A_LIB}: ${FTH_OBJECTS} ${FICL_OBJECTS}
 	${RM} $@
-	${AR} ${ARFLAGS} $@ ${FTH_OBJECTS} ${FICL_OBJECTS} ${LIB_OBJS}
+	${AR} ${ARFLAGS} $@ ${LIBFTH_OBJS}
 	${RANLIB} $@
 
-${FTH_SO_LIB}: fth.o ${FTH_OBJECTS} ${FICL_OBJECTS} ${FTH_A_LIB}
-	${SO_LD} ${SO_LDFLAGS} ${FTH_OBJECTS} ${FICL_OBJECTS} \
-	    ${LIB_OBJS} -o $@ ${LIBS}
+${FTH_SO_LIB}: ${FTH_OBJECTS} ${FICL_OBJECTS}
+	${SO_LD} ${SO_LDFLAGS} -o $@ ${LIBFTH_OBJS} ${LDFLAGS} ${LIBS}
 
 ${FICL_OBJECTS}:
 	(cd ${ficlbuilddir} && ${MAKE} all)
@@ -134,65 +157,63 @@ ${FICL_OBJECTS}:
 misc.o: ${srcdir}/misc.c ${src_common}
 	${CC} ${DEFS} ${MISC_EXTRA} ${FTH_CFLAGS} -c $<
 
-install: all
+install: install-shared install-static
+
+install-prog: all
 	${SHELL} ${top_srcdir}/mkinstalldirs ${bindir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${libdir}
 	${INSTALL} ${FTH_PROG} ${bindir}/${prog_name}
-	if test -f ${FTH_A_LIB}; then \
-		${INSTALL} ${FTH_A_LIB} ${libdir}/${FTH_A_LIB}; \
-		${RANLIB} ${libdir}/${FTH_A_LIB}; \
-	fi
+
+install-shared: install-prog ${FTH_SO_LIB}
 	if test -f ${FTH_SO_LIB}; then \
 		${RM} ${libdir}/${FTH_SO_LIB}*; \
 		${INSTALL} ${FTH_SO_LIB} ${libdir}/${FTH_SO_LIB}; \
 	fi
 
-install-shared: all fth-shared
-	${INSTALL} fth-shared ${bindir}/${prog_name}
-	if test -f ${FTH_SO_LIB}; then \
-		${RM} ${libdir}/${FTH_SO_LIB}*; \
-		${INSTALL} ${FTH_SO_LIB} ${libdir}/${FTH_SO_LIB}; \
-	fi
-
-install-static: all fth-static
-	${INSTALL} fth-static ${bindir}/${prog_name}
+install-static: install-prog ${FTH_A_LIB}
 	if test -f ${FTH_A_LIB}; then \
-		${INSTALL} ${FTH_A_LIB} ${libdir}/${FTH_A_LIB}; \
-		${RANLIB} ${libdir}/${FTH_A_LIB}; \
+		${RM} ${libdir}/${FTH_A_LIB}; \
+		${INSTALL_DATA} ${FTH_A_LIB} ${libdir}/${FTH_A_LIB}; \
 	fi
 
-install-strip: all
+install-strip: strip-shared strip-static install
+
+strip-prog: fth
 	${STRIP} fth ${FTH_PROG}
-	if test -f ${FTH_A_LIB}; then \
-		${STRIP} ${FTH_A_LIB}; \
-	fi
+
+strip-shared: strip-prog ${FTH_SO_LIB}
 	if test -f ${FTH_SO_LIB}; then \
 		${STRIP} ${FTH_SO_LIB}; \
+	fi
+
+strip-static: strip-prog ${FTH_A_LIB}
+	if test -f ${FTH_A_LIB}; then \
+		${STRIP} ${FTH_A_LIB}; \
 	fi
 
 dist: Makefile
 
 uninstall: Makefile
 	${RM} ${bindir}/${prog_name}
-	${RM} ${bindir}/fth-shared
-	${RM} ${bindir}/fth-static
 	${RM} ${libdir}/${FTH_A_LIB}
 	${RM} ${libdir}/${FTH_SO_LIB}*
 
-fth.o:     ${srcdir}/fth.c     ${src_common}
-array.o:   ${srcdir}/array.c   ${src_common}
-file.o:    ${srcdir}/file.c    ${src_common}
-hash.o:    ${srcdir}/hash.c    ${src_common}
-hook.o:    ${srcdir}/hook.c    ${src_common}
-io.o:      ${srcdir}/io.c      ${src_common}
-misc.o:    ${srcdir}/misc.c    ${src_common}
-numbers.o: ${srcdir}/numbers.c ${src_common}
-object.o:  ${srcdir}/object.c  ${src_common}
-port.o:    ${srcdir}/port.c    ${src_common}
-printf.o:  ${srcdir}/printf.c  ${src_common}
-proc.o:    ${srcdir}/proc.c    ${src_common}
-regexp.o:  ${srcdir}/regexp.c  ${src_common}
-string.o:  ${srcdir}/string.c  ${src_common}
-symbol.o:  ${srcdir}/symbol.c  ${src_common}
-utils.o:   ${srcdir}/utils.c   ${src_common}
+fth.bc:		${srcdir}/fth.c		${src_common}
+fth.o:		${srcdir}/fth.c		${src_common}
+array.o:	${srcdir}/array.c	${src_common}
+file.o:		${srcdir}/file.c	${src_common}
+hash.o:		${srcdir}/hash.c	${src_common}
+hook.o:		${srcdir}/hook.c	${src_common}
+io.o:		${srcdir}/io.c		${src_common}
+misc.o:		${srcdir}/misc.c	${src_common}
+numbers.o:	${srcdir}/numbers.c	${src_common}
+object.o:	${srcdir}/object.c	${src_common}
+port.o:		${srcdir}/port.c	${src_common}
+printf.o:	${srcdir}/printf.c	${src_common}
+proc.o:		${srcdir}/proc.c	${src_common}
+regexp.o:	${srcdir}/regexp.c	${src_common}
+string.o:	${srcdir}/string.c	${src_common}
+symbol.o:	${srcdir}/symbol.c	${src_common}
+utils.o:	${srcdir}/utils.c	${src_common}
 
 # Makefile.in ends here.

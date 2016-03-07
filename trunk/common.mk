@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2007-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# @(#)common.mk	1.23 9/13/13
+# @(#)common.mk	1.25 3/7/16
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib
@@ -38,14 +38,17 @@ ficl_full	= ${ficl_common} ${src_header}
 
 fth_cflags	= -I${top_builddir} -I${fthdir} -I${ficldir} -I${comdir}
 FTH_CFLAGS	= ${fth_cflags} -I${prefix}/include ${CFLAGS}
-TRASH		= fth fth-s* *.so *.[ao] *core *.db
+TRASH		= fth fth-s* *.so *.[ao] *core *.db *.bc *.s *-llvm*
 RM		= rm -f
 
 .SUFFIXES:
-.SUFFIXES: .o .c
+.SUFFIXES: .o .c .a .so .bc
 
 .c.o:
 	${CC} ${DEFS} ${FTH_CFLAGS} -c $<
+
+.c.bc:
+	${CC} -emit-llvm ${DEFS} ${FTH_CFLAGS} -o $@ -c $<
 
 clean:
 	${RM} ${TRASH}
