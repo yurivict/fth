@@ -36,7 +36,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)unix.c	1.22 10/17/13
+ * @(#)unix.c	1.23 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -88,27 +88,30 @@ ficlFileTruncate(ficlFile *ff, ficlUnsigned size)
 char *
 ficlCallbackDefaultTextIn(ficlCallback *callback)
 {
-  static char buf[BUFSIZ];
+	static char buf[BUFSIZ];
   
-  return fgets(buf, BUFSIZ, stdin);
+	(void)callback;
+	return fgets(buf, BUFSIZ, stdin);
 }
 
 /* ARGSUSED */
 void
 ficlCallbackDefaultTextOut(ficlCallback *callback, char *message)
 {
-  if (message != NULL)
-    fputs(message, stdout);
-  fflush(stdout);
+	(void)callback;
+	if (message != NULL)
+		fputs(message, stdout);
+	fflush(stdout);
 }
 
 /* ARGSUSED */
 void
 ficlCallbackDefaultErrorOut(ficlCallback *callback, char *message)
 {
-  if (message != NULL)
-    fputs(message, stderr);
-  fflush(stderr);
+	(void)callback;
+	if (message != NULL)
+		fputs(message, stderr);
+	fflush(stderr);
 }
 
 int

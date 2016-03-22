@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)primitives.c	1.108 1/23/14
+ * @(#)primitives.c	1.109 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -558,7 +558,8 @@ static void ficlPrimitiveEmit(ficlVm *vm)
 /* ARGSUSED */
 static void ficlPrimitiveCR(ficlVm *vm)
 {
-  fth_print("\n");
+	(void)vm;
+	fth_print("\n");
 }
 
 static void ficlPrimitiveBackslash(ficlVm *vm)
@@ -2369,7 +2370,8 @@ C-ADDR is the address of, and U is the number of characters in, the input buffer
 /* ARGSUSED */
 static void ficlPrimitiveVersion(ficlVm *vm)
 {
-  fth_print("Ficl version " FICL_VERSION "\n");
+	(void)vm;
+	fth_print("Ficl version " FICL_VERSION "\n");
 }
 
 /**************************************************************************

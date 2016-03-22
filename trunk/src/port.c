@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)port.c	1.64 1/1/15
+ * @(#)port.c	1.65 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -190,6 +190,7 @@ soft_read_char(void)
 static void
 soft_write_char(FTH c)
 {
+	(void)c;
 }
 
 static FTH
@@ -202,6 +203,7 @@ soft_read_line(void)
 static void
 soft_write_line(FTH line)
 {
+	(void)line;
 }
 
 static void

@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.672 3/7/16";
+const char libfth_sccsid[] = "@(#)misc.c	1.673 3/22/16";
 #endif /* not lint */
 
-#define FTH_DATE		"2016/03/07"
+#define FTH_DATE		"2016/03/22"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -1955,6 +1955,7 @@ time-reset\n\
 Set global timeval struct variable to current time.\n\
 See gettimeofday(2) for more information.\n\
 See also time."
+	(void)vm;
 	if (gettimeofday(&fth_timeval_tv, NULL) == -1)
 		FTH_SYSTEM_ERROR_THROW(gettimeofday);
 }
@@ -3139,6 +3140,7 @@ ficl_dot_lversion(ficlVm *vm)
 .long-version => FTH 1.2.9 (28-Jan-2012) [i386-portbld-freebsd9.0]\n\
 Print long package version.\n\
 See also .version and ver"
+	(void)vm;
 	fth_printf("FTH %s\n", fth_version());
 }
 
@@ -3150,6 +3152,7 @@ ficl_dot_version(ficlVm *vm)
 .version => 1.2.9\n\
 Print package version number.\n\
 See also .long-version and ver."
+	(void)vm;
 	fth_print(PACKAGE_VERSION "\n");
 }
 
@@ -3161,6 +3164,7 @@ ficl_dot_prefix(ficlVm *vm)
 .prefix => /usr/local\n\
 Print installation prefix path.\n\
 See also .cflags and .libs."
+	(void)vm;
 	fth_print(FTH_PREFIX_PATH "\n");
 }
 
@@ -3172,6 +3176,7 @@ ficl_dot_cflags(ficlVm *vm)
 .cflags => -I/usr/local/include/fth\n\
 Print compiler flags to compile libfth.so to other applications.\n\
 See also .prefix and .libs."
+	(void)vm;
 	fth_print("-I" FTH_PREFIX_PATH "/include/" FTH_PROG_NAME "\n");
 }
 
@@ -3183,6 +3188,7 @@ ficl_dot_libs(ficlVm *vm)
 .libs => -L/usr/local/lib -lfth -lm\n\
 Print linker flags to link libfth.so to other applications.\n\
 See also .cflags and .prefix."
+	(void)vm;
 	fth_print("-L" FTH_PREFIX_PATH "/lib -l" FTH_PROG_NAME " ");
 #if defined(FTH_STATIC)
 	fth_print(FTH_LIBS "\n");
@@ -3482,6 +3488,7 @@ ficl_reset_each_paren(ficlVm *vm)
 Helper function for each ... end-each.  \
 Removes last object from loop-array.\n\
 See also (set-each-loop), (fetch) and source file fth.fs."
+	(void)vm;
 	simple_array_pop(loop_array);
 }
 

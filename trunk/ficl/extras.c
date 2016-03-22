@@ -36,7 +36,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)extras.c	1.45 10/17/13
+ * @(#)extras.c	1.46 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -332,6 +332,7 @@ Dump a tab delimited file that summarizes the contents of the dictionary hash ta
 static void ficlPrimitiveBreak(ficlVm *vm)
 {
   /* vm->state = vm->state; */
+  (void)vm;
   return;
 }
 

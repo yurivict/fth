@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	1.87 9/13/13
+ * @(#)hash.c	1.88 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -675,6 +675,7 @@ Return associated array with '( key . value ) pairs of HASH's content."
 static FTH
 hs_keys_each(FTH key, FTH value, FTH obj)
 {
+	(void)value;
 	return (fth_array_push(obj, key));
 }
 
@@ -693,6 +694,7 @@ Return array of keys."
 static FTH
 hs_values_each(FTH key, FTH value, FTH obj)
 {
+	(void)key;
 	return (fth_array_push(obj, value));
 }
 
