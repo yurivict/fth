@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.155 1/1/15
+ * @(#)io.c	1.156 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -435,6 +435,7 @@ fam_to_mode(int fam)
 static int
 generic_read_char(void *ptr)
 {
+	(void)ptr;
 	return (EOF);
 }
 
@@ -442,12 +443,15 @@ generic_read_char(void *ptr)
 static void
 generic_write_char(void *ptr, int c)
 {
+	(void)ptr;
+	(void)c;
 }
 
 /* ARGSUSED */
 static char *
 generic_read_line(void *ptr)
 {
+	(void)ptr;
 	return (NULL);
 }
 
@@ -455,12 +459,15 @@ generic_read_line(void *ptr)
 static void
 generic_write_line(void *ptr, const char *line)
 {
+	(void)ptr;
+	(void)line;
 }
 
 /* ARGSUSED */
 static bool
 generic_eof_p(void *ptr)
 {
+	(void)ptr;
 	return (false);
 }
 
@@ -468,6 +475,7 @@ generic_eof_p(void *ptr)
 static ficl2Integer
 generic_tell(void *ptr)
 {
+	(void)ptr;
 	return (0);
 }
 
@@ -475,6 +483,9 @@ generic_tell(void *ptr)
 static ficl2Integer
 generic_seek(void *ptr, ficl2Integer pos, int whence)
 {
+	(void)ptr;
+	(void)pos;
+	(void)whence;
 	return (0);
 }
 
@@ -482,18 +493,21 @@ generic_seek(void *ptr, ficl2Integer pos, int whence)
 static void
 generic_flush(void *ptr)
 {
+	(void)ptr;
 }
 
 /* ARGSUSED */
 static void
 generic_rewind(void *ptr)
 {
+	(void)ptr;
 }
 
 /* ARGSUSED */
 static void
 generic_close(void *ptr)
 {
+	(void)ptr;
 }
 
 FTH

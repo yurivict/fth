@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.215 1/1/15
+ * @(#)object.c	1.216 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -601,6 +601,7 @@ ficl_gc_run(ficlVm *vm)
 gc-run\n\
 Run garbage collection immediately.\n\
 See also gc-stats."
+	(void)vm;
 	gc_run();
 }
 
@@ -632,6 +633,7 @@ See also gc-run."
 	int i, permanent, protected, marked, freed, rest;
 	FInstance *inst;
 
+	(void)vm;
 	permanent = protected = marked = freed = rest = 0;
 	for (i = 1, inst = instances[0];
 	    i < last_instance;

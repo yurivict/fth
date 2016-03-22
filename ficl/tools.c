@@ -43,7 +43,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)tools.c	1.54 10/17/13
+ * @(#)tools.c	1.55 3/22/16
  */
 
 /*
@@ -131,7 +131,8 @@ static void ficlVmSetBreak(ficlVm *vm, ficlBreakpoint *pBP)
 /* ARGSUSED */
 static void ficlDebugPrompt(ficlVm *vm)
 {
-  fth_print("dbg> ");
+	(void)vm;
+	fth_print("dbg> ");
 }
 
 /**************************************************************************

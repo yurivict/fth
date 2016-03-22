@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.226 3/4/16
+ * @(#)utils.c	1.227 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1119,6 +1119,7 @@ repl_command_generator(WordCompletion *cpl,
 	size_t len;
 	int i, j;
 
+	(void)data;
 	/*
 	 * Find begin of word.
 	 */
@@ -1680,6 +1681,7 @@ ficl_repl_cb(ficlVm *vm)
 A hard coded before-repl-hook.  \
 Before adding your own, do:\n\
 before-repl-hook reset-hook!."
+	(void)vm;
 	if (FTH_TRUE_P(fth_variable_ref("*fth-verbose*"))) {
 		fth_print("\\\n");
 		fth_print("\\ type help <word> to get help, \
