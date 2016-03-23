@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,13 +23,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-config.h.in	1.88 9/13/13
+ * @(#)fth-config.h.in	1.89 3/22/16
  */
 
 #undef FTH_ALIGNOF_VOID_P
 #undef FTH_CONFIGURE_ARGS
 #undef FTH_LIBS
 #undef FTH_PACKAGE_NAME
+#undef FTH_PACKAGE_TARNAME
 #undef FTH_PACKAGE_VERSION
 #undef FTH_SIZEOF_LONG
 #undef FTH_SIZEOF_LONG_LONG
@@ -53,7 +54,6 @@
 #undef HAVE_CATANH
 #undef HAVE_CCOS
 #undef HAVE_CCOSH
-#undef HAVE_CEIL
 #undef HAVE_CEXP
 #undef HAVE_CLOG
 #undef HAVE_CLOG10
@@ -74,15 +74,12 @@
 #undef HAVE_MISSING_COMPLEX_H
 #undef HAVE_MISSING_MATH_H
 #undef HAVE_OPENSSL_BN_H
-#undef HAVE_OPENSSL_ERR_H
 #undef HAVE_SETJMP_H
 #undef HAVE_STDARG_H
 #undef HAVE_STDBOOL_H
 #undef HAVE_STRINGS_H
 #undef HAVE_STRING_H
 #undef HAVE_STRNCASECMP
-#undef HAVE_SYS_PARAM_H
-#undef HAVE_SYS_TYPES_H
 #undef HAVE_UNISTD_H
 #undef HAVE__BOOL
 

@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.180 3/7/16
+dnl @(#)configure.ac	1.184 3/22/16
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -65,7 +65,7 @@ AC_INIT([FTH],
     [mi-scholz@users.sourceforge.net],
     [fth],
     [fth.sourceforge.net])
-AC_CONFIG_HEADERS([fth-config.h config.h])
+AC_CONFIG_HEADERS([src-config.h fth-config.h])
 AC_CONFIG_SRCDIR([src/fth.c])
 AM_MAINTAINER_MODE		# --enable-maintainer-mode
 
@@ -87,7 +87,9 @@ AC_DEFINE_UNQUOTED([FTH_TARGET_OS], ["${target_os}"],
     [Canonical target os string.])
 AC_DEFINE_UNQUOTED([FTH_CONFIGURE_ARGS], ["${ac_configure_args}"],
     [Configure arguments.])
-AC_DEFINE_UNQUOTED([FTH_PACKAGE_NAME], ["${PACKAGE_TARNAME}"],
+AC_DEFINE_UNQUOTED([FTH_PACKAGE_NAME], ["${PACKAGE_NAME}"],
+    [Package name.])
+AC_DEFINE_UNQUOTED([FTH_PACKAGE_TARNAME], ["${PACKAGE_TARNAME}"],
     [Package name.])
 AC_DEFINE_UNQUOTED([FTH_PACKAGE_VERSION], ["${PACKAGE_VERSION}"],
     [Package version.])
@@ -137,7 +139,7 @@ AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h openssl/bn.h openssl/err.h])
-AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/param.h sys/socket.h])
+AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
 # Special FreeBSD library 'libmissing'
 # added to ports/math/libmissing (2012/12/20).
@@ -191,10 +193,6 @@ AC_CHECK_TYPES([struct tms], [], [], [
 @%:@if HAVE_SYS_TIMES_H
 @%:@include <sys/times.h>
 @%:@endif])
-AC_CHECK_DECLS([sys_siglist], [], [], [
-@%:@if HAVE_SIGNAL_H
-@%:@include <signal.h>
-@%:@endif])
 
 dnl
 dnl Check for libraries.
@@ -223,9 +221,9 @@ AC_CHECK_FUNCS([execlp execvp floor fork frexp ftruncate])
 AC_CHECK_FUNCS([getegid getenv geteuid getgid gethostname getlogin getpid])
 AC_CHECK_FUNCS([getppid getservbyname getservbyport gettimeofday getuid])
 AC_CHECK_FUNCS([issetugid kill labs ldexp log2 lstat])
-AC_CHECK_FUNCS([mkdir mkfifo opendir pow psignal qsort qsort_r])
+AC_CHECK_FUNCS([mkdir mkfifo opendir pow psignal qsort])
 AC_CHECK_FUNCS([realpath rename rint rmdir setegid setenv seteuid setgid])
-AC_CHECK_FUNCS([sethostname setlocale setuid sleep strncasecmp strerror])
+AC_CHECK_FUNCS([sethostname setuid sleep strncasecmp strerror])
 AC_CHECK_FUNCS([strptime symlink sysconf times trunc truncate])
 AC_CHECK_FUNCS([tzset utimes wait waitpid])
 
@@ -341,7 +339,7 @@ AC_SUBST(SO_LD)
 AC_SUBST(SO_LDFLAGS)
 
 CWARNFLAGS="-ansi -std=iso9899:1999"
-CWARNFLAGS="${CWARNFLAGS} -Wall -Wextra -Wunused -Wno-unused-parameter"
+CWARNFLAGS="${CWARNFLAGS} -Wall -Wextra -Wunused"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-declarations"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-prototypes"
 CWARNFLAGS="${CWARNFLAGS} -Wundef"

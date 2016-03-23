@@ -7,7 +7,7 @@ SSYYNNOOPPSSIISS
      fftthh [--DDddQQqqrrvv] [--CC _s_o_-_l_i_b_-_p_a_t_h] [--EEee _p_a_t_t_e_r_n] [--FF _f_s] [--ff _i_n_i_t_-_f_i_l_e]
          [--II _f_s_-_p_a_t_h] [--SS "_l_i_b _i_n_i_t"] [--ss _f_i_l_e] [_f_i_l_e _._._.]
      fftthh [--aall] [--ii [_s_u_f_f_i_x]] [--nn | --pp] --ee _p_a_t_t_e_r_n [_f_i_l_e | _-]
-     fftthh [--hh | --VV]
+     fftthh [--VV]
 
 DDEESSCCRRIIPPTTIIOONN
      This is the manual page for the interactive and script processing Forth
@@ -41,7 +41,6 @@ DDEESSCCRRIIPPTTIIOONN
      --ff _f_i_l_e
           Take initialization file _f_i_l_e instead of _~_/_._f_t_h_r_c.  Use --QQ to
           prevent loading initialization files.
-     --hh   Display help message and exit.
      --II _p_a_t_h
           Prepend _p_a_t_h to *load-path*, multiple calls possible.
      --ii [_s_u_f_f_i_x]
@@ -3416,4 +3415,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/02/11                    NetBSD 7.99.26
+NetBSD 7.99.26                    2016/03/22                    NetBSD 7.99.26
