@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.673 3/22/16";
+const char libfth_sccsid[] = "@(#)misc.c	1.675 3/23/16";
 #endif /* not lint */
 
-#define FTH_DATE		"2016/03/22"
+#define FTH_DATE		"2016/03/23"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -2915,6 +2915,14 @@ See sleep(3) for more information."
 
 #include <getopt.h>
 
+/*
+ * external variables (unistd.h) for getopt(3)
+ */
+extern char    *optarg;
+extern int 	opterr;
+extern int 	optind;
+extern int 	optopt;
+
 #define h_opterr "\
 If #t, the default, getopt print error message in case of an error, \
 if #f, no message will be printed.  \
@@ -3110,15 +3118,15 @@ char *
 fth_version(void)
 {
 	if (strncmp("unknown", FTH_TARGET_VENDOR, 7L) == 0)
-		return (PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET_CPU
+		return (FTH_PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET_CPU
 		    "-" FTH_TARGET_OS "]");
-	return (PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET "]");
+	return (FTH_PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET "]");
 }
 
 char *
 fth_short_version(void)
 {
-	return (PACKAGE_VERSION " (" FTH_DATE ")");
+	return (FTH_PACKAGE_VERSION " (" FTH_DATE ")");
 }
 
 static void
@@ -3153,7 +3161,7 @@ ficl_dot_version(ficlVm *vm)
 Print package version number.\n\
 See also .long-version and ver."
 	(void)vm;
-	fth_print(PACKAGE_VERSION "\n");
+	fth_print(FTH_PACKAGE_VERSION "\n");
 }
 
 /* ARGSUSED */

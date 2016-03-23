@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)array.c	1.141 12/28/14
+ * @(#)array.c	1.142 3/22/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -98,9 +98,7 @@ static FTH	ary_set(FTH self, FTH fidx, FTH value);
 static FTH	ary_to_array(FTH self);
 static FTH	ary_to_string(FTH self);
 static FTH	ary_uniq_each(FTH value, FTH new);
-#if (defined(HAVE_QSORT_R) && !defined(__linux__))
-static int	cmpit(void *proc, const void *a, const void *b);
-#else
+#if defined(HAVE_QSORT)
 static int	cmpit(const void *a, const void *b);
 #endif
 static void	ficl_array_compact(ficlVm *vm);
@@ -1458,18 +1456,7 @@ See also array-uniq!."
 	ficlStackPushFTH(vm->dataStack, new);
 }
 
-#if (defined(HAVE_QSORT_R) && !defined(__linux__))
-
-static int
-cmpit(void *proc, const void *a, const void *b)
-{
-	FTH r;
-
-	r = fth_proc_call((FTH)proc, "array-sort", 2, *(FTH *)a, *(FTH *)b);
-	return (FIX_TO_INT32(r));
-}
-
-#elif HAVE_QSORT
+#if defined(HAVE_QSORT)
 
 static FTH	fth_cmp_proc;
 static int
@@ -1481,7 +1468,7 @@ cmpit(const void *a, const void *b)
 	return (FIX_TO_INT32(r));
 }
 
-#endif				/* HAVE_QSORT_R */
+#endif	/* HAVE_QSORT */
 
 FTH
 fth_array_sort(FTH array, FTH proc_or_xt)
@@ -1515,9 +1502,7 @@ See also array-sort."
 		return (array);
 	proc = proc_from_proc_or_xt(proc_or_xt, 2, 0, false);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2, "a compare proc");
-#if (defined(HAVE_QSORT_R) && !defined(__linux__))
-	qsort_r(FTH_ARRAY_DATA(array), len, sizeof(FTH), (void *)proc, cmpit);
-#elif defined(HAVE_QSORT)
+#if defined(HAVE_QSORT)
 	fth_cmp_proc = proc;
 	qsort((void *)FTH_ARRAY_DATA(array), len, sizeof(FTH), cmpit);
 #endif

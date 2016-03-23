@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2009-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2009-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,23 +23,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)config.h.in	1.23 9/13/13
+ * @(#)src-config.h.in	1.25 3/22/16
  */
 
-#include "fth-config.h"
-
-#undef ALIGNOF_VOID_P
 #undef HAVE_ACCESS
 #undef HAVE_ACOSH
 #undef HAVE_ARPA_INET_H
 #undef HAVE_ASINH
 #undef HAVE_ATANH
+#undef HAVE_CEIL
 #undef HAVE_CHDIR
 #undef HAVE_CHMOD
 #undef HAVE_CHROOT
 #undef HAVE_DECL_ISINF
 #undef HAVE_DECL_ISNAN
-#undef HAVE_DECL_SYS_SIGLIST
 #undef HAVE_DIRENT_H
 #undef HAVE_DLFCN_H
 #undef HAVE_DLOPEN
@@ -62,14 +59,9 @@
 #undef HAVE_GETSERVBYPORT
 #undef HAVE_GETTIMEOFDAY
 #undef HAVE_GETUID
-#undef HAVE_INTTYPES_H
 #undef HAVE_ISSETUGID
 #undef HAVE_KILL
-#undef HAVE_LABS
 #undef HAVE_LDEXP
-#undef HAVE_LIBC
-#undef HAVE_LIBCRYPTO
-#undef HAVE_LIBM
 #undef HAVE_LIBTECLA
 #undef HAVE_LIBTECLA_H
 #undef HAVE_LOG2
@@ -79,11 +71,11 @@
 #undef HAVE_NETDB_H
 #undef HAVE_NETINET_IN_H
 #undef HAVE_OPENDIR
+#undef HAVE_OPENSSL_ERR_H
 #undef HAVE_POSIX_REGEX
 #undef HAVE_POW
 #undef HAVE_PSIGNAL
 #undef HAVE_QSORT
-#undef HAVE_QSORT_R
 #undef HAVE_REALPATH
 #undef HAVE_REGEX_H
 #undef HAVE_RENAME
@@ -94,18 +86,14 @@
 #undef HAVE_SETEUID
 #undef HAVE_SETGID
 #undef HAVE_SETHOSTNAME
-#undef HAVE_SETLOCALE
 #undef HAVE_SETUID
 #undef HAVE_SIGNAL_H
 #undef HAVE_SIG_T
 #undef HAVE_SLEEP
 #undef HAVE_SNPRINTF
-#undef HAVE_STDINT_H
 #undef HAVE_STDLIB_H
 #undef HAVE_STRERROR
-#undef HAVE_STRFTIME
 #undef HAVE_STRPTIME
-#undef HAVE_STRSEP
 #undef HAVE_STRSIGNAL
 #undef HAVE_STRUCT_DIRENT_D_FILENO
 #undef HAVE_STRUCT_DIRENT_D_INO
@@ -121,6 +109,7 @@
 #undef HAVE_SYS_STAT_H
 #undef HAVE_SYS_TIMES_H
 #undef HAVE_SYS_TIME_H
+#undef HAVE_SYS_TYPES_H
 #undef HAVE_SYS_UIO_H
 #undef HAVE_SYS_UN_H
 #undef HAVE_SYS_WAIT_H
@@ -132,16 +121,7 @@
 #undef HAVE_UTIMES
 #undef HAVE_WAIT
 #undef HAVE_WAITPID
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_URL
-#undef PACKAGE_VERSION
 #undef RETSIGTYPE
-#undef SIZEOF_LONG
-#undef SIZEOF_LONG_LONG
-#undef SIZEOF_VOID_P
 #undef STDC_HEADERS
 #undef TM_IN_SYS_TIME
 
@@ -180,5 +160,5 @@
 #undef HAVE_DBM
 
 /*
- * config.h.in ends here
+ * src-config.h.in ends here
  */

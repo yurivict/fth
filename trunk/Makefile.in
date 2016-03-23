@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.132 3/7/16
+# @(#)Makefile.in	1.133 3/22/16
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -229,8 +229,9 @@ DIST_FILES = \
 	config.sub \
 	configure \
 	configure.ac \
+	config.h \
 	fth-config.h.in \
-	config.h.in \
+	src-config.h.in \
 	fth.1 \
 	fth.0 \
 	libfth.3 \
@@ -337,7 +338,7 @@ ${top_srcdir}/configure: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac \
 	(cd ${top_srcdir} && autoconf)
 
 ${top_srcdir}/fth-config.h.in: ${top_srcdir}/stamp-h.in
-${top_srcdir}/config.h.in: ${top_srcdir}/stamp-h.in
+${top_srcdir}/src-config.h.in: ${top_srcdir}/stamp-h.in
 ${top_srcdir}/stamp-h.in: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac \
 	    ${top_srcdir}/aclocal.m4
 	(cd ${top_srcdir} && echo timestamp > stamp-h.in)
@@ -345,7 +346,7 @@ ${top_srcdir}/stamp-h.in: @MAINTAINER_MODE_TRUE@${top_srcdir}/configure.ac \
 ${top_builddir}/fth-config.h: ${top_builddir}/stamp-h
 ${top_builddir}/config.h: ${top_builddir}/stamp-h
 ${top_builddir}/stamp-h: ${top_srcdir}/fth-config.h.in \
-	    ${top_srcdir}/config.h.in ${top_builddir}/config.status
+	    ${top_srcdir}/src-config.h.in ${top_builddir}/config.status
 	(cd ${top_builddir} && ${SHELL} ./config.status)
 
 Makefile: ${srcdir}/Makefile.in ${top_builddir}/config.status

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# @(#)common.mk	1.25 3/7/16
+# @(#)common.mk	1.26 3/22/16
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib
@@ -31,12 +31,18 @@ fthbuilddir    ?= ${top_builddir}/src
 ficl_hdr	= ${ficldir}/ficllocal.h ${ficldir}/ficl.h
 ficl_header	= ${ficl_hdr} ${ficldir}/ficltokens.h
 src_header	= ${fthdir}/fth.h ${fthdir}/fth-lib.h ${fthdir}/utils.h
-fth_config	= ${top_builddir}/fth-config.h ${top_builddir}/config.h 
+fth_config	= ${top_srcdir}/config.h 
+fth_config	+= ${top_builddir}/fth-config.h
+fth_config	+= ${top_builddir}/src-config.h
 ficl_common	= ${fth_config} ${ficl_header}
 src_common	= ${fth_config} ${src_header} ${ficl_header}
 ficl_full	= ${ficl_common} ${src_header}
 
-fth_cflags	= -I${top_builddir} -I${fthdir} -I${ficldir} -I${comdir}
+fth_cflags	= -I${top_srcdir}
+fth_cflags	+= -I${top_builddir}
+fth_cflags	+= -I${fthdir}
+fth_cflags	+= -I${ficldir}
+fth_cflags	+= -I${comdir}
 FTH_CFLAGS	= ${fth_cflags} -I${prefix}/include ${CFLAGS}
 TRASH		= fth fth-s* *.so *.[ao] *core *.db *.bc *.s *-llvm*
 RM		= rm -f

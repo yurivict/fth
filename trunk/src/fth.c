@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.111 2/6/16";
+const char fth_sccsid[] = "@(#)fth.c	1.114 3/23/16";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -197,7 +197,12 @@ repl_in_place(char *in, FTH out, ficlWord *word,
 usage: fth [-DdQqrv] [-C so-lib-path] [-Ee pattern] [-F fs] [-f init-file]\n\
            [-I fs-path] [-S \"lib init\"] [-s file] [file ...]\n\
        fth [-al] [-i [suffix]] [-n | -p] -e pattern [file | -]\n\
-       fth [-h | -V]\n"
+       fth -V\n"
+
+extern char    *optarg;
+extern int 	opterr;
+extern int 	optind;
+extern int 	optopt;
 
 int
 main(int argc, char **argv)
@@ -218,7 +223,7 @@ main(int argc, char **argv)
 	 * 
 	 * optional arguments: append two colons x:: (see i:: in char *args)
 	 */
-	char *args = "C:DE:F:I:QS:Vade:f:hi::lnpqrs:v";
+	char *args = "C:DE:F:I:QS:Vade:f:i::lnpqrs:v";
 
 	/*
 	 * Long options are gone with version 1.3.3 but --eval and
@@ -302,7 +307,8 @@ main(int argc, char **argv)
 				fprintf(stderr, WARN_STR, c, optarg);
 			break;
 		case 'V':	/* -V */
-			fprintf(stdout, "%s %s\n", PACKAGE_NAME, fth_version());
+			fprintf(stdout, "%s %s\n",
+			    FTH_PACKAGE_NAME, fth_version());
 			fprintf(stdout, "Copyright %s\n", FTH_COPYRIGHT);
 			exit(EXIT_SUCCESS);
 			break;
@@ -321,10 +327,6 @@ main(int argc, char **argv)
 			break;
 		case 'f':	/* -f FILE */
 			init_file = optarg;
-			break;
-		case 'h':	/* -h */
-			fprintf(stdout, FTH_USAGE);
-			exit(EXIT_SUCCESS);
 			break;
 		case 'i':	/* -i [SUFFIX] */
 			in_place_p = true;
@@ -556,8 +558,9 @@ main(int argc, char **argv)
 		 */
 		if (verbose != 0) {	/* not -q */
 			fth_printf("\\ This is %s, %s\n",
-			    PACKAGE_NAME, FTH_COPYRIGHT);
-			fth_printf("\\ %s %s\n", PACKAGE_NAME, fth_version());
+			    FTH_PACKAGE_NAME, FTH_COPYRIGHT);
+			fth_printf("\\ %s %s\n",
+			    FTH_PACKAGE_NAME, fth_version());
 		}
 		/*
 		 * Load init files if not -Q.

@@ -1,3 +1,7 @@
+2016-03-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/fth.c: Command line option -h removed.
+
 2016-02-05  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/proc.c (fth_xt_call, fth_xt_apply): New global

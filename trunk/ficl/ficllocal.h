@@ -42,7 +42,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficllocal.h	1.68 11/20/13
+ * @(#)ficllocal.h	1.69 3/22/16
  */
 
 #if !defined(_FICLLOCAL_H_)
@@ -181,7 +181,7 @@ typedef unsigned char _Bool;
 #endif
 #endif
 
-#define FICL_FORTH_NAME			FTH_PACKAGE_NAME
+#define FICL_FORTH_NAME			FTH_PACKAGE_TARNAME
 #define FICL_FORTH_VERSION		FTH_PACKAGE_VERSION
 #define FICL_PLATFORM_BASIC_TYPES	1
 #define FICL_DEFAULT_DICTIONARY_SIZE	(1024 * 1024)
@@ -241,4 +241,4 @@ typedef unsigned char _Bool;
 
 #endif				/* _FICLLOCAL_H_ */
 
-/* end of ficllocal.h */
+/* ficllocal.h ends here */
