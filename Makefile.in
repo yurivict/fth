@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.134 3/23/16
+# @(#)Makefile.in	1.138 3/25/16
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -223,6 +223,8 @@ DIST_FILES = \
 	NEWS \
 	README \
 	README.man \
+	SConstruct \
+	SConscript \
 	aclocal.m4 \
 	common.mk \
 	config.guess \
@@ -307,7 +309,7 @@ distclean: clean
 	done
 	${RM} Makefile config.[lc]* config.st* stamp-h \
 	    fth-config.h src-config.h fth.sh tags
-	${RMD} .scon* obj
+	${RMD} .scon* build
 
 maintainer-clean: clean
 	for f in ${CLEAN_SUBDIRS}; do \
@@ -357,7 +359,7 @@ ${top_builddir}/config.status: ${top_srcdir}/configure
 	(cd ${top_builddir} && ${SHELL} ./config.status --recheck)
 
 ${top_srcdir}/README: ${top_srcdir}/README.man
-	${MANDOC} $> | col -b > $@
+	${MANDOC} $> | col -b | grep -v '^NetBSD' > $@
 
 ${top_srcdir}/fth.0: ${top_srcdir}/fth.1
 	${MANDOC} $> > $@

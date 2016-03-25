@@ -1,3 +1,10 @@
+2016-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* SConstruct: New file.
+	* SConscript: New file.
+	* config.h: New file.
+	* src-config.h.in: New file.
+
 2016-03-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/fth.c: Command line option -h removed.

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.228 3/22/16
+ * @(#)utils.c	1.229 3/23/16
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1428,11 +1428,13 @@ ficl_bindkey(ficlVm *vm)
 	}
 }
 
+/* ARGSUSED */
 static char *
 get_line(char *prompt, char *dummy)
 {
 	char *buf;
 
+	(void)dummy;
 	if (prompt != NULL)
 		fth_print(prompt);
 	buf = utils_readline_buffer;

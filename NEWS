@@ -2,6 +2,9 @@ See ChangeLog for more.
 
 * 1.3.8
 
+Add config and build tool scripts for scons.  It's a replacement
+for autoconfig tools.
+
 Remove command line option -h.
 
 New experimental targets in src/Makefile:
