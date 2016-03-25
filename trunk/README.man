@@ -1,4 +1,4 @@
-.\" Copyright (c) 2012-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2012-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.29 12/28/14
+.\" @(#)README.man	1.32 3/25/16
 .\"
-.Dd December 28, 2014
+.Dd 2016/03/25
 .Dt README
 .Os
 .\"
@@ -38,13 +38,15 @@
 .\"
 .Sh INTRODUCTION
 .Em Fth
-is a software package which includes the interpreter 
-.Ic fth 
+is a software package which includes the interpreter
+.Cm fth
 and the extension library
-.Ic libfth .
-You can write Forth scripts and interpret them by the interpreter fth
-or you can link libfth into an application to use it as extension
-language.
+.Cm libfth .
+You can write Forth scripts and interpret them with the interpreter
+.Cm fth
+or you can link
+.Cm libfth
+into an application to use it as extension language.
 .Pp
 Fth's core language is Ficl, a Forth dialect written by John Sadler.
 The Ficl source is included in the Fth source tree and is slightly
@@ -64,18 +66,18 @@ You can get the latest archive from
 If you prefer svn, you can get the source code from
 .Pa svn.code.sf.net/p/fth/code/ .
 Check out the source tree with
-.Bd -literal -compact
-% svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
-.Ed
+.Dl % svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
 and update it later with
-.Bd -literal -compact
-% svn update
-.Ed
+.Dl % svn update
 in the new fth directory.
 .\"
 .\" REQUIREMENTS
 .\"
 .Sh REQUIREMENTS
+.\"
+.\" Tecla
+.\"
+.Ss Tecla
 The interactive Fth interpreter supports tcsh-like command-line editing
 with the
 .Xr tecla 7 
@@ -84,59 +86,167 @@ library.  You can find a copy at
 If you won't use 
 .Xr tecla 7 ,
 you can configure Fth without it, see
-.Sx "CONFIGURE FTH" .
-.Pp
+.Sx "CONFIGURE AND BUILD FTH WITH SCONS" .
+.\"
+.\" Bn(3)
+.\"
+.Ss Bn
 Bignumbers are supported by 
 .Xr bn 3
 from openssl.
+.\"
+.\" 64-Bit-NetBSD and Tecla
+.\"
 .Ss 64-Bit-NetBSD and Tecla
 The libtecla package on
 .Nx
 provides a static library
 .Pa libtecla.a .
 On 64-bit machines this package should be compiled with:
-.Dl cd /usr/pkgsrc/devel/libtecla
-.Dl env CFLAGS=-fPIC make install clean
+.Dl % cd /usr/pkgsrc/devel/libtecla
+.Dl % env CFLAGS=-fPIC make install clean
 .\"
-.\" CONFIGURE FTH
+.\" CONFIGURE AND BUILD FTH WITH SCONS
 .\"
-.Sh CONFIGURE FTH
-There are a few additional configure options which may be of interest.
+.Sh CONFIGURE AND BUILD FTH WITH SCONS
+If you have the
+.Xr python 1
+package
+.Xr scons 1 ,
+you can configure, build and install Fth with scons:
+.Pp
+.Dl % scons install
+or
+.Dl % scons test install
+.Pp
+You can set additional variables on the command line, see below
+for the full set of variables:
+.Pp
+.Dl % scons CC=clang CFLAGS='-fno-strict-aliasing' install
+.Pp
+Scons for Fth has the following command line options.  For more,
+try
+.Dl % scons -h
 .Bl -tag -width MMM -compact
-.It Fl Fl disable\(hyshared
-Disable shared library support.
-.It Fl Fl enable\(hywarnings
-Enable C compiler warning flags.
-.It Fl Fl enable\(hymaintainer\(hymode
-\(oqmake maintainer-clean\(cq removes files which need special
-developer utilities.  Use this option with caution.
-.It Fl Fl program\(hyprefix
-.It Fl Fl program\(hysuffix
-.It Fl Fl program\(hytransform\(hyname
-More than one version of fth may be installed at the same time.  You
-can manipulate the name to achieve this, for example:
-.Dl % ./configure --program-suffix=-1.3
-.Dl % make test install
+.It Fl Fl prefix Ar path
+Installation prefix.
+.It Fl Fl build Ar path
+Build path, default
+.Pd ./build .
+.It Fl Fl tecla-prefix Ar path
+Search for
+.Xr tecla 7
+in
+.Ar path/{include,lib} .
+.It Fl Fl program-prefix Ar string
+.It Fl Fl program-suffix Ar string 
+Prepend or append
+.Ar string
+to installed program and library name.  More than one version of
+fth may be installed at the same time.  You can manipulate the name
+to achieve this, for example:
+.Pp
+.Dl % scons --prefix=/usr/local --program-suffix=-1.3 test install
+.Pp
 installs the interpreter as fth-1.3, the library as libfth-1.3.so,
 creates a library path /usr/local/lib/fth-1.3 for local dynamic
 libs and installs the header files in /usr/local/include/fth-1.3:
-.Bl -tag -compact
-.It Pa /usr/local/bin/fth-1.3
-.It Pa /usr/local/lib/libfth-1.3.so
-.It Pa /usr/local/lib/fth-1.3/
-.It Pa /usr/local/include/fth-1.3/
-.El
-.It Fl Fl with\(hytecla\(hyprefix[=DIR]
-If the
-.Xr tecla 7
-command-line editing library is installed in other places than
-$prefix/{include,lib} or /usr/{include,lib}, take this configure option.
-configure will add -IDIR/include to $(CFLAGS) and -LDIR/lib to
-$(LDFLAGS).
-.It Fl Fl without\(hytecla
-Don't use the 
+.Bd -literal -compact
+.Dl /usr/local/bin/fth-1.3
+.Dl /usr/local/lib/libfth-1.3.so
+.Dl /usr/local/lib/fth-1.3/
+.Dl /usr/local/include/fth-1.3/
+.Ed
+.It Fl Fl enable-warnings
+Enable extra C compiler warnings flags.
+.It Fl Fl disable-shared
+Disable shared library support.
+.It Fl Fl without-tecla
+Do not use the 
 .Xr tecla 7
 command-line editing library.
+.El
+.Pp
+Scons has the following targets:
+.Bl -tag -width MMM -compact
+.It Cm dist
+Create a distribution tar file.
+.It Cm install
+Install the Fth package.
+.It Cm test
+Test the Fth package.
+.It Cm uninstall
+Uninstall all installed files.
+.El
+.Dl % scons -c
+is similar to
+.Sq make clean .
+.Pp
+Scons handles command line variables.  They can be mixed with
+command line options as well:
+.Pp
+.Dl % scons --prefix=/usr/opt CC=clang warnings=yes install
+.Pp
+These variables can be also set in
+.Pa ${HOME}/.scons/fth.py
+as normal Python variables.  Strings have to be enclosed between
+single or double quotes corresponding to Python requirements.
+.Bd -literal
+% cat ~/.scons/fth.py
+CC = 'clang'
+CFLAGS = '-fstack-protector -fno-strict-aliasing'
+.Ed
+.Pp
+Here is the full list of variables:
+.Bl -tag -width MMM -compact
+.It Cm CC Ar cc
+C Compiler, default
+.Cm cc .
+.It Cm CFLAGS Ar cflags
+Additional CFLAGS, default empty.
+.It Cm build Ar path
+Build path.
+.It Cm prefix Ar path
+Install prefix.
+.It Cm program_prefix Ar string
+.It Cm program_suffix Ar string
+Prepend or append
+.Ar string
+to fth program and library.  See above for an explanation.
+.It Cm tecla_prefix Ar path
+.Xr tecla 7
+prefix.
+.It Cm libtecla
+Set to yes or no, default yes.
+.It Cm shared
+Set to yes or no, default yes.
+.It Cm warnings
+Set to yes or no, default no.
+.El
+.\"
+.\" CONFIGURE AND BUILD FTH THE OLD WAY
+.\"
+.Sh CONFIGURE AND BUILD FTH THE OLD WAY
+The usual way to configure and install Fth is:
+.Dl % ./configure
+.Dl % make
+.Dl % make test # optional
+.Dl % make install
+.Pp
+There are a few additional configure options which may be of
+interest.  See
+.Sx "CONFIGURE AND BUILD FTH WITH SCONS"
+for explanations of them.  For more, try:
+.Dl % ./configure -h
+.Bl -tag -width MMM -compact
+.It Fl Fl prefix Ar path
+.It Fl Fl with-tecla-prefix Ar path
+.It Fl Fl program-prefix Ar string
+.It Fl Fl program-suffix Ar string
+.It Fl Fl enable-warnings
+.It Fl Fl enable-maintainer-mode
+.It Fl Fl disable-shared
+.It Fl Fl without-tecla
 .El
 .Pp
 Makefile knows the following targets:
@@ -144,34 +254,18 @@ Makefile knows the following targets:
 .It all
 .It clean
 .It distclean
-.It fth\(hyshared
-.It fth\(hystatic
+.It fth-shared
+.It fth-static
 .It install
-.It install\(hyshared
-.It install\(hystatic
-.It install\(hystrip
-.It maintainer\(hyclean
+.It install-shared
+.It install-static
+.It install-strip
+.It maintainer-clean
 .It test
 .It uninstall
 .El
-.\"
-.\" INSTALL FTH
-.\"
-.Sh INSTALL FTH
-The usual way to configure and install Fth is:
-.Bd -literal -compact
-% ./configure CFLAGS=\(dq-g -O2 -Wall\(dq
-% make
-% make test # optional
-% make install
-.Ed
-Or with options mentioned above and a single make command line:
-.Bd -literal -compact
-% ./configure --with-tecla-prefix=/my/tecla/prefix CFLAGS=\(dq-g -O2\(dq
-% make test install
-.Ed
-./configure -h presents all configure options.
-While testing (make test) two environment variables are checked:
+.Pp
+During testing with make test two environment variables are checked:
 .Bl -tag -compact
 .It Dv FTH_TEST_IO
 .It Dv FTH_TEST_FILE
@@ -187,7 +281,7 @@ program and library using the autoconf macro FTH_CHECK_LIB which is
 located in fth.m4.  This macro tests if the interpreter fth can be
 found in $PATH.  If so, it tests if libfth contains complex and
 rational numbers.  Eventually it substitutes six variables for
-configure.ac.
+.Pd configure.ac .
 .Pp
 After including FTH_CHECK_LIB in configure.ac call aclocal && autoconf
 to update aclocal.m4.
@@ -207,6 +301,9 @@ Set to \(dqyes\(dq or \(dqno\(dq.
 .It FTH_HAVE_RATIO
 Set to \(dqyes\(dq or \(dqno\(dq.
 .El
+.\"
+.\" Short configure.ac Example
+.\"
 .Ss Short configure.ac Example
 .Bd -literal -compact
 AC_ARG_WITH([forth],
@@ -216,7 +313,10 @@ AC_ARG_WITH([forth],
                 FTH_CHECK_LIB([AC_DEFINE([HAVE_FORTH])])
             fi])
 .Ed
-.Ss Long configure.as Example
+.\"
+.\" Long configure.ac Example
+.\"
+.Ss Long configure.ac Example
 .Bd -literal -compact
 AC_ARG_WITH([forth],
             [AS_HELP_STRING([--with-forth],
@@ -238,25 +338,4 @@ AC_ARG_WITH([forth],
                                ac_snd_have_extension_language=yes])
             fi])
 .Ed
-.\"
-.\" RUNNING FTH
-.\"
-.Sh RUNNING FTH
-Fth builds and runs on these systems:
-.Ss Current builds
-.Bd -literal -compact
-FTH 1.3.8 (2014/12/28) [amd64-pkgsrc-netbsd7.99]
-FTH 1.3.8 (2014/12/28) [amd64-portbld-freebsd8.4]
-FTH 1.3.8 (2014/12/28) [x86_64-amd-linux3.2]
-FTH 1.3.8 (2014/12/28) [i386-mnet-freebsd9.0] (arbornet.org)
-FTH 1.3.8 (2014/12/28) [i386-intel-openbsd5.0] (grex.org)
-FTH 1.3.8 (2014/12/28) [x86_64-debian-linux-gnu3.2.0] (freeshell.de)
-FTH 1.3.7 (2013/10/05) [amd64-sdf-netbsd6.1] (sdf.org)
-.Ed
-.Ss VirtualBox
-.Bd -literal -compact
-FTH 1.3.7 (2013/10/05) [amd64-vbox-freebsd11.0]
-FTH 1.3.7 (2013/10/05) [amd64-vbox-netbsd6.99.24]
-FTH 1.3.7 (2013/10/05) [amd64-vbox-openbsd5.4]
-FTH 1.3.7 (2013/10/05) [x86_64-vboxdebian-linux-gnu3.10]
 .\" README.man ends here

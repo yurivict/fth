@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,13 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)hash-test.fs	1.20 1/11/15
+\ @(#)hash-test.fs	1.21 3/23/16
 
 require test-utils.fs
 
 lambda: <{ key val -- x }> val 10 + ; value hash-map-cb
+
+: test-noop ;
 
 : hash-test ( -- )
 	nil nil nil { h1 h2 h3 }
@@ -110,14 +112,14 @@ lambda: <{ key val -- x }> val 10 + ; value hash-map-cb
 	#f properties #{ "hello" #{ 'hey "joe" } } hash= not
 	    "properties (all)" test-expr
 	\ word-properties, word-property-ref|set!
-	<'> noop 'hey "joe" word-property-set!
-	<'> noop 'hey word-property-ref "joe" string<>
+	<'> test-noop 'hey "joe" word-property-set!
+	<'> test-noop 'hey word-property-ref "joe" string<>
 	    "word-property-set!" test-expr
-	<'> noop 'joe word-property-ref #f <>
+	<'> test-noop 'joe word-property-ref #f <>
 	    "word-property-ref ('joe)" test-expr
-	<'> noop word-properties to obj
-	obj #{ 'hey "joe" 'documentation "noop" } hash=
-	obj #{ 'documentation "noop" 'hey "joe" } hash= || not
+	<'> test-noop word-properties to obj
+	obj #{ 'hey "joe" 'documentation "test-noop" } hash=
+	obj #{ 'documentation "test-noop" 'hey "joe" } hash= || not
 	    "word-properties (all)" test-expr
 	\ object-properties, object-property-ref|set!
 	"hello" to obj

@@ -1,13 +1,13 @@
-README(1)			     LOCAL			     README(1)
+README				     LOCAL				README
 
 NAME
-     README -- installation information for the Fth package
+     README - installation information for the Fth package
 
 INTRODUCTION
      Fth is a software package which includes the interpreter fth and the
      extension library libfth.	You can write Forth scripts and interpret them
-     by the interpreter fth or you can link libfth into an application to use
-     it as extension language.
+     with the interpreter fth or you can link libfth into an application to
+     use it as extension language.
 
      Fth's core language is Ficl, a Forth dialect written by John Sadler.  The
      Ficl source is included in the Fth source tree and is slightly changed to
@@ -20,55 +20,137 @@ WHERE IS FTH LOCATED?
      You can get the latest archive from http://www.sf.net/projects/fth/.  If
      you prefer svn, you can get the source code from
      svn.code.sf.net/p/fth/code/.  Check out the source tree with
-     % svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
+	   % svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
      and update it later with
-     % svn update
+	   % svn update
      in the new fth directory.
 
 REQUIREMENTS
+   Tecla
      The interactive Fth interpreter supports tcsh-like command-line editing
      with the tecla(7) library.	 You can find a copy at
      http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.3.tar.gz.  If you
-     won't use tecla(7), you can configure Fth without it, see CONFIGURE FTH.
+     won't use tecla(7), you can configure Fth without it, see CONFIGURE AND
+     BUILD FTH WITH SCONS.
 
+   Bn
      Bignumbers are supported by bn(3) from openssl.
 
    64-Bit-NetBSD and Tecla
      The libtecla package on NetBSD provides a static library libtecla.a.  On
      64-bit machines this package should be compiled with:
-	   cd /usr/pkgsrc/devel/libtecla
-	   env CFLAGS=-fPIC make install clean
+	   % cd /usr/pkgsrc/devel/libtecla
+	   % env CFLAGS=-fPIC make install clean
 
-CONFIGURE FTH
-     There are a few additional configure options which may be of interest.
-     --disable-shared
-	  Disable shared library support.
-     --enable-warnings
-	  Enable C compiler warning flags.
-     --enable-maintainer-mode
-	  `make maintainer-clean' removes files which need special developer
-	  utilities.  Use this option with caution.
-     --program-prefix
-     --program-suffix
-     --program-transform-name
+CONFIGURE AND BUILD FTH WITH SCONS
+     If you have the python(1) package scons(1), you can configure, build and
+     install Fth with scons:
+
+	   % scons install
+     or
+	   % scons test install
+
+     You can set additional variables on the command line, see below for the
+     full set of variables:
+
+	   % scons CC=clang CFLAGS='-fno-strict-aliasing' install
+
+     Scons for Fth has the following command line options.  For more, try
+	   % scons -h
+     --prefix path
+	  Installation prefix.
+     --build path
+	  Build path, default
+     --tecla-prefix path
+	  Search for tecla(7) in path/{include,lib}.
+     --program-prefix string
+     --program-suffix string
+	  Prepend or append string to installed program and library name.
 	  More than one version of fth may be installed at the same time.  You
 	  can manipulate the name to achieve this, for example:
-		% ./configure --program-suffix=-1.3
-		% make test install
+
+		% scons --prefix=/usr/local --program-suffix=-1.3 test install
+
 	  installs the interpreter as fth-1.3, the library as libfth-1.3.so,
 	  creates a library path /usr/local/lib/fth-1.3 for local dynamic libs
 	  and installs the header files in /usr/local/include/fth-1.3:
-	  /usr/local/bin/fth-1.3
-	  /usr/local/lib/libfth-1.3.so
-	  /usr/local/lib/fth-1.3/
-	  /usr/local/include/fth-1.3/
-     --with-tecla-prefix[=DIR]
-	  If the tecla(7) command-line editing library is installed in other
-	  places than $prefix/{include,lib} or /usr/{include,lib}, take this
-	  configure option.  configure will add -IDIR/include to $(CFLAGS) and
-	  -LDIR/lib to $(LDFLAGS).
+		/usr/local/bin/fth-1.3
+		/usr/local/lib/libfth-1.3.so
+		/usr/local/lib/fth-1.3/
+		/usr/local/include/fth-1.3/
+     --enable-warnings
+	  Enable extra C compiler warnings flags.
+     --disable-shared
+	  Disable shared library support.
      --without-tecla
-	  Don't use the tecla(7) command-line editing library.
+	  Do not use the tecla(7) command-line editing library.
+
+     Scons has the following targets:
+     dist
+	  Create a distribution tar file.
+     install
+	  Install the Fth package.
+     test
+	  Test the Fth package.
+     uninstall
+	  Uninstall all installed files.
+	   % scons -c
+     is similar to `make clean'.
+
+     Scons handles command line variables.  They can be mixed with command
+     line options as well:
+
+	   % scons --prefix=/usr/opt CC=clang warnings=yes install
+
+     These variables can be also set in ${HOME}/.scons/fth.py as normal Python
+     variables.	 Strings have to be enclosed between single or double quotes
+     corresponding to Python requirements.
+
+     % cat ~/.scons/fth.py
+     CC = 'clang'
+     CFLAGS = '-fstack-protector -fno-strict-aliasing'
+
+     Here is the full list of variables:
+     CC cc
+	  C Compiler, default cc.
+     CFLAGS cflags
+	  Additional CFLAGS, default empty.
+     build path
+	  Build path.
+     prefix path
+	  Install prefix.
+     program_prefix string
+     program_suffix string
+	  Prepend or append string to fth program and library.	See above for
+	  an explanation.
+     tecla_prefix path
+	  tecla(7) prefix.
+     libtecla
+	  Set to yes or no, default yes.
+     shared
+	  Set to yes or no, default yes.
+     warnings
+	  Set to yes or no, default no.
+
+CONFIGURE AND BUILD FTH THE OLD WAY
+     The usual way to configure and install Fth is:
+	   % ./configure
+	   % make
+	   % make test # optional
+	   % make install
+
+     There are a few additional configure options which may be of interest.
+     See CONFIGURE AND BUILD FTH WITH SCONS for explanations of them.  For
+     more, try:
+	   % ./configure -h
+     --prefix path
+     --with-tecla-prefix path
+     --program-prefix string
+     --program-suffix string
+     --enable-warnings
+     --enable-maintainer-mode
+     --disable-shared
+     --without-tecla
 
      Makefile knows the following targets:
 
@@ -85,16 +167,7 @@ CONFIGURE FTH
      test
      uninstall
 
-INSTALL FTH
-     The usual way to configure and install Fth is:
-     % ./configure CFLAGS="-g -O2 -Wall"
-     % make
-     % make test # optional
-     % make install
-     Or with options mentioned above and a single make command line:
-     % ./configure --with-tecla-prefix=/my/tecla/prefix CFLAGS="-g -O2"
-     % make test install
-     While testing (make test) two environment variables are checked:
+     During testing with make test two environment variables are checked:
      FTH_TEST_IO
      FTH_TEST_FILE
      If set, the IO and File test will be executed.  These two tests may bear
@@ -105,7 +178,7 @@ AUTOCONF MACRO FTH_CHECK_LIB
      program and library using the autoconf macro FTH_CHECK_LIB which is
      located in fth.m4.	 This macro tests if the interpreter fth can be found
      in $PATH.	If so, it tests if libfth contains complex and rational
-     numbers.  Eventually it substitutes six variables for configure.ac.
+     numbers.  Eventually it substitutes six variables for
 
      After including FTH_CHECK_LIB in configure.ac call aclocal && autoconf to
      update aclocal.m4.
@@ -130,7 +203,7 @@ AUTOCONF MACRO FTH_CHECK_LIB
 		     FTH_CHECK_LIB([AC_DEFINE([HAVE_FORTH])])
 		 fi])
 
-   Long configure.as Example
+   Long configure.ac Example
      AC_ARG_WITH([forth],
 		 [AS_HELP_STRING([--with-forth],
 				 [use Forth as the extension language])],
@@ -151,22 +224,3 @@ AUTOCONF MACRO FTH_CHECK_LIB
 				    ac_snd_have_extension_language=yes])
 		 fi])
 
-RUNNING FTH
-     Fth builds and runs on these systems:
-
-   Current builds
-     FTH 1.3.8 (2014/12/28) [amd64-pkgsrc-netbsd7.99]
-     FTH 1.3.8 (2014/12/28) [amd64-portbld-freebsd8.4]
-     FTH 1.3.8 (2014/12/28) [x86_64-amd-linux3.2]
-     FTH 1.3.8 (2014/12/28) [i386-mnet-freebsd9.0] (arbornet.org)
-     FTH 1.3.8 (2014/12/28) [i386-intel-openbsd5.0] (grex.org)
-     FTH 1.3.8 (2014/12/28) [x86_64-debian-linux-gnu3.2.0] (freeshell.de)
-     FTH 1.3.7 (2013/10/05) [amd64-sdf-netbsd6.1] (sdf.org)
-
-   VirtualBox
-     FTH 1.3.7 (2013/10/05) [amd64-vbox-freebsd11.0]
-     FTH 1.3.7 (2013/10/05) [amd64-vbox-netbsd6.99.24]
-     FTH 1.3.7 (2013/10/05) [amd64-vbox-openbsd5.4]
-     FTH 1.3.7 (2013/10/05) [x86_64-vboxdebian-linux-gnu3.10]
-
-NetBSD 7.99.3		       December 28, 2014		 NetBSD 7.99.3

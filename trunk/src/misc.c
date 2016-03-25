@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.675 3/23/16";
+const char libfth_sccsid[] = "@(#)misc.c	1.678 3/25/16";
 #endif /* not lint */
 
-#define FTH_DATE		"2016/03/23"
+#define FTH_DATE		"2016/03/25"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -158,8 +158,10 @@ static void	forth_pre_init(void);
 static RETSIGTYPE fth_toplevel_handler(int sig);
 static void	handler_exec(int sig);
 static FTH	load_file(const char *name, const char *caller);
+#if defined(HAVE_DLOPEN)
 static FTH	load_lib(const char *name, const char *func,
 		    const char *caller);
+#endif
 static void	run_at_exit(void);
 static void	set_and_show_signal_backtrace(int kind);
 
@@ -1482,14 +1484,18 @@ fth_dl_load(const char *name, const char *func)
 	return (FTH_TRUE);
 }
 
-#else
+#else	/* !HAVE_DLOPEN */
+
+/* ARGSUSED */
 FTH
 fth_dl_load(const char *name, const char *func)
 {
+	(void)name;
+	(void)func;
 	FTH_NOT_IMPLEMENTED_ERROR(dlopen);
 	return (FTH_FALSE);
 }
-#endif
+#endif	/* HAVE_DLOPEN */
 
 static void
 ficl_dl_load(ficlVm *vm)
