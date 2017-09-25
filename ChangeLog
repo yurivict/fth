@@ -1,3 +1,6 @@
+2017-09-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+	* examples/site-lib/clm.fs: Remove clm-default-frequency.
+
 2016-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* SConstruct: New file.
