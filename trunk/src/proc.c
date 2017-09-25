@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.166 2/17/16
+ * @(#)proc.c	1.167 9/25/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2723,26 +2723,26 @@ fth_var_set(FTH obj, FTH value)
  *
  * UNTRACE-VAR removes the hook.
  *
- * 0.0 value *clm-default-frequency*
- * <'> *clm-default-frequency* lambda: <{ val -- res }>
- *   val set-clm-default-frequency
+ * 8 value *clm-array-print-length*
+ * <'> *clm-array-print-length* lambda: <{ val -- res }>
+ *   val set-mus-array-print-length
  * ; trace-var
  * ...
- * <'> *clm-default-frequency* untrace-var
+ * <'> *clm-array-print-length* untrace-var
  *
  */
 void
 fth_trace_var(FTH obj, FTH proc_or_xt)
 {
 #define h_trace_var "( var proc-or-xt -- )  install trace xt\n\
-0.0 value *clm-default-frequency*\n\
-<'> *clm-default-frequency* lambda: <{ val -- res }>\n\
-    val set-clm-default-frequency\n\
+8 value *clm-array-print-length*\n\
+<'> *clm-array-print-length* lambda: <{ val -- res }>\n\
+    val set-mus-array-print-length\n\
 ; trace-var\n\
-440.0 to *clm-default-frequency*\n\
-*clm-default-frequency* => 440.0\n\
-clm-default-frequency   => 440.0\n\
-<'> *clm-default-frequency* untrace-var\n\
+24 to *clm-array-print-length*\n\
+*clm-array-print-length* => 24\n\
+mus-array-print-length   => 24\n\
+<'> *clm-array-print-length* untrace-var\n\
 Add PROC-OR-XT to global VAR hook which is utilized on every call of TO.  \
 The stack effect of PROC-OR-XT must be ( val -- res ).\n\
 See also untrace-var."
@@ -2766,14 +2766,14 @@ void
 fth_untrace_var(FTH obj)
 {
 #define h_untrace_var "( var -- )  remove trace xt\n\
-0.0 value *clm-default-frequency*\n\
-<'> *clm-default-frequency* lambda: <{ val -- res }>\n\
-    val set-clm-default-frequency\n\
+8 value *clm-array-print-length*\n\
+<'> *clm-array-print-length* lambda: <{ val -- res }>\n\
+    val set-mus-array-print-length\n\
 ; trace-var\n\
-440.0 to *clm-default-frequency*\n\
-*clm-default-frequency* => 440.0\n\
-clm-default-frequency   => 440.0\n\
-<'> *clm-default-frequency* untrace-var\n\
+24 to *clm-array-print-length*\n\
+*clm-array-print-length* => 24\n\
+mus-array-print-length   => 24\n\
+<'> *clm-array-print-length* untrace-var\n\
 Remove previously installed hook from VAR.\n\
 See also trace-var."
 	if (!FTH_TRACE_VAR_P(obj)) {

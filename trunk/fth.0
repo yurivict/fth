@@ -212,18 +212,19 @@ DDEESSCCRRIIPPTTIIOONN
      If the first character of the command-line is an exclamation point !!, try
      history expansion similar to csh(1).
 
-     !123   repeat event 123
-     !-123  repeat 123rd last event
-     !!     repeat last event (same as !-1)
+     !123    repeat event 123
+     !-123   repeat 123rd last event
+     !!      repeat last event (same as !-1)
      !?str(?)
-            repeat last event containing _s_t_r_; the last ?? is optional
-     !str   repeat last event starting with _s_t_r
+             repeat last event containing _s_t_r_; the last ?? is optional
+     !str    repeat last event starting with _s_t_r
 
      If the first character of the command-line is a caret ^^, try history
      substitution similar to csh(1).
 
-     ^search^replace(^)   repeat last event containing _s_e_a_r_c_h and replace this
-                          string with _r_e_p_l_a_c_e; the last ^^ is optional
+     ^search^replace(^)
+             repeat last event containing _s_e_a_r_c_h and replace this string with
+             _r_e_p_l_a_c_e; the last ^^ is optional
 
    TTeeccllaa vvaarriiaabblleess
      *histdup*
@@ -254,34 +255,38 @@ DDEESSCCRRIIPPTTIIOONN
      bbiinnddkkeeyy ( :optional key action -- )
           Key bindings and others can be set in _~_/_._f_t_h_r_c to control libtecla
           and getline.
-          no argument   Show user-defined key-bindings set for example in
-                        _~_/_._f_t_h_r_c.
-          one argument  If _k_e_y is a string, take it as configure string.  If
-                        _k_e_y is a predefined constant, set specific value as
-                        configure string.  Valid constants:
-                        gl-vi   edit-mode vi
-                        gl-emacs
-                                edit-mode emacs
-                        gl-none
-                                edit-mode none
-                        gl-nobeep
-                                nobeep
-                              "edit-mode vi \n nobeep" bindkey
-                              gl-vi bindkey
+          no argument
+                  Show user-defined key-bindings set for example in _~_/_._f_t_h_r_c.
+          one argument
+                  If _k_e_y is a string, take it as configure string.  If _k_e_y is
+                  a predefined constant, set specific value as configure
+                  string.  Valid constants:
+                  gl-vi   edit-mode vi
+                  gl-emacs
+                          edit-mode emacs
+                  gl-none
+                          edit-mode none
+                  gl-nobeep
+                          nobeep
+                        "edit-mode vi \n nobeep" bindkey
+                        gl-vi bindkey
           two arguments
-                        If _k_e_y and _a_c_t_i_o_n are strings, bind _a_c_t_i_o_n to _k_e_y.  If
-                        _k_e_y is a string and _a_c_t_i_o_n is anything else, unbind
-                        _k_e_y from last bind.  See tecla(7) for key-bindings and
-                        actions.
-                              "^G" "user-interrupt" bindkey
-                              "^G" #f bindkey
+                  If _k_e_y and _a_c_t_i_o_n are strings, bind _a_c_t_i_o_n to _k_e_y.  If _k_e_y
+                  is a string and _a_c_t_i_o_n is anything else, unbind _k_e_y from
+                  last bind.  See tecla(7) for key-bindings and actions.
+                        "^G" "user-interrupt" bindkey
+                        "^G" #f bindkey
      hhiissttoorryy ( :optional action arg -- )
           History events can be displayed, loaded, saved, and cleared where
           _a_c_t_i_o_n can be one of
-          gl-show   show _a_r_g or all history events
-          gl-load   load history events from _a_r_g or *histfile*
-          gl-save   save history events to _a_r_g or *histfile*
-          gl-clear  clear all history events
+          gl-show
+                  show _a_r_g or all history events
+          gl-load
+                  load history events from _a_r_g or *histfile*
+          gl-save
+                  save history events to _a_r_g or *histfile*
+          gl-clear
+                  clear all history events
                              history => show entire history
                 gl-show      history => same as above
                         10   history => show 10 last history events
@@ -2798,15 +2803,15 @@ DDEESSCCRRIIPPTTIIOONN
      ttrraaccee--vvaarr ( var proc-or-xt -- )
           Add _p_r_o_c_-_o_r_-_x_t to global _v_a_r hook which is utilized on every call of
           ttoo.  The stack effect of _p_r_o_c_-_o_r_-_x_t must be ( val -- res ).
-                clm-default-frequency => 0.0
-                0.0 value *clm-default-frequency*
-                <'> *clm-default-frequency* lambda: <{ val -- res }>
-                        val set-clm-default-frequency
+                mus-array-print-length => 8
+                8 value *clm-array-print-length*
+                <'> *clm-array-print-length* lambda: <{ val -- res }>
+                        val set-mus-array-print-length
                 ; trace-var
-                440.0 to *clm-default-frequency*
-                *clm-default-frequency* => 440.0
-                clm-default-frequency   => 440.0
-                <'> *clm-default-frequency* untrace-var
+                24 to *clm-array-print-length*
+                *clm-array-print-length* => 24
+                mus-array-print-length => 24
+                <'> *clm-array-print-length* untrace-var
      uunnttrraaccee--vvaarr ( var -- )
           Remove previously installed hook from _v_a_r.
      wwoorrdd?? ( obj -- f )
@@ -3415,4 +3420,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 7.99.26                    2016/03/22                    NetBSD 7.99.26
+NetBSD 8.99.3                     2017/09/25                     NetBSD 8.99.3
