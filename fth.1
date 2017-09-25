@@ -1,4 +1,4 @@
-.\" Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.137 3/22/16
+.\" @(#)fth.1	1.138 9/25/17
 .\"
-.Dd 2016/03/22
+.Dd 2017/09/25
 .Dt FTH 1
 .Os
 .\"
@@ -7107,15 +7107,15 @@ The stack effect of
 .Ar proc-or-xt
 must be ( val -- res ).
 .Bd -literal -offset indent -compact
-clm-default-frequency \(rA 0.0
-0.0 value *clm-default-frequency*
-<\(aq> *clm-default-frequency* lambda: <{ val -- res }>
-	val set-clm-default-frequency
+mus-array-print-length \(rA 8
+8 value *clm-array-print-length*
+<\(aq> *clm-array-print-length* lambda: <{ val -- res }>
+	val set-mus-array-print-length
 ; trace-var
-440.0 to *clm-default-frequency*
-*clm-default-frequency* \(rA 440.0
-clm-default-frequency   \(rA 440.0
-<\(aq> *clm-default-frequency* untrace-var
+24 to *clm-array-print-length*
+*clm-array-print-length* \(rA 24
+mus-array-print-length \(rA 24
+<\(aq> *clm-array-print-length* untrace-var
 .Ed
 .\"
 .\" untrace-var
