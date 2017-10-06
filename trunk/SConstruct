@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.3 3/25/16
+# @(#)SConstruct	1.4 10/6/17
 
 #
 # scons -h
@@ -557,22 +557,22 @@ fth_conf_test(env)
 Export('env')
 SConscript('SConscript', variant_dir = build_dir)
 
-print "%20s: %s" % ("host", env.subst("${HOST_TRIPLE}"))
-print "%20s: %s v%s" % ("compiler",
-	env.subst("${CC}"), env.subst("${CCVERSION}"))
+print("%20s: %s" % ("host", env.subst("${HOST_TRIPLE}")))
+print("%20s: %s v%s" % ("compiler",
+	env.subst("${CC}"), env.subst("${CCVERSION}")))
 if shared:
-	print "%20s: %s" % ("cc command line", env.subst("${SHCCCOM}"))
-	print "%20s: %s" % ("ld command line", env.subst("${SHLINKCOM}"))
+	print("%20s: %s" % ("cc command line", env.subst("${SHCCCOM}")))
+	print("%20s: %s" % ("ld command line", env.subst("${SHLINKCOM}")))
 else:
-	print "%20s: %s" % ("cc command line", env.subst("${CCCOM}"))
-	print "%20s: %s" % ("ld command line", env.subst("${LINKCOM}"))
+	print("%20s: %s" % ("cc command line", env.subst("${CCCOM}")))
+	print("%20s: %s" % ("ld command line", env.subst("${LINKCOM}")))
 
-print "%20s: %s" % ("prefix", prefix)
-print "%20s: %s" % ("tecla-prefix", tecla_prefix)
-print "%20s: %s" % ("program-prefix", prg_prefix)
-print "%20s: %s" % ("program-suffix", prg_suffix)
-print "%20s: %s" % ("libtecla", libtecla)
-print "%20s: %s" % ("shared", shared)
-print "%20s: %s" % ("warnings", warnings)
+print("%20s: %s" % ("prefix", prefix))
+print("%20s: %s" % ("tecla-prefix", tecla_prefix))
+print("%20s: %s" % ("program-prefix", prg_prefix))
+print("%20s: %s" % ("program-suffix", prg_suffix))
+print("%20s: %s" % ("libtecla", libtecla))
+print("%20s: %s" % ("shared", shared))
+print("%20s: %s" % ("warnings", warnings))
 
 # SConstruct ends here
