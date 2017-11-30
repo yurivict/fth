@@ -1,7 +1,14 @@
+2017-12-01  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/examp.fs: Replace several undefs with
+	correct values for function graph.
+
 2017-10-06  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
 	* SConscript: print() syntax has changed.
 
 2017-09-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
 	* examples/site-lib/clm.fs: Remove clm-default-frequency.
 
 2016-03-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
