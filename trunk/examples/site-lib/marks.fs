@@ -1,10 +1,10 @@
 \ marks.fs -- marks.scm|rb -> marks.fs
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Tue Dec 27 19:22:06 CET 2005
-\ Changed: Fri Oct  4 23:28:21 CEST 2013
+\ Created: 05/12/27 19:22:06
+\ Changed: 17/12/02 02:08:43
 \
-\ @(#)marks.fs	1.26 10/4/13
+\ @(#)marks.fs	1.27 12/2/17
 
 \ Commentary:
 \
@@ -198,7 +198,7 @@ mark-click-hook <'> mark-click-info add-hook!."
 		prt "\n\t\\ channel %d\n" #( i ) port-puts-format
 		chan-marks each { m }
 			m nil? ?leave
-			"\t%s #f %d %S %d add-mark to mk\n"
+			prt "\t%s #f %d %S %d add-mark to mk\n"
 			    #( m undef mark-sample
 			       j ( chn )
 			       m mark-name length 0= if
@@ -209,7 +209,7 @@ mark-click-hook <'> mark-click-info add-hook!."
 			       m mark-sync ) port-puts-format
 			m mark-properties { props }
 			props if
-				"\tmk %S set-mark-properties\n"
+				prt "\tmk %S set-mark-properties\n"
 				    #( props ) port-puts-format
 			then
 		end-each
