@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.159 12/2/17
+ * @(#)io.c	1.160 12/2/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -741,45 +741,59 @@ fth_io_popen(FTH cmd, int fam)
 static int
 string_read_char(void *ptr)
 {
-	if (FTH_IO_STRING_INDEX_REF(ptr) < FTH_IO_STRING_LENGTH(ptr))
-		return (fth_string_c_char_fast_ref((FTH)ptr,
-		    FTH_IO_STRING_INDEX_REF(ptr)++));
-	return (EOF);
+	ficlInteger idx;
+	int c;
+
+	c = EOF;
+	idx = FTH_IO_STRING_INDEX_REF(ptr);
+	if (idx < FTH_IO_STRING_LENGTH(ptr)) {
+		c = fth_string_c_char_fast_ref((FTH)ptr, idx++);
+		FTH_IO_STRING_INDEX_SET(ptr, idx);
+	}
+	return (c);
 }
 
 static void
 string_write_char(void *ptr, int c)
 {
-	if (FTH_IO_STRING_INDEX_REF(ptr) < (FTH_IO_STRING_LENGTH(ptr) - 1))
-		fth_string_c_char_fast_set((FTH)ptr,
-		    FTH_IO_STRING_INDEX_REF(ptr), (char)c);
-	else
-		fth_string_push((FTH)ptr,
-		    fth_make_string_format("%c", (char)c));
-	FTH_IO_STRING_INDEX_REF(ptr)++;
+	ficlInteger idx;
+
+	idx = FTH_IO_STRING_INDEX_REF(ptr);
+	if (idx >= FTH_IO_STRING_LENGTH(ptr) - 1) {
+		FTH fs;
+
+		fs = fth_make_string_format("%c", (char)c);
+		fth_string_push((FTH)ptr, fs);
+	} else
+		fth_string_c_char_fast_set((FTH)ptr, idx, (char)c);
+	FTH_IO_STRING_INDEX_SET(ptr, ++idx);
 }
 
 static char *
 string_read_line(void *ptr)
 {
-	char *line;
+	ficlInteger idx, len;
 	size_t i, size;
-	char c;
+	char *line;
 
-	if (FTH_IO_STRING_INDEX_REF(ptr) >= FTH_IO_STRING_LENGTH(ptr))
+	idx = FTH_IO_STRING_INDEX_REF(ptr);
+	len = FTH_IO_STRING_LENGTH(ptr); 
+	if (idx >= len)
 		return (NULL);
 	line = io_scratch;
 	size = sizeof(io_scratch);
-	for (i = 0;
-	    i < size &&
-	    FTH_IO_STRING_INDEX_REF(ptr) < FTH_IO_STRING_LENGTH(ptr);
-	    i++) {
-		c = fth_string_c_char_fast_ref((FTH)ptr,
-		    FTH_IO_STRING_INDEX_REF(ptr)++);
-		if (c == '\n')
-			break;
+	for (i = 0; i < size && idx < len; i++, idx++) {
+		char c;
+
+		c = fth_string_c_char_fast_ref((FTH)ptr, idx);
 		line[i] = c;
+		if (c == '\n') {
+			idx++;
+			i++;
+			break;
+		}
 	}
+	FTH_IO_STRING_INDEX_SET(ptr, idx);
 	line[i] = '\0';
 	return (line);
 }
@@ -787,28 +801,26 @@ string_read_line(void *ptr)
 static void
 string_write_line(void *ptr, const char *line)
 {
-	ficlInteger len;
+	ficlInteger idx, len;
+	size_t i, size;
 
 	if (line == NULL)
 		return;
-	len = (ficlInteger)fth_strlen(line);
-	if (FTH_IO_STRING_INDEX_REF(ptr) < (FTH_IO_STRING_LENGTH(ptr) - 1)) {
-		ficlInteger i;
-
-		for (i = 0;
-		    i < len &&
-		    FTH_IO_STRING_INDEX_REF(ptr) < FTH_IO_STRING_LENGTH(ptr);
-		    i++)
-			fth_string_c_char_fast_set((FTH)ptr,
-			    FTH_IO_STRING_INDEX_REF(ptr)++, line[i]);
-		if (i < len) {
-			fth_string_push((FTH)ptr, fth_make_string(line + i));
-			FTH_IO_STRING_INDEX_REF(ptr) += (len - i);
-		}
-	} else {
+	idx = FTH_IO_STRING_INDEX_REF(ptr);
+	len = FTH_IO_STRING_LENGTH(ptr); 
+	size = fth_strlen(line);
+	if (idx >= len - 1) {
 		fth_string_push((FTH)ptr, fth_make_string(line));
-		FTH_IO_STRING_INDEX_REF(ptr) += len;
+		idx += size;
+	} else {
+		for (i = 0; i < size && idx < len; i++, idx++)
+			fth_string_c_char_fast_set((FTH)ptr, idx, line[i]);
+		if (i < size) {
+			fth_string_push((FTH)ptr, fth_make_string(line + i));
+			idx += (size - i);
+		}
 	}
+	FTH_IO_STRING_INDEX_SET(ptr, idx);
 }
 
 static bool
