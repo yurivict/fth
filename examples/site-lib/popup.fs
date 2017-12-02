@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 14/11/11 00:07:54
+\ Changed: 17/12/02 03:19:40
 \
-\ @(#)popup.fs	1.42 11/11/14
+\ @(#)popup.fs	1.43 12/2/17
 
 \ selection-popup-menu
 \ graph-popup-menu

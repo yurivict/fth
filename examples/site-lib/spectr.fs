@@ -1,10 +1,10 @@
 \ spectr.fs -- spectr.cl --> spectr.fs
 
 \ Translator: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Thu Nov 18 15:26:46 CET 2004
-\ Changed: Fri Oct  4 23:29:38 CEST 2013
+\ Created: 04/11/18 15:26:46
+\ Changed: 17/12/02 03:03:01
 \
-\ @(#)spectr.fs	1.4 10/4/13
+\ @(#)spectr.fs	1.5 12/2/17
 
 \ Commentary:
 

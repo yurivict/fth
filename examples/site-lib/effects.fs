@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/10/16 23:04:30
-\ Changed: 14/04/28 03:52:17
+\ Changed: 17/12/02 03:19:40
 \
-\ @(#)effects.fs	1.56 4/28/14
+\ @(#)effects.fs	1.57 12/2/17
 
 \ General (nogui/motif/gtk)
 \
