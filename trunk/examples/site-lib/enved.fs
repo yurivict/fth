@@ -1,10 +1,10 @@
 \ enved.fs -- enved object type
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
-\ Created: Sun Nov 13 13:59:42 CET 2005
-\ Changed: Fri Oct  4 23:27:42 CEST 2013
+\ Created: 05/11/13 13:59:42
+\ Changed: 17/12/02 02:57:20
 \
-\ @(#)enved.fs	1.18 10/4/13
+\ @(#)enved.fs	1.19 12/2/17
 
 \ Commentary:
 
