@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.156 3/22/16
+ * @(#)io.c	1.159 12/2/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -752,10 +752,11 @@ string_write_char(void *ptr, int c)
 {
 	if (FTH_IO_STRING_INDEX_REF(ptr) < (FTH_IO_STRING_LENGTH(ptr) - 1))
 		fth_string_c_char_fast_set((FTH)ptr,
-		    FTH_IO_STRING_INDEX_REF(ptr)++, (char)c);
+		    FTH_IO_STRING_INDEX_REF(ptr), (char)c);
 	else
 		fth_string_push((FTH)ptr,
 		    fth_make_string_format("%c", (char)c));
+	FTH_IO_STRING_INDEX_REF(ptr)++;
 }
 
 static char *
@@ -786,22 +787,28 @@ string_read_line(void *ptr)
 static void
 string_write_line(void *ptr, const char *line)
 {
+	ficlInteger len;
+
 	if (line == NULL)
 		return;
-	if (FTH_IO_STRING_INDEX_REF(ptr) < FTH_IO_STRING_LENGTH(ptr)) {
-		ficlInteger i, len;
+	len = (ficlInteger)fth_strlen(line);
+	if (FTH_IO_STRING_INDEX_REF(ptr) < (FTH_IO_STRING_LENGTH(ptr) - 1)) {
+		ficlInteger i;
 
-		len = (ficlInteger)fth_strlen(line);
 		for (i = 0;
 		    i < len &&
 		    FTH_IO_STRING_INDEX_REF(ptr) < FTH_IO_STRING_LENGTH(ptr);
 		    i++)
 			fth_string_c_char_fast_set((FTH)ptr,
 			    FTH_IO_STRING_INDEX_REF(ptr)++, line[i]);
-		if (i < len)
+		if (i < len) {
 			fth_string_push((FTH)ptr, fth_make_string(line + i));
-	} else
+			FTH_IO_STRING_INDEX_REF(ptr) += (len - i);
+		}
+	} else {
 		fth_string_push((FTH)ptr, fth_make_string(line));
+		FTH_IO_STRING_INDEX_REF(ptr) += len;
+	}
 }
 
 static bool
@@ -870,8 +877,10 @@ fth_io_sopen(FTH string, int fam)
 	FTH_IO_OBJECT(io)->seek = string_seek;
 	FTH_IO_OBJECT(io)->rewind = string_rewind_and_close;
 	FTH_IO_OBJECT(io)->close = string_rewind_and_close;
-	if (fam & FICL_FAM_APPEND)
+	if ((fam & FICL_FAM_APPEND) || (fam & FICL_FAM_WRITE))
 		FTH_IO_SEEK(io, 0L, SEEK_END);
+	else
+		FTH_IO_SEEK(io, 0L, SEEK_SET);
 	return (io);
 }
 

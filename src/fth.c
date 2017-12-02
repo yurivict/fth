@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "%W% %G%";
+const char fth_sccsid[] = "@(#)fth.c	1.115 12/2/17";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -590,5 +590,5 @@ main(int argc, char **argv)
 }
 
 /*
- * %M% ends here
+ * fth.c ends here
  */

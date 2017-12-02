@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)io-test.fs	1.47 1/11/15
+\ @(#)io-test.fs	1.48 12/2/17
 
 require test-utils.fs
 
@@ -134,9 +134,8 @@ exit-status [if] "pwd" [else] "pwd -P" [then] constant *io-test-pwd-cmd*
 : io-test ( -- )
 	"file.test" { ftest }
 	nil nil nil { io io1 io2 }
-	nil nil     { s1 s2 }
+	nil nil nil { s1 s2 slen }
 	nil nil nil { line lines lines1 }
-	nil nil     { pos slen }
 	nil nil     { version-name version-name2 }
 	nil nil     { old-stdin old-stdout }
 	\ io-filename
@@ -335,10 +334,9 @@ exit-status [if] "pwd" [else] "pwd -P" [then] constant *io-test-pwd-cmd*
 	io io?        not "io-sopen not io?"    test-expr
 	io io-input?  not "io-sopen not input?" test-expr
 	io io-output? not "io-sopen output?"    test-expr
-	io io-pos-ref to pos
 	io 3 :whence SEEK_SET io-seek 3 <> "io-sopen (io-seek 3)" test-expr
 	io io-rewind
-	io io-pos-ref pos <> "io-sopen (io-seek 0)" test-expr
+	io io-pos-ref 0 <> "io-sopen (io-seek 0)" test-expr
 	io 4 io-pos-set!
 	io "strang" io-write
 	s1 string-length slen <> "io-sopen(4 len slen)" test-expr

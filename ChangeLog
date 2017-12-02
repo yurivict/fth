@@ -1,5 +1,7 @@
 2017-12-02  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
+	* src/io.c: Remove index bugs in string io functions.
+
 	* examples/site-lib/marks.fs (marks->string):  port-puts
 	requires an output io object.
 
