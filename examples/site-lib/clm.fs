@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/09/25 22:08:35
+\ Changed: 17/12/03 07:09:21
 \
-\ @(#)clm.fs	1.122 9/25/17
+\ @(#)clm.fs	1.123 12/3/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -281,7 +281,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/09/25"  value *clm-version*
+"fth 2017/12/03"  value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
@@ -881,9 +881,6 @@ defer ws-play
 	:srate             *clm-srate*            ws set-args
 	:statistics        *clm-statistics*       ws set-args
 	:verbose           *clm-verbose*          ws set-args
-	\ for backward compatibility
-	:data-format *clm-sample-type* get-optkey
-	    ws :sample-type rot ws-set! to ws
 	ws
 ;  
 
@@ -914,9 +911,6 @@ defer ws-play
 	:reverb-channels   ws1 :reverb-channels  ws-ref ws set-args
 	:reverb-file-name  ws1 :reverb-file-name ws-ref ws set-args
 	:decay-time        ws1 :decay-time       ws-ref ws set-args
-	\ for backward compatibility
-	:data-format ws1 :sample-type ws-ref get-optkey
-	    ws :sample-type rot ws-set! to ws
 	ws
 ;
 
@@ -1054,7 +1048,7 @@ previous
 :locsig-type       *clm-locsig-type*      (mus-interp-linear)\n\
 :header-type       *clm-header-type*      (mus-next)\n\
 :sample-type       *clm-sample-type*      (mus-lfloat)\n\
-:clipped           *clm-clipped*          (#t)\n\
+:clipped           *clm-clipped*          (#f)\n\
 :comment           *clm-comment*          (#f)\n\
 :notehook          *clm-notehook*         (#f)\n\
 :scaled-to                                (#f)\n\  
