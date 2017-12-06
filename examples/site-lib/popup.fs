@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 17/12/02 03:19:40
+\ Changed: 17/12/06 07:39:30
 \
-\ @(#)popup.fs	1.43 12/2/17
+\ @(#)popup.fs	1.45 12/6/17
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -433,8 +433,12 @@ let: ( -- menu )
 ;let constant selection-popup-menu
 
 \ --- time domain popup ---
-#f value graph-popup-snd
-#f value graph-popup-chn
+\ XXX: graph-popup-snd|chn
+\      Changed to functions to reflect currend snd/chn.
+\ #f value graph-popup-snd
+\ #f value graph-popup-chn
+: graph-popup-snd ( -- snd ) #f snd-snd ;
+: graph-popup-chn ( -- chn ) #f snd-chn ;
 
 : stop-playing-cb { vars -- prc; snd self -- val }
 	1 proc-create ( prc )
@@ -1095,20 +1099,22 @@ let: ( -- menu )
 ;
 
 : popup-install { snd chn xe ye info -- }
-	snd to graph-popup-snd
-	chn to graph-popup-chn
-	snd channel-style channels-combined = if
-		#t			\ flag
-		snd channels 0 ?do
-			ye snd i undef axis-info 14 array-ref < if
-				i 1- to graph-popup-chn
-				not	\ toggle flag
-				leave
-			then
-		loop ( flag ) if
-			snd channels 1- to graph-popup-chn
-		then
-	then
+	\ XXX: graph-popup-snd|chn
+	\      These are now functions returning current snd/chn.
+	\ snd to graph-popup-snd
+	\ chn to graph-popup-chn
+	\ snd channel-style channels-combined = if
+	\ 	#t			\ flag
+	\ 	snd channels 0 ?do
+	\ 		ye snd i undef axis-info 14 array-ref < if
+	\ 			i 1- to graph-popup-chn
+	\ 			not	\ toggle flag
+	\ 			leave
+	\ 		then
+	\ 	loop ( flag ) if
+	\ 		snd channels 1- to graph-popup-chn
+	\ 	then
+	\ then
 	snd chn transform-graph? if
 		snd chn transform-graph axis-info
 	else
@@ -1172,8 +1178,12 @@ let: ( -- menu )
 \ --- edit history popup ---
 #() value edhist-funcs
 #() value edhist-widgets
-#f  value edhist-snd
-#f  value edhist-chn
+\ XXX: edhist-snd|chn
+\      Changed to functions to reflect currend snd/chn.
+\ #f value edhist-snd
+\ #f value edhist-chn
+: edhist-snd ( -- snd ) #f snd-snd ;
+: edhist-chn ( -- chn ) #f snd-chn ;
 
 : edhist-clear-edits <{ w c info -- #f }>
 	#() to edhist-funcs
@@ -1181,83 +1191,86 @@ let: ( -- menu )
 ;
 
 : edhist-save-edits <{ w c info -- val }>
-	edhist-funcs #( edhist-snd edhist-chn )
-	    array-assoc-ref { old-proc }
+	edhist-funcs #( edhist-snd edhist-chn ) array-assoc-ref { old-prc }
 	edhist-snd edhist-chn edits { cur-edits }
-	edhist-snd edhist-chn cur-edits 0 array-ref
-	    1+ 0 cur-edits each
-		+
-	end-each edit-list->function { proc }
-	edhist-save-hook #( proc ) run-hook drop
-	old-proc proc? if
-		edhist-funcs
-		    #( edhist-snd edhist-chn )
-		    proc
-		    array-assoc-set!
+	0 ( sum )
+	cur-edits each ( val )
+		+ ( sum += val )
+	end-each { sum }
+	edhist-snd edhist-chn cur-edits car 1+ sum edit-list->function { prc }
+	edhist-save-hook #( prc ) run-hook drop
+	old-prc proc? if
+		edhist-funcs #( edhist-snd edhist-chn ) prc array-assoc-set!
 	else
-		edhist-funcs
-		    #( #( edhist-snd edhist-chn ) proc )
-		    array-push
+		edhist-funcs #( #( edhist-snd edhist-chn ) prc ) array-push
 	then to edhist-funcs
+	#f
 ;
 
 : edhist-reapply-edits <{ w c info -- val }>
-	edhist-funcs #( edhist-snd edhist-chn ) array-assoc-ref
-	    #( edhist-snd edhist-chn ) run-proc
-;
-
-: edhist-set-wid <{ widget -- }>
-	edhist-widgets widget array-push to edhist-widgets
-;
-
-: edhist-apply <{ w c info -- }>
-	edhist-funcs c range? if
-		edhist-funcs c array-ref 1 array-ref ( proc )
-		    #( edhist-snd edhist-chn ) run-proc drop
+	edhist-funcs #( edhist-snd edhist-chn ) array-assoc-ref { prc }
+	prc proc? if
+		prc #( edhist-snd edhist-chn ) run-proc
+	else
+		#f
 	then
 ;
 
-: edhist-apply-edits <{ lst -- }>
-	edhist-widgets 0 array-ref { parent }
-	edhist-widgets 1 nil array-subarray { wids }
-	edhist-funcs each 0 array-ref { label }
+: edhist-set-wid <{ w -- }>
+	edhist-widgets w array-push to edhist-widgets
+;
+
+: edhist-apply <{ w c info -- val }>
+	edhist-funcs c range? if
+		edhist-funcs c array-ref cdr ( prc )
+		    #( edhist-snd edhist-chn ) run-proc
+	else
+		#f
+	then
+;
+
+: edhist-apply-edits <{ dummy -- }>
+	edhist-widgets car { parent }
+	edhist-widgets cdr { wids }
+	edhist-funcs each car { label }
 		nil { button }
 		wids nil? if
 			"wid" FxmPushButtonWidgetClass parent
 			    #( FXmNbackground highlight-color )
 			    undef FXtCreateManagedWidget to button
-			edhist-widgets #( button )
-			    array-append to edhist-widgets
+			edhist-widgets button array-push to edhist-widgets
+			\ index (i) is context (c) in edhist-apply
 			button FXmNactivateCallback
 			    <'> edhist-apply i FXtAddCallback drop
 		else
-			wids 0 array-ref to button
-			wids 1 nil array-subarray to wids
+			wids car to button
+			wids cdr to wids
 			button FXtManageChild drop
 		then
 		label array? if
-			\ label: #(snd chn)
+			\ label: #( snd chn )
 			button  "%s[%s]"
-			    #( label 0 array-ref short-file-name
-			       label 1 array-ref )
-			    string-format change-label
+			    #( label car short-file-name
+			       label cadr ) string-format
 		else
 			\ label: "file-name[chn]"
-			button label change-label
-		then
-		button #( FXmNuserData i ) FXtVaSetValues drop
+			button label
+		then change-label
 	end-each
-	wids each ( w )
-		FXtUnmanageChild drop
-	end-each
+	wids nil? unless
+		wids each ( w )
+			FXtUnmanageChild drop
+		end-each
+	then
+	#f
 ;
 
 : edhist-close-hook-cb <{ snd -- }>
+	snd short-file-name { name }
 	snd channels 0 ?do
-		edhist-funcs #( snd i ) array-assoc { old-val }
+		edhist-funcs #( snd i ) array-assoc-ref { old-val }
 		old-val array? if
-			old-val 0 "%s[%d]"
-			    #( snd short-file-name i ) string-format array-set!
+			old-val 0 "%s[%d]" #( name i ) string-format array-set!
 		then
 	loop
 ;
@@ -1269,65 +1282,52 @@ let: ( -- menu )
 	   #( "sep"     'separator #f                       #f )
 	   #( "Save"    #f         <'> edhist-save-edits    #f )
 	   #( "Reapply" #f         <'> edhist-reapply-edits #f )
-	   #( "Apply" 'cascade     <'> edhist-set-wid <'> edhist-apply-edits )
+	   #( "Apply"   'cascade   <'> edhist-set-wid <'> edhist-apply-edits )
 	   #( "Clear"   #f         <'> edhist-clear-edits   #f )
 	   #( "sep"     'separator #f                       #f )
 	   #( "Help"    #f         <'> edhist-help-edits    #f )
 	) make-popup-menu
 ;let constant edit-history-menu
 
-: edhist-popup-cb { snd chn -- prc; w self -- val }
-	1 proc-create ( prc )
-	chn , snd ,
-  does> { w self -- val }
-	self       @ { chn }
-	self cell+ @ { snd }
-	w FXtName    { name }
+: edhist-popup-cb <{ w -- val }>
+	edhist-snd { snd }
+	edhist-chn { chn }
+	w FXtName { name }
 	name "Clear" string=
 	name "Apply" string= || if
 		w edhist-funcs empty? not set-sensitive
-		#f
-		exit
-	then
-	name "Save" string= if
-		w 0 snd chn edits each ( eds )
-			+
-		end-each 0> set-sensitive
-		#f
-		exit
-	then
-	name "Reapply" string= if
-		w edhist-funcs #( snd chn )
-		    array-assoc-ref set-sensitive
+	else
+		name "Save" string= if
+			w 0 snd chn edits each ( eds )
+				+
+			end-each 0> set-sensitive
+		else
+			name "Reapply" string= if
+				w edhist-funcs #( snd chn )
+				    array-assoc-ref proc? set-sensitive
+			then
+		then
 	then
 	#f
 ;
 
-: edhist-popup-handler-cb { snd chn -- prc; w c i self -- val }
-	3 proc-create ( prc )
-	chn , snd ,
-  does> { w c info self -- val }
-	self @ { chn }
-	self cell+ @ { snd }
+: edhist-popup-handler-cb <{ w c info -- val }>
+	edhist-snd { snd }
+	edhist-chn { chn }
 	info Fevent { ev }
 	FButtonPress ev Ftype = if
-		snd to edhist-snd
-		chn to edhist-chn
-		edit-history-menu snd chn edhist-popup-cb for-each-child
+		edit-history-menu <'> edhist-popup-cb for-each-child
 		edit-history-menu info popup-post-it
 	then
 	#f
 ;  
 
-: popup-handler-cb { snd chn -- prc; w c i self -- val }
-	3 proc-create ( prc )
-	chn , snd ,
-  does> { w c info self -- val }
-	self       @ { chn }
-	self cell+ @ { snd }
-	info Fevent  { ev }
+: popup-handler-cb <{ w c info -- val }>
+	edhist-snd { snd }
+	edhist-chn { chn }
+	info Fevent { ev }
 	ev Fx_root w 0 0 FXtTranslateCoords 0 array-ref - { xe }
-	ev Fy        { ye }
+	ev Fy { ye }
 	FButtonPress ev Ftype = if
 		snd chn xe ye info popup-install
 	then
@@ -1422,8 +1422,7 @@ let: ( -- menu )
 					top-one FXtUnmanageChild drop
 				then
 				len 1 > if
-					top-two-cascade
-					    FXtManageChild drop
+					top-two-cascade FXtManageChild drop
 					top-two FXtManageChild drop
 				then
 				top-one FWidget?
@@ -1468,13 +1467,19 @@ let: ( -- menu )
 : add-popup <{ snd -- }>
 	snd channels 0 ?do
 		popups #( snd i ) array-member? unless
-			popups #( snd i ) array-push drop
+			\ XXX: edhist-snd|chn
+			\      These are now functions returning
+			\      current snd/chn.
+
+			\ snd to edhist-snd
+			\ i to edhist-chn
+			popups #( snd i ) array-push to popups
 			snd i channel-widgets 7 array-ref ( chn-edhist )
 			    FXmNpopupHandlerCallback
-			    snd i edhist-popup-handler-cb
-			    undef FXtAddCallback drop
+			    <'> edhist-popup-handler-cb undef
+			    FXtAddCallback drop
 			snd i channel-widgets 0 array-ref ( chn-grf )
-			FXmNpopupHandlerCallback snd i popup-handler-cb
+			FXmNpopupHandlerCallback <'> popup-handler-cb
 			    undef FXtAddCallback drop
 		then
 	loop
