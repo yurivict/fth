@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 17/12/06 07:39:30
+\ Changed: 17/12/07 06:06:56
 \
-\ @(#)popup.fs	1.45 12/6/17
+\ @(#)popup.fs	1.46 12/7/17
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -78,7 +78,7 @@ hide
 		\ edhist sends a proc to set TOP to edhist-widgets
 		popdown-labels #( top ) run-proc drop
 	else
-	\ else arrays of #( name proc ) lists
+		\ else arrays of #( name proc ) lists
 		popdown-labels each { poplab }
 			poplab 0 array-ref FxmPushButtonWidgetClass top
 			    #( FXmNbackground highlight-color )
@@ -150,7 +150,7 @@ hide
 	then
 ;
 
-: make-popdown-entry { label parent func collector with-one -- values }
+: make-popdown-entry { label parent func collector with-one -- }
 	#f { widget }
 	#() { children }
 	with-one if
@@ -206,7 +206,7 @@ hide
 			then
 		then { class }
 		typ 'cascade = if
-			entry length 4 = if	\ fft menu
+			entry length 4 = if	\ fft/edhist menu
 				label
 				    entry 2 array-ref ( labels )
 				    menu
@@ -224,13 +224,14 @@ hide
 			label class menu
 			    #( FXmNbackground highlight-color )
 			    undef FXtCreateManagedWidget { wid }
-			entry 2 array-ref if	\ cb: 3 args or #f
-				wid FXmNactivateCallback
-				    entry 2 array-ref
+			entry 2 array-ref { cb }	\ cb: 3 args or #f
+			cb if
+				wid FXmNactivateCallback cb
 				    undef FXtAddCallback drop
 			then
-			entry 3 array-ref if	\ func: 1 arg or #f
-				entry 3 array-ref #( wid ) run-proc drop
+			entry 3 array-ref { prc }	\ func: 1 arg or #f
+			prc if
+				prc #( wid ) run-proc drop
 			then
 		then
 	end-each
@@ -1185,30 +1186,57 @@ let: ( -- menu )
 : edhist-snd ( -- snd ) #f snd-snd ;
 : edhist-chn ( -- chn ) #f snd-chn ;
 
+: edhist-funcs-index { key -- idx|-1 }
+	-1 ( idx )
+	edhist-funcs each
+		( val ) car key equal? if
+			drop			\ drop -1
+			i			\ set to current index
+			leave
+		then
+	end-each ( idx )
+;
+
+: edhist-funcs-ref { key -- val|#f }
+	key edhist-funcs-index { idx }
+	idx 0>= if
+		edhist-funcs idx array-ref cadr	\ => proc
+	else
+		#f
+	then
+;
+
+: edhist-funcs-set! { key val -- }
+	key edhist-funcs-index { idx }
+	idx 0>= if
+		edhist-funcs idx #( key val ) array-set!
+	else
+		edhist-funcs #( key val ) array-push to edhist-funcs
+	then
+;
+
 : edhist-clear-edits <{ w c info -- #f }>
 	#() to edhist-funcs
 	#f
 ;
 
 : edhist-save-edits <{ w c info -- val }>
-	edhist-funcs #( edhist-snd edhist-chn ) array-assoc-ref { old-prc }
-	edhist-snd edhist-chn edits { cur-edits }
+	edhist-snd { snd }
+	edhist-chn { chn }
+	#( snd chn ) edhist-funcs-ref { old-prc }
+	snd chn edits { cur-edits }
 	0 ( sum )
 	cur-edits each ( val )
 		+ ( sum += val )
 	end-each { sum }
-	edhist-snd edhist-chn cur-edits car 1+ sum edit-list->function { prc }
+	snd chn cur-edits car 1+ sum edit-list->function { prc }
 	edhist-save-hook #( prc ) run-hook drop
-	old-prc proc? if
-		edhist-funcs #( edhist-snd edhist-chn ) prc array-assoc-set!
-	else
-		edhist-funcs #( #( edhist-snd edhist-chn ) prc ) array-push
-	then to edhist-funcs
+	#( snd chn ) prc edhist-funcs-set!
 	#f
 ;
 
 : edhist-reapply-edits <{ w c info -- val }>
-	edhist-funcs #( edhist-snd edhist-chn ) array-assoc-ref { prc }
+	#( edhist-snd edhist-chn ) edhist-funcs-ref { prc }
 	prc proc? if
 		prc #( edhist-snd edhist-chn ) run-proc
 	else
@@ -1221,15 +1249,16 @@ let: ( -- menu )
 ;
 
 : edhist-apply <{ w c info -- val }>
+	\ context (c) is index (i) from edhist-apply-edits, see below
 	edhist-funcs c range? if
-		edhist-funcs c array-ref cdr ( prc )
-		    #( edhist-snd edhist-chn ) run-proc
+		edhist-funcs c array-ref cadr ( prc )
+		#( edhist-snd edhist-chn ) run-proc
 	else
 		#f
 	then
 ;
 
-: edhist-apply-edits <{ dummy -- }>
+: edhist-apply-edits <{ dummy -- val }>
 	edhist-widgets car { parent }
 	edhist-widgets cdr { wids }
 	edhist-funcs each car { label }
@@ -1239,7 +1268,7 @@ let: ( -- menu )
 			    #( FXmNbackground highlight-color )
 			    undef FXtCreateManagedWidget to button
 			edhist-widgets button array-push to edhist-widgets
-			\ index (i) is context (c) in edhist-apply
+			\ index (i) is context (c) in edhist-apply, see above
 			button FXmNactivateCallback
 			    <'> edhist-apply i FXtAddCallback drop
 		else
@@ -1247,28 +1276,24 @@ let: ( -- menu )
 			wids cdr to wids
 			button FXtManageChild drop
 		then
-		label array? if
-			\ label: #( snd chn )
+		label array? if		\ label: #( snd chn )
 			button  "%s[%s]"
 			    #( label car short-file-name
 			       label cadr ) string-format
-		else
-			\ label: "file-name[chn]"
+		else			\ label: "file-name[chn]"
 			button label
 		then change-label
 	end-each
-	wids nil? unless
-		wids each ( w )
-			FXtUnmanageChild drop
-		end-each
-	then
+	wids each ( w )
+		FXtUnmanageChild drop
+	end-each
 	#f
 ;
 
 : edhist-close-hook-cb <{ snd -- }>
 	snd short-file-name { name }
 	snd channels 0 ?do
-		edhist-funcs #( snd i ) array-assoc-ref { old-val }
+		#( snd i ) edhist-funcs-ref { old-val }
 		old-val array? if
 			old-val 0 "%s[%d]" #( name i ) string-format array-set!
 		then
@@ -1298,13 +1323,16 @@ let: ( -- menu )
 		w edhist-funcs empty? not set-sensitive
 	else
 		name "Save" string= if
-			w 0 snd chn edits each ( eds )
-				+
-			end-each 0> set-sensitive
+			snd chn edits { eds }
+			0 ( sum )
+			eds each ( val )
+				+ ( sum += val )
+			end-each { sum }
+			w sum 0> set-sensitive
 		else
 			name "Reapply" string= if
-				w edhist-funcs #( snd chn )
-				    array-assoc-ref proc? set-sensitive
+				#( snd chn ) edhist-funcs-ref { prc }
+				w prc word? set-sensitive
 			then
 		then
 	then
@@ -1312,8 +1340,6 @@ let: ( -- menu )
 ;
 
 : edhist-popup-handler-cb <{ w c info -- val }>
-	edhist-snd { snd }
-	edhist-chn { chn }
 	info Fevent { ev }
 	FButtonPress ev Ftype = if
 		edit-history-menu <'> edhist-popup-cb for-each-child
@@ -1323,13 +1349,11 @@ let: ( -- menu )
 ;  
 
 : popup-handler-cb <{ w c info -- val }>
-	edhist-snd { snd }
-	edhist-chn { chn }
 	info Fevent { ev }
 	ev Fx_root w 0 0 FXtTranslateCoords 0 array-ref - { xe }
 	ev Fy { ye }
 	FButtonPress ev Ftype = if
-		snd chn xe ye info popup-install
+		edhist-snd edhist-chn xe ye info popup-install
 	then
 	#f
 ;
@@ -1445,18 +1469,18 @@ let: ( -- menu )
 		main-widgets 4 array-ref
 	then { parent }
 	"listener-popup" parent
-	#( #( "Listener" 'label   #f  #f )
-	   #( "sep"    'separator #f  #f )
-	   #( "Play"   'cascade   <'> list-play-cb <'> identity-cb #t )
-	   #( "Help"   #f         <'> list-help-cb #f )
-	   #( "Open"   #f         <'> popen-cb #f )
-	   #( "Clear listener" #f <'> list-clear-cb #f )
+	#( #( "Listener" 'label   #f                     #f )
+	   #( "sep"    'separator #f                     #f )
+	   #( "Play"   'cascade   <'> list-play-cb       <'> identity-cb #t )
+	   #( "Help"   #f         <'> list-help-cb       #f )
+	   #( "Open"   #f         <'> popen-cb           #f )
+	   #( "Clear listener" #f <'> list-clear-cb      #f )
 	   #( "Close"  'cascade   <'> close-sound-extend <'> identity-cb #t )
-	   #( "Save"   'cascade   <'> save-sound <'> edited-cb #t )
-	   #( "Revert" 'cascade   <'> revert-sound <'> edited-cb #t )
-	   #( "Focus"  'cascade   <'> list-focus-cb <'> focused-cb  #f )
-	   #( "sep"    'separator #f #f )
-	   #( "Exit"   #f         <'> exit-cb #f )
+	   #( "Save"   'cascade   <'> save-sound         <'> edited-cb #t )
+	   #( "Revert" 'cascade   <'> revert-sound       <'> edited-cb #t )
+	   #( "Focus"  'cascade   <'> list-focus-cb      <'> focused-cb  #f )
+	   #( "sep"    'separator #f                     #f )
+	   #( "Exit"   #f         <'> exit-cb            #f )
 	) make-popup-menu { menu }
 	parent FXmNpopupHandlerCallback <'> listener-popup-cb menu
 	    FXtAddCallback drop
