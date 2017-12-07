@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 17/12/07 06:06:56
+\ Changed: 17/12/07 17:08:19
 \
-\ @(#)popup.fs	1.46 12/7/17
+\ @(#)popup.fs	1.47 12/7/17
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -369,28 +369,39 @@ hide
 	#f
 ;
 
+\ choice 2 == selection
+: sel-appcnt <{ w c info -- val }>
+	\ (apply-controls :optional snd (choice 0) (beg 0) (dur len))
+	\ choice: 0 snd
+	\         1 chn
+	\         2 sel
+	selected-sound 2 undef undef apply-controls
+;
+
+: sel-rescnt <{ w c info -- val }>
+	selected-sound reset-controls
+;
+
+: sel-unsel <{ w c info -- val }>
+	#f #t #f set-selection-member?
+;
+
+: sel-norm <{ w c info -- val }>
+	1.0 scale-selection-to
+;
+
 : sel-info <{ w c info -- val }>
-	#f #f selection-position { beg }
-	#f #f selection-framples { len }
+	selected-sound { snd }
+	snd selected-channel { chn }
+	snd chn selection-position { beg }
+	snd chn selection-framples { len }
 	"    start: %d, %.3f\n" #( beg beg #f srate f/ ) string-format ( str )
 	"      end: %d, %.3f\n" #( beg len + dup #f srate f/ ) string-format $+
 	" duration: %d, %.3f\n" #( len len #f srate f/ ) string-format $+
 	"    chans: %d\n" #( selection-chans ) string-format $+
 	"   maxamp: %.3f\n" #( #f #f selection-maxamp ) string-format $+ { str }
-	"Selection Info" str info-dialog
-;
-
-\ choice 2 == selection
-: sel-appcnt <{ w c info -- val }>
-	#f 2 0 undef apply-controls
-;
-
-: sel-rescnt <{ w c info -- val }>
-	#f reset-controls
-;
-
-: sel-unsel <{ w c info -- val }>
-	#f #t set-selection-member?
+	"%s[%d] selection info"
+	    '( snd file-name chn ) string-format str info-dialog
 ;
 
 : sel-rev <{ w c info -- val }>
@@ -423,10 +434,11 @@ let: ( -- menu )
 	   #( "Copy->New"        #f         <'> sel-copy     #f )
 	   #( "Cut->New"         #f         <'> sel-cut      #f )
 	   #( "Snap marks"       #f         <'> sel-marks    #f )
-	   #( "Selection Info"   #f         <'> sel-info     #f )
 	   #( "Apply controls"   #f         <'> sel-appcnt   #f )
 	   #( "Reset controls"   #f         <'> sel-rescnt   #f )
 	   #( "Unselect"         #f         <'> sel-unsel    #f )
+	   #( "-> 1.0"           #f         <'> sel-norm     #f )
+	   #( "Selection Info"   #f         <'> sel-info     #f )
 	   #( "Reverse"          #f         <'> sel-rev      #f )
 	   #( "Mix"              #f         <'> sel-mix      #f )
 	   #( "Invert"           #f         <'> sel-invert   #f )
@@ -434,10 +446,6 @@ let: ( -- menu )
 ;let constant selection-popup-menu
 
 \ --- time domain popup ---
-\ XXX: graph-popup-snd|chn
-\      Changed to functions to reflect currend snd/chn.
-\ #f value graph-popup-snd
-\ #f value graph-popup-chn
 : graph-popup-snd ( -- snd ) #f snd-snd ;
 : graph-popup-chn ( -- chn ) #f snd-chn ;
 
@@ -587,15 +595,19 @@ let: ( -- menu )
 ;
 
 : punsel-cb <{ w c info -- val }>
-	#f #t set-selection-member?
+	#f #t #f set-selection-member?
 ;
 
 : papcnt-cb <{ w c info -- val }>
-	#f 0 0 undef apply-controls
+	\ (apply-controls :optional snd (choice 0) (beg 0) (dur len))
+	\ choice: 0 snd
+	\         1 chn
+	\         2 sel
+	graph-popup-snd 0 undef undef apply-controls
 ;
 
 : precnt-cb <{ w c info -- val }>
-	#f reset-controls
+	graph-popup-snd reset-controls
 ;
 
 : print-props { props -- str }
@@ -613,6 +625,10 @@ let: ( -- menu )
 	old-len set-object-print-length
 	old-vct-len set-print-length drop
 	( str )
+;
+
+: pnorm-cb <{ w c info -- val }>
+	1.0 graph-popup-snd graph-popup-chn scale-to
 ;
 
 : pinfo-cb <{ w c info -- val }>
@@ -723,6 +739,7 @@ let: ( -- menu )
 	   #( "Unselect"         #f         <'> punsel-cb   #f )
 	   #( "Apply controls"   #f         <'> papcnt-cb   #f )
 	   #( "Reset controls"   #f         <'> precnt-cb   #f )
+	   #( "-> 1.0"           #f         <'> pnorm-cb    #f )
 	   #( "Info"             #f         <'> pinfo-cb    #f )
 	   #( "Add mark"         #f         <'> paddmrk-cb  #f )
 	   #( "Delete mark"      #f         <'> pdelmrk-cb  #f )
@@ -874,7 +891,8 @@ let: ( -- menu )
 	end-each
 ;
 
-#( 16 64 256 512 1024 4096 16384 65536 262144 1048576 ) constant fft-siz-sizes
+#( 32 64 128 256 512 1024 2048 4096 8192 16384 65536 262144 1048576 )
+    constant fft-siz-sizes
 
 : siz-lst-cb { val -- prc; w c i self -- val }
 	3 proc-create ( prc )
@@ -905,12 +923,6 @@ let: ( -- menu )
    blackman2-window 
    blackman3-window
    blackman4-window
-   blackman5-window
-   blackman6-window
-   blackman7-window
-   blackman8-window
-   blackman9-window
-   blackman10-window
    exponential-window
    riemann-window
    kaiser-window
@@ -925,7 +937,19 @@ let: ( -- menu )
    ultraspherical-window
    bartlett-hann-window
    bohman-window
-   flat-top-window ) constant fft-win-windows
+   flat-top-window
+   blackman5-window
+   blackman6-window
+   blackman7-window
+   blackman8-window
+   blackman9-window
+   blackman10-window
+   rv2-window
+   rv3-window
+   rv4-window
+   mlt-sine-window
+   papoulis-window
+   sinc-window ) constant fft-win-windows
 
 : win-lst-cb { val -- prc; w c i self -- val }
 	3 proc-create ( prc )
@@ -944,12 +968,6 @@ let: ( -- menu )
 	   "Blackman2"
 	   "Blackman3"
 	   "Blackman4"
-	   "Blackman5"
-	   "Blackman6"
-	   "Blackman7"
-	   "Blackman8"
-	   "Blackman9"
-	   "Blackman10"
 	   "Exponential"
 	   "Riemann"
 	   "Kaiser"
@@ -964,7 +982,19 @@ let: ( -- menu )
 	   "Ultraspherical"
 	   "Bartlett-Hann"
 	   "Bohman"
-	   "Flat-top" ) map
+	   "Flat-top"
+	   "Blackman5"
+	   "Blackman6"
+	   "Blackman7"
+	   "Blackman8"
+	   "Blackman9"
+	   "Blackman10"
+	   "Rife-Vincent2"
+	   "Rife-Vincent3"
+	   "Rife-Vincent4"
+	   "MLT Sine"
+	   "Papoulis"
+	   "Sinc" ) map
 		#( *key* fft-win-windows i array-ref win-lst-cb )
 	end-map
 ;
@@ -978,9 +1008,9 @@ let: ( -- menu )
 
 #( fourier-transform
    wavelet-transform
+   walsh-transform
    autocorrelation
    cepstrum
-   walsh-transform
    haar-transform ) value fft-trn-transform
 
 : trn-lst-cb { val -- prc; w c i self -- val }
@@ -991,7 +1021,7 @@ let: ( -- menu )
 ;
 
 : trn-labs ( -- ary )
-	#( "Fourier" "Wavelet" "Autocorrelate" "Cepstrum" "Walsh" "Haar" ) map
+	#( "Fourier" "Wavelet" "Walsh" "Autocorrelate" "Cepstrum" "Haar" ) map
 		#( *key* fft-trn-transform i array-ref trn-lst-cb )
 	end-map ( ary )
 ;
@@ -1020,8 +1050,8 @@ let: ( -- menu )
 	   "doub16"
 	   "doub18"
 	   "doub20"
-	   "battle_lemarie"
-	   "burt_adelson"
+	   "battle-lemarie"
+	   "burt-adelson"
 	   "beylkin"
 	   "coif2"
 	   "coif4"
@@ -1030,7 +1060,35 @@ let: ( -- menu )
 	   "sym3"
 	   "sym4"
 	   "sym5"
-	   "sym6" ) map
+	   "sym6"
+	   "doub22"
+	   "doub24"
+	   "doub26"
+	   "doub28"
+	   "doub30"
+	   "doub32"
+	   "doub34"
+	   "doub36"
+	   "doub38"
+	   "doub40"
+	   "doub42"
+	   "doub44"
+	   "doub46"
+	   "doub48"
+	   "doub50"
+	   "doub52"
+	   "doub54"
+	   "doub56"
+	   "doub58"
+	   "doub60"
+	   "doub62"
+	   "doub64"
+	   "doub66"
+	   "doub68"
+	   "doub70"
+	   "doub72"
+	   "doub74"
+	   "doub76" ) map
 		#( *key* i typ-lst-cb )
 	end-map
 ;
@@ -1100,22 +1158,6 @@ let: ( -- menu )
 ;
 
 : popup-install { snd chn xe ye info -- }
-	\ XXX: graph-popup-snd|chn
-	\      These are now functions returning current snd/chn.
-	\ snd to graph-popup-snd
-	\ chn to graph-popup-chn
-	\ snd channel-style channels-combined = if
-	\ 	#t			\ flag
-	\ 	snd channels 0 ?do
-	\ 		ye snd i undef axis-info 14 array-ref < if
-	\ 			i 1- to graph-popup-chn
-	\ 			not	\ toggle flag
-	\ 			leave
-	\ 		then
-	\ 	loop ( flag ) if
-	\ 		snd channels 1- to graph-popup-chn
-	\ 	then
-	\ then
 	snd chn transform-graph? if
 		snd chn transform-graph axis-info
 	else
@@ -1179,10 +1221,6 @@ let: ( -- menu )
 \ --- edit history popup ---
 #() value edhist-funcs
 #() value edhist-widgets
-\ XXX: edhist-snd|chn
-\      Changed to functions to reflect currend snd/chn.
-\ #f value edhist-snd
-\ #f value edhist-chn
 : edhist-snd ( -- snd ) #f snd-snd ;
 : edhist-chn ( -- chn ) #f snd-chn ;
 
@@ -1491,12 +1529,6 @@ let: ( -- menu )
 : add-popup <{ snd -- }>
 	snd channels 0 ?do
 		popups #( snd i ) array-member? unless
-			\ XXX: edhist-snd|chn
-			\      These are now functions returning
-			\      current snd/chn.
-
-			\ snd to edhist-snd
-			\ i to edhist-chn
 			popups #( snd i ) array-push to popups
 			snd i channel-widgets 7 array-ref ( chn-edhist )
 			    FXmNpopupHandlerCallback
