@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 17/12/07 17:08:19
+\ Changed: 17/12/08 02:56:09
 \
-\ @(#)popup.fs	1.47 12/7/17
+\ @(#)popup.fs	1.48 12/8/17
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -640,7 +640,7 @@ let: ( -- menu )
 	"  format: %s [%s]\n"
 	    #( snd sample-type mus-sample-type-name
 	       snd header-type mus-header-type-name ) string-format $+
-	"  length: %.3f  (%d frames)\n" #( frms sr f/ frms ) string-format $+
+	"  length: %.3f  (%d framples)\n" #( frms sr f/ frms ) string-format $+
 	snd #t #f maxamp each { mx }
 		"%6s %c: %.3f\n" #( "maxamp" [char] A i + mx ) string-format $+
 	end-each
