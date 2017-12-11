@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 17/12/08 02:56:09
+\ Changed: 17/12/09 22:53:03
 \
-\ @(#)popup.fs	1.48 12/8/17
+\ @(#)popup.fs	1.49 12/9/17
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -333,6 +333,10 @@ hide
 	0.0 scale-selection-by
 ;
 
+: sel-norm <{ w c info -- val }>
+	1.0 scale-selection-to
+;
+
 : sel-crop <{ w c info -- val }>
 	selection-members each ( sel )
 		as-one-edit-thunk "" as-one-edit drop
@@ -386,8 +390,16 @@ hide
 	#f #t #f set-selection-member?
 ;
 
-: sel-norm <{ w c info -- val }>
-	1.0 scale-selection-to
+: sel-rev <{ w c info -- val }>
+	reverse-selection
+;
+
+: sel-mix <{ w c info -- val }>
+	#f #f #f cursor mix-selection
+;
+
+: sel-invert <{ w c info -- val }>
+	-1.0 scale-selection-by
 ;
 
 : sel-info <{ w c info -- val }>
@@ -400,20 +412,7 @@ hide
 	" duration: %d, %.3f\n" #( len len #f srate f/ ) string-format $+
 	"    chans: %d\n" #( selection-chans ) string-format $+
 	"   maxamp: %.3f\n" #( #f #f selection-maxamp ) string-format $+ { str }
-	"%s[%d] selection info"
-	    '( snd file-name chn ) string-format str info-dialog
-;
-
-: sel-rev <{ w c info -- val }>
-	reverse-selection
-;
-
-: sel-mix <{ w c info -- val }>
-	#f #f #f cursor mix-selection
-;
-
-: sel-invert <{ w c info -- val }>
-	-1.0 scale-selection-by
+	"Selection info" str info-dialog
 ;
 
 let: ( -- menu )
@@ -428,20 +427,20 @@ let: ( -- menu )
 	   #( "Play"             #f         vars sel-play-cb #f )
 	   #( "Loop play"        #f         vars sel-loop-cb #f )
 	   #( "Delete"           #f         <'> sel-del      #f )
-	   #( "Zero"             #f         <'> sel-zero     #f )
+	   #( "-> 0.0"           #f         <'> sel-zero     #f )
+	   #( "-> 1.0"           #f         <'> sel-norm     #f )
 	   #( "Crop"             #f         <'> sel-crop     #f )
 	   #( "Save as"          #f         <'> sel-save-as  #f )
-	   #( "Copy->New"        #f         <'> sel-copy     #f )
-	   #( "Cut->New"         #f         <'> sel-cut      #f )
+	   #( "Copy -> new"      #f         <'> sel-copy     #f )
+	   #( "Cut -> new"       #f         <'> sel-cut      #f )
 	   #( "Snap marks"       #f         <'> sel-marks    #f )
 	   #( "Apply controls"   #f         <'> sel-appcnt   #f )
 	   #( "Reset controls"   #f         <'> sel-rescnt   #f )
 	   #( "Unselect"         #f         <'> sel-unsel    #f )
-	   #( "-> 1.0"           #f         <'> sel-norm     #f )
-	   #( "Selection Info"   #f         <'> sel-info     #f )
 	   #( "Reverse"          #f         <'> sel-rev      #f )
 	   #( "Mix"              #f         <'> sel-mix      #f )
 	   #( "Invert"           #f         <'> sel-invert   #f )
+	   #( "Info"             #f         <'> sel-info     #f )
 	) make-popup-menu
 ;let constant selection-popup-menu
 
@@ -627,6 +626,46 @@ let: ( -- menu )
 	( str )
 ;
 
+: paddmrk-cb <{ w c info -- val }>
+	graph-popup-snd graph-popup-chn #f cursor ( samp )
+	    graph-popup-snd graph-popup-chn #f ( name ) 0 ( sync ) add-mark
+;
+
+: pdelmrk-cb <{ w c info -- val }>
+	graph-popup-snd graph-popup-chn #f marks { ms }
+	ms nil? unless
+		ms length 1 = if
+			ms 0 array-ref delete-mark drop
+		else
+			graph-popup-snd graph-popup-chn #f cursor { loc }
+			ms 0 array-ref { id }
+			loc id undef mark-sample - abs { cur-min }
+			ms each { m }
+				loc m undef mark-sample - abs { this-min }
+				this-min cur-min < if
+					this-min to cur-min
+					m to id
+				then
+			end-each
+			id delete-mark
+		then
+	then
+	#f
+;
+
+: pdelamrk-cb <{ w c info -- val }>
+	graph-popup-snd graph-popup-chn delete-marks
+;
+
+: pnextmrk-cb <{ w c info -- val }>
+	[char] j 4 graph-popup-snd graph-popup-chn key \ C-j
+;
+
+: plastmrk-cb <{ w c info -- val }>
+	[char] - 4 graph-popup-snd graph-popup-chn key drop \ C--
+	[char] j 4 graph-popup-snd graph-popup-chn key \ C-j
+;
+
 : pnorm-cb <{ w c info -- val }>
 	1.0 graph-popup-snd graph-popup-chn scale-to
 ;
@@ -669,46 +708,6 @@ let: ( -- menu )
 	snd file-name " info" $+ str info-dialog
 ;
 
-: paddmrk-cb <{ w c info -- val }>
-	graph-popup-snd graph-popup-chn #f cursor ( samp )
-	    graph-popup-snd graph-popup-chn #f ( name ) 0 ( sync ) add-mark
-;
-
-: pdelmrk-cb <{ w c info -- val }>
-	graph-popup-snd graph-popup-chn #f marks { ms }
-	ms nil? unless
-		ms length 1 = if
-			ms 0 array-ref delete-mark drop
-		else
-			graph-popup-snd graph-popup-chn #f cursor { loc }
-			ms 0 array-ref { id }
-			loc id undef mark-sample - abs { cur-min }
-			ms each { m }
-				loc m undef mark-sample - abs { this-min }
-				this-min cur-min < if
-					this-min to cur-min
-					m to id
-				then
-			end-each
-			id delete-mark
-		then
-	then
-	#f
-;
-
-: pdelamrk-cb <{ w c info -- val }>
-	graph-popup-snd graph-popup-chn delete-marks
-;
-
-: pnextmrk-cb <{ w c info -- val }>
-	[char] j 4 graph-popup-snd graph-popup-chn key \ C-j
-;
-
-: plastmrk-cb <{ w c info -- val }>
-	[char] - 4 graph-popup-snd graph-popup-chn key drop \ C--
-	[char] j 4 graph-popup-snd graph-popup-chn key \ C-j
-;
-
 : exit-cb <{ w c info -- val }>
 	0 snd-exit
 ;
@@ -739,13 +738,13 @@ let: ( -- menu )
 	   #( "Unselect"         #f         <'> punsel-cb   #f )
 	   #( "Apply controls"   #f         <'> papcnt-cb   #f )
 	   #( "Reset controls"   #f         <'> precnt-cb   #f )
-	   #( "-> 1.0"           #f         <'> pnorm-cb    #f )
-	   #( "Info"             #f         <'> pinfo-cb    #f )
 	   #( "Add mark"         #f         <'> paddmrk-cb  #f )
 	   #( "Delete mark"      #f         <'> pdelmrk-cb  #f )
 	   #( "Delete all marks" #f         <'> pdelamrk-cb #f )
 	   #( "To next mark"     #f         <'> pnextmrk-cb #f )
 	   #( "To last mark"     #f         <'> plastmrk-cb #f )
+	   #( "-> 1.0"           #f         <'> pnorm-cb    #f )
+	   #( "Info"             #f         <'> pinfo-cb    #f )
 	   #( "sep"              'separator #f              #f )
 	   #( "Exit"             #f         <'> exit-cb     #f )
 	) make-popup-menu
