@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.698 12/16/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.699 12/16/17";
 #endif /* not lint */
 
 #define FTH_DATE		"2017/12/16"
@@ -1912,16 +1912,20 @@ See also fth-throw and fth-catch."
 		fth_throw(exc, "%S", fth_string_format(fmt, args));
 		/* NOTREACHED */
 	}
-	/* #f #f #f fth-raise: reraise last exception */
+	/*
+	 * #f #f #f fth-raise: status-error with last exception info
+	 */
 	if (FTH_EXCEPTION_P(fth_last_exception)) {
-		FTH msg;
+		FTH		fs;
 
-		msg = fth_exception_last_message_ref(fth_last_exception);
-		if (FTH_FALSE_P(msg))
-			fth_errorf("#<%s>\n",
-			    fth_exception_ref(fth_last_exception));
-		else
-			fth_errorf("#<%S>\n", msg);
+		fs = fth_exception_last_message_ref(fth_last_exception);
+		if (FTH_FALSE_P(fs)) {
+			char	       *s;
+
+			s = fth_exception_ref(fth_last_exception);
+			fth_errorf("#<%s>\n", s);
+		} else
+			fth_errorf("#<%S>\n", fs);
 	} else
 		fth_errorf("#<no last exception found>\n");
 	fth_show_backtrace(false);

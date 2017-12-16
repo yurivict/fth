@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/16 05:24:30
+\ Changed: 17/12/16 08:38:16
 \
-\ @(#)clm.fs	1.126 12/16/17
+\ @(#)clm.fs	1.127 12/16/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -935,7 +935,25 @@ set-current
 	ws
 ;
 
-: with-sound-main { body-xt ws -- ws }
+: ws-reset-handler <{ retval -- }>
+	stack-reset
+	*output* if
+		*output* mus-close drop
+	then
+	*reverb* if
+		*reverb* mus-close drop
+	then
+	*ws-args* array-pop drop
+	"#<=== WS-ERROR: %s ===>\n" '( retval car exception-name ) clm-print
+	*clm-debug* if
+		"#<DEBUG: %s>\n" '( retval ) clm-print
+	then
+	#f #f #f fth-raise
+;
+
+: (with-sound-main) ( body-xt ws -- ws )
+	2 stack-check
+	{ body-xt ws }
 	body-xt word? body-xt 1 "a proc or xt" assert-type
 	ws      ws?   ws      2 "a ws object"  assert-type
 	ws ws-before-output
@@ -992,18 +1010,7 @@ set-current
 	then
 	ws :timer make-timer ws-set! to ws
 	\ compute ws body
-	body-xt #t nil fth-catch if
-		stack-reset
-		*output* mus-close drop
-		*reverb* if
-			*reverb* mus-close drop
-		then
-		ws ws-after-output ( ws )
-		"%s: body-xt interrupted; output closed"
-		    #( get-func-name ) clm-message
-		\ reraise last exception
-		#f #f #f fth-raise
-	then
+	body-xt execute
 	reverb-xt if
 		*reverb* mus-close drop
 		ws :reverb-file-name ws-ref undef make-file->sample to *reverb*
@@ -1015,16 +1022,7 @@ set-current
 		\ compute ws reverb
 		\ push reverb arguments on stack
 		ws :reverb-data ws-ref each end-each
-		reverb-xt #t nil fth-catch if
-			stack-reset
-			*output* mus-close drop
-			*reverb* mus-close drop
-			ws ws-after-output ( ws )
-			"%s: reverb-xt interrupted; output closed"
-			    #( get-func-name ) clm-message
-			\ reraise last exception
-			#f #f #f fth-raise
-		then
+		reverb-xt execute
 		*reverb* mus-close drop
 	then
 	*output* mus-close drop
@@ -1052,15 +1050,8 @@ set-current
 	ws ws-after-output ( ws )
 ;
 
-: ws-reset-handler { retval -- val }
-	stack-reset
-	"#<=== WS-ERROR: %s ===>\n" '( retval car exception-name ) clm-print
-	*clm-debug* if
-		"#<DEBUG: %s>\n" '( retval ) clm-print
-	then
-	"#<%s>\n" '( retval cadr ) clm-print
-	bt
-	*ws-args* array-pop ( ws )
+: with-sound-main ( body-xt ws -- ws )
+	<'> (with-sound-main) #t <'> ws-reset-handler fth-catch drop ( ws )
 ;
 previous
 
@@ -1100,8 +1091,7 @@ and returns a ws-args object with with-sound arguments.\n\
 		with-sound-default-args
 	else
 		with-sound-args
-	then ( ws )
-	<'> with-sound-main #t <'> ws-reset-handler fth-catch ( ws )
+	then ( ws ) with-sound-main ( ws )
 ;
 
 : clm-load ( fname keyword-args -- ws )

@@ -1,5 +1,7 @@
 2017-12-16  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
+	* examples/fth-lib/fth.fs (stack-check): New function.
+
 	* src/misc.c (ADD_TO_LOAD_PATH): Remove a trailing slash
 	from path if any.
 

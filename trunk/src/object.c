@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.216 3/22/16
+ * @(#)object.c	1.218 12/16/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -381,7 +381,7 @@ fth_show_backtrace(bool verbose)
 	 */
 	fs = (FTH)simple_array_ref(last_frames, i++);
 	fth_errorf("#<bt: TIB %S>\n", fs);
-	if (!verbose && !FTH_TRUE_P(fth_variable_ref("*fth-verbose*")))
+	if (!verbose && FTH_FALSE_P(fth_variable_ref("*fth-verbose*")))
 		return;
 	/*
 	 * Rest: last called words
