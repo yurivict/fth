@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.695 12/15/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.697 12/16/17";
 #endif /* not lint */
 
-#define FTH_DATE		"2017/12/15"
+#define FTH_DATE		"2017/12/16"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -907,11 +907,23 @@ fth_basename(const char *path)
 	return ((base = strrchr(path, '/')) ? ++base : (char *)path);
 }
 
+/*
+ * Add PATH with array-function KIND to load-path LP removing a
+ * trailing slash if any.
+ */
 #define ADD_TO_LOAD_PATH(Lp, Kind, Path)				\
-	if (fth_strlen(Path) > 0) {					\
-		FTH fs;							\
+	ssize_t		len;						\
 									\
-		fs = fth_make_string(Path);				\
+	len = fth_strlen(Path);						\
+	if (len > 0) {							\
+		FTH		fs;					\
+		char	       *s;					\
+									\
+		s = (char *)Path;					\
+		len -= 1;						\
+		if (s[len] == '/')					\
+			s[len] = '\0';					\
+		fs = fth_make_string(s);				\
 		if (!fth_array_member_p(Lp, fs))			\
 			fth_array_ ## Kind(Lp, fs);			\
 	}								\
