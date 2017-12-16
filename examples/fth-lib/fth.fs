@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth.fs	1.65 1/7/15
+\ @(#)fth.fs	1.66 12/16/17
 
 \ alias			( xt "name" -- ; self -- ?? )
 \ shell-alias		( cmd-str "cmd" -- ; self -- f )
@@ -72,6 +72,7 @@
 \ 
 \ ?dup-unless		( obj -- obj| )
 \ assert-type		( condition obj pos msg -- )
+\ stack-check		( req -- )
 \ 
 \ make-?obj		( class-var "name" --; obj self -- f )
 \ create-struct		( names "name" -- ; self -- obj )
@@ -689,12 +690,24 @@ hide
 	{ condition obj pos msg xt }
 	condition unless
 		'wrong-type-arg
-		    #( "%s: wrong type arg %d, %s (%s), wanted %s"
+		    #( "%s: wrong type arg %s, %s (%s), wanted %s"
 		       xt xt->name
 		       pos
 		       obj object-name
 		       obj
 		       msg ) fth-throw
+	then
+;
+
+: (stack-check) ( req xt -- )
+	{ req xt }
+	depth req < if
+		depth { d }
+		'wrong-number-of-args
+		    #( "%s: not enough arguments, %s instead of %s"
+		       xt xt->name
+		       d
+		       req ) fth-throw
 	then
 ;
 set-current
@@ -713,6 +726,18 @@ This word is immediate and compile only, \
 it can only be used in colon definitions.\n\
 See also fth-throw, fth-raise, and fth-catch."
 	postpone running-word postpone (assert-type)
+; immediate compile-only
+
+: stack-check ( req -- )
+	doc" assertion\n\
+: new-word ( obj -- f )\n\
+	1 stack-check
+	{ obj }
+	...\n\
+;\n\
+Throw WRONG-NUMBER-OF-ARGS exception if stack-depth is less than REQ.\n\
+See also fth-throw, fth-raise, and fth-catch."
+	postpone running-word postpone (stack-check)
 ; immediate compile-only
 previous
 
