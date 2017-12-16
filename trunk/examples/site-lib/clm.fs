@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/08 03:01:31
+\ Changed: 17/12/16 04:06:53
 \
-\ @(#)clm.fs	1.124 12/8/17
+\ @(#)clm.fs	1.125 12/16/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -281,7 +281,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/08"  value *clm-version*
+"fth 2017/12/16"  value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
@@ -628,6 +628,43 @@ set-current
 ;
 previous
 
+[ifundef] ws-is-array?
+	#f value ws-is-array?
+[then]
+
+ws-is-array? [if]
+	<'> #()              alias #w{}    ( -- ws )
+	<'> array?           alias ws?     ( obj -- f )
+	<'> array-assoc-ref  alias ws-ref  ( ws key     -- val )
+	<'> array-assoc-set! alias ws-set! ( ws key val -- 'ws )
+[else]
+	<'> #{}              alias #w{}    ( -- ws )
+	<'> hash?            alias ws?     ( obj -- f )
+	<'> hash-ref         alias ws-ref  ( ws key     -- val )
+	: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
+[then]
+
+\ === Playing Sounds ===
+defer ws-play-it
+: play-sound <{ :key verbose *clm-verbose* player *clm-player*
+    :optional input *clm-file-name* -- }>
+	doc" Play sound file INPUT.\n\
+\"bell.snd\" :verbose #t play-sound"
+	input find-file to input
+	input unless
+		'no-such-file #( "%s: %s" get-func-name input ) fth-throw
+	then
+	verbose if
+		input snd-info
+	then
+	#w{} :output input ws-set! :player player ws-set! ws-play-it
+;
+
+'snd provided? [unless]
+	<'> play-sound alias play
+[then]
+<'> play alias ws-play
+
 : clm-mix <{ infile :key
     output #f
     output-frame 0
@@ -681,22 +718,6 @@ The whole oboe.snd file will be mixed in because :framples is not specified."
 		output continue-sample->file to *output*
 	then
 ;
-
-[ifundef] ws-is-array?
-	#f value ws-is-array?
-[then]
-
-ws-is-array? [if]
-	<'> #()              alias #w{}    ( -- ws )
-	<'> array?           alias ws?     ( obj -- f )
-	<'> array-assoc-ref  alias ws-ref  ( ws key     -- val )
-	<'> array-assoc-set! alias ws-set! ( ws key val -- 'ws )
-[else]
-	<'> #{}              alias #w{}    ( -- ws )
-	<'> hash?            alias ws?     ( obj -- f )
-	<'> hash-ref         alias ws-ref  ( ws key     -- val )
-	: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
-[then]
 
 hide
 : ws-get-snd ( ws -- snd )
@@ -806,7 +827,7 @@ hide
 	ws :output ws-ref
 	    :reverb-file-name ws :reverb-file-name ws-ref
 	    :scaled?          ws :scaled-to ws-ref ws :scaled-by ws-ref ||
-	    :timer            ws :timer ws-ref   snd-info
+	    :timer            ws :timer ws-ref snd-info
 ;
 
 : set-args { key def ws -- }
@@ -831,24 +852,24 @@ set-current
 \ ;
 \ <'> play-3-times to *clm-player*
 
-defer ws-play
-: ws-play-it { ws -- }
+\ defer ws-play
+: (ws-play-it) { ws -- }
 	ws :output ws-ref { output }
 	ws :player ws-ref { player }
 	player word? if
 		player #( output ) run-proc
 	else
-		player string? if
-			player $space $+ output $+ file-system
+		player string? unless
+			"sndplay" to player
+		then
+		'snd provided? if
+			output find-file :wait #t play
 		else
-			'snd provided? if
-				output find-file :wait #t ws-play
-			else
-				"sndplay " output $+ file-system
-			then
+			"%s %s" '( player output ) string-format file-system
 		then
 	then drop
 ;
+<'> (ws-play-it) is ws-play-it
 
 : ws-output ( ws -- fname )
 	:output ws-ref
@@ -1030,6 +1051,17 @@ defer ws-play
 	then
 	ws ws-after-output ( ws )
 ;
+
+: ws-reset-handler { retval -- val }
+	stack-reset
+	"#<=== WS-ERROR: %s ===>\n" '( retval car exception-name ) clm-print
+	*clm-debug* if
+		"#<DEBUG: %s>\n" '( retval ) clm-print
+	then
+	"#<%s>\n" '( retval cadr ) clm-print
+	bt
+	*ws-args* array-pop ( ws )
+;
 previous
 
 \ Usage: <'> resflt-test with-sound drop
@@ -1051,8 +1083,8 @@ previous
 :clipped           *clm-clipped*          (#f)\n\
 :comment           *clm-comment*          (#f)\n\
 :notehook          *clm-notehook*         (#f)\n\
-:scaled-to                                (#f)\n\  
-:scaled-by                                (#f)\n\  
+:scaled-to                                (#f)\n\
+:scaled-by                                (#f)\n\
 :delete-reverb     *clm-delete-reverb*    (#f)\n\
 :reverb            *clm-reverb*           (#f)\n\
 :reverb-data       *clm-reverb-data*      (#())\n\
@@ -1068,7 +1100,8 @@ and returns a ws-args object with with-sound arguments.\n\
 		with-sound-default-args
 	else
 		with-sound-args
-	then with-sound-main ( ws )
+	then ( ws )
+	<'> with-sound-main #t <'> ws-reset-handler fth-catch ( ws )
 ;
 
 : clm-load ( fname keyword-args -- ws )
@@ -1250,26 +1283,6 @@ lambda: { tmp1 tmp2 }\n\
 		file-delete
 	end-each
 ;
-
-\ === Playing Sounds ===
-: play-sound <{ :key verbose *clm-verbose* player *clm-player*
-    :optional input *clm-file-name* -- }>
-	doc" Play sound file INPUT.\n\
-\"bell.snd\" :verbose #t play-sound"
-	input find-file to input
-	input unless
-		'no-such-file #( "%s: %s" get-func-name input ) fth-throw
-	then
-	verbose if
-		input snd-info
-	then
-	#w{} :output input ws-set! :player player ws-set! ws-play-it
-;
-
-'snd provided? [unless]
-	<'> play-sound alias play
-[then]
-<'> play is ws-play
 
 \ === Example instruments, more in clm-ins.fs ===
 instrument: simp { start dur freq amp -- }
