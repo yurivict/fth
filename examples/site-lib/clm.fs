@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/16 04:06:53
+\ Changed: 17/12/16 05:24:30
 \
-\ @(#)clm.fs	1.125 12/16/17
+\ @(#)clm.fs	1.126 12/16/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -607,7 +607,7 @@ set-current
 	output mus-sound-framples { frms }
 	output mus-sound-chans { channels }
 	output mus-sound-srate { srate }
-	"filename: %S" #( output ) clm-message
+	"filename: %s" #( output ) clm-message
 	"   chans: %d, srate: %d" #( channels srate f>s ) clm-message
 	"  format: %s [%s]"
 	    #( output mus-sound-sample-type mus-sample-type-name
@@ -623,7 +623,7 @@ set-current
 	then
 	output mus-sound-comment { comm }
 	comm empty? unless
-		" comment: %S" #( comm ) clm-message
+		" comment: %s" #( comm ) clm-message
 	then
 ;
 previous
@@ -1228,9 +1228,8 @@ lambda: ( -- )\n\
 			mix-file file-mtime
 		else
 			'no-such-file
-			    #( "%s: %S not found"
-			       get-func-name
-			       mix-file ) fth-throw
+			    #( "%s: %S not found" get-func-name mix-file )
+			    fth-throw
 		then
 	then { mix-time }
 	snd-time      false?
