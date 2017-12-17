@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth.fs	1.66 12/16/17
+\ @(#)fth.fs	1.67 12/16/17
 
 \ alias			( xt "name" -- ; self -- ?? )
 \ shell-alias		( cmd-str "cmd" -- ; self -- f )
@@ -731,8 +731,8 @@ See also fth-throw, fth-raise, and fth-catch."
 : stack-check ( req -- )
 	doc" assertion\n\
 : new-word ( obj -- f )\n\
-	1 stack-check
-	{ obj }
+	1 stack-check\n\
+	{ obj }\n\
 	...\n\
 ;\n\
 Throw WRONG-NUMBER-OF-ARGS exception if stack-depth is less than REQ.\n\

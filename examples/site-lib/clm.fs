@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/16 08:38:16
+\ Changed: 17/12/16 22:26:52
 \
-\ @(#)clm.fs	1.127 12/16/17
+\ @(#)clm.fs	1.128 12/16/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -135,6 +135,28 @@
 	[else]
 		<'> fth-print alias clm-print ( fmt :optional args -- )
 	[then]
+[then]
+
+[ifundef] stack-check
+	\ added to examples/fth-lib/fth.fs on 2017/12/16
+	hide
+	: (stack-check) ( req xt -- )
+		{ req xt }
+		depth req < if
+			depth { d }
+			'wrong-number-of-args
+			    #( "%s: not enough arguments, %s instead of %s"
+			       xt xt->name
+			       d
+			       req ) fth-throw
+		then
+	;
+	set-current
+
+	: stack-check ( req -- )
+		postpone running-word postpone (stack-check)
+	; immediate compile-only
+	previous
 [then]
 
 \ Put comment sign before output string and finish with carriage return.
