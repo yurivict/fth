@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/16 22:26:52
+\ Changed: 17/12/18 06:04:56
 \
-\ @(#)clm.fs	1.128 12/16/17
+\ @(#)clm.fs	1.129 12/18/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -39,6 +39,8 @@
 \ find-file		( file -- fname|#f )
 \ snd-info		( output :key reverb-file-name scaled? timer -- )
 \
+\ play-sound		( :key verbose player :optional input -- )
+\
 \ clm-mix		( ifile keyword-args -- )
 \ ws-output		( ws -- fname )
 \ with-sound		( body-xt keyword-args -- ws )
@@ -49,8 +51,6 @@
 \ with-offset		( body-xt secs -- )
 \ with-mix		( body-str|nil args fname start -- )
 \ sound-let		( ws-xt-lst body-xt -- )
-\
-\ play-sound		( :key verbose player :optional input -- )
 \
 \ example instruments:
 \ simp			( star dur freq amp -- )
@@ -303,7 +303,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/16"  value *clm-version*
+"fth 2017/12/18"  value *clm-version*
 #f 	      	  value *locsig*
 mus-lshort    	  value *clm-audio-format*
 #f            	  value *clm-comment*
@@ -668,22 +668,40 @@ ws-is-array? [if]
 
 \ === Playing Sounds ===
 defer ws-play-it
-: play-sound <{ :key verbose *clm-verbose* player *clm-player*
-    :optional input *clm-file-name* -- }>
-	doc" Play sound file INPUT.\n\
-\"bell.snd\" :verbose #t play-sound"
-	input find-file to input
-	input unless
-		'no-such-file #( "%s: %s" get-func-name input ) fth-throw
+: (play-sound) <{ :key verbose #f player #f :optional input #f -- f }>
+	input string? if
+		input find-file to input
+		input unless
+			'no-such-file
+			    #( "%s: %s" get-func-name input ) fth-throw
+		then
+	else
+		input mus-output? if
+			input mus-file-name
+		else
+			*output* mus-output? if
+				*output* mus-file-name
+			else
+				*clm-file-name*
+			then
+		then to input
 	then
 	verbose if
 		input snd-info
 	then
 	#w{} :output input ws-set! :player player ws-set! ws-play-it
+	#f
+;
+
+: play-sound ( keyargs :optional input -- )
+	doc" Play sound file INPUT.\n\
+\"bell.snd\" :verbose #t play-sound"
+	0 *clm-file-name* get-optarg { input }
+	:verbose *clm-verbose* :player *clm-player* input (play-sound) drop
 ;
 
 'snd provided? [unless]
-	<'> play-sound alias play
+	<'> (play-sound) alias play
 [then]
 <'> play alias ws-play
 
@@ -713,7 +731,7 @@ The whole oboe.snd file will be mixed in because :framples is not specified."
 	infile find-file to infile
 	infile unless
 		'file-not-found
-		    #( "%s: can't find %S" get-func-name infile ) fth-throw
+		    #( "%s: %S not found" get-func-name infile ) fth-throw
 	then
 	framples
 	infile mus-sound-framples || dup unless
@@ -722,9 +740,7 @@ The whole oboe.snd file will be mixed in because :framples is not specified."
 	outgen if
 		*output* mus-close drop
 	then
-	chans 0>
-	scaler &&
-	scaler f0<> && if
+	scaler number? scaler f0<> && if
 		chans chans * scaler make-vct
 	else
 		#f
@@ -868,13 +884,12 @@ set-current
 \ A player may look like this:
 \
 \ : play-3-times { output -- }
-\ 	3 0 ?do
+\ 	3 0 do
 \		output :wait #t play drop
 \	loop
 \ ;
 \ <'> play-3-times to *clm-player*
 
-\ defer ws-play
 : (ws-play-it) { ws -- }
 	ws :output ws-ref { output }
 	ws :player ws-ref { player }
@@ -888,8 +903,8 @@ set-current
 			output find-file :wait #t play
 		else
 			"%s %s" '( player output ) string-format file-system
-		then
-	then drop
+		then drop
+	then
 ;
 <'> (ws-play-it) is ws-play-it
 
@@ -1128,7 +1143,7 @@ See with-sound for a full keyword list.\n\
 	{ fname ws }
 	fname file-exists? if
 		ws :verbose ws-ref if
-			"loading %S" #( fname ) clm-message
+			"loading %s" #( fname ) clm-message
 		then
 		fname <'> file-eval ws with-sound-main ( ws )
 	else
@@ -1139,8 +1154,8 @@ See with-sound for a full keyword list.\n\
 
 : with-current-sound <{ body-xt :key offset 0.0 scaled-to #f scaled-by #f -- }>
 	doc" Must be called within with-sound body.  \
-Take all arguments from current with-sound except \
-:output, :scaled-to, :scaled-by and :comment."
+Takes all arguments from current with-sound except \
+:output, :scaled-to, :scaled-by, and :comment."
 	*output* mus-output? false? if
 		'with-sound-error
 		    #( "%s can only be called within with-sound"
@@ -1158,7 +1173,7 @@ Take all arguments from current with-sound except \
 
 : scaled-to <{ body-xt scl -- }>
 	doc" Must be called within with-sound body.  \
-Scale BODY-XT's resulting sound file to SCL.\n\
+Scales BODY-XT's resulting sound file to SCL.\n\
 lambda: ( -- )\n\
   0.0 0.1 660.0 0.5 fm-violin\n\
   0.5 0.1 550.0 0.1 <'> fm-violin 0.8 scaled-to ( scaled to 0.8 )\n\
@@ -1168,7 +1183,7 @@ lambda: ( -- )\n\
 
 : scaled-by <{ body-xt scl -- }>
 	doc" Must be called within with-sound body.  \
-Scale BODY-XT's resulting sound file by SCL.\n\
+Scales BODY-XT's resulting sound file by SCL.\n\
 lambda: ( -- )\n\
   0.0 0.1 660.0 0.5 fm-violin\n\
   0.5 0.1 550.0 0.1 <'> fm-violin 2.0 scaled-by ( scaled to 0.2 )\n\
@@ -1178,11 +1193,11 @@ lambda: ( -- )\n\
 
 : with-offset <{ body-xt sec -- }>
 	doc" Must be called within with-sound body.  \
-Mix BODY-XT's resulting sound file into main sound file at SEC seconds.\n\
+Mixes BODY-XT's resulting sound file into main sound file at SEC seconds.\n\
 lambda: ( -- )\n\
   0.0 0.1 660.0 0.5 fm-violin\n\
-  0.5 0.1 550.0 0.1 <'> fm-violin 1.0 \
-with-offset ( its actual begin time is 1.5 )\n\
+  0.5 0.1 550.0 0.1 <'> fm-violin 1.0 with-offset\n\
+  ( its actual begin time is 1.5 )\n\
 ; with-sound"
 	body-xt :offset sec with-current-sound
 ;
@@ -1192,7 +1207,7 @@ with-offset ( its actual begin time is 1.5 )\n\
 ARGS is an array of with-sound arguments, \
 FNAME is the temporary mix file name without extension, \
 and START is the begin time for mix in.  \
-If BODY-STR is NIL a notelist file FNAME.fsm must exist.\n\
+If BODY-STR is NIL, a notelist file FNAME.fsm must exist.\n\
 lambda: ( -- )\n\
   0.0 0.1 440 0.1 fm-violin\n\
   \"\n\
@@ -1256,42 +1271,64 @@ lambda: ( -- )\n\
 ;
 
 : sound-let ( ws-xt-lst body-xt -- )
-	doc" Require array of arrays WS-XT-LST with with-sound args \
+	doc" Requires an array of arrays WS-XT-LST with with-sound args \
 and xts, and a BODY-XT.  \
 The BODY-XT must take WS-XT-LST length arguments which are tempfile names.  \
 with-sound will be feed with ws-args und ws-xts from WS-XT-LST.  \
 :output is set to tempnam which will be on stack before executing BODY-XT.  \
 These temporary files will be deleted after execution of BODY-XT.\n\
+\\ The WS-XT-LST:\n\
 #( #( #( :reverb <'> jc-reverb ) 0.0 1 220 0.2 <'> fm-violin )\n\
-   #( #() 0.5 1 440 0.3 <'> fm-violin ) ) ( the ws-xt-lst )\n\
-lambda: { tmp1 tmp2 }\n\
+   #( #()                        0.5 1 440 0.3 <'> fm-violin )\n\
+   #( #()                        #( 10 'a-symbol ) ) )\n\
+\\ The BODY-XT:\n\
+lambda: <{ tmp1 tmp2 tmp3 -- }>\n\
+  tmp1 .string cr\n\
+  tmp2 .string cr\n\
+  tmp3 .string cr\n\
   tmp1 :output tmp2 clm-mix\n\
-  tmp1 clm-mix\n\
-; ( the body-xt ) <'> sound-let with-sound drop"
+  tmp2 :output tmp1 clm-mix\n\
+  tmp1 play drop\n\
+  tmp2 play drop\n\
+; sound-let"
+	2 stack-check
 	{ ws-xt-lst body-xt }
 	ws-xt-lst array? ws-xt-lst 1 "an array"     assert-type
 	body-xt word?    body-xt   2 "a proc or xt" assert-type
-	*output* mus-output? unless
-		'with-sound-error
-		    #( "%s can only be called within with-sound"
-		       get-func-name ) fth-throw
-	then
+	*output* mus-output? { outgen }
+	nil nil { ws rest }
 	ws-xt-lst map
-		*key* 0 array-ref ( args ) each
+		*key* car ( with-sound args ) each
 			( put all args on stack )
-		end-each with-sound-args
-		( ws ) :output fth-tempnam ws-set! { ws }
-		*key* 1 array-ref ( xt ) each
-			( put all xts on stack )
-		end-each ws with-sound-main :output ws-ref ( outfile )
+		end-each ( *key* length args on stack )
+		outgen if
+			with-sound-args
+		else
+			with-sound-default-args ( ws )
+			:play			#f ws-set! ( ws )
+			:player			#f ws-set! ( ws )
+			:statistics		#f ws-set! ( ws )
+			:continue-old-file	#f ws-set! ( ws )
+		then ( ws ) :output fth-tempnam ws-set! to ws
+		*key* cdr to rest
+		rest -1 list-ref word? if
+			\ '( 0.0 1 220 0.2 <'> fm-violin )
+			rest each
+				( put all args and xt on stack )
+			end-each
+			ws with-sound-main ws-output ( outfile )
+		else
+			\ a single value like an array: #( 10 'a-symbol )
+			rest car
+		then
 	end-map { outfiles }
-	body-xt xt? if
-		outfiles each end-each body-xt execute
-	else
+	body-xt word? if
 		body-xt outfiles run-proc drop
 	then
-	outfiles each ( file )
-		file-delete
+	outfiles each { file }
+		file file-exists? if
+			file file-delete
+		then
 	end-each
 ;
 
