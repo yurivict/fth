@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/18 06:04:56
+\ Changed: 17/12/19 06:00:19
 \
-\ @(#)clm.fs	1.129 12/18/17
+\ @(#)clm.fs	1.130 12/19/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -303,23 +303,24 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/18"  value *clm-version*
-#f 	      	  value *locsig*
-mus-lshort    	  value *clm-audio-format*
-#f            	  value *clm-comment*
-1.0           	  value *clm-decay-time*
-#f  	      	  value *clm-delete-reverb*
-"test.snd"    	  value *clm-file-name*
-#f 	      	  value *clm-notehook*
-#f  	      	  value *clm-play*
-#f            	  value *clm-player*           
-#f 	      	  value *clm-reverb*
-1     	      	  value *clm-reverb-channels*
-#()           	  value *clm-reverb-data*
-"test.reverb" 	  value *clm-reverb-file-name*
-#f  	      	  value *clm-statistics*
-#f	      	  value *clm-verbose*
-#f            	  value *clm-debug*
+"fth 2017/12/19"	value *clm-version*
+#f		value *locsig*
+mus-lshort	value *clm-audio-format*
+#f		value *clm-comment*
+1.0		value *clm-decay-time*
+#f		value *clm-delete-reverb*
+"test.snd"	value *clm-file-name*
+#f		value *clm-notehook*
+#f		value *clm-play*
+#f		value *clm-player*           
+#f		value *clm-reverb*
+1		value *clm-reverb-channels*
+#()		value *clm-reverb-data*
+"test.reverb"	value *clm-reverb-file-name*
+#f		value *clm-statistics*
+#f		value *clm-to-snd*
+#f		value *clm-verbose*
+#f		value *clm-debug*
 "CLM_SEARCH_PATH" getenv "." || ":" string-split value *clm-search-list*
 
 <'> *clm-search-list*
@@ -337,33 +338,30 @@ Instruments using RUN or RUN-INSTRUMENT add entries to the list." help-set!
 	1024       constant dac-size
 [then]
 
-default-output-chans       value *clm-channels*
-default-output-srate       value *clm-srate*
-locsig-type                value *clm-locsig-type*
-default-output-header-type value *clm-header-type*
-default-output-sample-type value *clm-sample-type*
-dac-size                   value *clm-rt-bufsize*
-mus-file-buffer-size       value *clm-file-buffer-size*
-mus-clipping               value *clm-clipped*
-mus-array-print-length     value *clm-array-print-length*
-clm-table-size             value *clm-table-size*
-440.0                      value *clm-default-frequency*
-
-\ for backward compatibility
-*clm-sample-type* value *clm-data-format*
-<'> *clm-data-format* lambda: <{ val -- res }>
-	val to *clm-sample-type*
-	val
-; trace-var
+default-output-chans		value *clm-channels*
+default-output-srate		value *clm-srate*
+locsig-type			value *clm-locsig-type*
+default-output-header-type	value *clm-header-type*
+default-output-sample-type	value *clm-sample-type*
+dac-size			value *clm-rt-bufsize*
+mus-file-buffer-size		value *clm-file-buffer-size*
+mus-clipping			value *clm-clipped*
+mus-array-print-length		value *clm-array-print-length*
+clm-table-size			value *clm-table-size*
+440.0				value *clm-default-frequency*
  
 <'> *clm-table-size* lambda: <{ val -- res }>
 	val set-clm-table-size
 ; trace-var
 
 \ internal global variables
-*clm-channels* value *channels*
-*clm-verbose*  value *verbose*
-*clm-notehook* value *notehook*
+*clm-channels*	value *channels*
+*clm-verbose*	value *verbose*
+*clm-notehook*	value *notehook*
+0.0		value *degree*
+1.0		value *distance*
+0.05		value *reverbamount*
+0		value *start*
 
 'snd provided? [if]
 	<'> snd-tempnam alias fth-tempnam
@@ -450,48 +448,144 @@ Produces something like:\n\
 ;
 
 hide
-: (run) ( start dur vars -- limit begin ) ws-info times->samples ;
+defer (run) ( start dur vars -- end beg )
 
-: (run-instrument) { start dur args vars -- limit begin }
+: (run-snd) ( start dur vars -- end beg )
+	ws-info ( start dur ) nip seconds->samples 0
+;
+
+: (run-clm) ( start dur vars -- end beg )
+	ws-info ( start dur ) times->samples ( end beg )
+;
+
+defer (run-instrument) ( start dur args vars -- end beg )
+
+: (run-snd-instrument) { start dur args vars -- end beg }
 	args hash? unless
 		#{} to args
 	then
-	:degree args :degree hash-ref 0.0 ||
-	    :distance args :distance hash-ref 1.0 ||
-	    :reverb args :reverb hash-ref 0.05 ||
-	    :channels args :channels hash-ref *channels* ||
-	    :output args :output hash-ref *output* ||
-	    :revout args :revout hash-ref *reverb* ||
-	    :type args :type hash-ref locsig-type || make-locsig to *locsig*
-	\ we set channel 3/4 if any to 0.5 * channel 1/2
-	*output* mus-output? if
-		*output* mus-channels 2 > if
-			*locsig* 2
-			    *locsig* 0 locsig-ref f2/
-			    locsig-set! drop
-			*output* mus-channels 3 > if
-				*locsig* 3
-				    *locsig* 1 locsig-ref f2/
-				    locsig-set! drop
-			then
+	args :channels	hash-ref *channels*	|| { chans }
+	chans 1 = if
+		1.0
+	else chans 2 = if
+			90.0 random
+		else
+			360.0 random
 		then
-	then
-	*reverb* mus-output? if
-		*reverb* mus-channels 2 > if
-			*locsig* 2
-			    *locsig* 0 locsig-reverb-ref f2/
-			    locsig-reverb-set! drop
-			*reverb* mus-channels 3 > if
-				*locsig* 3
-				    *locsig* 1 locsig-reverb-ref f2/
-				    locsig-reverb-set! drop
-			then
-		then
-	then
-	start dur vars (run)
+	then { deg }
+	args :degree	hash-ref deg	|| to *degree*
+	args :distance	hash-ref 1.0	|| to *distance*
+	args :reverb	hash-ref 0.05	|| to *reverbamount*
+	start seconds->samples to *start*
+	dur seconds->samples 0.0 make-vct to *locsig*
+	start dur vars (run-snd)
 ;
 
-: (end-run) { val idx -- } *locsig* idx val locsig drop ;
+: (run-clm-instrument) { start dur args vars -- end beg }
+	args hash? unless
+		#{} to args
+	then
+	args :channels hash-ref *channels* || { chans }
+	chans 1 = if
+		1.0
+	else chans 2 = if
+			90.0 random
+		else
+			360.0 random
+		then
+	then { deg }
+	:degree		args :degree	hash-ref deg		||
+	:distance	args :distance	hash-ref *distance*	||
+	:reverb		args :reverb	hash-ref *reverbamount*	||
+	:channels	chans
+	:output		args :output	hash-ref *output*	||
+	:revout		args :revout	hash-ref *reverb*	||
+	:type		args :type	hash-ref locsig-type	||
+	make-locsig to *locsig*
+	start dur vars (run-clm)
+;
+
+defer (end-run) ( val idx -- )
+
+: (end-snd-run) ( val idx -- )
+	\ gen idx val gen-set!
+	\ *locsig* => vct
+	*locsig* swap rot vct-set! drop
+;
+
+: (end-clm-run) ( val idx -- )
+	\ gen idx val gen-set!
+	\ *locsig* => locsig gen
+	*locsig* swap rot locsig drop
+;
+
+defer (end-run-finish) ( -- )
+
+: (end-snd-run-finish) ( -- )
+	*start*         { beg }
+	*clm-instruments* each { en }
+		en 0 array-ref *clm-current-instrument* string= if
+			en 1 array-ref seconds->samples to beg
+			leave
+		then
+	end-each
+	*output*        { snd }
+	0               { chn }
+	snd channels    { chans }
+	*reverb*	{ rsnd }
+	*locsig*        { v }
+	*degree*        { frac }
+	*distance*      { scl }
+	scl             { s }
+	rsnd sound? if
+		v vct-copy *reverbamount* vct-scale!
+	else
+		#f
+	then		{ rv }
+	chans 1 = if
+		v scl vct-scale! beg snd chn #f "" mix-vct drop
+	else chans 2 = if
+			*degree* 90.0 f/ to frac
+			frac f0= if 1.0 to frac then
+			scl frac fnegate f* to s
+			0 to chn
+			v vct-copy
+			s vct-scale! beg snd chn #f "" mix-vct drop
+			scl frac f* to s
+			1 to chn
+			v
+			s vct-scale! beg snd chn #f "" mix-vct drop
+		else
+			*degree* 360.0 f/ to frac
+			frac f0= if 1.0 to frac then
+			scl frac f* to s
+			chans 1 do i to chn
+				v vct-copy
+				s vct-scale! beg snd chn #f "" mix-vct drop
+			loop
+			0 to chn
+			v
+			s vct-scale! beg snd chn #f "" mix-vct drop
+		then
+	then
+	rv vct? if
+		rsnd channels { rchns }
+		rchns 1 = if
+			0 to chn
+			rv beg rsnd chn #f "" mix-vct drop
+		else rchns 2 = if
+				0 to chn
+				rv beg rsnd chn #f "" mix-vct drop
+				1 to chn
+				rv beg rsnd chn #f "" mix-vct drop
+			else
+				rchns 0 do i to chn
+					rv beg rsnd chn #f "" mix-vct drop
+				loop
+			then
+		then
+	then
+;
 set-current
 
 \ RUN/LOOP is only a simple replacement of
@@ -528,7 +622,24 @@ set-current
 	postpone r@
 	postpone (end-run)
 	postpone loop
+	postpone (end-run-finish)
 ; immediate compile-only
+
+: set-to-snd ( f -- )
+	if
+		#t to *clm-to-snd*
+		<'> (run-snd)			[is] (run)
+		<'> (run-snd-instrument)	[is] (run-instrument)
+		<'> (end-snd-run)		[is] (end-run)
+		<'> (end-snd-run-finish)	[is] (end-run-finish)
+	else
+		#f to *clm-to-snd*
+		<'> (run-clm)			[is] (run)
+		<'> (run-clm-instrument)	[is] (run-instrument)
+		<'> (end-clm-run)		[is] (end-run)
+		<'> noop			[is] (end-run-finish)
+	then
+;
 previous
 
 : reverb-info { caller in-chans out-chans -- }
@@ -807,65 +918,65 @@ hide
 ;
 
 : ws-before-output { ws -- }
-	ws     :old-table-size         clm-table-size         ws-set!
-	( ws ) :old-file-buffer-size   mus-file-buffer-size   ws-set!
-	( ws ) :old-array-print-length mus-array-print-length ws-set!
-	( ws ) :old-clipped            mus-clipping           ws-set!
-	( ws ) :old-srate              mus-srate              ws-set!
-	( ws ) :old-locsig-type        locsig-type            ws-set!
-	( ws ) :old-*output*           *output*               ws-set!
-	( ws ) :old-*reverb*           *reverb*               ws-set!
-	( ws ) :old-verbose            *verbose*              ws-set! 
-	( ws ) :old-debug              *clm-debug*            ws-set!
-	( ws ) :old-channels           *channels*             ws-set!
-	( ws ) :old-notehook           *notehook*             ws-set!
-	( ws ) :old-decay-time         *clm-decay-time*       ws-set! to ws
-	ws :verbose              ws-ref to *verbose*
-	ws :debug                ws-ref to *clm-debug*
-	ws :channels             ws-ref to *channels*
-	ws :notehook             ws-ref to *notehook*
-	ws :decay-time           ws-ref to *clm-decay-time*
-	*clm-file-buffer-size*   set-mus-file-buffer-size   drop
-	*clm-array-print-length* set-mus-array-print-length drop
+	ws     :old-table-size		clm-table-size		ws-set!
+	( ws ) :old-file-buffer-size	mus-file-buffer-size	ws-set!
+	( ws ) :old-array-print-length	mus-array-print-length	ws-set!
+	( ws ) :old-clipped		mus-clipping		ws-set!
+	( ws ) :old-srate		mus-srate		ws-set!
+	( ws ) :old-locsig-type		locsig-type		ws-set!
+	( ws ) :old-*output*		*output*		ws-set!
+	( ws ) :old-*reverb*		*reverb*		ws-set!
+	( ws ) :old-verbose		*verbose*		ws-set! 
+	( ws ) :old-debug		*clm-debug*		ws-set!
+	( ws ) :old-channels		*channels*		ws-set!
+	( ws ) :old-notehook		*notehook*		ws-set!
+	( ws ) :old-decay-time		*clm-decay-time*	ws-set! to ws
+	ws :verbose	ws-ref to *verbose*
+	ws :debug	ws-ref to *clm-debug*
+	ws :channels	ws-ref to *channels*
+	ws :notehook	ws-ref to *notehook*
+	ws :decay-time	ws-ref to *clm-decay-time*
+	*clm-file-buffer-size*		set-mus-file-buffer-size drop
+	*clm-array-print-length*	set-mus-array-print-length drop
 	ws :scaled-to ws-ref
 	ws :scaled-by ws-ref || if
 		#( mus-bfloat
 		   mus-lfloat
 		   mus-bdouble
 		   mus-ldouble ) ws :sample-type ws-ref array-member? if
-			#f set-mus-clipping
+			#f
 		else
-			*clm-clipped* set-mus-clipping
+			*clm-clipped*
 		then
 	else
-		*clm-clipped* set-mus-clipping
-	then drop
-	ws :srate       ws-ref set-mus-srate   drop
-	ws :locsig-type ws-ref set-locsig-type drop
+		*clm-clipped*
+	then set-mus-clipping drop
+	ws :srate	ws-ref set-mus-srate drop
+	ws :locsig-type	ws-ref set-locsig-type drop
 ;
 
 : ws-after-output { ws -- ws }
-	ws :old-table-size         ws-ref set-clm-table-size         drop
-	ws :old-file-buffer-size   ws-ref set-mus-file-buffer-size   drop
-	ws :old-array-print-length ws-ref set-mus-array-print-length drop
-	ws :old-clipped            ws-ref set-mus-clipping           drop
-	ws :old-srate       	   ws-ref set-mus-srate              drop
-	ws :old-locsig-type 	   ws-ref set-locsig-type            drop
-	ws :old-*output*    	   ws-ref to *output*
-	ws :old-*reverb*    	   ws-ref to *reverb*
-	ws :old-verbose     	   ws-ref to *verbose*
-	ws :old-debug       	   ws-ref to *clm-debug*
-	ws :old-channels    	   ws-ref to *channels*
-	ws :old-notehook    	   ws-ref to *notehook*
-	ws :old-decay-time  	   ws-ref to *clm-decay-time*
+	ws :old-table-size		ws-ref set-clm-table-size drop
+	ws :old-file-buffer-size	ws-ref set-mus-file-buffer-size drop
+	ws :old-array-print-length	ws-ref set-mus-array-print-length drop
+	ws :old-clipped			ws-ref set-mus-clipping drop
+	ws :old-srate			ws-ref set-mus-srate drop
+	ws :old-locsig-type		ws-ref set-locsig-type drop
+	ws :old-*output*		ws-ref to *output*
+	ws :old-*reverb*		ws-ref to *reverb*
+	ws :old-verbose			ws-ref to *verbose*
+	ws :old-debug			ws-ref to *clm-debug*
+	ws :old-channels		ws-ref to *channels*
+	ws :old-notehook		ws-ref to *notehook*
+	ws :old-decay-time		ws-ref to *clm-decay-time*
 	*ws-args* array-pop
 ;
 
 : ws-statistics { ws -- }
 	ws :output ws-ref
-	    :reverb-file-name ws :reverb-file-name ws-ref
-	    :scaled?          ws :scaled-to ws-ref ws :scaled-by ws-ref ||
-	    :timer            ws :timer ws-ref snd-info
+	:reverb-file-name	ws :reverb-file-name ws-ref
+	:scaled?		ws :scaled-to ws-ref ws :scaled-by ws-ref ||
+	:timer			ws :timer ws-ref snd-info
 ;
 
 : set-args { key def ws -- }
@@ -916,29 +1027,31 @@ set-current
 	#() to *clm-instruments*
 	#w{} { ws }
 	*ws-args* ws array-push to *ws-args*
-	:channels          *clm-channels*         ws set-args
-	:clipped           *clm-clipped*          ws set-args
-	:comment           *clm-comment*          ws set-args
-	:continue-old-file #f                     ws set-args
-	:sample-type       *clm-sample-type*      ws set-args
-	:debug             *clm-debug*            ws set-args
-	:decay-time        *clm-decay-time*       ws set-args
-	:delete-reverb     *clm-delete-reverb*    ws set-args
-	:header-type       *clm-header-type*      ws set-args
-	:locsig-type       *clm-locsig-type*      ws set-args
-	:notehook          *clm-notehook*         ws set-args
-	:output            *clm-file-name*        ws set-args
-	:play              *clm-play*             ws set-args
-	:player            *clm-player*           ws set-args
-	:reverb            *clm-reverb*           ws set-args
-	:reverb-channels   *clm-reverb-channels*  ws set-args
-	:reverb-data       *clm-reverb-data*      ws set-args
-	:reverb-file-name  *clm-reverb-file-name* ws set-args
-	:scaled-by         #f                     ws set-args
-	:scaled-to         #f                     ws set-args
-	:srate             *clm-srate*            ws set-args
-	:statistics        *clm-statistics*       ws set-args
-	:verbose           *clm-verbose*          ws set-args
+	:channels		*clm-channels*		ws set-args
+	:clipped		*clm-clipped*		ws set-args
+	:comment		*clm-comment*		ws set-args
+	:continue-old-file	#f			ws set-args
+	:debug			*clm-debug*		ws set-args
+	:decay-time		*clm-decay-time*	ws set-args
+	:delete-reverb		*clm-delete-reverb*	ws set-args
+	:header-type		*clm-header-type*	ws set-args
+	:locsig-type		*clm-locsig-type*	ws set-args
+	:notehook		*clm-notehook*		ws set-args
+	:output			*clm-file-name*		ws set-args
+	:play			*clm-play*		ws set-args
+	:player			*clm-player*		ws set-args
+	:reverb			*clm-reverb*		ws set-args
+	:reverb-channels	*clm-reverb-channels*	ws set-args
+	:reverb-data		*clm-reverb-data*	ws set-args
+	:reverb-file-name	*clm-reverb-file-name*	ws set-args
+	:sample-type		*clm-sample-type*	ws set-args
+	:scaled-by		#f			ws set-args
+	:scaled-to		#f			ws set-args
+	:srate			*clm-srate*		ws set-args
+	:statistics		*clm-statistics*	ws set-args
+	:to-snd			*clm-to-snd*		ws set-args	
+	:verbose		*clm-verbose*		ws set-args
+	ws :to-snd ws-ref set-to-snd
 	ws
 ;  
 
@@ -946,39 +1059,108 @@ set-current
 	#w{} { ws }
 	*ws-args* -1 array-ref { ws1 }
 	*ws-args* ws array-push to *ws-args*
-	:play              #f                    ws set-args
-	:player            #f                    ws set-args
-	:statistics        #f                    ws set-args
-	:continue-old-file #f               	 ws set-args
-	:verbose           ws1 :verbose     	 ws-ref ws set-args
-	:debug             ws1 :debug       	 ws-ref ws set-args
-	:output            ws1 :output      	 ws-ref ws set-args
-	:channels          ws1 :channels    	 ws-ref ws set-args
-	:srate             ws1 :srate       	 ws-ref ws set-args
-	:locsig-type       ws1 :locsig-type 	 ws-ref ws set-args
-	:header-type       ws1 :header-type 	 ws-ref ws set-args
-	:sample-type       ws1 :sample-type 	 ws-ref ws set-args
+	:continue-old-file	#f ws set-args
+	:play			#f ws set-args
+	:player			#f ws set-args
+	:statistics		#f ws set-args
+	:channels		ws1 :channels		ws-ref ws set-args
 	:comment "with-sound level %d"
 	    #( *ws-args* length ) string-format ws set-args
-	:notehook          ws1 :notehook         ws-ref ws set-args
-	:scaled-to         ws1 :scaled-to        ws-ref ws set-args
-	:scaled-by         ws1 :scaled-by        ws-ref ws set-args
-	:delete-reverb     ws1 :delete-reverb    ws-ref ws set-args
-	:reverb            ws1 :reverb           ws-ref ws set-args
-	:reverb-data       ws1 :reverb-data      ws-ref ws set-args
-	:reverb-channels   ws1 :reverb-channels  ws-ref ws set-args
-	:reverb-file-name  ws1 :reverb-file-name ws-ref ws set-args
-	:decay-time        ws1 :decay-time       ws-ref ws set-args
+	:debug			ws1 :debug		ws-ref ws set-args
+	:decay-time		ws1 :decay-time		ws-ref ws set-args
+	:delete-reverb		ws1 :delete-reverb	ws-ref ws set-args
+	:header-type		ws1 :header-type	ws-ref ws set-args
+	:locsig-type		ws1 :locsig-type	ws-ref ws set-args
+	:notehook		ws1 :notehook		ws-ref ws set-args
+	:output			ws1 :output		ws-ref ws set-args
+	:reverb			ws1 :reverb		ws-ref ws set-args
+	:reverb-channels	ws1 :reverb-channels	ws-ref ws set-args
+	:reverb-data		ws1 :reverb-data	ws-ref ws set-args
+	:reverb-file-name	ws1 :reverb-file-name	ws-ref ws set-args
+	:sample-type		ws1 :sample-type	ws-ref ws set-args
+	:scaled-by		ws1 :scaled-by		ws-ref ws set-args
+	:scaled-to		ws1 :scaled-to		ws-ref ws set-args
+	:srate			ws1 :srate		ws-ref ws set-args
+	:verbose		ws1 :verbose		ws-ref ws set-args
 	ws
+;
+
+: ws-is-sound? ( gen -- f )
+	*clm-to-snd* if
+		sound?
+	else
+		sample->file?
+	then
+;
+
+: ws-create-sound { fname chans sr st ht com -- gen }
+	*clm-to-snd* if
+		save-stack { rest }
+		fname chans sr st ht com 1 new-sound { gen }
+		rest restore-stack gen
+	else
+		fname chans st ht com make-sample->file
+	then
+;
+
+: ws-continue-sound { fname -- gen }
+	*clm-to-snd* if
+		fname 0 find-sound
+	else
+		fname continue-sample->file
+	then
+;
+
+: ws-before-reverb { decay --  }
+	*clm-to-snd* if
+		\ *OUTPUT*:
+		\ was SOUND becomes VCT for reverb functions and outa
+		\ reverted in ws-after-reverb
+		*output* save-sound drop
+		*reverb* save-sound drop
+		0 #f *output* 0 #f channel->vct { v }
+		v vct-length decay seconds->samples + 0.0 make-vct to *output*
+		v each { y }
+			*output* i y vct-set! drop
+		end-each
+	else
+		*reverb* mus-close drop
+	then
+;
+
+: ws-after-reverb { fname -- }
+	*clm-to-snd* if
+		fname find-sound { snd }
+		*output* vct-length { len }
+		*output* 0 len snd 0 #f "" vct->channel drop
+		snd save-sound drop
+		snd update-sound drop
+		snd to *output*
+	then
+	*reverb* mus-close drop
+;
+
+: ws-close-sound { gen -- }
+	*clm-to-snd* if
+		gen sound? if
+			gen save-sound drop
+			gen close-sound drop
+		else gen mus-output? if
+				gen mus-close drop
+			then
+		then
+	else
+		gen mus-close drop
+	then
 ;
 
 : ws-reset-handler <{ retval -- }>
 	stack-reset
 	*output* if
-		*output* mus-close drop
+		*output* ws-close-sound
 	then
 	*reverb* if
-		*reverb* mus-close drop
+		*reverb* ws-close-sound
 	then
 	*ws-args* array-pop drop
 	"#<=== WS-ERROR: %s ===>\n" '( retval car exception-name ) clm-print
@@ -1001,68 +1183,71 @@ set-current
 	else
 		#f
 	then { rev? }
-	ws :output            ws-ref { output }
-	ws :reverb-file-name  ws-ref { revput }
-	ws :continue-old-file ws-ref { cont? }
-	cont? if
-		output continue-sample->file
-	else
-		output file-delete
-		output
-		ws :channels    ws-ref
-		ws :sample-type ws-ref
-		ws :header-type ws-ref
-		ws :comment ws-ref dup empty? if
-			drop make-default-comment
-		then make-sample->file
-	then to *output*
-	*output* sample->file? unless
-		'with-sound-error
-		    #( "%s: can't open sample->file" get-func-name ) fth-throw
+	ws :output		ws-ref { output }
+	ws :reverb-file-name	ws-ref { revout }
+	ws :continue-old-file	ws-ref { cont? }
+	ws :channels		ws-ref { chans }
+	ws :reverb-channels	ws-ref { rchans }
+	ws :srate		ws-ref { sr }
+	ws :sample-type		ws-ref { st }
+	ws :header-type		ws-ref { ht }
+	ws :comment		ws-ref { com }
+	com empty? if
+		make-default-comment to com
 	then
 	cont? if
-		output mus-sound-srate set-mus-srate drop
-		'snd provided? if
-			output 0 find-sound dup sound? if
-				close-sound
-			then drop
+		output ws-continue-sound
+	else
+		output file-delete
+		output chans sr st ht com ws-create-sound
+	then to *output*
+	*output* ws-is-sound? unless
+		'with-sound-error
+		    #( "%s: can't open %s" get-func-name output ) fth-throw
+	then
+	cont? if
+		*clm-to-snd* if
+			*output* close-sound drop
+		else
+			output mus-sound-srate set-mus-srate drop
+			'snd provided? if
+				output 0 find-sound dup sound? if
+					close-sound
+				then drop
+			then
 		then
 	then
 	rev? if
 		cont? if
-			revput continue-sample->file
+			revout ws-continue-sound
 		else
-			revput file-delete
-			revput
-			ws :reverb-channels ws-ref
-			ws :sample-type     ws-ref
-			ws :header-type     ws-ref
-			"with-sound temporary reverb file" make-sample->file
+			"with-sound temporary reverb file" to com
+			revout file-delete
+			revout rchans sr st ht com ws-create-sound
 		then to *reverb*
-		*reverb* sample->file? unless
+		*reverb* ws-is-sound? unless
 			'with-sound-error
-			    #( "%s: can't open reverb sample->file"
-			       get-func-name ) fth-throw
+			    #( "%s: can't open reverb %s"
+			       get-func-name revout ) fth-throw
 		then
 	then
 	ws :timer make-timer ws-set! to ws
 	\ compute ws body
 	body-xt execute
 	reverb-xt if
-		*reverb* mus-close drop
-		ws :reverb-file-name ws-ref undef make-file->sample to *reverb*
+		ws :decay-time ws-ref ws-before-reverb
+		revout undef make-file->sample to *reverb*
 		*reverb* file->sample? unless
 			'with-sound-error
-			    #( "%s: can't open file->sample" get-func-name )
+			    #( "%s: can't open %s" get-func-name revout )
 			    fth-throw
 		then
 		\ compute ws reverb
 		\ push reverb arguments on stack
-		ws :reverb-data ws-ref each end-each
-		reverb-xt execute
-		*reverb* mus-close drop
+		ws :reverb-data ws-ref each end-each reverb-xt execute
+		output ws-after-reverb
 	then
-	*output* mus-close drop
+	*output* ws-close-sound
 	ws :timer ws-ref stop-timer
 	'snd provided? if
 		ws ws-get-snd drop
@@ -1072,7 +1257,7 @@ set-current
 	then
 	reverb-xt if
 		ws :delete-reverb ws-ref if
-			ws :reverb-file-name ws-ref file-delete
+			revout file-delete
 		then
 	then
 	ws :scaled-to ws-ref if
