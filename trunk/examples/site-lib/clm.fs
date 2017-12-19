@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/19 06:00:19
+\ Changed: 17/12/19 06:19:36
 \
-\ @(#)clm.fs	1.130 12/19/17
+\ @(#)clm.fs	1.131 12/19/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -85,11 +85,16 @@
 'snd provided? [unless]
 	<'> noop alias close-sound
 	<'> noop alias find-sound
+	<'> noop alias mix-vct
+	<'> noop alias new-sound
 	<'> noop alias open-sound
 	<'> noop alias save-sound
+	<'> noop alias update-sound
 	<'> noop alias scale-channel
 	<'> noop alias sound?
 	<'> noop alias framples
+	<'> noop alias channel->vct
+	<'> noop alias vct->channel
 
 	\ Some generic words for non-Snd use.
 	: channels <{ :optional obj #f -- n }>
@@ -625,7 +630,9 @@ set-current
 	postpone (end-run-finish)
 ; immediate compile-only
 
-: set-to-snd ( f -- )
+: set-to-snd { flag -- }
+	flag
+	'snd provided? &&
 	if
 		#t to *clm-to-snd*
 		<'> (run-snd)			[is] (run)
