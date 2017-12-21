@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/20 07:09:09
+\ Changed: 17/12/21 07:02:50
 \
-\ @(#)clm.fs	1.132 12/20/17
+\ @(#)clm.fs	1.133 12/21/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -85,7 +85,6 @@
 'snd provided? [unless]
 	<'> noop alias channel->vct
 	<'> noop alias close-sound
-	<'> noop alias file-name
 	<'> noop alias find-sound
 	<'> noop alias framples
 	<'> noop alias mix-vct
@@ -118,14 +117,33 @@
 		then
 	;
 
-	: maxamp <{ :optional snd #f chn #f edpos #f -- r }>
-		snd string? if
-			snd mus-sound-maxamp
+	: maxamp <{ :optional obj #f chn #f edpos #f -- r }>
+		obj string? if
+			obj mus-sound-maxamp
 		else
-			snd vct? if
-				snd vct-peak
+			obj vct? if
+				obj vct-peak
 			else
-				0.0
+				obj mus-generator? if
+					obj mus-data vct-peak
+				else
+					0.0
+				then
+			then
+		then
+	;
+
+	\ set to *clm-file-name* below
+	defer *clm-fname*
+
+	: file-name <{ :optional obj #f -- name }>
+		obj string? if
+			obj			
+		else
+			obj mus-generator? if
+				obj mus-file-name
+			else
+				*clm-fname*
 			then
 		then
 	;
@@ -309,7 +327,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/20"	value *clm-version*
+"fth 2017/12/21"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -336,6 +354,7 @@ mus-lshort	value *clm-audio-format*
 Instruments using RUN or RUN-INSTRUMENT add entries to the list." help-set!
 
 'snd provided? [unless]
+	<'> *clm-file-name* is *clm-fname*
 	1          constant default-output-chans
 	44100      constant default-output-srate
 	mus-next   constant default-output-header-type
@@ -359,15 +378,21 @@ clm-table-size			value *clm-table-size*
 	val set-clm-table-size
 ; trace-var
 
+<'> *clm-srate* lambda: <{ val -- res }>
+	val set-mus-srate f>s
+; trace-var
+
 \ internal global variables
-*clm-channels*	value *channels*
-*clm-verbose*	value *verbose*
-*clm-notehook*	value *notehook*
-0.0		value *degree*
-1.0		value *distance*
-0.05		value *reverbamount*
-0		value *start*
-#f		value *outgen*
+*clm-channels*		value *channels*
+*clm-verbose*		value *verbose*
+*clm-notehook*		value *notehook*
+*clm-decay-time*	value *decay-time*
+0.0			value *degree*
+1.0			value *distance*
+0.05			value *reverbamount*
+0			value *start*
+#f			value *outgen*
+#f			value *revgen*
 
 'snd provided? [if]
 	<'> snd-tempnam alias fth-tempnam
@@ -543,7 +568,7 @@ defer (end-run-finish) ( -- )
 		#f
 	then		{ rv }
 	chans 1 = if
-		v scl vct-scale! beg snd chn #f "" mix-vct drop
+		v scl vct-scale! beg snd chn #f undef mix-vct drop
 	else
 		chans 2 = if
 			*degree* 90.0 f/ to frac
@@ -551,38 +576,38 @@ defer (end-run-finish) ( -- )
 			scl frac fnegate f* to s
 			0 to chn
 			v vct-copy
-			s vct-scale! beg snd chn #f "" mix-vct drop
+			s vct-scale! beg snd chn #f undef mix-vct drop
 			scl frac f* to s
 			1 to chn
 			v
-			s vct-scale! beg snd chn #f "" mix-vct drop
+			s vct-scale! beg snd chn #f undef mix-vct drop
 		else
 			*degree* 360.0 f/ to frac
 			frac f0= if 1.0 to frac then
 			scl frac f* to s
 			chans 1 do i to chn
 				v vct-copy
-				s vct-scale! beg snd chn #f "" mix-vct drop
+				s vct-scale! beg snd chn #f undef mix-vct drop
 			loop
 			0 to chn
 			v
-			s vct-scale! beg snd chn #f "" mix-vct drop
+			s vct-scale! beg snd chn #f undef mix-vct drop
 		then
 	then
 	rv vct? if
 		rsnd channels { rchns }
 		rchns 1 = if
 			0 to chn
-			rv beg rsnd chn #f "" mix-vct drop
+			rv beg rsnd chn #f undef mix-vct drop
 		else
 			rchns 2 = if
 				0 to chn
-				rv beg rsnd chn #f "" mix-vct drop
+				rv beg rsnd chn #f undef mix-vct drop
 				1 to chn
-				rv beg rsnd chn #f "" mix-vct drop
+				rv beg rsnd chn #f undef mix-vct drop
 			else
 				rchns 0 do i to chn
-					rv beg rsnd chn #f "" mix-vct drop
+					rv beg rsnd chn #f undef mix-vct drop
 				loop
 			then
 		then
@@ -780,13 +805,23 @@ ws-is-array? [if]
 [then]
 
 \ === Playing Sounds ===
-defer ws-play-it
-: (play-sound) <{ :key verbose #f player #f :optional input #f -- f }>
+
+defer ws-play
+
+: play-sound <{ :optional
+    input   *clm-file-name*
+    verbose *clm-verbose*
+    player  *clm-player* -- }>
+	doc" Play sound file INPUT.\n\
+\"bell.snd\" #t play-sound\n\
+\"bell.snd\" #f \"sndplay\" play-sound"
 	input string? if
-		input find-file to input
-		input unless
+		input find-file dup unless
+			drop
 			'no-such-file
 			    #( "%s: %s" get-func-name input ) fth-throw
+		else
+			to input
 		then
 	else
 		input mus-output? if
@@ -795,29 +830,34 @@ defer ws-play-it
 			*output* mus-output? if
 				*output* mus-file-name
 			else
-				*clm-file-name*
+				#f
 			then
 		then to input
 	then
-	verbose if
-		input snd-info
+	input if
+		verbose if
+			input snd-info
+		then
+		#w{} :output input ws-set! :player player ws-set! ws-play
 	then
-	#w{} :output input ws-set! :player player ws-set! ws-play-it
-	#f
-;
-
-: play-sound <{ :key verbose *clm-verbose* player *clm-player*
-    :optional input *clm-file-name* -- }>
-	doc" Play sound file INPUT.\n\
-\"bell.snd\" :verbose #t play-sound\n\
-\"bell.snd\" :player \"sndplay\" play-sound"
-	:verbose verbose :player player input (play-sound) drop
 ;
 
 'snd provided? [unless]
-	<'> (play-sound) alias play
+	: play ( keyword-args :optional obj -- f )
+		:start		#f get-optkey drop
+		:end		#f get-optkey drop
+		:channel	#f get-optkey drop
+		:edit-position	#f get-optkey drop
+		:out-channel	#f get-optkey drop
+		:with-sync	#f get-optkey drop
+		:wait		#f get-optkey drop
+		:stop		#f get-optkey drop
+		:srate		#f get-optkey drop
+		:channels	#f get-optkey drop
+		0 *clm-file-name* get-optarg #f #f play-sound
+		#f
+	;
 [then]
-<'> play alias ws-play
 
 : clm-mix <{ infile :key
     output #f
@@ -946,7 +986,7 @@ hide
 	( ws ) :old-file-buffer-size	mus-file-buffer-size	ws-set!
 	( ws ) :old-array-print-length	mus-array-print-length	ws-set!
 	( ws ) :old-clipped		mus-clipping		ws-set!
-	( ws ) :old-srate		mus-srate		ws-set!
+	( ws ) :old-srate		mus-srate f>s		ws-set!
 	( ws ) :old-locsig-type		locsig-type		ws-set!
 	( ws ) :old-*output*		*output*		ws-set!
 	( ws ) :old-*reverb*		*reverb*		ws-set!
@@ -1024,23 +1064,34 @@ set-current
 \ ;
 \ <'> play-3-times to *clm-player*
 
-: (ws-play-it) { ws -- }
+: (ws-play) { ws -- }
 	ws :output ws-ref { output }
 	ws :player ws-ref { player }
 	player word? if
-		player #( output ) run-proc
+		player #( output ) run-proc drop
 	else
-		player string? unless
+		player unless
 			"sndplay" to player
 		then
-		'snd provided? if
-			output find-file :wait #t play
+		player string? if
+			"%s %s" '( player output ) string-format { cmd }
+			cmd file-system unless
+				'system-error
+				    #( "%s: can't execute %S (exit %d)"
+					get-func-name
+					cmd
+					exit-status ) fth-throw
+			then
 		else
-			"%s %s" '( player output ) string-format file-system
-		then drop
+			'snd provided? if
+				output find-file :wait #t play drop
+			else
+				"no player found for %s" '( output ) fth-warning
+			then
+		then
 	then
 ;
-<'> (ws-play-it) is ws-play-it
+<'> (ws-play) is ws-play
 
 : ws-output ( ws -- fname )
 	:output ws-ref
@@ -1142,18 +1193,6 @@ set-current
 	then
 ;
 
-: ws-file-name { gen -- name }
-	gen sound? if
-		gen file-name
-	else
-		gen mus-generator? if
-			gen mus-file-name
-		else
-			gen object->string
-		then
-	then
-;
-
 'snd provided? [if]
 	: ws-close-snd { fname -- }
 		fname 0 find-sound { snd }
@@ -1170,45 +1209,33 @@ set-current
 		gen sound? if
 			gen save-sound drop
 			gen close-sound drop
-		else
-			gen mus-output? if
-				gen mus-close drop
-			then
 		then
 	else
-		gen ws-file-name ws-close-snd
+		gen file-name ws-close-snd
 		gen mus-close drop
 	then
 ;
 
-: ws-before-reverb { decay --  }
+: ws-before-reverb { --  }
 	*clm-to-snd* if
-		\ *OUTPUT*:
-		\ was SOUND becomes VCT for reverb functions and outa
-		\ reverted in ws-after-reverb
 		*output* save-sound drop
-		*reverb* close-sound drop
-		0 #f *output* 0 #f channel->vct { v }
-		v vct-length decay seconds->samples + 0.0 make-vct to *output*
-		v each { y }
-			*output* i y vct-set! drop
-		end-each
+		*reverb* save-sound drop
 	else
+		*reverb* mus-file-name { revout }
 		*reverb* mus-close drop
+		revout undef make-file->sample to *reverb*
+		*reverb* file->sample? unless
+			'with-sound-error
+			    #( "%s: can't open %s" get-func-name revout )
+			    fth-throw
+		then
 	then
 ;
 
-: ws-after-reverb { fname -- }
-	*clm-to-snd* if
-		fname 0 find-sound { snd }
-		*output* vct-length { len }
-		*output* 0 len snd 0 #f "" vct->channel drop
-		snd save-sound drop
-		snd update-sound drop
-		snd to *output*
+: ws-after-reverb { -- }
+	*clm-to-snd* unless
+		*reverb* mus-close drop
 	then
-	fname ws-close-snd
-	*reverb* ws-close-sound
 ;
 
 : ws-reset-handler <{ retval -- }>
@@ -1288,18 +1315,12 @@ set-current
 	\ compute ws body
 	body-xt execute
 	reverb-xt if
-		ws :decay-time ws-ref ws-before-reverb
-		revout undef make-file->sample to *reverb*
-		*reverb* file->sample? unless
-			'with-sound-error
-			    #( "%s: can't open %s" get-func-name revout )
-			    fth-throw
-		then
+		ws :decay-time ws-ref to *decay-time*
+		ws-before-reverb
 		\ compute ws reverb
 		\ push reverb arguments on stack
 		ws :reverb-data ws-ref each end-each reverb-xt execute
-		output ws-after-reverb
-		*reverb* ws-close-sound
+		ws-after-reverb
 	then
 	*output* ws-close-sound
 	ws :timer ws-ref stop-timer
@@ -1311,6 +1332,7 @@ set-current
 	then
 	reverb-xt if
 		ws :delete-reverb ws-ref if
+			*reverb* ws-close-sound
 			revout file-delete
 		then
 	then
@@ -1321,7 +1343,7 @@ set-current
 		ws ws-scaled-by
 	then
 	ws :play ws-ref if
-		ws ws-play-it
+		ws ws-play
 	then
 	ws ws-after-output ( ws )
 ;
