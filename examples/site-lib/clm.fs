@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/21 07:02:50
+\ Changed: 17/12/22 07:53:07
 \
-\ @(#)clm.fs	1.133 12/21/17
+\ @(#)clm.fs	1.134 12/22/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -37,15 +37,15 @@
 \ ;event		( -- )
 \
 \ find-file		( file -- fname|#f )
-\ snd-info		( output :key reverb-file-name scaled? timer -- )
+\ snd-info		( output keyword-args -- )
 \
-\ play-sound		( :key verbose player :optional input -- )
+\ play-sound		( :optional input verbose player -- )
 \
 \ clm-mix		( ifile keyword-args -- )
 \ ws-output		( ws -- fname )
 \ with-sound		( body-xt keyword-args -- ws )
 \ clm-load		( fname keyword-args -- ws )
-\ with-current-sound	( body-xt :key offset scaled-to scaled-by -- )
+\ with-current-sound	( body-xt keyword-args -- )
 \ scaled-to		( body-xt scl -- )
 \ scaled-by		( body-xt scl -- )
 \ with-offset		( body-xt secs -- )
@@ -56,20 +56,20 @@
 \ simp			( star dur freq amp -- )
 \ src-simp		( start dur amp sr sr-env fname -- )
 \ conv-simp		( start dur filt fname amp -- )
-\ arpeggio		( start dur freq amp :key ampenv offset -- )
+\ arpeggio		( start dur freq amp keyword-args -- )
 \
 \ from generators.scm:
 \ make-waveshape	( :optional freq parts wave size -- )
 \ waveshape		( gen :optional index fm -- val )
 \ waveshape?		( obj -- f )
 \ partials->waveshape	( part :optional size -- wave )
-\ make-sum-of-sines	( :key sines frequency initial-phase -- gen )
+\ make-sum-of-sines	( keyword-args -- gen )
 \ sum-of-sines		( gen :optional fm -- val )
 \ sum-of-sines?		( obj -- f )
-\ make-sum-of-cosines	( :key cosines frequency initial-phase -- gen )
+\ make-sum-of-cosines	( keyword-args -- gen )
 \ sum-of-cosines	( gen :optional fm -- val )
 \ sum-of-cosines?	( obj -- f )
-\ make-sine-summation	( :key frequency initial-phase n a ratio -- gen )
+\ make-sine-summation	( keyword-args -- gen )
 \ sine-summation	( gen :optional fm -- val )
 \ sine-summation?	( obj -- f )
 
@@ -327,7 +327,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/21"	value *clm-version*
+"fth 2017/12/22"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -392,7 +392,6 @@ clm-table-size			value *clm-table-size*
 0.05			value *reverbamount*
 0			value *start*
 #f			value *outgen*
-#f			value *revgen*
 
 'snd provided? [if]
 	<'> snd-tempnam alias fth-tempnam
@@ -494,27 +493,25 @@ defer (run) ( start dur vars -- end beg )
 
 defer (run-instrument) ( start dur args vars -- end beg )
 
-: prepare-degree { args -- deg }
-	args :channels hash-ref *channels* || { chans }
-	chans 1 = if
-		1.0
-	else
-		chans 2 = if
-			90.0 random
+: f0<>|| { res def -- val }
+	res number? if
+		res f0<> if
+			res
 		else
-			360.0 random
+			def
 		then
-	then ( deg )
+	else
+		def
+	then
 ;
 
 : (run-snd-instrument) { start dur args vars -- end beg }
 	args hash? unless
 		#{} to args
 	then
-	args prepare-degree { deg }
-	args :degree	hash-ref deg	|| to *degree*
-	args :distance	hash-ref 1.0	|| to *distance*
-	args :reverb	hash-ref 0.05	|| to *reverbamount*
+	args :degree	hash-ref 45.0	f0<>|| to *degree*
+	args :distance	hash-ref 1.0	f0<>|| to *distance*
+	args :reverb	hash-ref 0.05	f0<>|| to *reverbamount*
 	start s>f seconds->samples to *start*
 	dur   s>f seconds->samples 0.0 make-vct to *outgen*
 	start dur vars (run-snd) ( end beg )
@@ -524,10 +521,9 @@ defer (run-instrument) ( start dur args vars -- end beg )
 	args hash? unless
 		#{} to args
 	then
-	args prepare-degree { deg }
-	:degree		args :degree	hash-ref deg		||
-	:distance	args :distance	hash-ref *distance*	||
-	:reverb		args :reverb	hash-ref *reverbamount*	||
+	:degree		args :degree	hash-ref 45.0		f0<>||
+	:distance	args :distance	hash-ref *distance*	f0<>||
+	:reverb		args :reverb	hash-ref *reverbamount*	f0<>||
 	:channels	args :channels	hash-ref *channels*	||
 	:output		args :output	hash-ref *output*	||
 	:revout		args :revout	hash-ref *reverb*	||
@@ -557,60 +553,43 @@ defer (end-run-finish) ( -- )
 	*output*        { snd }
 	0               { chn }
 	snd channels    { chans }
-	*reverb*	{ rsnd }
 	*outgen*        { v }
 	*degree*        { frac }
 	*distance*      { scl }
 	scl             { s }
-	rsnd sound? if
-		v vct-copy *reverbamount* vct-scale!
-	else
-		#f
-	then		{ rv }
 	chans 1 = if
 		v scl vct-scale! beg snd chn #f undef mix-vct drop
 	else
+		*degree* 90.0 f/ to frac
+		scl 1.0 frac f- f*	{ left }
+		scl frac f*		{ right }
 		chans 2 = if
-			*degree* 90.0 f/ to frac
-			frac f0= if 1.0 to frac then
-			scl frac fnegate f* to s
 			0 to chn
-			v vct-copy
-			s vct-scale! beg snd chn #f undef mix-vct drop
-			scl frac f* to s
+			v vct-copy left vct-scale!
+			beg snd chn #f undef mix-vct drop
 			1 to chn
-			v
-			s vct-scale! beg snd chn #f undef mix-vct drop
+			v right vct-scale!
+			beg snd chn #f undef mix-vct drop
 		else
-			*degree* 360.0 f/ to frac
-			frac f0= if 1.0 to frac then
-			scl frac f* to s
 			chans 1 do i to chn
-				v vct-copy
-				s vct-scale! beg snd chn #f undef mix-vct drop
+				i 2 mod if
+					right
+				else
+					left
+				then to s
+				v vct-copy s vct-scale!
+				beg snd chn #f undef mix-vct drop
 			loop
 			0 to chn
-			v
-			s vct-scale! beg snd chn #f undef mix-vct drop
+			right to s
+			v s vct-scale!
+			beg snd chn #f undef mix-vct drop
 		then
 	then
-	rv vct? if
-		rsnd channels { rchns }
-		rchns 1 = if
-			0 to chn
-			rv beg rsnd chn #f undef mix-vct drop
-		else
-			rchns 2 = if
-				0 to chn
-				rv beg rsnd chn #f undef mix-vct drop
-				1 to chn
-				rv beg rsnd chn #f undef mix-vct drop
-			else
-				rchns 0 do i to chn
-					rv beg rsnd chn #f undef mix-vct drop
-				loop
-			then
-		then
+	*reverb* sound? if
+		v vct-length { len }
+		v *reverbamount* vct-scale!
+		beg len *reverb* 0 #f undef vct->channel drop
 	then
 ;
 set-current
@@ -651,28 +630,243 @@ set-current
 	postpone loop
 	postpone (end-run-finish)
 ; immediate compile-only
-
-: set-to-snd ( flag -- )
-	( flag ) 'snd provided? && if
-		#t to *clm-to-snd*
-		<'> (run-snd)			[is] (run)
-		<'> (run-snd-instrument)	[is] (run-instrument)
-		<'> (end-snd-run)		[is] (end-run)
-		<'> (end-snd-run-finish)	[is] (end-run-finish)
-	else
-		#f to *clm-to-snd*
-		<'> (run-clm)			[is] (run)
-		<'> (run-clm-instrument)	[is] (run-instrument)
-		<'> (end-clm-run)		[is] (end-run)
-		<'> noop			[is] (end-run-finish)
-	then
-;
 previous
+
+defer ws-outa		( idx val gen -- )
+defer ws-outb		( idx val gen -- )
+defer ws-outc		( idx val gen -- )
+defer ws-outd		( idx val gen -- )
+defer ws-out-any	( idx val chn gen -- )
+
+\ XXX: ws-snd-outX
+\ We vct-set sample in a fresh vct, later vct-mix'ed in the sound.
+\ No need for vct-ref val f+ vct-set here.
+
+: ws-snd-out-any { idx val chn gen -- }
+	swap array-ref rot rot vct-set! drop
+;
+
+: ws-snd-outa ( idx val gen -- )
+	0 array-ref rot rot vct-set! drop
+;
+
+: ws-snd-outb ( idx val gen -- )
+	1 array-ref rot rot vct-set! drop
+;
+
+: ws-snd-outc ( idx val gen -- )
+	2 array-ref rot rot vct-set! drop
+;
+
+: ws-snd-outd ( idx val gen -- )
+	3 array-ref rot rot vct-set! drop
+;
+
+: ws-clm-out-any ( idx val chn gen -- )	out-any drop ;
+: ws-clm-outa	( idx val gen -- )	outa drop ;
+: ws-clm-outb	( idx val gen -- )	outb drop ;
+: ws-clm-outc	( idx val gen -- )	outc drop ;
+: ws-clm-outd	( idx val gen -- )	outd drop ;
+
+\ XXX: *clm-to-snd* == #t   idx gen ina etc.
+\ If gen is a vct, ina, inb, and in-any all return the same value.
+\ If gen is an array, it should be an array of numbers not of vcts.
+\
+\ #( vct( 0 1 2 ) vct( 2 1 0 ) ) value gen
+\ builds not the expected stereo gen
+\ 0 gen inb => garbage ( first vct taken as double )
+
+<'> ina		alias ws-ina
+<'> inb		alias ws-inb
+<'> in-any	alias ws-in-any
 
 : reverb-info { caller in-chans out-chans -- }
 	"%s on %d in and %d out channels"
 	    #( caller in-chans out-chans ) clm-message
 ;
+
+hide
+defer (run-reverb) ( dur vars -- end beg )
+
+: rr-before-reverb { dur vars -- end beg }
+	0.0 dur vars ws-info ( start dur ) times->samples { end beg }
+	*verbose* if
+		*clm-current-instrument* *reverb* channels *output* channels
+		    reverb-info
+	then
+	end beg
+;
+
+#f value old-*output*
+#f value old-*reverb*
+
+: (run-snd-reverb) { dur vars -- end beg }
+	dur vars rr-before-reverb { end beg }
+	*output* save-sound drop
+	*output* to old-*output*
+	*output* channels make-array map!
+		beg end *output* i #f channel->vct
+	end-map to *output*
+	*reverb* save-sound drop
+	*reverb* to old-*reverb*
+	beg end *reverb* 0 #f channel->vct to *reverb*
+	\ *output* is Array of Vcts
+	\ *reverb* is Vct
+	beg to *start*
+	end 0
+;
+
+: (run-clm-reverb) { dur vars -- end beg }
+	dur vars rr-before-reverb { end beg }
+	*reverb* to old-*reverb*
+	*reverb* mus-file-name { revfile }
+	revfile undef make-file->sample to *reverb*
+	*reverb* file->sample? unless
+		'with-sound-error
+		    #( "%s: can't open %s" get-func-name revfile ) fth-throw
+	then
+	\ *output* is sample->file (mus-output)
+	\ *reverb* is file->sample (mus-input)
+	beg to *start*
+	end 0
+;
+
+: (run-reverb-inval-1) ( idx -- in-val )
+	*reverb* ina
+;
+
+: (end-run-reverb-1) ( samp idx -- )
+	swap *output* ws-outa
+;
+
+: (end-run-reverb-2) { samp1 samp2 idx -- }
+	idx samp1 *output* ws-outa
+	idx samp2 *output* ws-outb
+;
+
+: (end-run-reverb-4) { samp1 samp2 samp3 samp4 idx -- }
+	idx samp1 *output* ws-outa
+	idx samp2 *output* ws-outb
+	idx samp3 *output* ws-outc
+	idx samp4 *output* ws-outd
+;
+
+defer (end-run-reverb-finish) ( -- )
+
+: (end-snd-run-reverb-finish) ( -- )
+	*output* each ( v )
+		*start* old-*output* i #f undef mix-vct drop
+	end-each
+	old-*output* to *output*
+	old-*reverb* to *reverb*
+;
+
+: (end-clm-run-reverb-finish) ( -- )
+	*output* mus-close drop
+	*reverb* mus-close drop
+	old-*reverb* to *reverb*
+;
+set-current
+
+\ RUN-REVERB/END-RUN-REVERB-OUT-1|2|4 for use with with-sound reverb
+\ instruments.  Requires an opened *output* (file->sample or sound)
+\ and an opened *reverb* generator or sound.  The inval is the sample
+\ from the reverb file, the out samples are written to the output
+\ file.
+\
+\ run-reverb ( dur -- inval )
+\ end-run-reverb-out-1 ( samp -- )
+\ end-run-reverb-out-2 ( samp1 samp2 -- )
+\
+\ reverb for mono output file:
+\ 10.0 run-reverb { inval }
+\	inval 2.0 f*
+\ end-run-reverb-out-1
+\
+\ reverb for stereo output file:
+\ 10.0 run-reverb { inval }
+\	inval 2.0 f* ( samp1 )
+\	inval 4.0 f* ( samp1 samp2 )
+\ end-run-reverb-out-2
+\
+\ reverb for quad output file:
+\ 10.0 run-reverb { inval }
+\	inval 2.0 f* ( samp1 )
+\	inval 4.0 f* ( samp1 samp2 )
+\	inval 2.0 f* ( samp1 samp2 samp3 )
+\	inval 4.0 f* ( samp1 samp2 samp3 samp4 )
+\ end-run-reverb-out-4
+
+: run-reverb ( dur -- in-val )
+	postpone local-variables
+	postpone (run-reverb)
+	postpone ?do
+	postpone r@
+	postpone (run-reverb-inval-1)
+; immediate compile-only
+
+: end-run-reverb ( -- )
+	postpone loop
+	postpone (end-run-reverb-finish)
+; immediate compile-only
+
+: end-run-reverb-out-1 ( samp -- )
+	postpone r@
+	postpone (end-run-reverb-1)
+	postpone loop
+	postpone (end-run-reverb-finish)
+; immediate compile-only
+
+: end-run-reverb-out-2 ( samp1 samp2 - )
+	postpone r@
+	postpone (end-run-reverb-2)
+	postpone loop
+	postpone (end-run-reverb-finish)
+; immediate compile-only
+
+: end-run-reverb-out-4 ( samp1 samp2 samp3 samp4 - )
+	postpone r@
+	postpone (end-run-reverb-4)
+	postpone loop
+	postpone (end-run-reverb-finish)
+; immediate compile-only
+
+: set-to-snd ( f -- )
+	( f ) 'snd provided? && if
+		#t to *clm-to-snd*
+		\ RUN-INSTRUMENT
+		<'> (run-snd)			[is] (run)
+		<'> (run-snd-instrument)	[is] (run-instrument)
+		<'> (end-snd-run)		[is] (end-run)
+		<'> (end-snd-run-finish)	[is] (end-run-finish)
+		\ RUN-REVERB
+		<'> (run-snd-reverb)		[is] (run-reverb)
+		<'> (end-snd-run-reverb-finish)	[is] (end-run-reverb-finish)
+		\ OUT-ANY
+		<'> ws-snd-outa			[is] ws-outa
+		<'> ws-snd-outb			[is] ws-outb
+		<'> ws-snd-outc			[is] ws-outc
+		<'> ws-snd-outd			[is] ws-outd
+		<'> ws-snd-out-any		[is] ws-out-any
+	else
+		#f to *clm-to-snd*
+		\ RUN-INSTRUMENT
+		<'> (run-clm)			[is] (run)
+		<'> (run-clm-instrument)	[is] (run-instrument)
+		<'> (end-clm-run)		[is] (end-run)
+		<'> noop			[is] (end-run-finish)
+		\ RUN-REVERB
+		<'> (run-clm-reverb)		[is] (run-reverb)
+		<'> (end-clm-run-reverb-finish)	[is] (end-run-reverb-finish)
+		\ OUT-ANY
+		<'> ws-clm-outa			[is] ws-outa
+		<'> ws-clm-outb			[is] ws-outb
+		<'> ws-clm-outc			[is] ws-outc
+		<'> ws-clm-outd			[is] ws-outd
+		<'> ws-clm-out-any		[is] ws-out-any
+	then
+;
+previous
 
 \ === Helper functions for instruments ===
 hide
@@ -1216,26 +1410,22 @@ set-current
 	then
 ;
 
-: ws-before-reverb { --  }
-	*clm-to-snd* if
-		*output* save-sound drop
-		*reverb* save-sound drop
+: ws-framples { gen -- len }
+	0 { len }
+	gen sound? if
+		gen #f #f framples to len
 	else
-		*reverb* mus-file-name { revout }
-		*reverb* mus-close drop
-		revout undef make-file->sample to *reverb*
-		*reverb* file->sample? unless
-			'with-sound-error
-			    #( "%s: can't open %s" get-func-name revout )
-			    fth-throw
+		#f { cont }
+		gen mus-output? if
+			#t to cont
+			gen mus-close drop
+		then
+		gen file-name mus-sound-framples to len
+		cont if
+			gen file-name continue-sample->file to gen
 		then
 	then
-;
-
-: ws-after-reverb { -- }
-	*clm-to-snd* unless
-		*reverb* mus-close drop
-	then
+	len
 ;
 
 : ws-reset-handler <{ retval -- }>
@@ -1316,11 +1506,13 @@ set-current
 	body-xt execute
 	reverb-xt if
 		ws :decay-time ws-ref to *decay-time*
-		ws-before-reverb
+		*reverb* mus-output? if
+			*reverb* mus-close drop
+		then
 		\ compute ws reverb
 		\ push reverb arguments on stack
 		ws :reverb-data ws-ref each end-each reverb-xt execute
-		ws-after-reverb
+		*reverb* ws-close-sound
 	then
 	*output* ws-close-sound
 	ws :timer ws-ref stop-timer
@@ -1332,7 +1524,6 @@ set-current
 	then
 	reverb-xt if
 		ws :delete-reverb ws-ref if
-			*reverb* ws-close-sound
 			revout file-delete
 		then
 	then
