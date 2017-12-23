@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/22 07:53:07
+\ Changed: 17/12/23 05:26:21
 \
-\ @(#)clm.fs	1.134 12/22/17
+\ @(#)clm.fs	1.136 12/23/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -20,7 +20,6 @@
 \ bpm->seconds		( bpm -- secs )
 \ rhythm->seconds	( rhy -- secs )
 \ 
-\ tempnam		( -- name )
 \ fth-tempnam		( -- name )
 \ make-default-comment	( -- str )
 \ times->samples	( start dur -- len beg )
@@ -30,7 +29,15 @@
 \ run			( start dur -- )
 \ run-instrument	( start dur locsig-args -- )
 \ end-run		( sample -- )
+\ ws-out[a-c]		( idx val gen -- )
+\ ws-out-any		( idx val chn gen -- )
 \ reverb-info		( caller in-chans out-chans -- )
+\ run-reverb		( dur -- in-val )
+\ end-run-reverb	( -- )
+\ end-run-reverb-out-1	( samp -- )
+\ end-run-reverb-out-2	( samp1 samp2 -- )
+\ end-run-reverb-out-4	( samp1 samp2 samp3 samp4 -- )
+\ set-to-snd		( f -- )
 \ instrument:		( "name" -- )
 \ ;instrument		( -- )
 \ event:		( "name" -- )
@@ -40,16 +47,20 @@
 \ snd-info		( output keyword-args -- )
 \
 \ play-sound		( :optional input verbose player -- )
-\
-\ clm-mix		( ifile keyword-args -- )
+\ clm-mix		( infile keyword-args -- )
+\ ws-play		( ws -- )
 \ ws-output		( ws -- fname )
+\ ws-framples		( gen -- len )
+\ ws-close-snd		( fname -- )
+\ ws-is-output?		( gen -- f )
+\ with-sound-main	( body-xt ws -- ws )
 \ with-sound		( body-xt keyword-args -- ws )
 \ clm-load		( fname keyword-args -- ws )
 \ with-current-sound	( body-xt keyword-args -- )
 \ scaled-to		( body-xt scl -- )
 \ scaled-by		( body-xt scl -- )
 \ with-offset		( body-xt secs -- )
-\ with-mix		( body-str|nil args fname start -- )
+\ with-mix		( body-str args fname start -- )
 \ sound-let		( ws-xt-lst body-xt -- )
 \
 \ example instruments:
@@ -196,11 +207,11 @@ hide
 0.25 value *clm-beat*
 set-current
 
-: now@ ( -- secs )   *clm-current-time* ;
-: now! ( secs -- )   to *clm-current-time* ;
-: step ( secs -- )   now@ f+ now! ;
-: tempo@ ( -- secs )   *clm-tempo* ;
-: tempo! ( secs -- )   to *clm-tempo* ;
+: now@ ( -- secs )	*clm-current-time* ;
+: now! ( secs -- )	to *clm-current-time* ;
+: step ( secs -- )	now@ f+ now! ;
+: tempo@ ( -- secs )	*clm-tempo* ;
+: tempo! ( secs -- )	to *clm-tempo* ;
 previous
 
 \ --- Pitches ---
@@ -302,8 +313,8 @@ set-current
 previous
 
 \ --- Note length ---
-: bpm->seconds ( bpm -- secs )   60.0 swap f/ ;
-: rhythm->seconds ( rhy -- secs )   4.0 tempo@ bpm->seconds f* f* ;
+: bpm->seconds ( bpm -- secs )		60.0 swap f/ ;
+: rhythm->seconds ( rhy -- secs )	4.0 tempo@ bpm->seconds f* f* ;
 
 hide
 : notelength ( scale "name" --; self -- r )
@@ -327,7 +338,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/22"	value *clm-version*
+"fth 2017/12/23"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -1270,17 +1281,16 @@ set-current
 		player string? if
 			"%s %s" '( player output ) string-format { cmd }
 			cmd file-system unless
-				'system-error
-				    #( "%s: can't execute %S (exit %d)"
-					get-func-name
-					cmd
-					exit-status ) fth-throw
+				    "%s: can't execute %S (exit %d)"
+					'( get-func-name cmd
+					   exit-status ) fth-warning
 			then
 		else
 			'snd provided? if
 				output find-file :wait #t play drop
 			else
-				"no player found for %s" '( output ) fth-warning
+				"%s: no player found for %s"
+				    '( get-func-name output ) fth-warning
 			then
 		then
 	then
@@ -1291,6 +1301,45 @@ set-current
 	:output ws-ref
 ;
 
+: ws-framples { gen -- len }
+	0 { len }
+	gen sound? if
+		gen #f #f framples to len
+	else
+		#f { cont }
+		gen mus-output? if
+			#t to cont
+			gen mus-close drop
+		then
+		gen file-name mus-sound-framples to len
+		cont if
+			gen file-name continue-sample->file to gen
+		then
+	then
+	len
+;
+
+'snd provided? [if]
+	: ws-close-snd { fname -- }
+		fname 0 find-sound { snd }
+		snd sound? if
+			snd close-sound drop
+		then
+	;
+[else]
+	: ws-close-snd ( fname -- ) drop ;
+[then]
+
+: ws-is-output? ( gen -- f )
+	*clm-to-snd* if
+		sound?
+	else
+		mus-output?
+	then
+;
+previous
+
+hide
 : with-sound-default-args ( keyword-args -- ws )
 	#() to *clm-instruments*
 	#w{} { ws }
@@ -1353,14 +1402,6 @@ set-current
 	ws
 ;
 
-: ws-is-output? ( gen -- f )
-	*clm-to-snd* if
-		sound?
-	else
-		mus-output?
-	then
-;
-
 : ws-is-sound? ( gen -- f )
 	*clm-to-snd* if
 		sound?
@@ -1387,17 +1428,6 @@ set-current
 	then
 ;
 
-'snd provided? [if]
-	: ws-close-snd { fname -- }
-		fname 0 find-sound { snd }
-		snd sound? if
-			snd close-sound drop
-		then
-	;
-[else]
-	: ws-close-snd ( fname -- ) drop ;
-[then]
-
 : ws-close-sound { gen -- }
 	*clm-to-snd* if
 		gen sound? if
@@ -1408,24 +1438,6 @@ set-current
 		gen file-name ws-close-snd
 		gen mus-close drop
 	then
-;
-
-: ws-framples { gen -- len }
-	0 { len }
-	gen sound? if
-		gen #f #f framples to len
-	else
-		#f { cont }
-		gen mus-output? if
-			#t to cont
-			gen mus-close drop
-		then
-		gen file-name mus-sound-framples to len
-		cont if
-			gen file-name continue-sample->file to gen
-		then
-	then
-	len
 ;
 
 : ws-reset-handler <{ retval -- }>
@@ -1538,11 +1550,11 @@ set-current
 	then
 	ws ws-after-output ( ws )
 ;
+set-current
 
 : with-sound-main ( body-xt ws -- ws )
 	<'> (with-sound-main) #t <'> ws-reset-handler fth-catch drop ( ws )
 ;
-previous
 
 \ Usage: <'> resflt-test with-sound drop
 \        <'> resflt-test :play #f :channels 2 with-sound .g
@@ -1624,6 +1636,7 @@ Takes all arguments from current with-sound except \
 	output :output-frame offset seconds->samples clm-mix
 	output file-delete
 ;
+previous
 
 : scaled-to <{ body-xt scl -- }>
 	doc" Must be called within with-sound body.  \
@@ -1728,8 +1741,7 @@ lambda: ( -- )\n\
 	doc" Requires an array of arrays WS-XT-LST with with-sound args \
 and xts, and a BODY-XT.  \
 The BODY-XT must take WS-XT-LST length arguments which are tempfile names.  \
-with-sound will be feed with ws-args und ws-xts from WS-XT-LST.  \
-:output is set to tempnam which will be on stack before executing BODY-XT.  \
+with-sound gets ws-args und ws-xts from WS-XT-LST.  \
 These temporary files will be deleted after execution of BODY-XT.\n\
 \\ The WS-XT-LST:\n\
 '( '( '( :reverb <'> jc-reverb ) 0.0 1 220 0.2 <'> fm-violin )\n\
@@ -1860,7 +1872,7 @@ instrument: simp { start dur freq amp -- }
 	end-run
 ;instrument
 
-: run-test ( -- ) 0.0 1.0 330.0 0.5 simp ;
+: run-test ( -- )	0.0 1.0 330.0 0.5 simp ;
 
 : input-fn { gen -- prc; dir self -- r }
 	1 proc-create ( prc )
@@ -1921,79 +1933,6 @@ event: inst-test ( -- )
 	1.2 1.0 vct( 0.5 0.2 0.1 0.05 0 0 0 0 ) "fyow.snd" 1.0 conv-simp
 	2.4 1.0 "pistol.snd" "fyow.snd" 0.2 conv-simp
 ;event
-
-\ generators.scm
-: make-waveshape <{ :optional
-    freq *clm-default-frequency*
-    parts #( 1 1 )
-    wave #f
-    size *clm-table-size* -- gen }>
-	doc" See make-polyshape."
-	:frequency freq
-	    wave if
-		    :coeffs wave
-	    else
-		    :partials parts
-	    then make-polyshape
-;
-
-<'> polyshape  alias waveshape  ( gen :optional index 1.0 fm 0.0 -- val )
-<'> polyshape? alias waveshape? ( obj -- f )
-<'> waveshape  <'> polyshape  help-ref  help-set!
-<'> waveshape? <'> polyshape? help-ref  help-set!
-
-: partials->waveshape <{ partials :optional size *clm-table-size* -- wave }>
-	doc" See partials->polynomial."
-	partials partials->polynomial ( wave )
-;
-
-\ snd10.scm
-: make-sum-of-sines <{ :key
-    sines 1
-    frequency 0.0
-    initial-phase 0.0 -- gen }>
-	doc" See make-nsin."
-	:frequency frequency :n sines make-nsin { gen }
-	gen initial-phase set-mus-phase drop
-	gen
-;
-
-<'> nsin  alias sum-of-sines  ( gen :optional fm 0.0 -- val )
-<'> nsin? alias sum-of-sines? ( obj -- f )
-<'> sum-of-sines  <'> nsin  help-ref  help-set!
-<'> sum-of-sines? <'> nsin? help-ref  help-set!
-
-: make-sum-of-cosines <{ :key
-    cosines 1
-    frequency 0.0
-    initial-phase 0.0 -- gn }>
-	doc" See make-ncos."
-	:frequency frequency :n cosines make-ncos { gen }
-	gen initial-phase set-mus-phase drop
-	gen
-;
-
-<'> ncos  alias sum-of-cosines  ( gen :optional fm 0.0 -- val )
-<'> ncos? alias sum-of-cosines? ( obj -- f )
-<'> sum-of-cosines  <'> ncos  help-ref  help-set!
-<'> sum-of-cosines? <'> ncos? help-ref  help-set!
-
-: make-sine-summation <{ :key
-    frequency 0.0
-    initial-phase 0.0
-    n 1
-    a 0.5
-    ratio 1.0 -- gen }>
-	doc" See make-nrxysin."
-	:frequency frequency :ratio ratio :n n :r a make-nrxysin { gen }
-	gen initial-phase set-mus-phase drop
-	gen
-;
-
-<'> nrxysin  alias sine-summation  ( gen :optional fm 0.0 -- val )
-<'> nrxysin? alias sine-summation? ( obj -- f )
-<'> sine-summation  <'> nrxysin  help-ref  help-set!
-<'> sine-summation? <'> nrxysin? help-ref  help-set!
 
 'snd provided? [if]
 	instrument: snd-arpeggio
@@ -2068,5 +2007,78 @@ instrument: arpeggio <{ start dur freq amp :key
 event: arpeggio-test ( -- )
 	0 10 65 0.5 arpeggio
 ;event
+
+\ generators.scm
+: make-waveshape <{ :optional
+    freq *clm-default-frequency*
+    parts #( 1 1 )
+    wave #f
+    size *clm-table-size* -- gen }>
+	doc" See make-polyshape."
+	:frequency freq
+	    wave if
+		    :coeffs wave
+	    else
+		    :partials parts
+	    then make-polyshape
+;
+
+<'> polyshape  alias waveshape  ( gen :optional index 1.0 fm 0.0 -- val )
+<'> polyshape? alias waveshape? ( obj -- f )
+<'> waveshape  <'> polyshape  help-ref  help-set!
+<'> waveshape? <'> polyshape? help-ref  help-set!
+
+: partials->waveshape <{ partials :optional size *clm-table-size* -- wave }>
+	doc" See partials->polynomial."
+	partials partials->polynomial ( wave )
+;
+
+\ snd10.scm
+: make-sum-of-sines <{ :key
+    sines 1
+    frequency 0.0
+    initial-phase 0.0 -- gen }>
+	doc" See make-nsin."
+	:frequency frequency :n sines make-nsin { gen }
+	gen initial-phase set-mus-phase drop
+	gen
+;
+
+<'> nsin  alias sum-of-sines  ( gen :optional fm 0.0 -- val )
+<'> nsin? alias sum-of-sines? ( obj -- f )
+<'> sum-of-sines  <'> nsin  help-ref  help-set!
+<'> sum-of-sines? <'> nsin? help-ref  help-set!
+
+: make-sum-of-cosines <{ :key
+    cosines 1
+    frequency 0.0
+    initial-phase 0.0 -- gn }>
+	doc" See make-ncos."
+	:frequency frequency :n cosines make-ncos { gen }
+	gen initial-phase set-mus-phase drop
+	gen
+;
+
+<'> ncos  alias sum-of-cosines  ( gen :optional fm 0.0 -- val )
+<'> ncos? alias sum-of-cosines? ( obj -- f )
+<'> sum-of-cosines  <'> ncos  help-ref  help-set!
+<'> sum-of-cosines? <'> ncos? help-ref  help-set!
+
+: make-sine-summation <{ :key
+    frequency 0.0
+    initial-phase 0.0
+    n 1
+    a 0.5
+    ratio 1.0 -- gen }>
+	doc" See make-nrxysin."
+	:frequency frequency :ratio ratio :n n :r a make-nrxysin { gen }
+	gen initial-phase set-mus-phase drop
+	gen
+;
+
+<'> nrxysin  alias sine-summation  ( gen :optional fm 0.0 -- val )
+<'> nrxysin? alias sine-summation? ( obj -- f )
+<'> sine-summation  <'> nrxysin  help-ref  help-set!
+<'> sine-summation? <'> nrxysin? help-ref  help-set!
 
 \ clm.fs ends here
