@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.216 3/2/16
+ * @(#)fth.h	1.217 12/26/17
  */
 
 #if !defined(_FTH_H_)
@@ -212,12 +212,12 @@ typedef struct {
 	FTH		_true;
 	FTH		_nil;
 	FTH		_undef;
-	bool		print_p;
-	bool		eval_p;
-	bool		hit_error_p;
-	bool		true_repl_p;
-	bool		die_on_signal_p;
-	bool		interactive_p;
+	int		print_p;
+	int		eval_p;
+	int		hit_error_p;
+	int		true_repl_p;
+	int		die_on_signal_p;
+	int		interactive_p;
 } Ficl;
 
 /* defined in misc.c */
@@ -713,13 +713,13 @@ FTH		fth_wordlist_each(bool(*func) (ficlWord *word, FTH data),
 		    FTH data);
 
 /* === numbers.c === */
-bool		fth_char_p(FTH obj);
-bool		fth_exact_p(FTH obj);
-bool		fth_fixnum_p(FTH obj);
-bool		fth_integer_p(FTH obj);
-bool		fth_number_p(FTH obj);
-bool		fth_ullong_p(FTH obj);
-bool		fth_unsigned_p(FTH obj);
+int		fth_char_p(FTH obj);
+int		fth_exact_p(FTH obj);
+int		fth_fixnum_p(FTH obj);
+int		fth_integer_p(FTH obj);
+int		fth_number_p(FTH obj);
+int		fth_ullong_p(FTH obj);
+int		fth_unsigned_p(FTH obj);
 #if HAVE_COMPLEX
 ficlComplex	fth_complex_ref(FTH x);
 #endif				/* HAVE_COMPLEX */
@@ -728,8 +728,8 @@ ficlFloat	fth_float_ref_or_else(FTH x, ficlFloat fallback);
 ficlInteger	fth_integer_ref(FTH x);
 ficlInteger	fth_int_ref(FTH x);
 ficlInteger	fth_int_ref_or_else(FTH x, ficlInteger fallback);
-bool		fth_isinf (ficlFloat f);
-bool		fth_isnan (ficlFloat f);
+int		fth_isinf (ficlFloat f);
+int		fth_isnan (ficlFloat f);
 FTH		fth_llong_copy(FTH obj);
 ficl2Integer	fth_long_long_ref(FTH x);
 FTH		fth_make_int(ficlInteger n);
@@ -775,8 +775,8 @@ FTH		fth_rationalize(FTH x, FTH err);
 #endif				/* HAVE_BN */
 FTH		fth_number_add(FTH x, FTH y);
 FTH		fth_number_div(FTH x, FTH y);
-bool		fth_number_equal_p(FTH x, FTH y);
-bool		fth_number_less_p(FTH x, FTH y);
+int		fth_number_equal_p(FTH x, FTH y);
+int		fth_number_less_p(FTH x, FTH y);
 FTH		fth_number_mul(FTH x, FTH y);
 FTH		fth_number_sub(FTH x, FTH y);
 
