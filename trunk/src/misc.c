@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.706 12/23/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.707 12/26/17";
 #endif /* not lint */
 
-#define FTH_DATE		"2017/12/23"
+#define FTH_DATE		"2017/12/26"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -75,95 +75,94 @@ const char libfth_sccsid[] = "@(#)misc.c	1.706 12/23/17";
 #define FTH_FS_LIB_PATH		FTH_SHARE_PATH "/fth-lib"
 #define FTH_SITE_FTH_PATH	FTH_SHARE_PATH "/site-fth"
 
-static bool	apropos(ficlWord *word, FTH data);
-static FTH	at_exit_each(FTH proc, FTH name);
-static void	ficl_add_feature(ficlVm *vm);
-static void	ficl_add_load_lib_path(ficlVm *vm);
-static void	ficl_add_load_path(ficlVm *vm);
-static void	ficl_at_exit(ficlVm *vm);
-static void	ficl_catch(ficlVm *vm);
-static void	ficl_config_cflags(ficlVm *vm);
-static void	ficl_config_libs(ficlVm *vm);
-static void	ficl_config_prefix(ficlVm *vm);
-static void	ficl_configure_args(ficlVm *vm);
-static void	ficl_current_time(ficlVm *vm);
-static void	ficl_date(ficlVm *vm);
-static void	ficl_dl_load(ficlVm *vm);
-static void	ficl_dot_cflags(ficlVm *vm);
-static void	ficl_dot_libs(ficlVm *vm);
-static void	ficl_dot_lversion(ficlVm *vm);
-static void	ficl_dot_prefix(ficlVm *vm);
-static void	ficl_dot_version(ficlVm *vm);
-static void	ficl_environ(ficlVm *vm);
-static void	ficl_exec(ficlVm *vm);
-static void	ficl_exit(ficlVm *vm);
-static void	ficl_features(ficlVm *vm);
-static void	ficl_fetch_paren(ficlVm *vm);
-static void	ficl_fork(ficlVm *vm);
-static void	ficl_getegid(ficlVm *vm);
-static void	ficl_getenv(ficlVm *vm);
-static void	ficl_geteuid(ficlVm *vm);
-static void	ficl_getgid(ficlVm *vm);
-static void	ficl_gethostname(ficlVm *vm);
-static void	ficl_getlogin(ficlVm *vm);
-static void	ficl_getopt(ficlVm *vm);
-static void	ficl_getopt_long(ficlVm *vm);
-static void	ficl_getpid(ficlVm *vm);
-static void	ficl_getppid(ficlVm *vm);
-static void	ficl_getservbyname(ficlVm *vm);
-static void	ficl_getservbyport(ficlVm *vm);
-static void	ficl_getuid(ficlVm *vm);
-static void	ficl_gmtime(ficlVm *vm);
-static void	ficl_include_file(ficlVm *vm);
-static void	ficl_kill(ficlVm *vm);
-static void	ficl_load_init_file(ficlVm *vm);
-static void	ficl_localtime(ficlVm *vm);
-static void	ficl_mktime(ficlVm *vm);
-static void	ficl_provided_p(ficlVm *vm);
-static void	ficl_putenv(ficlVm *vm);
-static void	ficl_raise(ficlVm *vm);
-static void	ficl_require_file(ficlVm *vm);
-static void	ficl_reset_each_paren(ficlVm *vm);
-static void	ficl_reset_map_paren(ficlVm *vm);
-static void	ficl_set_begin_paren(ficlVm *vm);
-static void	ficl_set_each_loop_paren(ficlVm *vm);
-static void	ficl_set_end_paren(ficlVm *vm);
-static void	ficl_set_map_loop_paren(ficlVm *vm);
-static void	ficl_setegid(ficlVm *vm);
-static void	ficl_seteuid(ficlVm *vm);
-static void	ficl_setgid(ficlVm *vm);
-static void	ficl_sethostname(ficlVm *vm);
-static void	ficl_setuid(ficlVm *vm);
-static void	ficl_show_memory(ficlVm *vm);
-static void	ficl_signal(ficlVm *vm);
-static void	ficl_signal_handler(ficlVm *vm);
-static void	ficl_sleep(ficlVm *vm);
-static void	ficl_stack_reset(ficlVm *vm);
-static void	ficl_store_paren(ficlVm *vm);
-static void	ficl_strftime(ficlVm *vm);
-static void	ficl_strptime(ficlVm *vm);
-static void	ficl_throw(ficlVm *vm);
-static void	ficl_time(ficlVm *vm);
-static void	ficl_time_reset(ficlVm *vm);
-static void	ficl_time_to_string(ficlVm *vm);
-static void	ficl_unshift_load_lib_path(ficlVm *vm);
-static void	ficl_unshift_load_path(ficlVm *vm);
-static void	ficl_utime(ficlVm *vm);
-static void	ficl_values_end(ficlVm *vm);
-static void	ficl_version(ficlVm *vm);
-static void	ficl_wait(ficlVm *vm);
-static void	ficl_waitpid(ficlVm *vm);
-static bool	find_in_wordlist(ficlWord *word, FTH data);
-static void	forth_pre_init(void);
+static bool 	apropos(ficlWord *word, FTH data);
+static FTH 	at_exit_each(FTH proc, FTH name);
+static void 	ficl_add_feature(ficlVm *vm);
+static void 	ficl_add_load_lib_path(ficlVm *vm);
+static void 	ficl_add_load_path(ficlVm *vm);
+static void 	ficl_at_exit(ficlVm *vm);
+static void 	ficl_catch(ficlVm *vm);
+static void 	ficl_config_cflags(ficlVm *vm);
+static void 	ficl_config_libs(ficlVm *vm);
+static void 	ficl_config_prefix(ficlVm *vm);
+static void 	ficl_configure_args(ficlVm *vm);
+static void 	ficl_current_time(ficlVm *vm);
+static void 	ficl_date(ficlVm *vm);
+static void 	ficl_dl_load(ficlVm *vm);
+static void 	ficl_dot_cflags(ficlVm *vm);
+static void 	ficl_dot_libs(ficlVm *vm);
+static void 	ficl_dot_lversion(ficlVm *vm);
+static void 	ficl_dot_prefix(ficlVm *vm);
+static void 	ficl_dot_version(ficlVm *vm);
+static void 	ficl_environ(ficlVm *vm);
+static void 	ficl_exec(ficlVm *vm);
+static void 	ficl_exit(ficlVm *vm);
+static void 	ficl_features(ficlVm *vm);
+static void 	ficl_fetch_paren(ficlVm *vm);
+static void 	ficl_fork(ficlVm *vm);
+static void 	ficl_getegid(ficlVm *vm);
+static void 	ficl_getenv(ficlVm *vm);
+static void 	ficl_geteuid(ficlVm *vm);
+static void 	ficl_getgid(ficlVm *vm);
+static void 	ficl_gethostname(ficlVm *vm);
+static void 	ficl_getlogin(ficlVm *vm);
+static void 	ficl_getopt(ficlVm *vm);
+static void 	ficl_getopt_long(ficlVm *vm);
+static void 	ficl_getpid(ficlVm *vm);
+static void 	ficl_getppid(ficlVm *vm);
+static void 	ficl_getservbyname(ficlVm *vm);
+static void 	ficl_getservbyport(ficlVm *vm);
+static void 	ficl_getuid(ficlVm *vm);
+static void 	ficl_gmtime(ficlVm *vm);
+static void 	ficl_include_file(ficlVm *vm);
+static void 	ficl_kill(ficlVm *vm);
+static void 	ficl_load_init_file(ficlVm *vm);
+static void 	ficl_localtime(ficlVm *vm);
+static void 	ficl_mktime(ficlVm *vm);
+static void 	ficl_provided_p(ficlVm *vm);
+static void 	ficl_putenv(ficlVm *vm);
+static void 	ficl_raise(ficlVm *vm);
+static void 	ficl_require_file(ficlVm *vm);
+static void 	ficl_reset_each_paren(ficlVm *vm);
+static void 	ficl_reset_map_paren(ficlVm *vm);
+static void 	ficl_set_begin_paren(ficlVm *vm);
+static void 	ficl_set_each_loop_paren(ficlVm *vm);
+static void 	ficl_set_end_paren(ficlVm *vm);
+static void 	ficl_set_map_loop_paren(ficlVm *vm);
+static void 	ficl_setegid(ficlVm *vm);
+static void 	ficl_seteuid(ficlVm *vm);
+static void 	ficl_setgid(ficlVm *vm);
+static void 	ficl_sethostname(ficlVm *vm);
+static void 	ficl_setuid(ficlVm *vm);
+static void 	ficl_show_memory(ficlVm *vm);
+static void 	ficl_signal(ficlVm *vm);
+static void 	ficl_signal_handler(ficlVm *vm);
+static void 	ficl_sleep(ficlVm *vm);
+static void 	ficl_stack_reset(ficlVm *vm);
+static void 	ficl_store_paren(ficlVm *vm);
+static void 	ficl_strftime(ficlVm *vm);
+static void 	ficl_strptime(ficlVm *vm);
+static void 	ficl_throw(ficlVm *vm);
+static void 	ficl_time(ficlVm *vm);
+static void 	ficl_time_reset(ficlVm *vm);
+static void 	ficl_time_to_string(ficlVm *vm);
+static void 	ficl_unshift_load_lib_path(ficlVm *vm);
+static void 	ficl_unshift_load_path(ficlVm *vm);
+static void 	ficl_utime(ficlVm *vm);
+static void 	ficl_values_end(ficlVm *vm);
+static void 	ficl_version(ficlVm *vm);
+static void 	ficl_wait(ficlVm *vm);
+static void 	ficl_waitpid(ficlVm *vm);
+static bool 	find_in_wordlist(ficlWord *word, FTH data);
+static void 	forth_pre_init(void);
 static RETSIGTYPE fth_toplevel_handler(int sig);
-static void	handler_exec(int sig);
-static FTH	load_file(const char *name, const char *caller);
+static void 	handler_exec(int sig);
+static FTH 	load_file(const char *name, const char *caller);
 #if defined(HAVE_DLOPEN)
-static FTH	load_lib(const char *name, const char *func,
-		    const char *caller);
+static FTH	load_lib(const char *name, const char *f, const char *caller);
 #endif
-static void	run_at_exit(void);
-static void	set_and_show_signal_backtrace(int kind);
+static void 	run_at_exit(void);
+static void 	set_and_show_signal_backtrace(int kind);
 
 /* global ficl variable; access via FTH_FICL_VAR() etc (fth.h) */
 Ficl           *fth_ficl = NULL;
@@ -172,12 +171,12 @@ Ficl           *fth_ficl = NULL;
  * exit callback void (*)(int);
  * snd/xen.c use it.
  */
-exit_cb		fth_exit_hook;
+exit_cb 	fth_exit_hook;
 
 /* === Init FTH === */
 
 #if !defined(_WIN32)
-sigjmp_buf	fth_sig_toplevel;
+sigjmp_buf 	fth_sig_toplevel;
 
 static RETSIGTYPE
 fth_toplevel_handler(int sig)
@@ -188,7 +187,7 @@ fth_toplevel_handler(int sig)
 #endif
 
 #if !defined(HAVE_SIG_T)
-typedef void    (*sig_t)(int sig);
+typedef void    (*sig_t) (int sig);
 #endif
 
 #if !defined(SIG_DFL)
@@ -202,7 +201,7 @@ typedef void    (*sig_t)(int sig);
 #endif
 
 /* required in object.c */
-bool		fth_signal_caught_p;
+bool 		fth_signal_caught_p;
 
 #if !defined(_WIN32)
 static void
@@ -227,8 +226,8 @@ set_and_show_signal_backtrace(int kind)
 void
 signal_check(int sig)
 {
-	char *func;
-	sig_t cb;
+	char           *func;
+	sig_t 		cb;
 
 	func = RUNNING_WORD();
 	cb = signal(sig, SIG_DFL);
@@ -269,11 +268,10 @@ signal_check(int sig)
 }
 
 #define FTH_SIGNALS 7
-static int	fth_signals[] = {
+static int 	fth_signals[] = {
 	SIGINT, SIGQUIT, SIGILL, SIGSEGV, SIGBUS, SIGFPE, SIGUSR1
 };
-
-#endif				/* !_WIN32 */
+#endif		/* !_WIN32 */
 
 #define INIT_ASSERT(Cond)						\
 	if (!(Cond)) {							\
@@ -287,13 +285,13 @@ fth_make_ficl(unsigned int dict_size, unsigned int stack_size,
     unsigned int return_size, unsigned int locals_size)
 {
 #if !defined(_WIN32)
-	int i;
+	int 		i;
 #endif
 
 	if (FTH_FICL_VAR() == NULL) {
 		ficlSystemInformation fsi;
-		ficlSystem *sys;
-		ficlVm *vm;
+		ficlSystem     *sys;
+		ficlVm         *vm;
 
 		FTH_FICL_VAR() = FTH_MALLOC(sizeof(Ficl));
 		fth_last_exception = 0L;
@@ -344,27 +342,27 @@ fth_make_ficl(unsigned int dict_size, unsigned int stack_size,
 #endif
 }
 
-static FTH	load_path;
-static FTH	load_lib_path;
-static FTH	loaded_files;
-static FTH	before_load_hook;
-static FTH	after_load_hook;
-static FTH	eval_string;
-static FTH	fth_at_exit_procs;
+static FTH 	load_path;
+static FTH 	load_lib_path;
+static FTH 	loaded_files;
+static FTH 	before_load_hook;
+static FTH 	after_load_hook;
+static FTH 	eval_string;
+static FTH 	fth_at_exit_procs;
 static simple_array *depth_array;
 static simple_array *loop_array;
 
-static char	misc_scratch[MAXPATHLEN];
-static char	misc_scratch_02[MAXPATHLEN];
-static char	misc_scratch_03[MAXPATHLEN];
-static char	misc_scratch_04[MAXPATHLEN];
+static char 	misc_scratch[MAXPATHLEN];
+static char 	misc_scratch_02[MAXPATHLEN];
+static char 	misc_scratch_03[MAXPATHLEN];
+static char 	misc_scratch_04[MAXPATHLEN];
 
 /*
  * Boolean and Nil object types.
  */
-static void	init_boolean_type(void);
-static FTH	bl_inspect(FTH self);
-static FTH	bl_to_string(FTH self);
+static void 	init_boolean_type(void);
+static FTH 	bl_inspect(FTH self);
+static FTH 	bl_to_string(FTH self);
 
 enum {
 	BOOLEAN_FALSE,
@@ -380,20 +378,20 @@ enum {
 #define B_SSTR_NIL		"#<" B_ISTR_NIL ">"
 #define B_SSTR_UNDEF		"#<" B_ISTR_UNDEF ">"
 
-static FTH	b_istr_false;
-static FTH	b_istr_true;
-static FTH	b_istr_nil;
-static FTH	b_istr_undef;
-static FTH	b_sstr_nil;
-static FTH	b_sstr_undef;
+static FTH 	b_istr_false;
+static FTH 	b_istr_true;
+static FTH 	b_istr_nil;
+static FTH 	b_istr_undef;
+static FTH 	b_sstr_nil;
+static FTH 	b_sstr_undef;
 
 static FTH
 bl_inspect(FTH self)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = fth_make_string(FTH_INSTANCE_NAME(self));
-	switch(FTH_INT_OBJECT(self)) {
+	switch (FTH_INT_OBJECT(self)) {
 	case BOOLEAN_FALSE:
 		return (fth_string_sformat(fs, ": %S", b_istr_false));
 		break;
@@ -413,7 +411,7 @@ bl_inspect(FTH self)
 static FTH
 bl_to_string(FTH self)
 {
-	switch(FTH_INT_OBJECT(self)) {
+	switch (FTH_INT_OBJECT(self)) {
 	case BOOLEAN_FALSE:
 		return (b_istr_false);
 		break;
@@ -433,8 +431,8 @@ bl_to_string(FTH self)
 static void
 init_boolean_type(void)
 {
-	FTH boolean_tag; 
-	FTH nil_tag;	
+	FTH 		boolean_tag;
+	FTH 		nil_tag;
 
 	boolean_tag = make_object_type(FTH_STR_BOOLEAN, FTH_BOOLEAN_T);
 	fth_set_object_inspect(boolean_tag, bl_inspect);
@@ -468,7 +466,7 @@ init_boolean_type(void)
 static void
 forth_pre_init(void)
 {
-	INIT_ASSERT(FTH_FICL_VAR());	
+	INIT_ASSERT(FTH_FICL_VAR());
 	/*
 	 * Theses object types are required before defining further
 	 * functions.
@@ -502,7 +500,7 @@ forth_pre_init(void)
 	eval_string = fth_make_string("eval");
 
 	{
-		char *libs, *pname;
+		char           *libs, *pname;
 
 		/* Set path for Forth script files: */
 		libs = fth_getenv(FTH_ENV_FTHPATH, NULL);
@@ -553,7 +551,7 @@ after-load-hook lambda: <{ fname -- }>\n\
 	fth_add_feature(FTH_TARGET_CPU);
 
 	{
-		char *s, *p, *r;
+		char           *s, *p, *r;
 
 		s = misc_scratch;
 		fth_strcpy(s, sizeof(misc_scratch), FTH_TARGET_OS);
@@ -609,7 +607,7 @@ after-load-hook lambda: <{ fname -- }>\n\
 	fth_current_line = -1;
 }
 
-/*
+/*-
  * Shell environment variables.
  *
  * $FTH_DICTIONARY_SIZE
@@ -622,8 +620,8 @@ after-load-hook lambda: <{ fname -- }>\n\
 void
 forth_init_before_load(void)
 {
-	unsigned int dict_size, stack_size, return_size, locals_size;
-	char *env;
+	unsigned int 	dict_size, stack_size, return_size, locals_size;
+	char           *env;
 
 	dict_size = FICL_DEFAULT_DICTIONARY_SIZE;
 	stack_size = FICL_DEFAULT_STACK_SIZE;
@@ -631,21 +629,21 @@ forth_init_before_load(void)
 	locals_size = FICL_MAX_LOCALS;
 	env = fth_getenv(FTH_ENV_DICTIONARY_SIZE, NULL);
 	if (env != NULL)
-		dict_size = (unsigned int)strtol(env, NULL, 10);
+		dict_size = (unsigned int) strtol(env, NULL, 10);
 	env = fth_getenv(FTH_ENV_STACK_SIZE, NULL);
 	if (env != NULL)
-		stack_size = (unsigned int)strtol(env, NULL, 10);
+		stack_size = (unsigned int) strtol(env, NULL, 10);
 	env = fth_getenv(FTH_ENV_RETURN_SIZE, NULL);
 	if (env != NULL)
-		return_size = (unsigned int)strtol(env, NULL, 10);
+		return_size = (unsigned int) strtol(env, NULL, 10);
 	env = fth_getenv(FTH_ENV_LOCALS_SIZE, NULL);
 	if (env != NULL)
-		locals_size = (unsigned int)strtol(env, NULL, 10);
+		locals_size = (unsigned int) strtol(env, NULL, 10);
 	fth_make_ficl(dict_size, stack_size, return_size, locals_size);
 	forth_pre_init();
 }
 
-/*
+/*-
  * Init libfth.so.
  *
  * This function must be called before any libfth.so action can take
@@ -664,7 +662,7 @@ void
 fth_reset(void)
 {
 #if !defined(_WIN32)
-	int i;
+	int 		i;
 
 	for (i = 0; i < FTH_SIGNALS; i++)
 		signal(fth_signals[i], SIG_DFL);
@@ -678,7 +676,7 @@ void
 fth_exit(int n)
 {
 	if (fth_exit_hook != NULL)
-		(*fth_exit_hook)(n);
+		(*fth_exit_hook) (n);
 	exit(n);
 }
 
@@ -687,7 +685,7 @@ fth_exit(int n)
 int
 fth_catch_exec(ficlWord *word)
 {
-	int status;
+	int 		status;
 
 	if (word == NULL)
 		return (FTH_OKAY);
@@ -717,11 +715,11 @@ fth_catch_exec(ficlWord *word)
 int
 fth_catch_eval(const char *buffer)
 {
-	int status;
-	ficlCell id;
-	ficlString s;
-	ficlVm *vm;
-	char *buf;
+	int 		status;
+	ficlCell 	id;
+	ficlString 	s;
+	ficlVm         *vm;
+	char           *buf;
 
 	if (buffer == NULL)
 		return (FTH_OKAY);
@@ -755,7 +753,7 @@ fth_catch_eval(const char *buffer)
 	}
 }
 
-/*
+/*-
  * Evaluate C string BUFFER.
  * If BUFFER is NULL,
  *      return #<undef>,
@@ -772,10 +770,10 @@ FTH
 fth_eval(const char *buffer)
 {
 	static ficlInteger lineno = 0;
-	ficlInteger old_line, new_depth, i;
-	ficlVm *vm;
-	FTH val, old_file;
-	int depth;
+	ficlInteger 	old_line, new_depth, i;
+	ficlVm         *vm;
+	FTH 		val, old_file;
+	int 		depth;
 
 	if (buffer == NULL)
 		return (FTH_UNDEF);
@@ -790,7 +788,7 @@ fth_eval(const char *buffer)
 		fth_exit(EXIT_SUCCESS);
 	vm = FTH_FICL_VM();
 	new_depth = FTH_STACK_DEPTH(vm) - depth;
-	switch(new_depth) {
+	switch (new_depth) {
 	case 0:
 		val = FTH_UNDEF;
 		break;
@@ -818,8 +816,8 @@ fth_add_feature(const char *name)
 {
 	if (fth_strlen(name) > 0)
 		ficlDictionaryAppendConstant(FTH_FICL_ENV(),
-		    (char *)name,
-		    (ficlInteger)fth_symbol(name));
+		    (char *) name,
+		    (ficlInteger) fth_symbol(name));
 }
 
 static void
@@ -829,7 +827,7 @@ ficl_add_feature(ficlVm *vm)
 'snd add-feature\n\
 Add OBJ, a string or symbol, to *features* list.\n\
 See also provided? and *features*."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -845,7 +843,7 @@ bool
 fth_provided_p(const char *name)
 {
 	if (fth_strlen(name) > 0) {
-		ficlString s;
+		ficlString 	s;
 
 		FICL_STRING_SET_FROM_CSTRING(s, name);
 		return (ficlDictionaryLookup(FTH_FICL_ENV(), s) != NULL);
@@ -862,7 +860,7 @@ ficl_provided_p(ficlVm *vm)
 Return #t if OBJ, a string or symbol, exists in *features* list, \
 otherwise #f.\n\
 See also add-feature and *features*."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -879,10 +877,10 @@ ficl_features(ficlVm *vm)
 *features* => #( \"timer\" \"exception\" ...)\n\
 Return array of all features.\n\
 See also add-feature and provided?."
-	ficlHash *hash;
-	ficlWord *word;
-	unsigned int i;
-	FTH features;
+	ficlHash       *hash;
+	ficlWord       *word;
+	unsigned int 	i;
+	FTH 		features;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 	hash = ficlSystemGetEnvironment(vm->callback.system)->forthWordlist;
@@ -897,14 +895,14 @@ See also add-feature and provided?."
 
 /* === Load Files === */
 
-char *
+char           *
 fth_basename(const char *path)
 {
-	char *base;
+	char           *base;
 
 	if (path == NULL)
 		return ("");
-	return ((base = strrchr(path, '/')) ? ++base : (char *)path);
+	return ((base = strrchr(path, '/')) ? ++base : (char *) path);
 }
 
 /*
@@ -1024,7 +1022,7 @@ Prepend string PATH to *load-lib-path* array if not already there."
 	fth_current_line = old_line;					\
 } while (0)
 
-/*
+/*-
  * load_file(name, caller)
  *
  * Two load hooks:
@@ -1041,11 +1039,11 @@ Prepend string PATH to *load-lib-path* array if not already there."
 static FTH
 load_file(const char *name, const char *caller)
 {
-	ficlVm *vm;
-	ficlInteger old_line, len, i, status;
-	FTH fname, old_file, content, ret, fs;
-	ficlCell old_source_id;
-	ficlString s;
+	ficlVm         *vm;
+	ficlInteger 	old_line, len, i, status;
+	FTH 		fname, old_file, content, ret, fs;
+	ficlCell 	old_source_id;
+	ficlString 	s;
 
 	if (name == NULL)
 		return (FTH_FALSE);
@@ -1089,7 +1087,7 @@ load_file(const char *name, const char *caller)
 			fs = fth_make_string_format("%S at line %ld",
 			    fth_current_file, fth_current_line);
 			FINISH_LOAD();
-			fth_throw(ficl_ans_real_exc((int)status),
+			fth_throw(ficl_ans_real_exc((int) status),
 			    "%s: can't load file %S", caller, fs);
 			/* NOTREACHED */
 			return (FTH_FALSE);
@@ -1105,7 +1103,7 @@ load_file(const char *name, const char *caller)
 	return (FTH_TRUE);
 }
 
-/*
+/*-
  * fth_load_file(name)
  *
  * Two load hooks:
@@ -1132,10 +1130,10 @@ load_file(const char *name, const char *caller)
 FTH
 fth_load_file(const char *name)
 {
-	char *func, *path, *tname, *fname;
-	ficlInteger i, alen, slen;
-	size_t size;
-	FTH fs;
+	char           *func, *path, *tname, *fname;
+	ficlInteger 	i, alen, slen;
+	size_t 		size;
+	FTH 		fs;
 
 	if (name == NULL)
 		return (FTH_TRUE);
@@ -1158,7 +1156,7 @@ fth_load_file(const char *name)
 	 * If not found, try every path from load_path with NAME and probably
 	 * added file extension to find source file in Fth's environment.
 	 */
-	alen = fth_array_length(load_path); 
+	alen = fth_array_length(load_path);
 	fname = misc_scratch_02;
 	fth_strcpy(fname, size, tname);
 	for (i = 0; i < alen; i++) {
@@ -1198,7 +1196,7 @@ See also require, before-load-hook and after-load-hook."
 	fth_load_file(vm->pad);
 }
 
-/*
+/*-
  * fth_require_file(name)
  *
  * Two load hooks:
@@ -1226,7 +1224,7 @@ See also require, before-load-hook and after-load-hook."
 FTH
 fth_require_file(const char *name)
 {
-	FTH fs;
+	FTH 		fs;
 
 	if (name == NULL)
 		return (FTH_TRUE);
@@ -1265,7 +1263,7 @@ See also include, before-load-hook and after-load-hook."
 	fth_require_file(vm->pad);
 }
 
-/*
+/*-
  * fth_load_init_file(init_file)
  *
  * if init file ~/.fthrc or $FTH_INIT_FILE exists:
@@ -1292,8 +1290,8 @@ fth_load_init_file(const char *init_file)
 		/* ... and no environment variable was set ... */
 		init_file = fth_getenv(FTH_ENV_INIT_FILE, NULL);
 		if (init_file == NULL) {
-			char *home, *file;
-			size_t size;
+			char           *home, *file;
+			size_t 		size;
 
 			/* ... take ${HOME}/.fthrc */
 			home = fth_getenv("HOME", "/tmp");
@@ -1310,7 +1308,7 @@ fth_load_init_file(const char *init_file)
 	return (FTH_TRUE);
 }
 
-/*
+/*-
  * fth_load_global_init_file()
  *
  * if init file ${prefix}/etc/fth.conf exists:
@@ -1344,9 +1342,9 @@ ficl_load_init_file(ficlVm *vm)
 If Forth source FILE exists in current or $HOME dir, load it, \
 otherwise do nothing.\n\
 See also include and require."
-	char *str, *file, *home;
-	size_t size;
-	FTH fs;
+	char           *str, *file, *home;
+	size_t 		size;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	fs = fth_pop_ficl_cell(vm);
@@ -1378,7 +1376,7 @@ See also include and require."
 }
 
 #if defined(HAVE_DLOPEN)
-/*
+/*-
  * load_lib(name, func, caller)
  *
  *   before_load_hook ( fname -- val )
@@ -1392,14 +1390,14 @@ See also include and require."
 static FTH
 load_lib(const char *name, const char *func, const char *caller)
 {
-	FTH fname, old_file;
-	void *handle;
-	void (*init_fnc) (void);
-	ficlVm *vm;
-	ficlInteger old_line;
-	ficlCell old_source_id;
+	FTH 		fname, old_file;
+	void           *handle;
+	void            (*init_fnc) (void);
+	ficlVm         *vm;
+	ficlInteger 	old_line;
+	ficlCell 	old_source_id;
 
-	handle = (void *)dlopen(name, RTLD_LAZY | RTLD_GLOBAL);
+	handle = (void *) dlopen(name, RTLD_LAZY | RTLD_GLOBAL);
 	if (handle == NULL) {
 		fth_throw(FTH_SO_FILE_ERROR, "%s: %s", caller, dlerror());
 		/* NOTREACHED */
@@ -1411,7 +1409,7 @@ load_lib(const char *name, const char *func, const char *caller)
 		dlclose(handle);
 		return (FTH_FALSE);
 	}
-	init_fnc = (void (*)(void))dlsym(handle, func);
+	init_fnc = (void (*) (void)) dlsym(handle, func);
 	if (init_fnc == NULL) {
 		dlclose(handle);
 		fth_throw(FTH_SO_FILE_ERROR, "%s: %s", caller, dlerror());
@@ -1427,14 +1425,14 @@ load_lib(const char *name, const char *func, const char *caller)
 	fth_current_line = 0;
 	fth_add_loaded_files(name);
 	/* Calling Init_dbm() etc. */
-	(*init_fnc)();
+	(*init_fnc) ();
 	if (!fth_hook_empty_p(after_load_hook))
 		fth_run_hook(after_load_hook, 1, fname);
 	FINISH_LOAD();
 	return (FTH_TRUE);
 }
 
-/*
+/*-
  * fth_dl_load(name, func)
  *
  *   before_load_hook ( fname -- val )
@@ -1459,10 +1457,10 @@ load_lib(const char *name, const char *func, const char *caller)
 FTH
 fth_dl_load(const char *name, const char *func)
 {
-	char *caller, *path, *tname, *fname;
-	ficlInteger i, alen, slen;
-	size_t size;
-	FTH fs;
+	char           *caller, *path, *tname, *fname;
+	ficlInteger 	i, alen, slen;
+	size_t 		size;
+	FTH 		fs;
 
 	tname = misc_scratch;
 	fname = misc_scratch_02;
@@ -1475,7 +1473,7 @@ fth_dl_load(const char *name, const char *func)
 		return (FTH_TRUE);
 	if (fth_file_exists_p(tname))
 		return (load_lib(tname, func, caller));
-	alen = fth_array_length(load_lib_path); 
+	alen = fth_array_length(load_lib_path);
 	for (i = 0; i < alen; i++) {
 		fs = fth_array_fast_ref(load_lib_path, i);
 		slen = fth_string_length(fs);
@@ -1502,8 +1500,8 @@ fth_dl_load(const char *name, const char *func)
 FTH
 fth_dl_load(const char *name, const char *func)
 {
-	(void)name;
-	(void)func;
+	(void) name;
+	(void) func;
 	FTH_NOT_IMPLEMENTED_ERROR(dlopen);
 	return (FTH_FALSE);
 }
@@ -1516,11 +1514,11 @@ ficl_dl_load(ficlVm *vm)
 dl-load dbm Init_dbm\n\
 Load dynamic library LIB and call its function FUNC.\n\
 See also include and require."
-	char *lib, *fnc;
-	ficlString s;
-	size_t size;
+	char           *lib, *fnc;
+	ficlString 	s;
+	size_t 		size;
 
- 	lib = misc_scratch_03;
+	lib = misc_scratch_03;
 	fnc = misc_scratch_04;
 	size = sizeof(misc_scratch_03);
 	s = ficlVmGetWord0(vm);
@@ -1545,11 +1543,11 @@ Install FILE in first writeable path \
 found in *load-path* (*.fs[m]) or *load-lib-path* (*.so).  \
 A warning is given if no writable path was found.\n\
 See also install and file-install."
-	char *lname, *pname, *tname;
-	FTH path_array, fs;
-	mode_t mode;
-	size_t size;
-	ficlInteger i, alen, slen;
+	char           *lname, *pname, *tname;
+	FTH 		path_array, fs;
+	mode_t 		mode;
+	size_t 		size;
+	ficlInteger 	i, alen, slen;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fname), fname, FTH_ARG1, "a string");
 	lname = fth_string_ref(fname);
@@ -1578,7 +1576,7 @@ See also install and file-install."
 		    RUNNING_WORD(), lname);
 		return;
 	}
-	alen = fth_array_length(path_array); 
+	alen = fth_array_length(path_array);
 	tname = misc_scratch;
 	size = sizeof(misc_scratch);
 	for (i = 0; i < alen; i++) {
@@ -1619,8 +1617,7 @@ See also install-file and file-install."
 	ficlVmGetWordToPad(FTH_FICL_VM());
 	fth_install_file(fth_make_string(FTH_FICL_VM()->pad));
 }
-
-#endif				/* !_WIN32 */
+#endif		/* !_WIN32 */
 
 /*
  * Return full path of NAME or #f.
@@ -1628,11 +1625,11 @@ See also install-file and file-install."
 FTH
 fth_find_file(FTH name)
 {
-	ficlInteger i, alen;
-	FTH fp, fn, fs;
+	ficlInteger 	i , alen;
+	FTH 		fp, fn, fs;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(name), name, FTH_ARG1, "a string");
-	alen = fth_array_length(load_path); 
+	alen = fth_array_length(load_path);
 	for (i = 0; i < alen; i++) {
 		fp = fth_array_fast_ref(load_path, i);
 		fn = fth_make_string_format("%S/%S", fp, name);
@@ -1649,17 +1646,17 @@ fth_find_file(FTH name)
 FTH
 fth_word_ref(const char *name)
 {
-	return ((FTH)FICL_WORD_NAME_REF(name));
+	return ((FTH) FICL_WORD_NAME_REF(name));
 }
 
 /*
  * Used by snd/snd-help.c and repl/repl.c.
  */
-char *
+char           *
 fth_parse_word(void)
 {
-	ficlVm *vm;
-	ficlWord *w;
+	ficlVm         *vm;
+	ficlWord       *w;
 
 	vm = FTH_FICL_VM();
 	ficlVmGetWordToPad(vm);
@@ -1672,24 +1669,22 @@ fth_parse_word(void)
 }
 
 FTH
-fth_wordlist_each(
-    bool (*func) (ficlWord *word, FTH data),
-    FTH data)
+fth_wordlist_each(bool (*func) (ficlWord *word, FTH data), FTH data)
 {
-	FTH ret;
+	FTH 		ret;
 	ficlDictionary *dict;
-	ficlHash *hash;
-	ficlWord *word;
-	int i, j;
+	ficlHash       *hash;
+	ficlWord       *word;
+	int 		i, j;
 
 	dict = FTH_FICL_SYSTEM()->dictionary;
 	ret = fth_make_empty_array();
 
-	for (i = (int)dict->wordlistCount - 1; i >= 0; i--)
+	for (i = (int) dict->wordlistCount - 1; i >= 0; i--)
 		for (hash = dict->wordlists[i];
 		    hash != NULL;
 		    hash = hash->link)
-			for (j = (int)hash->size - 1; j >= 0; j--)
+			for (j = (int) hash->size - 1; j >= 0; j--)
 				for (word = hash->table[j];
 				    word != NULL;
 				    word = word->link)
@@ -1702,7 +1697,7 @@ fth_wordlist_each(
 static bool
 find_in_wordlist(ficlWord *word, FTH data)
 {
-	char *text = (char *)data;
+	char           *text = (char *) data;
 
 	return (word->length > 0 &&
 	    ficlStrincmp(word->name, text, fth_strlen(text)) == 0);
@@ -1712,7 +1707,7 @@ FTH
 fth_find_in_wordlist(const char *text)
 {
 	if (text != NULL && *text != '\0')
-		return (fth_wordlist_each(find_in_wordlist, (FTH)text));
+		return (fth_wordlist_each(find_in_wordlist, (FTH) text));
 	return (fth_make_empty_array());
 }
 
@@ -1771,14 +1766,14 @@ of the catched exception; \
 if ARG is a proc or xt, this will be executed instead of simply returned.  \
 The stack effect must be ( retval -- val ).\n\
 See also fth-throw and fth-raise."
-	FTH prc, obj;
-	volatile FTH arg;
-	jmp_buf jmp_env;
-	ficlWord *volatile word;
+	FTH 		prc      , obj;
+	volatile FTH 	arg;
+	jmp_buf 	jmp_env;
+	ficlWord       *volatile word;
 	volatile ficlVm vm_copy;
 	volatile ficlStack data_stack_copy;
 	volatile ficlStack return_stack_copy;
-	volatile FTH exc, rval, result;
+	volatile FTH 	exc, rval, result;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	arg = fth_pop_ficl_cell(vm);
@@ -1793,9 +1788,9 @@ See also fth-throw and fth-raise."
 	FTH_ASSERT_ARGS(FTH_NOT_FALSE_P(exc), obj, FTH_ARG2,
 	    "a symbol, an exception, or #t");
 	word = FICL_WORD_REF(prc);
-	memcpy((void *)&vm_copy, vm, sizeof(ficlVm));
-	memcpy((void *)&data_stack_copy, vm->dataStack, sizeof(ficlStack));
-	memcpy((void *)&return_stack_copy, vm->returnStack, sizeof(ficlStack));
+	memcpy((void *) &vm_copy, vm, sizeof(ficlVm));
+	memcpy((void *) &data_stack_copy, vm->dataStack, sizeof(ficlStack));
+	memcpy((void *) &return_stack_copy, vm->returnStack, sizeof(ficlStack));
 	vm->exceptionHandler = &jmp_env;
 	vm->fth_catch_p = true;
 	result = FTH_FALSE;
@@ -1812,15 +1807,15 @@ See also fth-throw and fth-raise."
 		result = FTH_FALSE;
 		break;
 	default:		/* exception */
-		memcpy(vm, (void *)&vm_copy, sizeof(ficlVm));
-		memcpy(vm->dataStack, (void *)&data_stack_copy,
+		memcpy(vm, (void *) &vm_copy, sizeof(ficlVm));
+		memcpy(vm->dataStack, (void *) &data_stack_copy,
 		    sizeof(ficlStack));
-		memcpy(vm->returnStack, (void *)&return_stack_copy,
+		memcpy(vm->returnStack, (void *) &return_stack_copy,
 		    sizeof(ficlStack));
 		vm->exceptionHandler = vm_copy.exceptionHandler;
 		vm->fth_catch_p = false;
 		if (FTH_TRUE_P(exc)) {
-			FTH ex;
+			FTH 		ex;
 
 			ex = fth_variable_ref("*last-exception*");
 			rval = FTH_LIST_2(ex,
@@ -1831,7 +1826,7 @@ See also fth-throw and fth-raise."
 		if (FTH_TRUE_P(exc) ||
 		    fth_exception_equal_p(fth_car(rval), exc)) {
 			if (FICL_WORD_P(arg)) {
-				FTH a;
+				FTH 		a;
 
 				a = proc_from_proc_or_xt(arg, 1, 0, false);
 				if (FTH_PROC_P(a))
@@ -1878,7 +1873,7 @@ If ARGS is an array with one element, this string is used.  \
 If ARGS is an array and its first element is a format string with N \
 %s-format signs, ARGS should have N more elements with corresponding values.\n\
 See also fth-raise and fth-catch."
-	FTH obj, args;
+	FTH 		obj, args;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	args = fth_pop_ficl_cell(vm);
@@ -1900,7 +1895,7 @@ If FMT is a format string with N %s-format signs, \
 ARGS should have N elements with corresponding values.  \
 If EXC is #f, reraise last exception.\n\
 See also fth-throw and fth-catch."
-	FTH exc, fmt, args;
+	FTH 		exc, fmt, args;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	args = fth_pop_ficl_cell(vm);
@@ -1916,11 +1911,11 @@ See also fth-throw and fth-catch."
 	 * #f #f #f fth-raise: status-error with last exception info
 	 */
 	if (FTH_EXCEPTION_P(fth_last_exception)) {
-		FTH		fs;
+		FTH 		fs;
 
 		fs = fth_exception_last_message_ref(fth_last_exception);
 		if (FTH_FALSE_P(fs)) {
-			char	       *s;
+			char           *s;
 
 			s = fth_exception_ref(fth_last_exception);
 			fth_errorf("#<%s>\n", s);
@@ -1955,16 +1950,16 @@ time => 4055.3\n\
 Return real time, a ficlFloat.\n\
 See gettimeofday(2) for more information.\n\
 See also reset-time."
-	struct timeval tv;
-	double f;
+	struct timeval 	tv;
+	double 		f;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
 	if (gettimeofday(&tv, NULL) == -1)
 		FTH_SYSTEM_ERROR_THROW(gettimeofday);
-	f = (double)tv.tv_sec - (double)fth_timeval_tv.tv_sec;
-	f += ((double)tv.tv_usec - (double)fth_timeval_tv.tv_usec) * 1e-6;
+	f = (double) tv.tv_sec - (double) fth_timeval_tv.tv_sec;
+	f += ((double) tv.tv_usec - (double) fth_timeval_tv.tv_usec) * 1e-6;
 	ficlStackPushFloat(vm->dataStack, f);
 }
 
@@ -1977,11 +1972,11 @@ time-reset\n\
 Set global timeval struct variable to current time.\n\
 See gettimeofday(2) for more information.\n\
 See also time."
-	(void)vm;
+	(void) vm;
 	if (gettimeofday(&fth_timeval_tv, NULL) == -1)
 		FTH_SYSTEM_ERROR_THROW(gettimeofday);
 }
-#endif
+#endif		/* HAVE_GETTIMEOFDAY */
 
 static void
 ficl_utime(ficlVm *vm)
@@ -1991,30 +1986,30 @@ utime => 0.171875 0.0234375\n\
 Return user and system time as ficlFloats.  \
 Raise NOT-IMPLEMENTED exception if times(3) is not available.\n\
 See times(3) for more information."
-	double hertz;
+	double 		hertz;
 #if defined(HAVE_TIMES) && defined(HAVE_STRUCT_TMS)
-	struct tms buf;
+	struct tms 	buf;
 
 #if defined(HAVE_SYSCONF) && defined(HAVE_DECL__SC_CLK_TCK)
-	hertz = (double)sysconf(_SC_CLK_TCK);
-#else
+	hertz = (double) sysconf(_SC_CLK_TCK);
+#else		/* !HAVE_SYSCONF */
 #if !defined(HZ)
 #if defined(CLK_TCK)
 #define HZ CLK_TCK
-#else
+#else		/* !CLK_TCK */
 #define HZ 60
-#endif
-#endif
-	hertz = (double)HZ;
-#endif
+#endif		/* CLK_TCK */
+#endif		/* !HZ */
+	hertz = (double) HZ;
+#endif		/* HAVE_SYSCONF */
 	if (hertz < 0.0)
 		FTH_SYSTEM_ERROR_THROW(sysconf);
 	times(&buf);
-	ficlStackPushFloat(vm->dataStack, (double)buf.tms_utime / hertz);
-	ficlStackPushFloat(vm->dataStack, (double)buf.tms_stime / hertz);
-#else
+	ficlStackPushFloat(vm->dataStack, (double) buf.tms_utime / hertz);
+	ficlStackPushFloat(vm->dataStack, (double) buf.tms_stime / hertz);
+#else		/* !HAVE_TIMES */
 	FTH_NOT_IMPLEMENTED_ERROR(times);
-#endif
+#endif		/* HAVE_TIMES */
 }
 
 static void
@@ -2027,7 +2022,7 @@ Return time in seconds since 1970/01/01 as ficl2Unsigned.\n\
 See time(3) for more information.\n\
 See also strftime, strptime and time->string."
 	FTH_STACK_CHECK(vm, 0, 1);
-	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned)time(NULL));
+	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned) time(NULL));
 }
 
 static void
@@ -2037,10 +2032,10 @@ ficl_time_to_string(ficlVm *vm)
 current-time time->string => \"Sat Jan 14 02:40:28 CET 2012\"\n\
 Convert ficl2Unsigned SECS in a date string in current local time.\n\
 See also strftime, strptime and current-time."
-	time_t tp;
+	time_t 		tp;
 
 	FTH_STACK_CHECK(vm, 1, 1);
-	tp = (time_t)ficlStackPop2Unsigned(vm->dataStack);
+	tp = (time_t) ficlStackPop2Unsigned(vm->dataStack);
 	strftime(vm->pad, sizeof(vm->pad), "%a %b %d %H:%M:%S %Z %Y",
 	    localtime(&tp));
 	push_cstring(vm, vm->pad);
@@ -2056,11 +2051,11 @@ Convert ficl2Unsigned SECS in a date string corresponding to FMT.  \
 The FMT string will be interpreted by strftime(3).\n\
 See strftime(3) for more information.\n\
 See also strptime, time->string and current-time."
-	FTH fmt;
-	time_t tp;
+	FTH 		fmt;
+	time_t 		tp;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	tp = (time_t)ficlStackPop2Unsigned(vm->dataStack);
+	tp = (time_t) ficlStackPop2Unsigned(vm->dataStack);
 	fmt = fth_pop_ficl_cell(vm);
 	FTH_ASSERT_ARGS(FTH_STRING_P(fmt), fmt, FTH_ARG1, "a string");
 	strftime(vm->pad, sizeof(vm->pad), fth_string_ref(fmt), localtime(&tp));
@@ -2076,9 +2071,9 @@ ficl_strptime(ficlVm *vm)
 Parse STR according to FMT and return TIME as ficl2Unsigned.\n\
 See strptime(3) for more information.\n\
 See also strftime, time->string and current-time."
-	FTH fmt, str;
-	time_t tp;
-	struct tm *tm;
+	FTH 		fmt, str;
+	time_t 		tp;
+	struct tm      *tm;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	fmt = fth_pop_ficl_cell(vm);
@@ -2091,7 +2086,7 @@ See also strftime, time->string and current-time."
 	if (strptime(fth_string_ref(str), fth_string_ref(fmt), tm) == NULL)
 		FTH_SYSTEM_ERROR_ARG_THROW(strptime, fth_string_ref(str));
 #endif
-	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned)mktime(tm));
+	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned) mktime(tm));
 }
 
 static void
@@ -2113,12 +2108,12 @@ tm_gmtoff -- offset from UTC in seconds\n\
 tm_zone   -- timezone abbreviation\n\
 See localtime(3) for more information.\n\
 See also gmtime, mktime, strftime, strptime, time->string and current-time."
-	FTH array;
-	time_t tp;
-	struct tm *tm;
+	FTH 		array;
+	time_t 		tp;
+	struct tm      *tm;
 
 	FTH_STACK_CHECK(vm, 1, 1);
-	tp = (time_t)ficlStackPop2Unsigned(vm->dataStack);
+	tp = (time_t) ficlStackPop2Unsigned(vm->dataStack);
 	tm = localtime(&tp);
 	array = fth_make_array_var(11,
 	    INT_TO_FIX(tm->tm_sec),	/* seconds after minute [0-60] */
@@ -2132,7 +2127,7 @@ See also gmtime, mktime, strftime, strptime, time->string and current-time."
 	    BOOL_TO_FTH(tm->tm_isdst),	/* Daylight Savings Time flag */
 #if defined(HAVE_STRUCT_TM_TM_GMTOFF)
 	/* offset from UTC in seconds */
-	    fth_make_long_long((ficl2Integer)tm->tm_gmtoff),
+	    fth_make_long_long((ficl2Integer) tm->tm_gmtoff),
 #else
 	    FTH_FALSE,
 #endif
@@ -2164,12 +2159,12 @@ tm_gmtoff -- offset from UTC in seconds\n\
 tm_zone   -- timezone abbreviation\n\
 See gmtime(3) for more information.\n\
 See also localtime, mktime, strftime, strptime, time->string and current-time."
-	FTH array;
-	time_t tp;
-	struct tm *tm;
+	FTH 		array;
+	time_t 		tp;
+	struct tm      *tm;
 
 	FTH_STACK_CHECK(vm, 1, 1);
-	tp = (time_t)ficlStackPop2Unsigned(vm->dataStack);
+	tp = (time_t) ficlStackPop2Unsigned(vm->dataStack);
 	tm = gmtime(&tp);
 	array = fth_make_array_var(11,
 	    INT_TO_FIX(tm->tm_sec),	/* seconds after minute [0-60] */
@@ -2183,7 +2178,7 @@ See also localtime, mktime, strftime, strptime, time->string and current-time."
 	    BOOL_TO_FTH(tm->tm_isdst),	/* Daylight Savings Time flag */
 #if defined(HAVE_STRUCT_TM_TM_GMTOFF)
 	/* offset from UTC in seconds */
-	    fth_make_long_long((ficl2Integer)tm->tm_gmtoff),
+	    fth_make_long_long((ficl2Integer) tm->tm_gmtoff),
 #else
 	    FTH_FALSE,
 #endif
@@ -2232,72 +2227,72 @@ tm_zone   -- timezone abbreviation\n\
 See mktime(3) for more information.\n\
 See also localtime, gmtime, strftime, strptime, \
 time->string and current-time."
-	FTH array, el;
-	ficlInteger len;
-	struct tm tm;
+	FTH 		array, el;
+	ficlInteger 	len;
+	struct tm 	tm;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	array = fth_pop_ficl_cell(vm);
 	len = fth_array_length(array);
 	if (len > TM_SEC) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_SEC);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_SEC);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_sec = FIX_TO_INT32(el);
 	}
 	if (len > TM_MIN) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_MIN);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_MIN);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_min = FIX_TO_INT32(el);
 	}
 	if (len > TM_HOUR) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_HOUR);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_HOUR);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_hour = FIX_TO_INT32(el);
 	}
 	if (len > TM_MDAY) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_MDAY);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_MDAY);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_mday = FIX_TO_INT32(el);
 	}
 	if (len > TM_MON) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_MON);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_MON);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_mon = FIX_TO_INT32(el);
 	}
 	if (len > TM_YEAR) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_YEAR);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_YEAR);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_year = FIX_TO_INT32(el);
 	}
 	if (len > TM_WDAY) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_WDAY);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_WDAY);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_wday = FIX_TO_INT32(el);
 	}
 	if (len > TM_YDAY) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_YDAY);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_YDAY);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_yday = FIX_TO_INT32(el);
 	}
 	if (len > TM_ISDST) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_ISDST);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_ISDST);
 		tm.tm_isdst = FTH_TO_BOOL(el);
 	}
 #if defined(HAVE_STRUCT_TM_TM_GMTOFF)
 	if (len > TM_GMTOFF) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_GMTOFF);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_GMTOFF);
 		if (FTH_NOT_FALSE_P(el))
-			tm.tm_gmtoff = (long)fth_long_long_ref(el);
+			tm.tm_gmtoff = (long) fth_long_long_ref(el);
 	}
 #endif
 #if defined(HAVE_STRUCT_TM_TM_ZONE)
 	if (len > TM_ZONE) {
-		el = fth_array_fast_ref(array, (ficlInteger)TM_ZONE);
+		el = fth_array_fast_ref(array, (ficlInteger) TM_ZONE);
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_zone = fth_string_ref(el);
 	}
 #endif
-	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned)mktime(&tm));
+	ficlStackPush2Unsigned(vm->dataStack, (ficl2Unsigned) mktime(&tm));
 }
 
 static void
@@ -2309,7 +2304,7 @@ Return content of shell environment variable NAME as string \
 or #f if variable is not defined.\n\
 See getenv(3) for more information.\n\
 See also putenv and environ."
-	char *val = NULL;
+	char           *val = NULL;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	val = fth_getenv(pop_cstring(vm), NULL);
@@ -2328,7 +2323,7 @@ ficl_putenv(ficlVm *vm)
 Set VALUE to shell environment variable NAME.\n\
 See putenv(3) for more information.\n\
 See also getenv and environ."
-	char *name, *val;
+	char           *name, *val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_to_c_string(fth_pop_ficl_cell(vm));
@@ -2347,9 +2342,9 @@ ficl_environ(ficlVm *vm)
 environ => #a( '( \"HOME\" . \"/home/mike\" ) ... )\n\
 Return assoc array of all shell environment variables and their values.\n\
 See also getenv and putenv."
-	char **env;
-	FTH vals;
-	ficlInteger sep;
+	char          **env;
+	FTH 		vals;
+	ficlInteger 	sep;
 
 	env = environ;
 	vals = fth_make_empty_array();
@@ -2371,7 +2366,7 @@ See getpid(2) for more information.\n\
 See also getppid."
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_GETPID)
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)getpid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) getpid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2387,7 +2382,7 @@ See getppid(2) for more information.\n\
 See also getpid."
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_GETPPID)
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)getppid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) getppid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2403,7 +2398,7 @@ See getuid(2) for more information.\n\
 See also geteuid, getgid and getegid."
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_GETUID)
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)getuid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) getuid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2419,7 +2414,7 @@ See geteuid(2) for more information.\n\
 See also getuid, getgid and getegid."
 #if defined(HAVE_GETEUID)
 	FTH_STACK_CHECK(vm, 0, 1);
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)geteuid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) geteuid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2435,7 +2430,7 @@ See getgid(2) for more information.\n\
 See also getegid, getuid and geteuid."
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_GETGID)
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)getgid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) getgid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2451,7 +2446,7 @@ See getegid(2) for more information.\n\
 See also getgid, getuid and geteuid."
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_GETEGID)
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)getegid());
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) getegid());
 #else
 	ficlStackPushInteger(vm->dataStack, -1);
 #endif
@@ -2470,10 +2465,9 @@ or the effective UID is that of the super user.\n\
 See setuid(2) for more information.\n\
 See also seteuid, setgid and setegid."
 	FTH_STACK_CHECK(vm, 1, 0);
-	if (setuid((uid_t)ficlStackPopInteger(vm->dataStack)) == -1)
+	if (setuid((uid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setuid);
 }
-
 #endif
 
 #if defined(HAVE_SETEUID)
@@ -2489,10 +2483,9 @@ or the effective UID is that of the super user.\n\
 See seteuid(2) for more information.\n\
 See also setuid, setgid and setegid."
 	FTH_STACK_CHECK(vm, 1, 0);
-	if (seteuid((uid_t)ficlStackPopInteger(vm->dataStack)) == -1)
+	if (seteuid((uid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(seteuid);
 }
-
 #endif
 
 #if defined(HAVE_SETGID)
@@ -2508,10 +2501,9 @@ or the effective UID is that of the super user.\n\
 See setgid(2) for more information.\n\
 See also setegid, setuid and seteuid."
 	FTH_STACK_CHECK(vm, 1, 0);
-	if (setgid((gid_t)ficlStackPopInteger(vm->dataStack)) == -1)
+	if (setgid((gid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setgid);
 }
-
 #endif
 
 #if defined(HAVE_SETEGID)
@@ -2527,10 +2519,9 @@ or the effective UID is that of the super user.\n\
 See setegid(2) for more information.\n\
 See also setgid, setuid and seteuid."
 	FTH_STACK_CHECK(vm, 1, 0);
-	if (setegid((gid_t)ficlStackPopInteger(vm->dataStack)) == -1)
+	if (setegid((gid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setegid);
 }
-
 #endif
 
 #define FTH_SIGNAL_HANDLER	fth_symbol("signal-handler")
@@ -2540,23 +2531,23 @@ static ficlWord *sig_to_xt[40];
 static void
 handler_exec(int sig)
 {
-	ficlStackPushInteger(FTH_FICL_STACK(), (ficlInteger)sig);
+	ficlStackPushInteger(FTH_FICL_STACK(), (ficlInteger) sig);
 	fth_execute_xt(FTH_FICL_VM(), sig_to_xt[sig]);
 }
 
-/*
+/*-
  * old-handler ( sig -- )
  * A preserved old handler is wrapped in that XT.
  */
 static void
 ficl_signal_handler(ficlVm *vm)
 {
-	int sig;
-	sig_t func;
+	int 		sig;
+	sig_t 		func;
 
 	FTH_STACK_CHECK(vm, 1, 0);
-	sig = (int)ficlStackPopInteger(vm->dataStack);
-	func = (sig_t)fth_word_property_ref((FTH)vm->runningWord,
+	sig = (int) ficlStackPopInteger(vm->dataStack);
+	func = (sig_t) fth_word_property_ref((FTH) vm->runningWord,
 	    FTH_SIGNAL_HANDLER);
 	if (func && func != SIG_DFL && func != SIG_IGN && func != SIG_ERR)
 		(*func) (sig);
@@ -2577,19 +2568,19 @@ and must not return any value; \
 its stack effect is ( sig -- ).  \
 The old xt handler can be preserved for later use.\n\
 See signal(3) for more information."
-	int sig;
-	sig_t func;
-	ficlWord *xt1, *xt2;
+	int 		sig;
+	sig_t 		func;
+	ficlWord       *xt1, *xt2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	xt1 = ficlStackPopPointer(vm->dataStack);
-	sig = (int)ficlStackPopInteger(vm->dataStack);
+	sig = (int) ficlStackPopInteger(vm->dataStack);
 	sig_to_xt[sig] = xt1;
 
-	if (xt1 == (ficlWord *)SIG_DFL ||
-	    xt1 == (ficlWord *)SIG_IGN ||
-	    xt1 == (ficlWord *)SIG_ERR)
-		func = signal(sig, (sig_t)xt1);
+	if (xt1 == (ficlWord *) SIG_DFL ||
+	    xt1 == (ficlWord *) SIG_IGN ||
+	    xt1 == (ficlWord *) SIG_ERR)
+		func = signal(sig, (sig_t) xt1);
 	else
 		func = signal(sig, handler_exec);
 
@@ -2599,7 +2590,7 @@ See signal(3) for more information."
 
 	/* preserves old handler in xt2 */
 	xt2 = FTH_PRI1("", ficl_signal_handler, NULL);
-	fth_word_property_set((FTH)xt2, FTH_SIGNAL_HANDLER, (FTH)func);
+	fth_word_property_set((FTH) xt2, FTH_SIGNAL_HANDLER, (FTH) func);
 	ficlStackPushPointer(vm->dataStack, xt2);
 }
 
@@ -2614,16 +2605,15 @@ Send signal SIG to process ID PID.  \
 If PID is zero, send SIG to current process.  \
 SIG is a number or a constant like SIGKILL.\n\
 See kill(2) for more information."
-	pid_t pid;
-	int sig;
+	pid_t 		pid;
+	int 		sig;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	sig = (int)ficlStackPopInteger(vm->dataStack);
-	pid = (pid_t)ficlStackPopInteger(vm->dataStack);
+	sig = (int) ficlStackPopInteger(vm->dataStack);
+	pid = (pid_t) ficlStackPopInteger(vm->dataStack);
 	if (kill(pid, sig) == -1)
 		FTH_SYSTEM_ERROR_THROW(kill);
 }
-
 #endif
 
 static void
@@ -2634,8 +2624,8 @@ wait => 1234\n\
 Wait for child process and return its process ID.  \
 Set global read only variable exit-status to wait status.\n\
 See wait(2) for more information."
-	pid_t pid = 0;
-	int status = 0;
+	pid_t 		pid = 0;
+	int 		status = 0;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 #if defined(HAVE_WAIT)
@@ -2644,7 +2634,7 @@ See wait(2) for more information."
 		FTH_SYSTEM_ERROR_THROW(wait);
 #endif
 	fth_set_exit_status(status);
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)pid);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) pid);
 }
 
 static void
@@ -2658,12 +2648,12 @@ Wait for child process PID.  \
 Set global read only variable exit-status to wait status.  \
 FLAGS may be 0, or WNOHANG and WUNTRACED ored.\n\
 See waitpid(2) for more information."
-	pid_t pid;
-	int status = 0, flags;
+	pid_t 		pid;
+	int 		status = 0, flags;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	flags = (int)ficlStackPopInteger(vm->dataStack);
-	pid = (pid_t)ficlStackPopInteger(vm->dataStack);
+	flags = (int) ficlStackPopInteger(vm->dataStack);
+	pid = (pid_t) ficlStackPopInteger(vm->dataStack);
 #if defined(HAVE_WAITPID)
 	if (waitpid(pid, &status, flags) == -1)
 		FTH_SYSTEM_ERROR_THROW(waitpid);
@@ -2682,8 +2672,8 @@ Create child process and execute XT in the child.  \
 The child process returns nothing, parent returns child's process ID.\n\
 See fork(2) for more information.\n\
 See also exec."
-	pid_t pid;
-	FTH proc_or_xt, proc;
+	pid_t 		pid;
+	FTH 		proc_or_xt, proc;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	proc_or_xt = fth_pop_ficl_cell(vm);
@@ -2696,7 +2686,7 @@ See also exec."
 	if (pid == 0)		/* child */
 		fth_proc_call(proc, RUNNING_WORD_VM(vm), 0);
 	else			/* parent */
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)pid);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) pid);
 }
 #endif
 
@@ -2714,8 +2704,8 @@ If CMD is an array of strings, no shell expansion takes place \
 and \"CMD 0 array-ref\" should be a program name.\n\
 See exec(3) for more information.\n\
 See also fork."
-	FTH cmd;
-	char *prog;
+	FTH 		cmd;
+	char           *prog;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	cmd = fth_pop_ficl_cell(vm);
@@ -2723,7 +2713,7 @@ See also fork."
 	    cmd, FTH_ARG1, "a string or an array of strings");
 	/* cmd == string: execute shell expansion */
 	if (FTH_STRING_P(cmd)) {
-		char *shell;
+		char           *shell;
 
 		prog = fth_string_ref(cmd);
 		shell = fth_getenv("SHELL", "sh");
@@ -2731,16 +2721,16 @@ See also fork."
 		if (execlp(shell, shell, "-c", prog, NULL) == -1)
 			FTH_SYSTEM_ERROR_ARG_THROW(execlp, prog);
 	} else {
-		ficlInteger argc;
+		ficlInteger 	argc;
 
 		argc = fth_array_length(cmd);
 		if (argc > 0) {
-			ficlInteger i;
-			int status;
-			char **argv;
+			ficlInteger 	i;
+			int 		status;
+			char          **argv;
 
 			prog = fth_string_ref(fth_array_fast_ref(cmd, 0L));
-			argv = FTH_MALLOC(sizeof(char *) * (size_t)(argc + 1));
+			argv = FTH_MALLOC(sizeof(char *) * (size_t) (argc + 1));
 
 			for (i = 0; i < argc; i++)
 				argv[i] =
@@ -2764,7 +2754,7 @@ ficl_getlogin(ficlVm *vm)
 getlogin => \"mike\"\n\
 Return name of user associated with current session.\n\
 See getlogin(2) for more information."
-	char *name;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 	errno = 0;
@@ -2785,7 +2775,7 @@ Return name of current host.\n\
 See gethostname(3) for more information."
 #if defined(HAVE_GETHOSTNAME)
 	FTH_STACK_CHECK(vm, 0, 1);
-	if (gethostname(vm->pad, (size_t)FICL_PAD_SIZE) == -1)
+	if (gethostname(vm->pad, (size_t) FICL_PAD_SIZE) == -1)
 		FTH_SYSTEM_ERROR_THROW(gethostname);
 	push_cstring(vm, vm->pad);
 #else
@@ -2802,14 +2792,14 @@ Set name of current host to STR.  \
 This call is restricted to the super-user.  \
 Raise NOT-IMPLEMENTED exception if sethostname(3) is not available.\n\
 See sethostname(3) for more information."
-	char *name;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	name = pop_cstring(vm);
 #if defined(HAVE_SETHOSTNAME)
 #if defined(__FreeBSD__)
 	/* int sethostname(const char *, int) */
-	if (sethostname(name, (int)fth_strlen(name)) == -1)
+	if (sethostname(name, (int) fth_strlen(name)) == -1)
 #else
 	/* int sethostname(const char *, size_t) */
 	if (sethostname(name, fth_strlen(name)) == -1)
@@ -2833,9 +2823,9 @@ Return array containing the service, an array of aliases, \
 the port number and the protocol.  \
 Raise NOT-IMPLEMENTED exception if getservbyname(3) is not available.\n\
 See getservbyname(3) for more information."
-	char *service, **s_aliases;
+	char           *service, **s_aliases;
 	struct servent *se;
-	FTH aliases, res;
+	FTH 		aliases, res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	service = pop_cstring(vm);
@@ -2856,7 +2846,7 @@ See getservbyname(3) for more information."
 		fth_array_push(aliases, fth_make_string(*s_aliases++));
 	res = FTH_LIST_4(fth_make_string(se->s_name),
 	    aliases,
-	    INT_TO_FIX(ntohs((uint16_t)se->s_port)),
+	    INT_TO_FIX(ntohs((uint16_t) se->s_port)),
 	    fth_make_string(se->s_proto));
 	ficlStackPushFTH(vm->dataStack, res);
 #else
@@ -2873,15 +2863,15 @@ Return array containing the service, an array of aliases, \
 the port number and the protocol.  \
 Raise NOT-IMPLEMENTED exception if getservbyport(3) is not available.\n\
 See getservbyport(3) for more information."
-	uint16_t port;
+	uint16_t 	port;
 	struct servent *se;
-	FTH aliases, res;
-	char **s_aliases;
+	FTH 		aliases, res;
+	char          **s_aliases;
 
 	FTH_STACK_CHECK(vm, 1, 1);
-	port = (uint16_t)ficlStackPopInteger(vm->dataStack);
+	port = (uint16_t) ficlStackPopInteger(vm->dataStack);
 #if defined(HAVE_GETSERVBYPORT)
-	se = getservbyport((int)htons(port), NULL);
+	se = getservbyport((int) htons(port), NULL);
 	if (se == NULL) {
 		if (errno != 0) {
 			FTH_SYSTEM_ERROR_THROW(getservbyport);
@@ -2896,8 +2886,8 @@ See getservbyport(3) for more information."
 	while (*s_aliases)
 		fth_array_push(aliases, fth_make_string(*s_aliases++));
 	res = FTH_LIST_4(fth_make_string(se->s_name),
-  	    aliases,
-	    INT_TO_FIX(ntohs((uint16_t)se->s_port)),
+	    aliases,
+	    INT_TO_FIX(ntohs((uint16_t) se->s_port)),
 	    fth_make_string(se->s_proto));
 	ficlStackPushFTH(vm->dataStack, res);
 #else
@@ -2911,11 +2901,11 @@ ficl_date(ficlVm *vm)
 #define h_date "( -- str )  return date as string\n\
 date => Mon Nov 21 04:34:07 CET 2005\n\
 Return date in default Unix/C format as a string."
-	time_t tp;
+	time_t 		tp;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 	time(&tp);
-	strftime(vm->pad, (size_t)FICL_PAD_SIZE,
+	strftime(vm->pad, (size_t) FICL_PAD_SIZE,
 	    "%a %b %d %H:%M:%S %Z %Y", localtime(&tp));
 	push_cstring(vm, vm->pad);
 }
@@ -2929,7 +2919,7 @@ ficl_sleep(ficlVm *vm)
 Pause for SECS seconds.\n\
 See sleep(3) for more information."
 	FTH_STACK_CHECK(vm, 1, 0);
-	sleep((unsigned)ficlStackPopUnsigned(vm->dataStack));
+	sleep((unsigned) ficlStackPopUnsigned(vm->dataStack));
 }
 #endif
 
@@ -3007,16 +2997,16 @@ main\n\
 Return next option character from command line options.  \
 This is the example from getopt(3).\n\
 See getopt(3) for more information."
-	FTH args;
-	char *options, *argv[GETOPT_MAX_ARGS];
-	ficlInteger i;
-	int argc, c;
+	FTH 		args;
+	char           *options, *argv[GETOPT_MAX_ARGS];
+	ficlInteger 	i;
+	int 		argc, c;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	options = pop_cstring(vm);
 	args = fth_pop_ficl_cell(vm);
 	/* prepare argv */
-	argc = (int)fth_array_length(args);
+	argc = (int) fth_array_length(args);
 	argc = FICL_MIN(GETOPT_MAX_ARGS - 1, argc);
 	for (i = 0; i < argc; i++)
 		argv[i] = fth_string_ref(fth_array_fast_ref(args, i));
@@ -3035,7 +3025,7 @@ See getopt(3) for more information."
 		    optopt ? INT_TO_FIX(optopt) : FTH_FALSE);
 		fth_variable_set("optarg",
 		    optarg ? fth_make_string(optarg) : FTH_FALSE);
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)c);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) c);
 	}
 }
 
@@ -3068,19 +3058,19 @@ ficl_getopt_long(ficlVm *vm)
 Return next option character from command line options.  \
 The example may show differences and similarities to getopt_long(3).\n\
 See getopt_long(3) for more information."
-	FTH args, long_args;
-	char *options, *argv[GETOPT_MAX_ARGS];
-	struct option opts[GETOPT_MAX_ARGS];
-	int argc, optc, c;
-	ficlInteger i;
+	FTH 		args, long_args;
+	char           *options, *argv[GETOPT_MAX_ARGS];
+	struct option 	opts[GETOPT_MAX_ARGS];
+	int 		argc, optc, c;
+	ficlInteger 	i;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	long_args = fth_pop_ficl_cell(vm);
 	options = pop_cstring(vm);
 	args = fth_pop_ficl_cell(vm);
-	argc = (int)fth_array_length(args);
+	argc = (int) fth_array_length(args);
 	argc = FICL_MIN(GETOPT_MAX_ARGS - 1, argc);
-	optc = (int)fth_array_length(long_args);
+	optc = (int) fth_array_length(long_args);
 	optc = FICL_MIN(GETOPT_MAX_ARGS - 1, optc);
 	/* prepare argv */
 	for (i = 0; i < argc; i++)
@@ -3088,7 +3078,7 @@ See getopt_long(3) for more information."
 	argv[i] = NULL;
 	/* prepare opts */
 	for (i = 0; i < optc; i++) {
-		FTH opt;
+		FTH 		opt;
 
 		opt = fth_array_fast_ref(long_args, i);
 		if (fth_array_length(opt) == 3) {
@@ -3121,7 +3111,7 @@ See getopt_long(3) for more information."
 		    optopt ? INT_TO_FIX(optopt) : FTH_FALSE);
 		fth_variable_set("optarg",
 		    optarg ? fth_make_string(optarg) : FTH_FALSE);
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)c);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) c);
 	}
 }
 
@@ -3136,7 +3126,7 @@ Print used and free dictionary cells."
 	    ficlDictionaryCellsAvailable(ficlVmGetDictionary(vm)));
 }
 
-char *
+char           *
 fth_version(void)
 {
 	if (strncmp("unknown", FTH_TARGET_VENDOR, 7L) == 0)
@@ -3145,7 +3135,7 @@ fth_version(void)
 	return (FTH_PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET "]");
 }
 
-char *
+char           *
 fth_short_version(void)
 {
 	return (FTH_PACKAGE_VERSION " (" FTH_DATE ")");
@@ -3170,7 +3160,7 @@ ficl_dot_lversion(ficlVm *vm)
 .long-version => FTH 1.2.9 (28-Jan-2012) [i386-portbld-freebsd9.0]\n\
 Print long package version.\n\
 See also .version and ver"
-	(void)vm;
+	(void) vm;
 	fth_printf("FTH %s\n", fth_version());
 }
 
@@ -3182,7 +3172,7 @@ ficl_dot_version(ficlVm *vm)
 .version => 1.2.9\n\
 Print package version number.\n\
 See also .long-version and ver."
-	(void)vm;
+	(void) vm;
 	fth_print(FTH_PACKAGE_VERSION "\n");
 }
 
@@ -3194,7 +3184,7 @@ ficl_dot_prefix(ficlVm *vm)
 .prefix => /usr/local\n\
 Print installation prefix path.\n\
 See also .cflags and .libs."
-	(void)vm;
+	(void) vm;
 	fth_print(FTH_PREFIX_PATH "\n");
 }
 
@@ -3206,7 +3196,7 @@ ficl_dot_cflags(ficlVm *vm)
 .cflags => -I/usr/local/include/fth\n\
 Print compiler flags to compile libfth.so to other applications.\n\
 See also .prefix and .libs."
-	(void)vm;
+	(void) vm;
 	fth_print("-I" FTH_PREFIX_PATH "/include/" FTH_PROG_NAME "\n");
 }
 
@@ -3218,7 +3208,7 @@ ficl_dot_libs(ficlVm *vm)
 .libs => -L/usr/local/lib -lfth -lm\n\
 Print linker flags to link libfth.so to other applications.\n\
 See also .cflags and .prefix."
-	(void)vm;
+	(void) vm;
 	fth_print("-L" FTH_PREFIX_PATH "/lib -l" FTH_PROG_NAME " ");
 #if defined(FTH_STATIC)
 	fth_print(FTH_LIBS "\n");
@@ -3273,21 +3263,21 @@ Return configure arguments."
 static FTH
 at_exit_each(FTH proc, FTH name)
 {
-	fth_proc_call(proc, (char *)name, 0);
+	fth_proc_call(proc, (char *) name, 0);
 	return (name);
 }
 
 static void
 run_at_exit(void)
 {
-	FTH rw;
+	FTH 		rw;
 #if !defined(_WIN32)
-	int i;
+	int 		i;
 
 	for (i = 0; i < FTH_SIGNALS; i++)
 		signal(fth_signals[i], SIG_DFL);
 #endif
-	rw = (FTH)RUNNING_WORD();
+	rw = (FTH) RUNNING_WORD();
 	if (fth_array_length(fth_at_exit_procs) > 0)
 		fth_array_each(fth_at_exit_procs, at_exit_each, rw);
 	fth_reset_loop_and_depth();
@@ -3311,7 +3301,7 @@ More than one calls to AT-EXIT are possible, \
 all procs or xts will be called in order.  \
 The stack effect of OBJ must be ( -- ).\n\
 See atexit(3) for more information."
-	FTH proc_or_xt, proc;
+	FTH 		proc_or_xt, proc;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	proc_or_xt = fth_pop_ficl_cell(vm);
@@ -3334,10 +3324,10 @@ and the current process will be terminated with exit code N.\n\
 See exit(3) for more information.\n\
 See also bye and at-exit."
 	FTH_STACK_CHECK(vm, 1, 0);
-	fth_exit((int)ficlStackPopInteger(vm->dataStack));
+	fth_exit((int) ficlStackPopInteger(vm->dataStack));
 }
 
-/*
+/*-
  * Convenient functions for
  * >array     >assoc       >list      >alist     >hash
  * #( ... )   #a( ... )   '( ... )   'a( ... )   #{ ... }
@@ -3360,7 +3350,7 @@ static ficlWord *loop_until;
 void
 fth_reset_loop_and_depth(void)
 {
-	unsigned int i;
+	unsigned int 	i;
 
 	for (i = 0; i < depth_array->length; i++)
 		simple_array_free(simple_array_pop(depth_array));
@@ -3371,25 +3361,25 @@ fth_reset_loop_and_depth(void)
 static void
 ficl_set_begin_paren(ficlVm *vm)
 {
-	ficlWord *to_obj;
-	FTH args;
+	ficlWord       *to_obj;
+	FTH 		args;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	to_obj = ficlStackPopPointer(vm->dataStack);
 	args = fth_pop_ficl_cell(vm);
 	simple_array_push(depth_array,
 	    make_simple_array_var(3, FTH_STACK_DEPTH(vm), to_obj,
-	    (void *)args));
+		(void *) args));
 }
 
 static void
 ficl_set_end_paren(ficlVm *vm)
 {
-	simple_array *ary;
-	ficlInteger depth;
+	simple_array   *ary;
+	ficlInteger 	depth;
 
 	ary = simple_array_pop(depth_array);
-	depth = FTH_STACK_DEPTH(vm) - (ficlInteger)simple_array_ref(ary, 0);
+	depth = FTH_STACK_DEPTH(vm) - (ficlInteger) simple_array_ref(ary, 0);
 	simple_array_free(ary);
 	ficlStackPushInteger(vm->dataStack, depth);
 }
@@ -3398,25 +3388,29 @@ ficl_set_end_paren(ficlVm *vm)
 void
 fth_begin_values_to_obj(ficlVm *vm, char *name, FTH args)
 {
-	ficlWord *to_obj;
+	ficlWord       *to_obj;
 
 	to_obj = FICL_WORD_NAME_REF(name);
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned 	up;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned)ficlInstructionLiteralParen);
+		up = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, up);
 		ficlDictionaryAppendFTH(dict, args);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned)ficlInstructionLiteralParen);
+		ficlDictionaryAppendUnsigned(dict, up);
 		ficlDictionaryAppendPointer(dict, to_obj);
 		ficlDictionaryAppendPointer(dict, set_begin_paren);
 		ficlDictionaryAppendPointer(dict, loop_begin);
-	} else
-		simple_array_push(depth_array,
-		    make_simple_array_var(3, FTH_STACK_DEPTH(vm), to_obj,
-		    (void *)args));
+	} else {
+		ficlInteger	d;
+		simple_array   *ary;
+
+		d = FTH_STACK_DEPTH(vm);
+		ary = make_simple_array_var(3, d, to_obj, (void *) args);
+		simple_array_push(depth_array, ary);
+	}
 }
 
 #define FTH_BEGIN_OBJ(name)						\
@@ -3435,40 +3429,41 @@ FTH_BEGIN_OBJ(hash)
 static void
 ficl_values_end(ficlVm *vm)
 {
-	ficlWord *to_obj;
-	FTH args;
-	int len;
+	ficlWord       *to_obj;
+	FTH 		args;
+	int 		len;
 
 	len = simple_array_length(depth_array);
 	if (len <= 0)
 		FTH_BAD_SYNTAX_ERROR("orphaned closing paren found");
 	to_obj = FICL_WORD_REF(simple_array_ref(simple_array_ref(depth_array,
-	    len - 1), 1));
-	args = (FTH)simple_array_ref(simple_array_ref(depth_array,
-	    len - 1), 2);
+		    len - 1), 1));
+	args = (FTH) simple_array_ref(simple_array_ref(depth_array,
+		len - 1), 2);
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned 	up;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned)ficlInstructionLiteralParen);
-		ficlDictionaryAppendInteger(dict, (ficlInteger)FICL_TRUE);
+		up = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, up);
+		ficlDictionaryAppendInteger(dict, (ficlInteger) FICL_TRUE);
 		ficlDictionaryAppendPointer(dict, loop_until);
 		ficlDictionaryAppendPointer(dict, set_end_paren);
 		/* >dbm needs an argument, the filename */
 		if (FTH_NOT_FALSE_P(args)) {
-			ficlDictionaryAppendUnsigned(dict,
-			    (ficlUnsigned)ficlInstructionLiteralParen);
+			up = (ficlUnsigned) ficlInstructionLiteralParen;
+			ficlDictionaryAppendUnsigned(dict, up);
 			ficlDictionaryAppendFTH(dict, args);
 		}
 		ficlDictionaryAppendPointer(dict, to_obj);
 	} else {
-		simple_array *ary;
-		ficlInteger depth;
+		simple_array   *ary;
+		ficlInteger 	depth, od;
 
 		ary = simple_array_pop(depth_array);
-		depth = FTH_STACK_DEPTH(vm) - 
-		    (ficlInteger)simple_array_ref(ary, 0);
+		od = (ficlInteger) simple_array_ref(ary, 0);
+		depth = FTH_STACK_DEPTH(vm) - od;
 		simple_array_free(ary);
 		ficlStackPushInteger(vm->dataStack, depth);
 		/* >dbm needs an argument, the filename */
@@ -3487,11 +3482,11 @@ ficl_set_each_loop_paren(ficlVm *vm)
 Helper function for each ... end-each.  \
 Sets array representation of OBJ to loop_array and returns OBJ's length.\n\
 See also (reset-each), (fetch) and source file fth.fs."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
-	simple_array_push(loop_array, (void *)fth_object_copy(obj));
+	simple_array_push(loop_array, (void *) fth_object_copy(obj));
 	ficlStackPushInteger(vm->dataStack, fth_object_length(obj));
 }
 
@@ -3502,11 +3497,11 @@ ficl_set_map_loop_paren(ficlVm *vm)
 Helper function for map ... end-map.  \
 Sets copy of OBJ to loop_array and returns OBJ's length.\n\
 See also (set-map-loop), (reset-map), (fetch), (store) and source file fth.fs."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
-	simple_array_push(loop_array, (void *)obj);
+	simple_array_push(loop_array, (void *) obj);
 	ficlStackPushInteger(vm->dataStack, fth_object_length(obj));
 }
 
@@ -3518,7 +3513,7 @@ ficl_reset_each_paren(ficlVm *vm)
 Helper function for each ... end-each.  \
 Removes last object from loop-array.\n\
 See also (set-each-loop), (fetch) and source file fth.fs."
-	(void)vm;
+	(void) vm;
 	simple_array_pop(loop_array);
 }
 
@@ -3530,7 +3525,7 @@ Helper function for map ... end-map.  \
 Removes last object from loop-array and retuns it.\n\
 See also (set-map-loop), (fetch), (store) and source file fth.fs."
 	FTH_STACK_CHECK(vm, 0, 1);
-	ficlStackPushFTH(vm->dataStack, (FTH)simple_array_pop(loop_array));
+	ficlStackPushFTH(vm->dataStack, (FTH) simple_array_pop(loop_array));
 }
 
 static void
@@ -3540,16 +3535,16 @@ ficl_fetch_paren(ficlVm *vm)
 Helper function for each ... end-each and map ... end-map.  \
 Returns value on INDEX of last object in loop-array.\n\
 See also (set-each-loop), (reset-each), (store) and source file fth.fs."
-	ficlInteger idx;
-	int len;
+	ficlInteger 	idx;
+	int 		len;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	len = simple_array_length(loop_array);
 	if (len > 0)
 		fth_push_ficl_cell(vm,
-		    fth_object_value_ref((FTH)simple_array_ref(loop_array,
-		    len - 1), idx));
+		    fth_object_value_ref((FTH) simple_array_ref(loop_array,
+			    len - 1), idx));
 	else
 		ficlStackPushBoolean(vm->dataStack, false);
 }
@@ -3561,17 +3556,17 @@ ficl_store_paren(ficlVm *vm)
 Helper function for map ... end-map.  \
 Stores VALUE on INDEX of last object in loop-array.\n\
 See also (set-map-loop), (reset-map), (fetch) and source file fth.fs."
-	FTH value;
-	ficlInteger idx;
-	int len;
+	FTH 		value;
+	ficlInteger 	idx;
+	int 		len;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	idx = ficlStackPopInteger(vm->dataStack);
 	value = fth_pop_ficl_cell(vm);
 	len = simple_array_length(loop_array);
 	if (len > 0)
-		fth_object_value_set((FTH)simple_array_ref(loop_array,
-		    len - 1), idx, value);
+		fth_object_value_set((FTH) simple_array_ref(loop_array,
+			len - 1), idx, value);
 }
 
 /* === Initialize === */
@@ -3587,7 +3582,8 @@ forth_init(void)
 		FTH_SYSTEM_ERROR_THROW(atexit);
 	/* Load Ficl source files. */
 	{
-		char *sf[] = {"softcore.fr",
+		char           *sf[] = {
+			"softcore.fr",
 			"ifbrack.fr",
 			"prefix.fr",
 			"ficl.fr",
@@ -3596,14 +3592,15 @@ forth_init(void)
 			"fileaccess.fr",
 			"assert.fs",
 			"compat.fs",
-		NULL};
-		char **softcore = sf;
+			NULL};
+		char          **softcore = sf;
 
 		while (*softcore) {
 			fth_var_set(fth_last_exception, FTH_FALSE);
 			fth_require_file(*softcore++);
 		}
 	}
+
 	/* constants */
 	fth_define_constant("cell", sizeof(ficlCell), NULL);
 	fth_define_constant("float", sizeof(ficlFloat), NULL);
@@ -3620,6 +3617,7 @@ forth_init(void)
 	    NULL);
 	fth_define_constant("FICL_VM_STATE_COMPILE", FICL_VM_STATE_COMPILE,
 	    NULL);
+
 	/* misc */
 	FTH_PRI1("add-feature", ficl_add_feature, h_add_feature);
 	FTH_PRI1("provided?", ficl_provided_p, h_provided_p);
@@ -3795,11 +3793,10 @@ forth_init(void)
 					 * tty read */
 #endif
 #if defined(SIGTTOU)
-	FTH_SET_CONSTANT(SIGTTOU);	/* like TTIN if
-					 * (tp->t_local&LTOSTOP) */
+	FTH_SET_CONSTANT(SIGTTOU);	/* like TTIN if (tp->t_local&LTOSTOP) */
 #endif
 #if defined(SIGIO)
-	FTH_SET_CONSTANT(SIGIO);	/* input/output possible signal */
+	FTH_SET_CONSTANT(SIGIO);/* input/output possible signal */
 #endif
 #if defined(SIGXCPU)
 	FTH_SET_CONSTANT(SIGXCPU);	/* exceeded CPU time limit */
@@ -3828,6 +3825,7 @@ forth_init(void)
 #if defined(SIGTHR)
 	FTH_SET_CONSTANT(SIGTHR);	/* Thread interrupt. */
 #endif
+
 	/* >array, >assoc, >list, >hash */
 	loop_begin = FICL_WORD_NAME_REF("begin");
 	loop_until = FICL_WORD_NAME_REF("until");
@@ -3847,6 +3845,7 @@ forth_init(void)
 	FTH_PRI1("hash{", ficl_begin_hash, NULL);
 	FTH_PRI1(")", ficl_values_end, NULL);
 	FTH_PRI1("}", ficl_values_end, NULL);
+
 	/* each/map */
 	FTH_PRI1("(set-each-loop)", ficl_set_each_loop_paren,
 	    h_set_each_l_paren);
@@ -3858,6 +3857,7 @@ forth_init(void)
 	FTH_PRI1("(reset-map)", ficl_reset_map_paren, h_re_map_paren);
 	FTH_PRI1("(fetch)", ficl_fetch_paren, h_fetch_paren);
 	FTH_PRI1("(store)", ficl_store_paren, h_store_paren);
+
 	fth_require_file("fth.fs");
 #if defined(HAVE_TZSET)
 	tzset();

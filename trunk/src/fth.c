@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.115 12/2/17";
+const char fth_sccsid[] = "@(#)fth.c	1.116 12/25/17";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -38,11 +38,11 @@ const char fth_sccsid[] = "@(#)fth.c	1.115 12/2/17";
 
 #define FTH_COPYRIGHT	"(c) 2004-2017 Michael Scholz"
 
-static FTH	 eval_with_error_exit(void *p, int kind);
-static void	 repl_in_place(char *in, FTH out, ficlWord *word,
-		     bool auto_split_p, bool print_p, bool chomp_p);
+static FTH 	eval_with_error_exit(void *p, int kind);
+static void	repl_in_place(char *in, FTH out, ficlWord *word,
+    bool auto_split_p, bool print_p, bool chomp_p);
 static ficlWord *source_to_word(const char *buffer);
-static FTH	 string_split(char *str, char *delim);
+static FTH 	string_split(char *str, char *delim);
 
 enum {
 	REPL_COMPILE,
@@ -52,9 +52,9 @@ enum {
 static ficlWord *
 source_to_word(const char *buffer)
 {
-	ficlWord *word = NULL;
-	char *bstr;
-	int status;
+	ficlWord       *word = NULL;
+	char           *bstr;
+	int 		status;
 
 	bstr = fth_format("lambda: ( ?? -- ?? ) %s ;", buffer);
 	status = fth_catch_eval(bstr);
@@ -79,10 +79,10 @@ source_to_word(const char *buffer)
 static FTH
 eval_with_error_exit(void *p, int kind)
 {
-	ficlVm *vm;
-	FTH val;
-	ficlInteger depth, new_depth, i;
-	int status;
+	ficlVm         *vm;
+	FTH 		val;
+	ficlInteger 	depth, new_depth, i;
+	int 		status;
 
 	val = FTH_UNDEF;
 	if (p == NULL)
@@ -92,11 +92,11 @@ eval_with_error_exit(void *p, int kind)
 	depth = FTH_STACK_DEPTH(vm);
 	switch (kind) {
 	case REPL_COMPILE:
-		status = fth_catch_exec((ficlWord *)p);
+		status = fth_catch_exec((ficlWord *) p);
 		break;
 	case REPL_INTERPRET:
 	default:
-		status = fth_catch_eval((const char *)p);
+		status = fth_catch_eval((const char *) p);
 		break;
 	}
 	switch (status) {
@@ -131,8 +131,8 @@ eval_with_error_exit(void *p, int kind)
 static FTH
 string_split(char *str, char *delim)
 {
-	char *p, *s, *t;
-	FTH result;
+	char           *p, *s, *t;
+	FTH 		result;
 
 	s = t = FTH_STRDUP(str);
 	result = fth_make_empty_array();
@@ -143,17 +143,17 @@ string_split(char *str, char *delim)
 	return (result);
 }
 
-static char fth_scratch[BUFSIZ];
+static char 	fth_scratch[BUFSIZ];
 
 static void
 repl_in_place(char *in, FTH out, ficlWord *word,
     bool auto_split_p, bool print_p, bool chomp_p)
 {
-	char *delim, *buf;
-	size_t len;
-	ficlInteger line_no;
-	FTH line;
-	FILE *ifp;
+	char           *delim, *buf;
+	size_t 		len;
+	ficlInteger 	line_no;
+	FTH 		line;
+	FILE           *ifp;
 
 	ifp = stdin;
 	if (in != NULL) {
@@ -207,30 +207,32 @@ extern int 	optopt;
 int
 main(int argc, char **argv)
 {
-	bool die, no_init_file, auto_split, debug, in_place_p, ficl_repl;
-	bool line_end, implicit_loop, loop_print, script_p, finish_getopt;
-	int i, c, exit_value, stay_in_repl, verbose;
-	int lp_len, llp_len, bufs_len, libs_len;
-	char *field_separator, *init_file, *suffix, *script;
-	char *buffers[LIBSLEN], *load_lib_paths[LIBSLEN];
-	char *libraries[LIBSLEN], *load_paths[LIBSLEN];
-	FTH ret;
+	bool 		die, no_init_file, auto_split, debug;
+	bool 		in_place_p, ficl_repl;
+	bool 		line_end, implicit_loop, loop_print;
+	bool 		script_p, finish_getopt;
+	int 		i, c, exit_value, stay_in_repl, verbose;
+	int 		lp_len, llp_len, bufs_len, libs_len;
+	char           *field_separator, *init_file, *suffix, *script;
+	char           *buffers[LIBSLEN], *load_lib_paths[LIBSLEN];
+	char           *libraries[LIBSLEN], *load_paths[LIBSLEN];
+	FTH 		ret;
 
 	/*
 	 * environment variable POSIXLY_CORRECT: if set, disable permutation
 	 * optstring starting with `-': RETURN_IN_ORDER optstring starting
 	 * with `+': REQUIRE_ORDER (posix)
-	 * 
+	 *
 	 * optional arguments: append two colons x:: (see i:: in char *args)
 	 */
-	char *args = "C:DE:F:I:QS:Vade:f:i::lnpqrs:v";
+	char           *args = "C:DE:F:I:QS:Vade:f:i::lnpqrs:v";
 
 	/*
 	 * Long options are gone with version 1.3.3 but --eval and
 	 * --no-init-file remain for backwards compatibility for old fth.m4
 	 * files.
 	 */
-	struct option opts[] = {
+	struct option 	opts[] = {
 		{"eval", required_argument, NULL, 'e'},
 		{"no-init-file", no_argument, NULL, 'Q'},
 		{0, 0, 0, 0}
@@ -406,7 +408,7 @@ main(int argc, char **argv)
 	if (field_separator != NULL)	/* -F SEP */
 		fth_variable_set("*fs*", fth_make_string(field_separator));
 	if (libs_len > 0) {	/* -S "LIB FUNC" */
-		char *lib, *name, *fnc;
+		char           *lib, *name, *fnc;
 
 		for (i = 0; i < libs_len; i++) {
 			lib = libraries[i];
@@ -430,9 +432,9 @@ main(int argc, char **argv)
 	 * In-place or implicit-loop action and exit.
 	 */
 	if (in_place_p || implicit_loop) {	/* -inp */
-		ficlWord *word;
-		char *in_file, out_file[MAXPATHLEN];
-		FTH out;
+		ficlWord       *word;
+		char           *in_file, out_file[MAXPATHLEN];
+		FTH 		out;
 
 		if (bufs_len < 1) {
 			fth_errorf("#<%s: in-place require -e PATTERN!>\n",
@@ -494,18 +496,18 @@ main(int argc, char **argv)
 		if (strcmp(argv[i], "-") == 0) {
 			/*-
 			 * % echo "80 .f2c cr" | fth -	==> 26.67
-			 * 
+			 *
 			 * % cat foo
 			 * 80 .f2c cr
-			 * 
+			 *
 			 * % fth - < foo		==> 26.67
-			 * 
+			 *
 			 * % fth -
 			 * 80 .f2c cr <enter>		==> 26.67
 			 * bye <enter>
 			 * %
 			 */
-			char *buf;
+			char           *buf;
 
 			buf = fth_scratch;
 			while (fgets(buf, BUFSIZ, stdin) != NULL)

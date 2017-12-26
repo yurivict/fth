@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	1.218 12/16/17
+ * @(#)object.c	1.219 12/25/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -97,67 +97,67 @@ typedef enum {
 #define GC_FRAME_CURRENT_WORD()	GC_FRAME_WORD(gc_frame_level)
 #define GC_FRAME_CURRENT_INST()	GC_FRAME_INST(gc_frame_level)
 
-static void	ficl_add_store_object(ficlVm *vm);
-static void	ficl_backtrace(ficlVm *vm);
-static void	ficl_boolean_p(ficlVm *vm);
-static void	ficl_cycle_pos_0(ficlVm *vm);
-static void	ficl_cycle_pos_ref(ficlVm *vm);
-static void	ficl_cycle_pos_set(ficlVm *vm);
-static void	ficl_div_store_object(ficlVm *vm);
-static void	ficl_false_p(ficlVm *vm);
-static void	ficl_first_object_ref(ficlVm *vm);
-static void	ficl_first_object_set(ficlVm *vm);
-static void	ficl_frame_depth(ficlVm *vm);
-static void	ficl_gc_mark(ficlVm *vm);
-static void	ficl_gc_marked_p(ficlVm *vm);
-static void	ficl_gc_permanent_objects(ficlVm *vm);
-static void	ficl_gc_permanent_p(ficlVm *vm);
-static void	ficl_gc_protected_objects(ficlVm *vm);
-static void	ficl_gc_protected_p(ficlVm *vm);
-static void	ficl_gc_run(ficlVm *vm);
-static void	ficl_gc_stats(ficlVm *vm);
-static void	ficl_gc_unmark(ficlVm *vm);
-static void	ficl_instance_gen_ref(ficlVm *vm);
-static void	ficl_instance_obj_ref(ficlVm *vm);
-static void	ficl_instance_p(ficlVm *vm);
-static void	ficl_last_object_ref(ficlVm *vm);
-static void	ficl_last_object_set(ficlVm *vm);
-static void	ficl_make_instance(ficlVm *vm);
-static void	ficl_make_object_type(ficlVm *vm);
-static void	ficl_mul_store_object(ficlVm *vm);
-static void	ficl_nil_p(ficlVm *vm);
-static void	ficl_object_cycle_set(ficlVm *vm);
-static void	ficl_object_debug_hook(ficlVm *vm);
-static void	ficl_object_empty_p(ficlVm *vm);
-static void	ficl_object_equal_p(ficlVm *vm);
-static void	ficl_object_is_instance_of(ficlVm *vm);
-static void	ficl_object_length(ficlVm *vm);
-static void	ficl_object_member_p(ficlVm *vm);
-static void	ficl_object_name(ficlVm *vm);
-static void	ficl_object_range_p(ficlVm *vm);
-static void	ficl_object_ref(ficlVm *vm);
-static void	ficl_object_set(ficlVm *vm);
-static void	ficl_object_type_p(ficlVm *vm);
-static void	ficl_object_type_ref(ficlVm *vm);
-static void	ficl_object_types(ficlVm *vm);
-static void	ficl_print_inspect(ficlVm *vm);
-static void	ficl_print_length(ficlVm *vm);
-static void	ficl_print_object_name(ficlVm *vm);
-static void	ficl_second_object_ref(ficlVm *vm);
-static void	ficl_second_object_set(ficlVm *vm);
-static void	ficl_set_apply(ficlVm *vm);
-static void	ficl_set_print_length(ficlVm *vm);
-static void	ficl_sub_store_object(ficlVm *vm);
-static void	ficl_third_object_ref(ficlVm *vm);
-static void	ficl_third_object_set(ficlVm *vm);
-static void	ficl_true_p(ficlVm *vm);
-static void	ficl_undef_p(ficlVm *vm);
-static void	ficl_xmobj_p(ficlVm *vm);
+static void 	ficl_add_store_object(ficlVm *vm);
+static void 	ficl_backtrace(ficlVm *vm);
+static void 	ficl_boolean_p(ficlVm *vm);
+static void 	ficl_cycle_pos_0(ficlVm *vm);
+static void 	ficl_cycle_pos_ref(ficlVm *vm);
+static void 	ficl_cycle_pos_set(ficlVm *vm);
+static void 	ficl_div_store_object(ficlVm *vm);
+static void 	ficl_false_p(ficlVm *vm);
+static void 	ficl_first_object_ref(ficlVm *vm);
+static void 	ficl_first_object_set(ficlVm *vm);
+static void 	ficl_frame_depth(ficlVm *vm);
+static void 	ficl_gc_mark(ficlVm *vm);
+static void 	ficl_gc_marked_p(ficlVm *vm);
+static void 	ficl_gc_permanent_objects(ficlVm *vm);
+static void 	ficl_gc_permanent_p(ficlVm *vm);
+static void 	ficl_gc_protected_objects(ficlVm *vm);
+static void 	ficl_gc_protected_p(ficlVm *vm);
+static void 	ficl_gc_run(ficlVm *vm);
+static void 	ficl_gc_stats(ficlVm *vm);
+static void 	ficl_gc_unmark(ficlVm *vm);
+static void 	ficl_instance_gen_ref(ficlVm *vm);
+static void 	ficl_instance_obj_ref(ficlVm *vm);
+static void 	ficl_instance_p(ficlVm *vm);
+static void 	ficl_last_object_ref(ficlVm *vm);
+static void 	ficl_last_object_set(ficlVm *vm);
+static void 	ficl_make_instance(ficlVm *vm);
+static void 	ficl_make_object_type(ficlVm *vm);
+static void 	ficl_mul_store_object(ficlVm *vm);
+static void 	ficl_nil_p(ficlVm *vm);
+static void 	ficl_object_cycle_set(ficlVm *vm);
+static void 	ficl_object_debug_hook(ficlVm *vm);
+static void 	ficl_object_empty_p(ficlVm *vm);
+static void 	ficl_object_equal_p(ficlVm *vm);
+static void 	ficl_object_is_instance_of(ficlVm *vm);
+static void 	ficl_object_length(ficlVm *vm);
+static void 	ficl_object_member_p(ficlVm *vm);
+static void 	ficl_object_name(ficlVm *vm);
+static void 	ficl_object_range_p(ficlVm *vm);
+static void 	ficl_object_ref(ficlVm *vm);
+static void 	ficl_object_set(ficlVm *vm);
+static void 	ficl_object_type_p(ficlVm *vm);
+static void 	ficl_object_type_ref(ficlVm *vm);
+static void 	ficl_object_types(ficlVm *vm);
+static void 	ficl_print_inspect(ficlVm *vm);
+static void 	ficl_print_length(ficlVm *vm);
+static void 	ficl_print_object_name(ficlVm *vm);
+static void 	ficl_second_object_ref(ficlVm *vm);
+static void 	ficl_second_object_set(ficlVm *vm);
+static void 	ficl_set_apply(ficlVm *vm);
+static void 	ficl_set_print_length(ficlVm *vm);
+static void 	ficl_sub_store_object(ficlVm *vm);
+static void 	ficl_third_object_ref(ficlVm *vm);
+static void 	ficl_third_object_set(ficlVm *vm);
+static void 	ficl_true_p(ficlVm *vm);
+static void 	ficl_undef_p(ficlVm *vm);
+static void 	ficl_xmobj_p(ficlVm *vm);
 static FInstance *gc_next_instance(void);
 static FInstance *gc_run(void);
-static FTH	print_object(FTH obj, fth_inspect_type_t type);
-static bool	xmobj_p(FTH obj);
-static FTH	xmobj_to_string(FTH obj);
+static FTH 	print_object(FTH obj, fth_inspect_type_t type);
+static bool 	xmobj_p(FTH obj);
+static FTH 	xmobj_to_string(FTH obj);
 
 #define h_list_of_object_functions "\
 *** OBJECT PRIMITIVES ***\n\
@@ -294,7 +294,7 @@ gc_loop_reset(void)
 void
 init_gc(void)
 {
-	int i;
+	int 		i;
 
 	for (i = 0; i < GC_FRAME_SIZE; i++)
 		GC_FRAME_INST(i) = NULL;
@@ -309,7 +309,7 @@ ficl_frame_depth(ficlVm *vm)
 frame-depth => 0\n\
 Internal global variable.  \
 Return the current frame depth."
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)gc_frame_level);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) gc_frame_level);
 }
 
 static simple_array *last_frames = NULL;
@@ -317,11 +317,11 @@ static simple_array *last_frames = NULL;
 void
 fth_set_backtrace(FTH exception)
 {
-	char *exc;
-	int i;
-	ficlVm *vm;
-	ficlWord *word;
-	FTH fs;
+	char           *exc;
+	int 		i;
+	ficlVm         *vm;
+	ficlWord       *word;
+	FTH 		fs;
 
 	vm = FTH_FICL_VM();
 	if (vm->state == FICL_VM_STATE_COMPILE)
@@ -340,7 +340,7 @@ fth_set_backtrace(FTH exception)
 	fs = fth_make_string(exc);
 	if (FICL_WORD_P(word))
 		fth_string_sformat(fs, " in %s", FICL_WORD_NAME(word));
-	simple_array_push(last_frames, (void *)fs);
+	simple_array_push(last_frames, (void *) fs);
 	/*
 	 * Second line: last line from terminal input buffer (TIB)
 	 */
@@ -348,13 +348,13 @@ fth_set_backtrace(FTH exception)
 		fs = fth_make_string("empty");
 	else
 		fs = fth_string_chomp(fth_make_string(vm->tib.text));
-	simple_array_push(last_frames, (void *)fs);
+	simple_array_push(last_frames, (void *) fs);
 	/*
 	 * Rest: last called words
 	 */
 	for (i = 0; i < 20 && word != NULL; i++) {
-		fs = fth_word_inspect((FTH)word);
-		simple_array_push(last_frames, (void *)fs);
+		fs = fth_word_inspect((FTH) word);
+		simple_array_push(last_frames, (void *) fs);
 		if (word == word->current_word)
 			break;
 		word = word->current_word;
@@ -364,8 +364,8 @@ fth_set_backtrace(FTH exception)
 void
 fth_show_backtrace(bool verbose)
 {
-	int len, i;
-	FTH fs;
+	int 		len, i;
+	FTH 		fs;
 
 	len = simple_array_length(last_frames);
 	if (len <= 0)
@@ -374,12 +374,12 @@ fth_show_backtrace(bool verbose)
 	/*
 	 * First line: repeat exception
 	 */
-	fs = (FTH)simple_array_ref(last_frames, i++);
+	fs = (FTH) simple_array_ref(last_frames, i++);
 	fth_errorf("#<bt: %S>\n", fs);
 	/*
 	 * Second line: last line from terminal input buffer (TIB)
 	 */
-	fs = (FTH)simple_array_ref(last_frames, i++);
+	fs = (FTH) simple_array_ref(last_frames, i++);
 	fth_errorf("#<bt: TIB %S>\n", fs);
 	if (!verbose && FTH_FALSE_P(fth_variable_ref("*fth-verbose*")))
 		return;
@@ -387,7 +387,7 @@ fth_show_backtrace(bool verbose)
 	 * Rest: last called words
 	 */
 	for (; i < len; i++) {
-		fs = (FTH)simple_array_ref(last_frames, i);
+		fs = (FTH) simple_array_ref(last_frames, i);
 		fth_errorf("#<bt[%d]: %S>\n", i - 2, fs);
 	}
 }
@@ -420,7 +420,7 @@ Return the number of objects to print for objects like array, list, hash.  \
 Default value is 12.\n\
 See also set-object-print-length."
 	FTH_STACK_CHECK(vm, 0, 1);
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)fth_print_length);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) fth_print_length);
 }
 
 static void
@@ -432,21 +432,21 @@ Set number of objects to print for objects like array, list, hash to N.  \
 If N is negative, print all elements of a given object.\n\
 See also object-print-length."
 	FTH_STACK_CHECK(vm, 1, 0);
-	fth_print_length = (int)ficlStackPopInteger(vm->dataStack);
+	fth_print_length = (int) ficlStackPopInteger(vm->dataStack);
 }
 
 /* === GC === */
 
-static FObject *obj_minmem = (void *)1;
+static FObject *obj_minmem = (void *) 1;
 static FObject *obj_maxmem = NULL;
 static FObject **obj_types;
-static int	last_object = 0;
+static int 	last_object = 0;
 
 static FInstance *inst_free_list = NULL;
-static FInstance *inst_minmem = (void *)1;
+static FInstance *inst_minmem = (void *) 1;
 static FInstance *inst_maxmem = NULL;
 static FInstance **instances;
-static int	last_instance = 0;
+static int 	last_instance = 0;
 
 #define OBJECT_P(Obj)		(((FTH)(Obj)) & ~FTH_NIL)
 
@@ -486,11 +486,11 @@ static int	last_instance = 0;
 static FInstance *
 gc_run(void)
 {
-	int i, freed;
-	FInstance *inst, *free_inst = NULL;
-	ficlStack *stack;
+	int 		i, freed;
+	FInstance      *inst, *free_inst = NULL;
+	ficlStack      *stack;
 #if defined(FTH_DEBUG)
-	int stk_marked, frm_marked;
+	int 		stk_marked, frm_marked;
 
 	stk_marked = frm_marked = 0;
 	fprintf(stderr, "\\ gc[%02d:%06d]: marking ... ",
@@ -500,7 +500,7 @@ gc_run(void)
 	stack = FTH_FICL_STACK();
 
 	/* Mark possible instances on stack. */
-	for (i = -((int)(stack->top - stack->base)); i <= 0; i++) {
+	for (i = -((int) (stack->top - stack->base)); i <= 0; i++) {
 		inst = FTH_INSTANCE_REF(STACK_FTH_INDEX_REF(stack, i));
 
 		if (INSTANCE_P(inst)) {
@@ -525,7 +525,7 @@ gc_run(void)
 	    i < last_instance;
 	    inst = instances[i++])
 		if (GC_ANY_MARK_P(inst) && inst->obj->mark)
-			(*inst->obj->mark) ((FTH)inst);
+			(*inst->obj->mark) ((FTH) inst);
 #if defined(FTH_DEBUG)
 	if (stk_marked)
 		fprintf(stderr, "(stack %d) ", stk_marked);
@@ -563,7 +563,7 @@ gc_run(void)
 void
 gc_free_all(void)
 {
-	int i, last;
+	int 		i, last;
 
 	simple_array_free(last_frames);
 	if (instances != NULL) {
@@ -601,11 +601,11 @@ ficl_gc_run(ficlVm *vm)
 gc-run\n\
 Run garbage collection immediately.\n\
 See also gc-stats."
-	(void)vm;
+	(void) vm;
 	gc_run();
 }
 
-static bool	fth_gc_on_p;
+static bool 	fth_gc_on_p;
 
 /* ARGSUSED */
 static void
@@ -630,10 +630,10 @@ PROTECTED: temporary protected objects like gc-protected\n\
    BUFFER: size of entire allocated buffer-array\n\
  GC STACK: stack frame level\n\
 See also gc-run."
-	int i, permanent, protected, marked, freed, rest;
-	FInstance *inst;
+	int 		i, permanent, protected, marked, freed, rest;
+	FInstance      *inst;
 
-	(void)vm;
+	(void) vm;
 	permanent = protected = marked = freed = rest = 0;
 	for (i = 1, inst = instances[0];
 	    i < last_instance;
@@ -671,8 +671,8 @@ a1 gc-marked? => #t\n\
 Return #t if OBJ is an instance and mark flag is set.  \
 All new created objects have mark flag set.\n\
 See also gc-protected? and gc-permanent?."
-	FInstance *inst;
-	bool flag;
+	FInstance      *inst;
+	bool 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	inst = ficlStackPopPointer(vm->dataStack);
@@ -692,8 +692,8 @@ a1 gc-unprotect drop\n\
 a1 gc-protected? => #f\n\
 Return #t if OBJ is an instance and protected flag is set.\n\
 See also gc-marked? and gc-permanent?."
-	FInstance *inst;
-	bool flag;
+	FInstance      *inst;
+	bool 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	inst = ficlStackPopPointer(vm->dataStack);
@@ -711,8 +711,8 @@ a1 gc-permanent? => #f\n\
 a2 gc-permanent? => #t\n\
 Return #t if OBJ is an instance and permanent flag is set like constants.\n\
 See also gc-marked? and gc-protected?."
-	FInstance *inst;
-	bool flag;
+	FInstance      *inst;
+	bool 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	inst = ficlStackPopPointer(vm->dataStack);
@@ -727,16 +727,16 @@ ficl_gc_protected_objects(ficlVm *vm)
 gc-protected-objects length => 55\n\
 Return array of all protected objects.\n\
 See also gc-permanent-objects."
-	FInstance *inst;
-	FTH ary;
-	int i;
+	FInstance      *inst;
+	FTH 		ary;
+	int 		i;
 
 	ary = fth_make_empty_array();
 	for (i = 1, inst = instances[0];
 	    i < last_instance;
 	    inst = instances[i++])
 		if (GC_PROTECTED_P(inst))
-			fth_array_push(ary, (FTH)inst);
+			fth_array_push(ary, (FTH) inst);
 	ficlStackPushFTH(vm->dataStack, ary);
 }
 
@@ -747,16 +747,16 @@ ficl_gc_permanent_objects(ficlVm *vm)
 gc-permanent-objects length => 3634\n\
 Return array of all permanent objects.\n\
 See also gc-protected-objects."
-	FInstance *inst;
-	FTH ary;
-	int i;
+	FInstance      *inst;
+	FTH 		ary;
+	int 		i;
 
 	ary = fth_make_empty_array();
 	for (i = 1, inst = instances[0];
 	    i < last_instance;
 	    inst = instances[i++])
 		if (GC_PERMANENT_P(inst))
-			fth_array_push(ary, (FTH)inst);
+			fth_array_push(ary, (FTH) inst);
 	ficlStackPushFTH(vm->dataStack, ary);
 }
 
@@ -803,7 +803,7 @@ a1 gc-mark\n\
 a1 gc-marked => #t\n\
 Mark OBJ to protect it from garbage collection on next gc-run.\n\
 See also gc-unmark."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -829,7 +829,7 @@ a1 gc-unmark\n\
 a1 gc-marked => #f\n\
 Unmark OBJ to unprotect it from garbage collection on next gc-run.\n\
 See also gc-mark."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -907,7 +907,7 @@ ficl_object_type_p(ficlVm *vm)
 \"enved\" make-object-type object-type? => #t\n\
 Return #t if OBJ is an Object type, otherwise #f.\n\
 See also make-object-type."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -917,15 +917,15 @@ See also make-object-type."
 FTH
 make_object_type(const char *name, fobj_t type)
 {
-	FObject *current;
+	FObject        *current;
 
 	FTH_ASSERT_STRING(name);
 	if (last_object % OBJ_CHUNK_SIZE == 0) {
-		int i, size;
+		int 		i, size;
 
 		size = OBJ_CHUNK_SIZE + last_object;
 		obj_types = FTH_REALLOC(obj_types,
-		    sizeof(FObject *) * (size_t)size);
+		    sizeof(FObject *) * (size_t) size);
 		for (i = last_object; i < size; i++)
 			obj_types[i] = FTH_CALLOC(1, sizeof(FObject));
 		if (last_object == 0)
@@ -947,15 +947,15 @@ make_object_type(const char *name, fobj_t type)
 	fth_strcpy(FTH_FICL_VM()->pad, sizeof(FTH_FICL_VM()->pad), "fth-");
 	fth_strcat(FTH_FICL_VM()->pad, sizeof(FTH_FICL_VM()->pad), name);
 	ficlDictionaryAppendConstant(FTH_FICL_DICT(),
-	    FTH_FICL_VM()->pad, (ficlInteger)current);
-	return ((FTH)current);
+	    FTH_FICL_VM()->pad, (ficlInteger) current);
+	return ((FTH) current);
 }
 
 FTH
 make_object_type_from(const char *name, fobj_t type, FTH obj)
 {
-	FTH new;
-	FObject *current, *base;
+	FTH 		new;
+	FObject        *current, *base;
 
 	new = make_object_type(name, type);
 	current = FTH_OBJECT_REF(new);
@@ -985,7 +985,7 @@ make_object_type_from(const char *name, fobj_t type, FTH obj)
 	return (new);
 }
 
-static fobj_t		object_type_counter = FTH_LAST_ENTRY_T;
+static fobj_t 	object_type_counter = FTH_LAST_ENTRY_T;
 
 /*
  * Add NAME to feature environment list, create a constant "fth-NAME"
@@ -1023,7 +1023,7 @@ create a constant \"fth-NAME\" \
 of object-type and return new object-type NAME.  \
 The new created OBJECT-TYPE can be used to bind functions to it.\n\
 See examples/site-lib/enved.fs for examples."
-	FTH tp, fs;
+	FTH 		tp, fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1039,7 +1039,7 @@ ficl_object_type_ref(ficlVm *vm)
 fth-enved object-type-ref => Object% struct\n\
 Return object struct of object-type OBJ.\n\
 See also make-object-type."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -1053,11 +1053,11 @@ ficl_object_types(ficlVm *vm)
 #define h_object_types "( -- ary )  return all object names\n\
 object-types => #( \"array\" \"list\" \"acell\"... )\n\
 Return array of all object names known to the system."
-	FTH objs;
-	ficlInteger i;
+	FTH 		objs;
+	ficlInteger 	i;
 
 	FTH_STACK_CHECK(vm, 0, 1);
-	objs = fth_make_array_len((ficlInteger)last_object);
+	objs = fth_make_array_len((ficlInteger) last_object);
 	for (i = 0; i < last_object; i++)
 		fth_array_set(objs, i, fth_make_string(obj_types[i]->name));
 	ficlStackPushFTH(vm->dataStack, objs);
@@ -1066,12 +1066,12 @@ Return array of all object names known to the system."
 /*
  * Return GEN-struct of OBJ.
  */
-void *
+void           *
 fth_instance_ref_gen(FTH obj)
 {
 	if (INSTANCE_P(obj)) {
 		GC_MARK_SET(FTH_INSTANCE_REF(obj));
-		return ((void *)FTH_INSTANCE_REF_GEN(obj, void));
+		return ((void *) FTH_INSTANCE_REF_GEN(obj, void));
 	}
 	return (NULL);
 }
@@ -1081,7 +1081,7 @@ fth_instance_ref_gen(FTH obj)
 static FInstance *
 gc_next_instance(void)
 {
-	FInstance *current = NULL;
+	FInstance      *current = NULL;
 
 	if (last_instance && (last_instance % GC_MAX_OBJECTS) == 0) {
 		current = inst_free_list;
@@ -1094,11 +1094,11 @@ gc_next_instance(void)
 	}
 	if (current == NULL) {
 		if (last_instance % GC_CHUNK_SIZE == 0) {
-			int i, size;
+			int 		i        , size;
 
 			size = GC_CHUNK_SIZE + last_instance;
 			instances = FTH_REALLOC(instances,
-			    sizeof(FInstance *) * (size_t)size);
+			    sizeof(FInstance *) * (size_t) size);
 
 			for (i = last_instance; i < size; i++) {
 				instances[i] = FTH_CALLOC(1, sizeof(FInstance));
@@ -1153,7 +1153,7 @@ ficl_instance_p(ficlVm *vm)
 gen fth-enved make-instance instance? => #t\n\
 Return #t if OBJ is an instance, otherwise #f.\n\
 See also make-instance."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1166,7 +1166,7 @@ See also make-instance."
 FTH
 fth_make_instance(FTH obj, void *gen)
 {
-	FInstance *inst;
+	FInstance      *inst;
 
 	if (!OBJECT_TYPE_P(obj)) {
 		ficlVmThrowError(FTH_FICL_VM(), "no object type %#x", obj);
@@ -1186,7 +1186,7 @@ fth_make_instance(FTH obj, void *gen)
 	inst->gc_mark = GC_MARK;
 	inst->next = GC_FRAME_CURRENT_INST();
 	GC_FRAME_CURRENT_INST() = inst;
-	return ((FTH)inst);
+	return ((FTH) inst);
 }
 
 static void
@@ -1197,8 +1197,8 @@ gen fth-enved make-instance value enved\n\
 Return new instance of Object type OBJ with GEN wrapped in.\n\
 See also instance-gen-ref and instance-obj-ref.\n\
 See examples/site-lib/enved.fs for examples."
-	void *gen;
-	FTH obj;
+	void           *gen;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -1215,7 +1215,7 @@ enved instance-gen-ref => Enved% struct\n\
 Return GEN-struct of OBJ.\n\
 See also make-instance and instance-obj-ref.\n\
 See examples/site-lib/enved.fs for examples."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -1238,7 +1238,7 @@ enved instance-obj-ref => enved (object-type)\n\
 enved instance-obj-ref object-name => \"object-type\"\n\
 Return object type of OBJ.\n\
 See also instance-gen-ref and instance-obj-ref."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -1273,7 +1273,7 @@ ficl_object_is_instance_of(ficlVm *vm)
 a1 fth-array instance-of? => #t\n\
 a1 fth-hash  instance-of? => #f\n\
 Return #t if OBJ is an instance of TYPE, otherwise #f."
-	FTH obj, type;
+	FTH 		obj, type;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	type = ficlStackPopFTH(vm->dataStack);
@@ -1304,8 +1304,8 @@ ficl_obj_ ## Name (FTH self)						\
 static void								\
 ficl_set_ ## Name (ficlVm *vm)						\
 {									\
-	FTH obj, prc;							\
-	ficlWord *word;							\
+	FTH		obj, prc;					\
+	ficlWord       *word;						\
 									\
 	FTH_STACK_CHECK(vm, 2, 0);					\
 	obj = ficlStackPopFTH(vm->dataStack);				\
@@ -1331,7 +1331,7 @@ fth_set_object_ ## Name (FTH obj, FTH (*Name)(FTH self, FTH val))	\
 static FTH								\
 ficl_obj_ ## Name (FTH self, FTH val)					\
 {									\
-	FTH res, prc;							\
+	FTH		res, prc;					\
 									\
 	prc = FTH_INSTANCE_REF_OBJ(self)->Name ## _proc;		\
 	res = fth_proc_call(prc, # Name, 2, self, val);			\
@@ -1340,8 +1340,8 @@ ficl_obj_ ## Name (FTH self, FTH val)					\
 static void								\
 ficl_set_ ## Name (ficlVm *vm)						\
 {									\
-	FTH obj, prc;							\
-	ficlWord *word;							\
+	FTH		obj, prc;					\
+	ficlWord       *word;						\
 									\
 	FTH_STACK_CHECK(vm, 2, 0);					\
 	obj = ficlStackPopFTH(vm->dataStack);				\
@@ -1367,7 +1367,7 @@ fth_set_object_ ## Name (FTH obj, FTH (*Name)(FTH s, FTH o1, FTH o2))	\
 static FTH								\
 ficl_obj_ ## Name (FTH self, FTH o1, FTH o2)				\
 {									\
-	FTH res, prc;							\
+	FTH		res, prc;					\
 									\
 	prc = FTH_INSTANCE_REF_OBJ(self)->Name ## _proc;		\
 	res = fth_proc_call(prc, # Name, 3, self, o1, o2);		\
@@ -1376,8 +1376,8 @@ ficl_obj_ ## Name (FTH self, FTH o1, FTH o2)				\
 static void								\
 ficl_set_ ## Name (ficlVm *vm)						\
 {									\
-	FTH obj, prc;							\
-	ficlWord *word;							\
+	FTH		obj, prc;					\
+	ficlWord       *word;						\
 									\
 	FTH_STACK_CHECK(vm, 2, 0);					\
 	obj = ficlStackPopFTH(vm->dataStack);				\
@@ -1403,7 +1403,7 @@ fth_set_object_ ## Name (FTH obj, void (*Name)(FTH self))		\
 static void								\
 ficl_obj_ ## Name (FTH self)						\
 {									\
-	FTH prc;							\
+	FTH		prc;						\
 									\
 	prc = FTH_INSTANCE_REF_OBJ(self)->Name ## _proc;		\
 	fth_proc_call(prc, # Name, 1, self);				\
@@ -1411,8 +1411,8 @@ ficl_obj_ ## Name (FTH self)						\
 static void								\
 ficl_set_ ## Name (ficlVm *vm)						\
 {									\
-	FTH obj, prc;							\
-	ficlWord *word;							\
+	FTH		obj, prc;					\
+	ficlWord       *word;						\
 									\
 	FTH_STACK_CHECK(vm, 2, 0);					\
 	obj = ficlStackPopFTH(vm->dataStack);				\
@@ -1499,12 +1499,12 @@ FTH
 fth_set_object_apply(FTH obj, void *apply, int req, int opt, int rest)
 {
 	if (OBJECT_TYPE_P(obj)) {
-		FTH prc;
+		FTH 		prc;
 
 		/*
 		 * req + 1: self in addition to args length
 		 */
-		prc = fth_make_proc_from_func(NULL, (FTH(*)())apply,
+		prc = fth_make_proc_from_func(NULL, (FTH (*) ()) apply,
 		    false, req + 1, opt, rest);
 		FTH_OBJECT_REF(obj)->apply = prc;
 	}
@@ -1519,10 +1519,10 @@ ficl_set_apply(ficlVm *vm)
 <'> enved-ref fth-enved 1 set-object-apply\n\
 Set XT as OBJECT-APPLY function for OBJ type.\n\
 See examples/site-lib/enved.fs for examples."
-	FTH obj, arity;
-	ficlWord *word;
-	int req, opt;
-	bool rest;
+	FTH 		obj, arity;
+	ficlWord       *word;
+	int 		req, opt;
+	bool 		rest;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	arity = fth_pop_ficl_cell(vm);
@@ -1540,7 +1540,7 @@ See examples/site-lib/enved.fs for examples."
 	} else
 		req = FIX_TO_INT32(arity) + 1;
 	if (OBJECT_TYPE_P(obj)) {
-		FTH prc;
+		FTH 		prc;
 
 		prc = fth_make_proc(word, req, opt, rest);
 		FTH_OBJECT_REF(obj)->apply = prc;
@@ -1553,7 +1553,7 @@ See examples/site-lib/enved.fs for examples."
 static bool
 xmobj_p(FTH obj)
 {
-	ficlInteger len;
+	ficlInteger 	len;
 
 #define X_SYMBOL_P(Obj)							\
 	(FTH_SYMBOL_P(Obj) && isupper((int)(fth_symbol_ref(Obj)[0])))
@@ -1570,14 +1570,14 @@ xmobj_p(FTH obj)
 	 */
 	if (len == 3 &&
 	    fth_unsigned_p(fth_array_ref(obj, 1L) &&
-	    fth_instance_p(fth_array_ref(obj, 2L))))
+		fth_instance_p(fth_array_ref(obj, 2L))))
 		return (X_SYMBOL_P(fth_array_ref(obj, 0L)));
 	/*
 	 * XEvent '( 'XXxxEvent pointer object 'XEvent )
 	 */
 	if (len == 4 && X_SYMBOL_P(fth_array_ref(obj, 3L)))
 		return (strncmp(fth_symbol_ref(fth_array_ref(obj, 3L)),
-		    "XEvent", 6L) == 0);
+			"XEvent", 6L) == 0);
 	return (false);
 }
 
@@ -1590,7 +1590,7 @@ nil xmobj? => #f\n\
 Return #t if OBJ is an XmObj (xm.c), otherwise #f.  \
 It is a very special Snd XM test.\n\
 See snd(1) for more information."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1601,8 +1601,8 @@ static FTH
 xmobj_to_string(FTH obj)
 {
 	if (xmobj_p(obj)) {
-		ficlInteger len;
-		char *symbol;
+		ficlInteger 	len;
+		char           *symbol;
 
 		len = fth_array_length(obj);
 		symbol = ((len > 0) ?
@@ -1612,24 +1612,24 @@ xmobj_to_string(FTH obj)
 		case 2:
 			/* #( symbol addr ) */
 			return (fth_make_string_format("#( %s %p )",
-			    symbol, (void *)fth_array_ref(obj, 1L)));
+				symbol, (void *) fth_array_ref(obj, 1L)));
 			break;
 		case 3:
 			/* #( symbol addr xm-obj-from-addr ) */
 			if (fth_instance_p(fth_array_ref(obj, 2L)))
 				return (fth_make_string_format("#( XmObj %s )",
-				    symbol));
+					symbol));
 			break;
 		case 4:
 			/* #( type addr xm-obj-from-addr symbol ) */
 			if (fth_instance_p(fth_array_ref(obj, 2L)))
 				return (fth_make_string_format("#( XEvent %S )",
-				    fth_array_ref(obj, 0L)));
+					fth_array_ref(obj, 0L)));
 			break;
 		case 5:
 			/* #( symbol code context prop-atom prot-atom ) */
 			return (fth_make_string_format("#( Callback %s )",
-			    fth_symbol_ref(fth_array_ref(obj, 3L))));
+				fth_symbol_ref(fth_array_ref(obj, 3L))));
 			break;
 		default:
 			break;
@@ -1654,14 +1654,14 @@ See also object-id."
 	if (FICL_WORD_DEFINED_P(obj))
 		return (INT_TO_FIX(FICL_WORD_REF(obj)->hash));
 	if (fth_instance_p(obj)) {
-		char *str;
-		ficlString s;
+		char           *str;
+		ficlString 	s;
 
 		str = fth_to_c_string(obj);
 		FICL_STRING_SET_FROM_CSTRING(s, str);
 		return (INT_TO_FIX(ficlHashCode(s)));
 	}
-	return ((FTH)((ficlInteger)obj | FIXNUM_FLAG));
+	return ((FTH) ((ficlInteger) obj | FIXNUM_FLAG));
 }
 
 FTH
@@ -1674,10 +1674,10 @@ Return object id of OBJ, a uniq number.\n\
 See also hash-id."
 	if (IMMEDIATE_P(obj))
 		return (INT_TO_FIX(obj));
-	return ((FTH)((ficlInteger)obj | FIXNUM_FLAG));
+	return ((FTH) ((ficlInteger) obj | FIXNUM_FLAG));
 }
 
-char *
+char           *
 fth_object_name(FTH obj)
 {
 	if (obj == 0 || (IMMEDIATE_P(obj) && FIXNUM_P(obj)))
@@ -1731,7 +1731,7 @@ ficl_object_name(ficlVm *vm)
 1          object-name => \"fixnum\"\n\
 Return object type name of OBJ as a string.\n\
 See also .object-name."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1747,7 +1747,7 @@ ficl_print_object_name(ficlVm *vm)
 1          .object-name => fixnum\n\
 Print object name of OBJ to current stdout.\n\
 See also object-name."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -1757,17 +1757,17 @@ See also object-name."
 static FTH
 print_object(FTH obj, fth_inspect_type_t type)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = FTH_FALSE;
 	if (obj == 0 || (IMMEDIATE_P(obj) && FIXNUM_P(obj))) {
-			if (type == OBJ_INSPECT)
-				fs = fth_make_string_format("%s: %ld",
-				    fth_object_name(obj),
-				    FIX_TO_INT(obj));
-			else
-				fs = fth_make_string_format("%ld",
-				    FIX_TO_INT(obj));
+		if (type == OBJ_INSPECT)
+			fs = fth_make_string_format("%s: %ld",
+			    fth_object_name(obj),
+			    FIX_TO_INT(obj));
+		else
+			fs = fth_make_string_format("%ld",
+			    FIX_TO_INT(obj));
 	} else if (INSTANCE_P(obj)) {
 		/* xm.c */
 		if (xmobj_p(obj))
@@ -1784,9 +1784,9 @@ print_object(FTH obj, fth_inspect_type_t type)
 				else
 					fs = fth_make_string_format("%s: %p",
 					    FTH_INSTANCE_NAME(obj),
-					    (void *)obj);
+					    (void *) obj);
 				if (!fth_hook_empty_p(
-				    FTH_INSTANCE_DEBUG_HOOK(obj)))
+					FTH_INSTANCE_DEBUG_HOOK(obj)))
 					fs = fth_run_hook_again(
 					    FTH_INSTANCE_DEBUG_HOOK(obj),
 					    2, fs, obj);
@@ -1801,7 +1801,7 @@ print_object(FTH obj, fth_inspect_type_t type)
 				else
 					fs = fth_make_string_format("#<%s:%p>",
 					    FTH_INSTANCE_NAME(obj),
-					    (void *)obj);
+					    (void *) obj);
 				break;
 			case OBJ_DUMP:
 			default:
@@ -1814,7 +1814,7 @@ print_object(FTH obj, fth_inspect_type_t type)
 				else
 					fs = fth_make_string_format("%s:%p",
 					    FTH_INSTANCE_NAME(obj),
-					    (void *)obj);
+					    (void *) obj);
 				break;
 			}
 	} else if (FICL_WORD_DEFINED_P(obj))
@@ -1847,8 +1847,8 @@ print_object(FTH obj, fth_inspect_type_t type)
 	if (type == OBJ_INSPECT) {
 		if (fth_string_length(fs) < 3 ||
 		    (FTH_TO_CHAR(fth_string_char_ref(fs, 0L)) !=
-		    (int)'#' && FTH_TO_CHAR(fth_string_char_ref(fs, 1L)) !=
-		    (int)'<'))
+			(int) '#' && FTH_TO_CHAR(fth_string_char_ref(fs, 1L)) !=
+			(int) '<'))
 			fs = fth_make_string_format("#<%S>", fs);
 	}
 	return (fs);
@@ -1861,7 +1861,7 @@ ficl_print_inspect(ficlVm *vm)
 #( 0 ) .inspect => #<array[1]:  #<fixnum: 0>>\n\
 Print inspect string of OBJ.\n\
 See also object-inspect, object->string and object-dump."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -1913,26 +1913,26 @@ See also .inspect, object-inspect and object->string."
 	return (print_object(obj, OBJ_DUMP));
 }
 
-char *
+char           *
 fth_to_c_inspect(FTH obj)
 {
 	return (fth_string_ref(print_object(obj, OBJ_INSPECT)));
 }
 
-char *
+char           *
 fth_to_c_string(FTH obj)
 {
 	return (fth_string_ref(print_object(obj, OBJ_TO_STRING)));
 }
 
 /* For object type function obj_to_string. */
-char *
+char           *
 fth_to_c_string_2(FTH obj)
 {
 	return (fth_string_ref(fth_object_to_string_2(obj)));
 }
 
-char *
+char           *
 fth_to_c_dump(FTH obj)
 {
 	return (fth_string_ref(print_object(obj, OBJ_DUMP)));
@@ -1946,7 +1946,7 @@ fth_object_to_array(FTH obj)
 1 object->array => #( 1 )\n\
 Return OBJ as array."
 	if (INSTANCE_P(obj) && FTH_TO_ARRAY_P(obj)) {
-		FInstance *inst;
+		FInstance      *inst;
 
 		GC_MARK_SET(FTH_INSTANCE_REF(obj));
 		inst = FTH_INSTANCE_REF(obj);
@@ -1969,8 +1969,8 @@ a1 a2 object-equal? => #t\n\
 Return copy of OBJ1.  \
 Copy any element if OBJ1 is an instance."
 	if (obj != 0 && INSTANCE_P(obj) && FTH_COPY_P(obj)) {
-		FTH new;
-		FInstance *inst, *new_inst;
+		FTH 		new;
+		FInstance      *inst, *new_inst;
 
 		GC_MARK_SET(FTH_INSTANCE_REF(obj));
 		if (FTH_BOOLEAN_P(obj) || FTH_NIL_TYPE_P(obj))
@@ -2010,8 +2010,8 @@ an array for example, return value at INDEX.  \
 If OBJ is of a type which consists of only one element, \
 a fixnum for example, ignore INDEX and return OBJ itself.\n\
 See also object-set!."
-	FTH obj;
-	ficlInteger idx;
+	FTH 		obj;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2047,8 +2047,8 @@ an array for example, set VALUE at position INDEX.  \
 If OBJ is of a type which consists of only one element, \
 a fixnum for example, do nothing.\n\
 See also object-ref."
-	FTH obj, val;
-	ficlInteger idx;
+	FTH 		obj, val;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2068,8 +2068,8 @@ Add VALUE to value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set-!, object-set*! and object-set/!."
-	FTH obj, value;
-	ficlInteger idx;
+	FTH 		obj, value;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2090,8 +2090,8 @@ Subtract VALUE from value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set+!, object-set*! and object-set/!."
-	FTH obj, value;
-	ficlInteger idx;
+	FTH 		obj, value;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2112,8 +2112,8 @@ Multiply VALUE with value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatioi, \
 or ficlComplex).\n\
 See also object-set+!, object-set-! and object-set/!."
-	FTH obj, value;
-	ficlInteger idx;
+	FTH 		obj, value;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2134,8 +2134,8 @@ Divide value at INDEX of OBJ by VALUE.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set+!, object-set-! and object-set*!."
-	FTH obj, value;
-	ficlInteger idx;
+	FTH 		obj, value;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2170,8 +2170,8 @@ ficl_object_equal_p(ficlVm *vm)
 a1 a2 object-equal? => #t\n\
 a1 h1 object-equal? => #f\n\
 Return #t if OBJ1 and OBJ2 have equal content, otherwise #f."
-	FTH obj1, obj2;
-	bool flag;
+	FTH 		obj1, obj2;
+	bool 		flag;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -2220,7 +2220,7 @@ The next two examples require each 1 argument:\n\
 Forth: <'> enved-ref fth-enved 1 set-object-apply\n\
 See examples/site-lib/enved.fs for Forth examples \
 and eg. src/array.c for C examples."
-	FTH prc, r;
+	FTH 		prc, r;
 
 	if (!INSTANCE_P(obj))
 		return (FTH_FALSE);
@@ -2252,7 +2252,7 @@ ficl_object_empty_p(ficlVm *vm)
 #{ 'a 10 } object-empty? => #f\n\
 1 object-empty? => #f\n\
 Return #t if length of OBJ is zero, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2274,8 +2274,8 @@ ficl_object_range_p(ficlVm *vm)
 #( 0 1 2 ) -3 object-range? => #f\n\
 Return #t if INDEX is in range of OBJ, otherwise #f.  \
 If INDEX is negative, return #f."
-	ficlInteger idx;
-	FTH obj;
+	ficlInteger 	idx;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2286,8 +2286,8 @@ If INDEX is negative, return #f."
 bool
 fth_object_member_p(FTH obj, FTH key)
 {
-	ficlInteger i;
-	FTH val;
+	ficlInteger 	i;
+	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
 		val = fth_object_value_ref(obj, i);
@@ -2307,7 +2307,7 @@ ficl_object_member_p(ficlVm *vm)
 \"foo\" <char> f object-member? => #t\n\
 Return #t if KEY is present in OBJ, otherwise #f.\n\
 See also object-find and object-index."
-	FTH key, obj;
+	FTH 		key, obj;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
@@ -2325,8 +2325,8 @@ fth_object_find(FTH obj, FTH key)
 \"foo\" <char> f object-find => 102\n\
 Search for KEY in OBJ and return corresponding value or #f if not found.\n\
 See also object-member? and object-index."
-	ficlInteger i;
-	FTH val;
+	ficlInteger 	i;
+	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
 		val = fth_object_value_ref(obj, i);
@@ -2346,8 +2346,8 @@ fth_object_index(FTH obj, FTH key)
 \"foo\" <char> f object-index => 0\n\
 Search for KEY in OBJ and return index or -1 if not found.\n\
 See also object-member? and object-find."
-	ficlInteger i;
-	FTH val;
+	ficlInteger 	i;
+	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
 		val = fth_object_value_ref(obj, i);
@@ -2442,7 +2442,7 @@ Return value at current cycle-index of OBJ and increment cycle-index.  \
 Cycle through content of OBJ from first to last entry \
 and start again at the beginning etc.\n\
 See also cycle-set!"
-	FTH value;
+	FTH 		value;
 
 	if (!INSTANCE_P(obj))
 		return (FTH_FALSE);
@@ -2478,7 +2478,7 @@ Store VALUE at current cycle-index of OBJ and increment cycle-index.  \
 Cycle through content of OBJ from first to last entry \
 and start again at the beginning etc.\n\
 See also cycle-ref."
-	FTH obj, val;
+	FTH 		obj, val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2516,8 +2516,8 @@ a cycle-ref => 3\n\
 a cycle-start@ => 0\n\
 Set cycle-index of OBJ to INDEX.\n\
 See also cycle-start@ and cycle-start0."
-	FTH obj;
-	ficlInteger idx;
+	FTH 		obj;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2565,7 +2565,7 @@ a1 .$ => #( 20 1 2 )\n\
 Store VALUE to first element of OBJ.  \
 Raise an OUT-OF-RANGE exception if length of OBJ is less than 1.\n\
 See also second-set!, third-set! and last-set!."
-	FTH obj, val;
+	FTH 		obj, val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2596,7 +2596,7 @@ a1 .$ => #( 0 20 2 )\n\
 Store VALUE to second entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 2.\n\
 See also first-set!, third-set! and last-set!."
-	FTH obj, val;
+	FTH 		obj, val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2627,7 +2627,7 @@ a1 .$ => #( 0 1 20 )\n\
 Store VALUE to third entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 3.\n\
 See also first-set!, second-set! and last-set!."
-	FTH obj, val;
+	FTH 		obj, val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2658,7 +2658,7 @@ a1 .$ => #( 0 1 20 )\n\
 Store VALUE to last entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 1.\n\
 See also first-set!, second-set! and third-set!."
-	FTH obj, val;
+	FTH 		obj, val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2685,7 +2685,7 @@ If set, it will be called on inspecting the object \
 with the inspect string as first argument.  \
 If there are more than one hook procedures, \
 all of them will be called feeded with the new string previously returned."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2708,7 +2708,7 @@ ficl_false_p(ficlVm *vm)
 0  false? => #f\n\
 Return #t if OBJ is #f, otherwise #f.\n\
 See also boolean?, true?, nil?, undef?."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2724,7 +2724,7 @@ ficl_true_p(ficlVm *vm)
 0  true? => #f\n\
 Return #t if OBJ is #t, otherwise #f.\n\
 See also false?, boolean?, nil?, undef?."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2741,7 +2741,7 @@ nil nil? => #t\n\
 '() nil? => #t\n\
 Return #t if OBJ is nil, otherwise #f.\n\
 See also false?, true?, boolean?, undef?."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2757,7 +2757,7 @@ undef undef? => #t\n\
 \"\"    undef? => #f\n\
 Return #t if OBJ is undef, otherwise #f.\n\
 See also false?, true?, nil?, boolean?."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2776,7 +2776,7 @@ undef boolean? => #f\n\
 0     boolean? => #f\n\
 Return #t if OBJ is #t or #f, otherwise #f.\n\
 See also false?, true?, nil?, undef?."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2789,14 +2789,14 @@ ficl_to_fth(FTH obj)
 	if (obj &&
 	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE_P(obj)))
 		return (obj);
-	return (fth_make_int((ficlInteger)obj));
+	return (fth_make_int((ficlInteger) obj));
 }
 
 FTH
 fth_pop_ficl_cell(ficlVm *vm)
 {
-	ficlStack *stack;
-	FTH obj;
+	ficlStack      *stack;
+	FTH 		obj;
 
 	stack = vm->dataStack;
 	obj = STACK_FTH_REF(stack);
@@ -2804,21 +2804,21 @@ fth_pop_ficl_cell(ficlVm *vm)
 	if (obj &&
 	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE_P(obj)))
 		return (obj);
-	return (fth_make_int((ficlInteger)obj));
+	return (fth_make_int((ficlInteger) obj));
 }
 
 FTH
 fth_to_ficl(FTH obj)
 {
 	if (FTH_FIXNUM_P(obj))
-		return ((FTH)FIX_TO_INT(obj));
+		return ((FTH) FIX_TO_INT(obj));
 	return (obj);
 }
 
 void
 fth_push_ficl_cell(ficlVm *vm, FTH obj)
 {
-	ficlStack *stack;
+	ficlStack      *stack;
 
 	stack = vm->dataStack;
 	++stack->top;
