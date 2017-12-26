@@ -1,3 +1,15 @@
+2017-12-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c (history-lineno, history-next, history-prev):
+	New words added.
+
+	* src/utils.c (history): New command gl-add added.
+
+2017-12-25  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/proc.c (ficl_get_help): Returns the help string
+	instead of printing it.  The repl prints it.
+
 2017-12-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs (with-sound): Add run-reverb.
@@ -10,8 +22,8 @@
 
 	* examples/fth-lib/fth.fs (stack-check): New function.
 
-	* src/misc.c (ADD_TO_LOAD_PATH): Remove a trailing slash
-	from path if any.
+	* src/misc.c (ADD_TO_LOAD_PATH): Remove trailing slash from
+	path if any.
 
 	* examples/site-lib/clm.fs (with-sound): Catch all exceptions
 	to reset variables before finish.

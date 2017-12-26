@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.229 3/23/16
+ * @(#)utils.c	1.230 12/25/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -52,19 +52,19 @@ static int	get_pos_from_buffer(ficlVm *vm, char *delim);
 static ficlString parse_input_buffer_0(ficlVm *vm, int pos);
 static void	utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p);
 
-char *
+char           *
 fth_strerror(int n)
 {
 #if defined(HAVE_STRERROR)
 	return (strerror(n));
 #else
-	static char mesg[32];
+	static char 	mesg[32];
 
 	if (n < 0 || n >= sys_nerr) {
 		snprintf(mesg, sizeof(mesg), "Unknown error (%d)", n);
 		return (mesg);
 	} else
-		return ((char *)sys_errlist[n]);
+		return ((char *) sys_errlist[n]);
 #endif
 }
 
@@ -76,13 +76,13 @@ fth_strerror(int n)
 #else
 void           *malloc();
 void           *realloc();
-void		free();
+void 		free();
 #endif
 
-static void *
+static void    *
 fixup_null_alloc(size_t n, const char *name)
 {
-	void *p = NULL;
+	void           *p = NULL;
 
 	if (n == 0)
 		p = malloc(1L);
@@ -95,10 +95,10 @@ fixup_null_alloc(size_t n, const char *name)
 	return (p);
 }
 
-void *
+void           *
 fth_malloc(size_t n)
 {
-	void *p;
+	void           *p;
 
 	p = malloc(n);
 	if (p == NULL)
@@ -106,7 +106,7 @@ fth_malloc(size_t n)
 	return (p);
 }
 
-void *
+void           *
 fth_realloc(void *p, size_t n)
 {
 	if (p == NULL)
@@ -117,10 +117,10 @@ fth_realloc(void *p, size_t n)
 	return (p);
 }
 
-void *
+void           *
 fth_calloc(size_t count, size_t eltsize)
 {
-	void *p;
+	void           *p;
 
 	p = calloc(count, eltsize);
 	if (p == NULL) {
@@ -138,15 +138,15 @@ fth_free(void *ptr)
 	ptr = NULL;
 }
 
-char *
+char           *
 fth_strdup(const char *s)
 {
 	if (s != NULL) {
-		size_t len;
+		size_t 		len;
 
 		len = strlen(s) + 1;
 		if (len > 1)
-			return ((char *)memcpy(FTH_MALLOC(len), s, len));
+			return ((char *) memcpy(FTH_MALLOC(len), s, len));
 	}
 	return (NULL);
 }
@@ -159,7 +159,7 @@ fth_strlen(const char *s)
 	return (0);
 }
 
-/*
+/*-
  * fth_strcpy
  * fth_strncpy
  * fth_strcat
@@ -183,7 +183,7 @@ fth_strlen(const char *s)
 	if ((Dst) == NULL || (Siz) == 0 || (Src) == NULL || (Cnt) == 0)	\
 		return (Dst)
 
-static char *
+static char    *
 do_strncpy(char *d, size_t size, const char *s, size_t count)
 {
 	size--;
@@ -193,7 +193,7 @@ do_strncpy(char *d, size_t size, const char *s, size_t count)
 	return (strncat(d, s, count));
 }
 
-static char *
+static char    *
 do_strncat(char *d, size_t size, const char *s, size_t count)
 {
 	size -= strlen(d);
@@ -203,38 +203,38 @@ do_strncat(char *d, size_t size, const char *s, size_t count)
 	return (strncat(d, s, count));
 }
 
-char *
+char           *
 fth_strcpy(char *d, size_t size, const char *s)
 {
 	CHECK_STR3ARGS(d, size, s);
 	return (do_strncpy(d, size, s, strlen(s)));
 }
 
-char *
+char           *
 fth_strncpy(char *d, size_t size, const char *s, size_t count)
 {
 	CHECK_STR4ARGS(d, size, s, count);
 	return (do_strncpy(d, size, s, count));
 }
 
-char *
+char           *
 fth_strcat(char *d, size_t size, const char *s)
 {
 	CHECK_STR3ARGS(d, size, s);
 	return (do_strncat(d, size, s, strlen(s)));
 }
 
-char *
+char           *
 fth_strncat(char *d, size_t size, const char *s, size_t count)
 {
 	CHECK_STR4ARGS(d, size, s, count);
 	return (do_strncat(d, size, s, count));
 }
 
-char *
+char           *
 fth_getenv(const char *name, char *def)
 {
-	char *value;
+	char           *value;
 
 	value = NULL;
 #if defined(HAVE_ISSETUGID)
@@ -253,14 +253,14 @@ fth_getenv(const char *name, char *def)
 int
 fth_evaluate(ficlVm *vm, const char *buffer)
 {
-	volatile int status, sig;
+	volatile int 	status, sig;
 
 	status = FICL_VM_STATUS_OUT_OF_TEXT;
 	if (buffer != NULL) {
 		gc_push(vm->runningWord);
 		sig = sigsetjmp(fth_sig_toplevel, 1);
 		if (sig == 0)
-			status = ficlVmEvaluate(vm, (char *)buffer);
+			status = ficlVmEvaluate(vm, (char *) buffer);
 		else
 			signal_check(sig);
 		gc_pop();
@@ -272,7 +272,7 @@ fth_evaluate(ficlVm *vm, const char *buffer)
 int
 fth_execute_xt(ficlVm *vm, ficlWord *word)
 {
-	volatile int status, sig;
+	volatile int 	status, sig;
 
 	status = FICL_VM_STATUS_OUT_OF_TEXT;
 	if (word != NULL) {
@@ -287,16 +287,16 @@ fth_execute_xt(ficlVm *vm, ficlWord *word)
 	return (status);
 }
 
-#else				/* _WIN32 */
+#else	/* _WIN32 */
 
 int
 fth_evaluate(ficlVm *vm, const char *buffer)
 {
-	int status;
+	int 		status;
 
 	status = FICL_VM_STATUS_OUT_OF_TEXT;
 	if (buffer != NULL) {
-		status = ficlVmEvaluate(vm, (char *)buffer);
+		status = ficlVmEvaluate(vm, (char *) buffer);
 	}
 	return (status);
 }
@@ -304,7 +304,7 @@ fth_evaluate(ficlVm *vm, const char *buffer)
 int
 fth_execute_xt(ficlVm *vm, ficlWord *word)
 {
-	int status;
+	int 		status;
 
 	status = FICL_VM_STATUS_OUT_OF_TEXT;
 	if (word != NULL) {
@@ -312,11 +312,11 @@ fth_execute_xt(ficlVm *vm, ficlWord *word)
 	}
 	return (status);
 }
-#endif				/* _WIN32 */
+#endif	/* _WIN32 */
 
 /* === Utilities === */
 
-char *
+char           *
 pop_cstring(ficlVm *vm)
 {
 	return (fth_string_ref(ficlStackPopFTH(vm->dataStack)));
@@ -340,8 +340,8 @@ push_forth_string(ficlVm *vm, char *string)
 void
 fth_throw(FTH obj, const char *fmt,...)
 {
-	ficlVm *vm;
-	FTH fs, exc;
+	ficlVm         *vm;
+	FTH 		fs, exc;
 
 	vm = FTH_FICL_VM();
 	fs = fth_make_empty_string();
@@ -352,7 +352,7 @@ fth_throw(FTH obj, const char *fmt,...)
 	if (FTH_NOT_FALSE_P(exc))
 		fth_string_sformat(fs, "%s", fth_exception_ref(exc));
 	if (fmt != NULL) {
-		va_list ap;
+		va_list 	ap;
 
 		if (FTH_NOT_FALSE_P(exc))
 			fth_string_sformat(fs, " in ");
@@ -385,7 +385,7 @@ fth_throw(FTH obj, const char *fmt,...)
 	 */
 }
 
-/*
+/*-
  * Throw exception EXC with text built from ARGS.
  * If ARGS is not an array, ARGS's string representation is used.
  * If ARGS is FTH_NIL or an empty array, a default string is used.
@@ -400,7 +400,7 @@ fth_throw(FTH obj, const char *fmt,...)
  *       #( fmt arg1 arg2 ... )	=> formatted string
  *
  * fth_throw_error(FTH_BAD_ARITY, proc);
- *   => #<bad-arity in test-proc> 
+ *   => #<bad-arity in test-proc>
  *
  * fth_throw_error(FTH_BAD_ARITY, FTH_NIL);
  *   => #<bad-arity: proc has bad arity>
@@ -435,8 +435,8 @@ fth_throw_list(FTH exc, FTH args)
 static void
 utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p)
 {
-	ficlInteger len;
-	FTH fmt;
+	ficlInteger 	len;
+	FTH 		fmt;
 
 	if (!fth_symbol_or_exception_p(exc))
 		exc = FTH_FORTH_ERROR;
@@ -450,7 +450,7 @@ utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p)
 			fth_throw(exc, "%S", args);
 			/* NOTREACHED */
 			break;
-		} /* else */
+		}		/* else */
 		/* FALLTHROUGH */
 	case 0:
 		/*
@@ -464,7 +464,7 @@ utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p)
 		 * #( str )
 		 * [0]: simple string
 		 */
-		fth_throw(exc, "%S", fth_array_ref(args, 0L)); 
+		fth_throw(exc, "%S", fth_array_ref(args, 0L));
 		/* NOTREACHED */
 		break;
 	default:
@@ -475,7 +475,7 @@ utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p)
 		 */
 		fmt = fth_array_shift(args);
 		if (with_lisp_fmt_p && fth_string_length(fmt) > 1) {
-			FTH fmt_s;
+			FTH 		fmt_s;
 
 			fmt_s = fth_make_string("%s");
 			fth_string_replace(fmt, fth_make_string("~A"), fmt_s);
@@ -490,34 +490,34 @@ utils_throw_error(FTH exc, FTH args, bool with_lisp_fmt_p)
 static int
 get_pos_from_buffer(ficlVm *vm, char *delim)
 {
-	char *str, *tmp;
+	char           *str, *tmp;
 
 	tmp = str = ficlVmGetInBuf(vm);
 	while ((tmp = strstr(tmp, delim)) != NULL && (*(tmp - 1) == '\\'))
 		tmp++;
-	return ((tmp != NULL && tmp >= str) ? (int)(tmp - str) : -1);
+	return ((tmp != NULL && tmp >= str) ? (int) (tmp - str) : -1);
 }
 
 #define FTH_BUFFER_LENGTH               (8192 * sizeof(FTH))
-static char	buffer_result[FTH_BUFFER_LENGTH + 1];
+static char 	buffer_result[FTH_BUFFER_LENGTH + 1];
 
 /*
  * Returned string must be freed.
  */
-char *
+char           *
 parse_tib_with_restart(ficlVm *vm, char *delim, int skip,
-    ficlString (*parse_buffer)(ficlVm *vm, int pos))
+    ficlString (*parse_buffer) (ficlVm *vm, int pos))
 {
-	char *buf = NULL;
-	int pos;
-	ficlString s;
+	char           *buf = NULL;
+	int 		pos;
+	ficlString 	s;
 
 	pos = get_pos_from_buffer(vm, delim);
 	if (pos == -1)
 		skip = -1;
 	else if (pos >= skip)
 		skip += pos;
-	s = (*parse_buffer)(vm, skip);
+	s = (*parse_buffer) (vm, skip);
 	fth_strncat(buffer_result, sizeof(buffer_result), s.text, s.length);
 	if (pos == -1)
 		ficlVmThrow(vm, FICL_VM_STATUS_RESTART);
@@ -532,9 +532,9 @@ parse_tib_with_restart(ficlVm *vm, char *delim, int skip,
 static ficlString
 parse_input_buffer_0(ficlVm *vm, int pos)
 {
-	char *trace, *stop, *tmp;
-	int esc, cur_pos;
-	ficlString s;
+	char           *trace, *stop, *tmp;
+	int 		esc, cur_pos;
+	ficlString 	s;
 
 	trace = ficlVmGetInBuf(vm);
 	stop = ficlVmGetInBufEnd(vm);
@@ -601,7 +601,7 @@ parse_input_buffer_0(ficlVm *vm, int pos)
  * Returned string must be freed.
  * TIB points after first char of delim.
  */
-char *
+char           *
 parse_input_buffer(ficlVm *vm, char *delim)
 {
 	return (parse_tib_with_restart(vm, delim, 0, parse_input_buffer_0));
@@ -609,33 +609,33 @@ parse_input_buffer(ficlVm *vm, char *delim)
 
 /* === Simple Array === */
 
-simple_array *
+simple_array   *
 make_simple_array(int incr)
 {
-	simple_array *ary;
+	simple_array   *ary;
 
 	if (incr <= 0)
 		incr = 8;
 	if (incr > 128)
 		incr = 128;
 	ary = FTH_MALLOC(sizeof(simple_array));
-	ary->incr = (unsigned int)incr;
+	ary->incr = (unsigned int) incr;
 	ary->length = 0;
 	ary->data = NULL;
 	return (ary);
 }
 
-simple_array *
+simple_array   *
 make_simple_array_var(int len,...)
 {
-	int i;
-	va_list list;
-	simple_array *ary;
+	int 		i;
+	va_list 	list;
+	simple_array   *ary;
 
 	ary = make_simple_array(len);
 	va_start(list, len);
 	for (i = 0; i < len; i++)
-		simple_array_push(ary, (void *)va_arg(list, void *));
+		simple_array_push(ary, (void *) va_arg(list, void *));
 	va_end(list);
 	return (ary);
 }
@@ -645,7 +645,7 @@ simple_array_length(simple_array *ary)
 {
 	if (ary == NULL)
 		return (-1);
-	return ((int)ary->length);
+	return ((int) ary->length);
 }
 
 bool
@@ -653,21 +653,21 @@ simple_array_equal_p(simple_array *ary1, simple_array *ary2)
 {
 	if ((ary1 != NULL && ary2 != NULL) &&
 	    (ary1->length == ary2->length && ary1->incr == ary2->incr)) {
-		unsigned int i;
+		unsigned int 	i;
 
 		for (i = 0; i < ary1->length; i++)
-			if (!fth_object_equal_p((FTH)ary1->data[i],
-			    (FTH)ary2->data[i]))
+			if (!fth_object_equal_p((FTH) ary1->data[i],
+				(FTH) ary2->data[i]))
 				return (false);
 		return (true);
 	}
 	return (false);
 }
 
-void *
+void           *
 simple_array_ref(simple_array *ary, int i)
 {
-	if (ary != NULL && i >= 0 && i < (int)ary->length)
+	if (ary != NULL && i >= 0 && i < (int) ary->length)
 		return (ary->data[i]);
 	return (NULL);
 }
@@ -675,7 +675,7 @@ simple_array_ref(simple_array *ary, int i)
 void
 simple_array_set(simple_array *ary, int i, void *obj)
 {
-	if (ary != NULL && i >= 0 && i < (int)ary->length)
+	if (ary != NULL && i >= 0 && i < (int) ary->length)
 		ary->data[i] = obj;
 }
 
@@ -690,10 +690,10 @@ simple_array_push(simple_array *ary, void *obj)
 	ary->data[ary->length++] = obj;
 }
 
-void *
+void           *
 simple_array_pop(simple_array *ary)
 {
-	void *obj = NULL;
+	void           *obj = NULL;
 
 	if (ary != NULL && ary->length > 0) {
 		ary->length--;
@@ -708,11 +708,11 @@ int
 simple_array_index(simple_array *ary, void *obj)
 {
 	if (ary != NULL && ary->length > 0) {
-		unsigned int i;
+		unsigned int 	i;
 
 		for (i = 0; i < ary->length; i++)
 			if (ary->data[i] == obj)
-				return ((int)i);
+				return ((int) i);
 	}
 	return (-1);
 }
@@ -721,9 +721,9 @@ int
 simple_array_rindex(simple_array *ary, void *obj)
 {
 	if (ary != NULL && ary->length > 0) {
-		int i;
+		int 		i;
 
-		for (i = (int)ary->length - 1; i >= 0; i--)
+		for (i = (int) ary->length - 1; i >= 0; i--)
 			if (ary->data[i] == obj)
 				return (i);
 	}
@@ -736,16 +736,16 @@ simple_array_member_p(simple_array *ary, void *obj)
 	return (simple_array_index(ary, obj) != -1);
 }
 
-void *
+void           *
 simple_array_delete(simple_array *ary, void *obj)
 {
-	int i;
-	unsigned int ui;
+	int 		i;
+	unsigned int 	ui;
 
 	i = simple_array_index(ary, obj);
 	if (i == -1)
 		return (NULL);
-	ui = (unsigned int)i;
+	ui = (unsigned int) i;
 	ary->length--;
 	if (ary->length == 0)
 		simple_array_clear(ary);
@@ -755,16 +755,16 @@ simple_array_delete(simple_array *ary, void *obj)
 	return (obj);
 }
 
-void *
+void           *
 simple_array_rdelete(simple_array *ary, void *obj)
 {
-	int i;
-	unsigned int ui;
+	int 		i;
+	unsigned int 	ui;
 
 	i = simple_array_rindex(ary, obj);
 	if (i == -1)
 		return (NULL);
-	ui = (unsigned int)i;
+	ui = (unsigned int) i;
 	ary->length--;
 	if (ary->length == 0)
 		simple_array_clear(ary);
@@ -774,22 +774,22 @@ simple_array_rdelete(simple_array *ary, void *obj)
 	return (obj);
 }
 
-simple_array *
+simple_array   *
 simple_array_reverse(simple_array *ary)
 {
 	if (ary != NULL && ary->length > 0) {
-		int i;
-		simple_array *new;
+		int 		i;
+		simple_array   *new;
 
-		new = make_simple_array((int)ary->incr);
-		for (i = (int)ary->length - 1; i >= 0; i--)
+		new = make_simple_array((int) ary->incr);
+		for (i = (int) ary->length - 1; i >= 0; i--)
 			simple_array_push(new, ary->data[i]);
 		return (new);
 	}
 	return (NULL);
 }
 
-simple_array *
+simple_array   *
 simple_array_clear(simple_array *ary)
 {
 	if (ary == NULL)
@@ -814,12 +814,12 @@ FTH
 simple_array_to_array(simple_array *ary)
 {
 	if (ary != NULL && ary->length > 0) {
-		ficlInteger i;
-		FTH array;
+		ficlInteger 	i;
+		FTH 		array;
 
-		array = fth_make_array_len((ficlInteger)ary->length);
-		for (i = 0; i < (int)ary->length; i++)
-			fth_array_fast_set(array, i, (FTH)ary->data[i]);
+		array = fth_make_array_len((ficlInteger) ary->length);
+		for (i = 0; i < (int) ary->length; i++)
+			fth_array_fast_set(array, i, (FTH) ary->data[i]);
 		return (array);
 	}
 	return (fth_make_empty_array());
@@ -828,8 +828,8 @@ simple_array_to_array(simple_array *ary)
 FTH
 fth_set_argv(int from, int to, char **argv)
 {
-	int i;
-	FTH args;
+	int 		i;
+	FTH 		args;
 
 	if (from >= to || argv == NULL) {
 		fth_variable_set("*argc*", FTH_ZERO);
@@ -842,10 +842,10 @@ fth_set_argv(int from, int to, char **argv)
 	return (fth_variable_set("*argv*", args));
 }
 
-static FTH	before_repl_hook;
-static FTH	after_repl_hook;
-static FTH	before_prompt_hook;
-static bool	fth_in_repl_p = false;
+static FTH 	before_repl_hook;
+static FTH 	after_repl_hook;
+static FTH 	before_prompt_hook;
+static bool 	fth_in_repl_p = false;
 
 #define FTH_REPL_PROMPT		"ok "
 #define FTH_REPL_PROMPT2	"c> "
@@ -855,14 +855,14 @@ static bool	fth_in_repl_p = false;
 #define FGL_COMMENT		"\\"
 #define FGL_BUFFER		4096
 
-static FTH	fgl_all;	/* gl-all to *histdup* */
-static FTH	fgl_prev;	/* gl-prev to *histdup* */
-static FTH	fgl_erase;	/* gl-erase to *histdup* */
+static FTH 	fgl_all;	/* gl-all to *histdup* */
+static FTH 	fgl_prev;	/* gl-prev to *histdup* */
+static FTH 	fgl_erase;	/* gl-erase to *histdup* */
 
-static FTH	fgl_vi;		/* edit-mode vi */
-static FTH	fgl_emacs;	/* edit-mode emacs */
-static FTH	fgl_none;	/* edit-mode none */
-static FTH	fgl_nobeep;	/* nobeep */
+static FTH 	fgl_vi;		/* edit-mode vi */
+static FTH 	fgl_emacs;	/* edit-mode emacs */
+static FTH 	fgl_none;	/* edit-mode none */
+static FTH 	fgl_nobeep;	/* nobeep */
 
 /* constant (string) */
 #define FGL_HISTDUP_REF()	fth_variable_ref("*histdup*")
@@ -892,17 +892,21 @@ static FTH	fgl_nobeep;	/* nobeep */
 #include <libtecla.h>
 #endif
 
-static void	ficl_history(ficlVm *vm);
-static int	gl_config(GetLine * gl, FTH action);
-static void	ficl_bindkey(ficlVm *vm);
+static GetLine *repl_gl_init(void);
+static void 	ficl_history(ficlVm *vm);
+static void 	ficl_history_lineno(ficlVm *vm);
+static void 	ficl_history_next(ficlVm *vm);
+static void 	ficl_history_prev(ficlVm *vm);
+static int 	gl_config(GetLine * gl, FTH action);
+static void 	ficl_bindkey(ficlVm *vm);
 
 static int	repl_command_generator(WordCompletion * cpl,
-		    void *data, const char *line, int word_end);
-static int	repl_init_history(void);
-static int	repl_unique_history(GetLine * gl, char *line);
-static int	repl_append_history(GetLine * gl, char *line);
+    void *data, const char *line, int word_end);
+static int 	repl_init_history(void);
+static int 	repl_unique_history(GetLine * gl, char *line);
+static int 	repl_append_history(GetLine * gl, char *line);
 static char    *repl_expand_history(GetLine * gl, char *line);
-static char    *repl_replace_history(GetLine *gl, char *line);
+static char    *repl_replace_history(GetLine * gl, char *line);
 
 static simple_array *fgl_getline_config;
 static simple_array *fgl_getline_bindkey;
@@ -912,16 +916,42 @@ static simple_array *fgl_getline_bindkey;
 	fth_throw(FTH_GET_LINE_ERROR,					\
 	    "%s: %s", RUNNING_WORD(), gl_error_message(gl, NULL, 0))
 
-static FTH	fgl_show;	/* gl-show [n] history */
-static FTH	fgl_load;	/* gl-load [fname] history */
-static FTH	fgl_save;	/* gl-save [fname] history */
-static FTH	fgl_clear;	/* gl-clear history */
+static FTH 	fgl_show;	/* gl-show [n] history */
+static FTH 	fgl_load;	/* gl-load [fname] history */
+static FTH 	fgl_save;	/* gl-save [fname] history */
+static FTH 	fgl_add;	/* gl-add line history */
+static FTH 	fgl_clear;	/* gl-clear history */
+
+static ficlUnsigned gl_cur_event;
+
+static GetLine *
+repl_gl_init(void)
+{
+	ficlVm         *vm;
+	GetLine        *gl;
+
+	vm = FTH_FICL_VM();
+	gl = ficlVmGetRepl(vm);
+	if (gl == NULL) {
+		gl = new_GetLine(FGL_BUFFER, FGL_BUFFER * repl_init_history());
+		if (gl == NULL) {
+			fprintf(stderr, "cannot initialize GetLine\n");
+		}
+		gl_automatic_history(gl, 0);
+		gl_customize_completion(gl, NULL, repl_command_generator);
+		gl_prompt_style(gl, GL_FORMAT_PROMPT);
+		gl_bind_keyseq(gl, GL_USER_KEY, "^C", "user-interrupt");
+		gl_bind_keyseq(gl, GL_USER_KEY, "^G", "ring-bell");
+		ficlVmGetRepl(vm) = gl;
+	}
+	return (gl);
+}
 
 static void
 ficl_history(ficlVm *vm)
 {
 #define h_history "( :optional action arg -- )  handle histoy events\n\
-             history => show entire history\n\
+             history => return entire history as string\n\
 gl-show      history => same as above\n\
         10   history => show 10 last history events\n\
 gl-show 10   history => same as above\n\
@@ -931,65 +961,181 @@ gl-load file history => load from file\n\
 gl-save      history => save to *histfile*\n\
 gl-save nil  history => same as above\n\
 gl-save file history => save to file\n\
+gl-add  line history => add line to history\n\
 gl-clear     history => clear all history events\n\
-gl-show: show ARG or all history events.\n\
+gl-show: return ARG or all history events as string.\n\
 gl-load: load from ARG or *histfile* (~/" FTH_HIST_FILE ").\n\
 gl-save: save to ARG or *histfile*.\n\
+gl-add: add event ARG to history.\n\
 gl-clear: clear all history events."
-	GetLine *gl;
-	int len, n;
-	FTH action, arg;
+	GetLine        *gl;
+	int 		len, n;
+	FTH 		action, arg;
 
 	arg = FTH_FALSE;
 	n = -1;
 	gl = ficlVmGetRepl(vm);
+	if (gl == NULL)
+		gl = repl_gl_init();
+
 	len = FTH_STACK_DEPTH(vm);
 	if (len == 0)
 		action = fgl_show;
 	else if (len == 1) {
 		action = fth_pop_ficl_cell(vm);
 		if (FTH_INTEGER_P(action)) {
-			n = (int)FTH_INT_REF(action);
+			n = (int) FTH_INT_REF(action);
 			action = fgl_show;
 		}
 	} else {
 		arg = fth_pop_ficl_cell(vm);
 		action = fth_pop_ficl_cell(vm);
 	}
+
 	if (action == fgl_load) {
-		char *fname;
+		char           *fname;
 
 		fname = fth_string_ref(arg);
 		if (fname == NULL)
 			fname = FGL_HISTFILE_CSTR();
-		gl_load_history(gl, fname, FGL_COMMENT);
+		if (gl_load_history(gl, fname, FGL_COMMENT) != 0) {
+			fth_warning("%s: can't load %s", RUNNING_WORD(), fname);
+			return;
+		}
 	} else if (action == fgl_save) {
-		char *fname;
+		char           *fname;
 
 		fname = fth_string_ref(arg);
 		if (fname == NULL)
 			fname = FGL_HISTFILE_CSTR();
-		gl_save_history(gl, fname, FGL_COMMENT, -1);
+		if (gl_save_history(gl, fname, FGL_COMMENT, -1) != 0) {
+			fth_warning("%s: can't save %s", RUNNING_WORD(), fname);
+			return;
+		}
+	} else if (action == fgl_add) {
+		char           *line;
+
+		line = fth_string_ref(arg);
+		if (line == NULL || *line == '\0')
+			return;
+		repl_append_history(gl, line);
 	} else if (action == fgl_clear)
 		gl_clear_history(gl, 1);
- 	else {
+	else {
+		FILE           *fp;
+		int 		fd;
+		char 		b[16] = "";
+		char		buf[BUFSIZ];
+		FTH		fs;
+
+		snprintf(b, sizeof(b), "/tmp/fth.XXXXXX");
+		fp = NULL;
+		fd = mkstemp(b);
+
+		if (fd != -1)
+		    fp = fdopen(fd, "w+");
+		if (fp == NULL) {
+			if (fd != -1) {
+				unlink(b);
+				close(fd);
+			}
+			fth_warning("%s: %s %s",
+			    RUNNING_WORD(), b, strerror(errno));
+			return;
+		}
+
 		if (FTH_INTEGER_P(arg))
-			n = (int)FTH_INT_REF(arg);
+			n = (int) FTH_INT_REF(arg);
 		/*
 		 * XXX: gl_show_history and stdout
-		 * Use stdout direct, not ficlVmGetStdout(vm).
+		 *      We send stdout to a tmp file, read it from
+		 *      there and put it on stack.
+		 *	This works well in Snd's listener.
 		 */
-		gl_show_history(gl, stdout, "%N  %T   %H\n", 1, n);
+		gl_show_history(gl, fp, "%N  %T   %H\n", 1, n);
+
+		rewind(fp);
+		fs = fth_make_empty_string();
+		while (fgets(buf, sizeof(buf), fp) != NULL)
+			fth_string_scat(fs, buf);
+		unlink(b);
+		fclose(fp);
+		ficlStackPushFTH(vm->dataStack, fs);
 	}
+}
+
+static void
+ficl_history_lineno(ficlVm *vm)
+{
+#define h_hist_lineno "( -- line )"
+	GetLine        *gl;
+	GlHistoryRange 	range;
+
+	gl = ficlVmGetRepl(vm);
+	if (gl == NULL)
+		gl = repl_gl_init();
+	gl_range_of_history(gl, &range);
+	gl_cur_event = range.newest;
+	ficlStackPushUnsigned(vm->dataStack, gl_cur_event);
+}
+
+static void
+ficl_history_next(ficlVm *vm)
+{
+#define h_hist_next "( -- line )"
+	const char     *line;
+	GetLine        *gl;
+	GlHistoryRange 	range;
+	GlHistoryLine 	hline;
+
+	gl = ficlVmGetRepl(vm);
+	if (gl == NULL)
+		gl = repl_gl_init();
+	gl_range_of_history(gl, &range);
+	gl_cur_event++;
+	/*
+	 * If greater than newest, start from the end.
+	 */
+	if (gl_cur_event > range.newest || gl_cur_event < range.oldest)
+		gl_cur_event = range.oldest;
+	line = "";
+	if (gl_lookup_history(gl, gl_cur_event, &hline))
+		line = hline.line;
+	fth_push_ficl_cell(vm, fth_make_string(line));
+}
+
+static void
+ficl_history_prev(ficlVm *vm)
+{
+#define h_hist_prev "( -- line )"
+	const char     *line;
+	GetLine        *gl;
+	GlHistoryRange 	range;
+	GlHistoryLine 	hline;
+
+	gl = ficlVmGetRepl(vm);
+	if (gl == NULL)
+		gl = repl_gl_init();
+	gl_range_of_history(gl, &range);
+	gl_cur_event--;
+	/*
+	 * If less than oldest, start from the beginning.
+	 */
+	if (gl_cur_event < range.oldest || gl_cur_event > range.newest)
+		gl_cur_event = range.newest;
+	line = "";
+	if (gl_lookup_history(gl, gl_cur_event, &hline))
+		line = hline.line;
+	fth_push_ficl_cell(vm, fth_make_string(line));
 }
 
 #define FGL_TECLA_RC		"~/.teclarc"
 
-static int 
-gl_config(GetLine *gl, FTH action)
+static int
+gl_config(GetLine * gl, FTH action)
 {
-	char *app;
-	
+	char           *app;
+
 	if (action == fgl_vi)
 		app = "edit-mode vi";
 	else if (action == fgl_emacs)
@@ -1029,10 +1175,10 @@ Two arguments (KEY ACTION):\n\
 If KEY and ACTION are strings, bind ACTION to KEY.  \
 If KEY is a string and ACTION is anything else, unbind KEY from last bind.\n\
 See tecla(7) for key-bindings and actions."
-	GetLine *gl;
-	FTH key, action;
-	char *k, *a;
-	int i, l, len;
+	GetLine        *gl;
+	FTH 		key, action;
+	char           *k, *a;
+	int 		i, l, len;
 
 	gl = ficlVmGetRepl(vm);
 	len = FTH_STACK_DEPTH(vm);
@@ -1105,35 +1251,35 @@ See tecla(7) for key-bindings and actions."
 
 /* ARGSUSED */
 static int
-repl_command_generator(WordCompletion *cpl,
+repl_command_generator(WordCompletion * cpl,
     void *data, const char *line, int word_end)
 {
 	ficlDictionary *dict;
-	ficlHash *hash;
-	ficlWord *word;
-	CplMatches *matches;
-	const char *text;
-	size_t len;
-	int i, j;
+	ficlHash       *hash;
+	ficlWord       *word;
+	CplMatches     *matches;
+	const char     *text;
+	size_t 		len;
+	int 		i, j;
 
-	(void)data;
+	(void) data;
 	/*
 	 * Find begin of word.
 	 */
 	for (i = word_end; i >= 0; i--)
-		if (isspace((int)line[i]))
+		if (isspace((int) line[i]))
 			break;
-	len = (size_t)(word_end - ++i);
+	len = (size_t) (word_end - ++i);
 	text = line + i;
 	dict = FTH_FICL_DICT();
 	/*
 	 * Search for words beginning with TEXT.
 	 */
-	for (i = (int)dict->wordlistCount - 1; i >= 0; i--)
+	for (i = (int) dict->wordlistCount - 1; i >= 0; i--)
 		for (hash = dict->wordlists[i];
 		    hash != NULL;
 		    hash = hash->link)
-			for (j = (int)hash->size - 1; j >= 0; j--)
+			for (j = (int) hash->size - 1; j >= 0; j--)
 				for (word = hash->table[j];
 				    word != NULL;
 				    word = word->link)
@@ -1160,9 +1306,9 @@ repl_command_generator(WordCompletion *cpl,
 static int
 repl_init_history(void)
 {
-	int hist_len;
-	char *tmp_str;
-	FTH fs, fn;
+	int 		hist_len;
+	char           *tmp_str;
+	FTH 		fs, fn;
 
 	/*-
 	 * Set history file.
@@ -1191,11 +1337,11 @@ repl_init_history(void)
 	 * 	- otherwise default to FTH_HIST_LEN
 	 */
 	fn = FGL_HISTORY_REF();
-	hist_len = (int)fth_int_ref_or_else(fn, -1);
+	hist_len = (int) fth_int_ref_or_else(fn, -1);
 	if (hist_len == -1) {
 		tmp_str = getenv(FTH_ENV_HIST_LEN);
 		if (tmp_str != NULL)
-			hist_len = (int)strtol(tmp_str, NULL, 10);
+			hist_len = (int) strtol(tmp_str, NULL, 10);
 	}
 	if (hist_len < FTH_HIST_LEN)
 		hist_len = FTH_HIST_LEN;
@@ -1204,18 +1350,18 @@ repl_init_history(void)
 }
 
 static int
-repl_unique_history(GetLine *gl, char *line)
+repl_unique_history(GetLine * gl, char *line)
 {
-	char *hf;
-	FTH hary, nhary, cline, hline;
-	ficlInteger i, len;
+	char           *hf;
+	FTH 		hary, nhary, cline, hline;
+	ficlInteger 	i, len;
 
 	hf = FGL_HISTFILE_CSTR();
 	gl_save_history(gl, hf, FGL_COMMENT, -1);
 	hary = fth_array_reverse(fth_readlines(hf));
 	cline = fth_make_string_format("%s\n", line);
 	nhary = fth_make_empty_array();
-	len = fth_array_length(hary) - 1; 
+	len = fth_array_length(hary) - 1;
 	for (i = 0; i < len; i += 2) {
 		hline = fth_array_ref(hary, i);
 		if (fth_string_equal_p(cline, hline))
@@ -1242,11 +1388,11 @@ repl_unique_history(GetLine *gl, char *line)
  * gl-prev, gl-erase, or undef.
  */
 static int
-repl_append_history(GetLine *gl, char *line)
+repl_append_history(GetLine * gl, char *line)
 {
-	unsigned long id;
-	GlHistoryRange range;
-	GlHistoryLine hline;
+	unsigned long 	id;
+	GlHistoryRange 	range;
+	GlHistoryLine 	hline;
 
 	/* replace '\n' */
 	line[strlen(line)] = '\0';
@@ -1273,7 +1419,7 @@ repl_append_history(GetLine *gl, char *line)
 	return (gl_append_history(gl, line));
 }
 
-/*
+/*-
  * If command line starts with !, try to substitute with commands from
  * previous history events.
  *
@@ -1283,15 +1429,15 @@ repl_append_history(GetLine *gl, char *line)
  * !?sub_string(?)	repeat last event containing SUB_STRING
  * !start_of_string	repeat last event starting with START_OF_STRING
  */
-static char *
-repl_expand_history(GetLine *gl, char *line)
+static char    *
+repl_expand_history(GetLine * gl, char *line)
 {
-	unsigned long id;
-	GlHistoryRange range;
-	GlHistoryLine hline;
-	long ld;
-	size_t ln;
-	char s[FGL_BUFFER + 1], *res;
+	unsigned long 	id;
+	GlHistoryRange 	range;
+	GlHistoryLine 	hline;
+	long 		ld;
+	size_t 		ln;
+	char 		s[FGL_BUFFER + 1], *res;
 
 	ln = strlen(line);
 	if (ln < 2)
@@ -1306,7 +1452,7 @@ repl_expand_history(GetLine *gl, char *line)
 	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
-	if (isdigit((int)*s) || *s == '-') {
+	if (isdigit((int) *s) || *s == '-') {
 		/* !123 or !-123 */
 		ld = strtol(s, NULL, 10);
 		if (ld < 0)
@@ -1314,15 +1460,15 @@ repl_expand_history(GetLine *gl, char *line)
 		else
 			id = ld;
 		if (gl_lookup_history(gl, id, &hline))
-			res = (char *)hline.line;
+			res = (char *) hline.line;
 	} else if (*s == '!') {
 		/* !! */
 		if (gl_lookup_history(gl, id, &hline))
-			res = (char *)hline.line;
+			res = (char *) hline.line;
 	} else if (*s == '?') {
 		/* !?sub_string(?) */
-		size_t sl;
-		char *r;
+		size_t 		sl;
+		char           *r;
 
 		r = s + 1;
 		sl = strlen(r);
@@ -1331,7 +1477,7 @@ repl_expand_history(GetLine *gl, char *line)
 		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
 				if (fth_regexp_find(r, hline.line) != -1) {
-					res = (char *)hline.line;
+					res = (char *) hline.line;
 					break;
 				}
 	} else
@@ -1339,11 +1485,11 @@ repl_expand_history(GetLine *gl, char *line)
 		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
 				if (strncmp(s, hline.line, ln) == 0) {
-					res = (char *)hline.line;
+					res = (char *) hline.line;
 					break;
 				}
 	if (res == NULL) {
-		int i;
+		int 		i;
 
 		i = 0;
 		if (*s == '!')
@@ -1355,31 +1501,31 @@ repl_expand_history(GetLine *gl, char *line)
 	return (res);
 }
 
-/*
+/*-
  * If command line starts with ^, try a search from previous history
  * events and replace it with second part of ^search^replace.
  *
  * ^search^replace(^)
  */
-static char *
-repl_replace_history(GetLine *gl, char *line)
+static char    *
+repl_replace_history(GetLine * gl, char *line)
 {
-	unsigned long id;
-	GlHistoryRange range;
-	GlHistoryLine hline;
-	size_t i, j;
-	char src[FGL_BUFFER], dst[FGL_BUFFER], *res;
+	unsigned long 	id;
+	GlHistoryRange 	range;
+	GlHistoryLine 	hline;
+	size_t 		i, j;
+	char 		src[FGL_BUFFER], dst[FGL_BUFFER], *res;
 
 	if (strlen(line) < 4)
 		return (line);
 	i = 0;
-	j = 1;		/* skip 1st ^ */
-	while (line[j] != '^' && !isspace((int)line[j]))
+	j = 1;			/* skip 1st ^ */
+	while (line[j] != '^' && !isspace((int) line[j]))
 		src[i++] = line[j++];
 	src[i] = '\0';
 	i = 0;
-	j++;		/* skip 2nd ^ */
-	while (line[j] != '^' && !isspace((int)line[j]))
+	j++;			/* skip 2nd ^ */
+	while (line[j] != '^' && !isspace((int) line[j]))
 		dst[i++] = line[j++];
 	dst[i] = '\0';
 	res = NULL;
@@ -1388,7 +1534,7 @@ repl_replace_history(GetLine *gl, char *line)
 	for (; id > range.oldest; id--)
 		if (gl_lookup_history(gl, id, &hline))
 			if (fth_regexp_find(src, hline.line) != -1) {
-				FTH reg, str, rep, rpl;
+				FTH 		reg      , str, rep, rpl;
 
 				reg = fth_make_regexp(src);
 				str = fth_make_string(hline.line);
@@ -1412,7 +1558,7 @@ static void
 ficl_bindkey(ficlVm *vm)
 {
 #define h_bindkey "( :optional key action -- )  noop without libtecla"
-	int len;
+	int 		len;
 
 	/* clear at most 2 stack entries */
 	len = FTH_STACK_DEPTH(vm);
@@ -1427,14 +1573,13 @@ ficl_bindkey(ficlVm *vm)
 		break;
 	}
 }
-
 /* ARGSUSED */
-static char *
+static char    *
 get_line(char *prompt, char *dummy)
 {
-	char *buf;
+	char           *buf;
 
-	(void)dummy;
+	(void) dummy;
 	if (prompt != NULL)
 		fth_print(prompt);
 	buf = utils_readline_buffer;
@@ -1451,20 +1596,20 @@ void
 fth_repl(int argc, char **argv)
 {
 	static ficlInteger lineno;
-	ficlVm *vm;
-	char *line;
-	char *volatile prompt;
-	char *volatile err_line;
-	volatile bool compile_p;
-	volatile int status;
+	ficlVm         *vm;
+	char           *line;
+	char           *volatile prompt;
+	char           *volatile err_line;
+	volatile bool 	compile_p;
+	volatile int 	status;
 #if !defined(_WIN32)
-	volatile int sig;
+	volatile int 	sig;
 #endif
-	int i, len;
+	int 		i, len;
 #if defined(HAVE_LIBTECLA)
-	GetLine *gl;
-	GlHistoryRange range;
-	GlReturnStatus rs;
+	GetLine        *gl;
+	GlHistoryRange 	range;
+	GlReturnStatus 	rs;
 #endif
 
 	vm = FTH_FICL_VM();
@@ -1497,7 +1642,7 @@ fth_repl(int argc, char **argv)
 	 */
 	len = simple_array_length(fgl_getline_config);
 	for (i = 0; i < len; i++) {
-		char *app;
+		char           *app;
 
 		app = simple_array_ref(fgl_getline_config, i);
 		if (gl_configure_getline(gl, app, NULL, NULL)) {
@@ -1508,7 +1653,7 @@ fth_repl(int argc, char **argv)
 	}
 	len = simple_array_length(fgl_getline_bindkey);
 	for (i = 0; i < len; i += 2) {
-		char *k, *a;
+		char           *k, *a;
 
 		k = simple_array_ref(fgl_getline_bindkey, i);
 		a = simple_array_ref(fgl_getline_bindkey, i + 1);
@@ -1524,7 +1669,7 @@ fth_repl(int argc, char **argv)
 	    FGL_PROMPTSTYLE_P() ? GL_FORMAT_PROMPT : GL_LITERAL_PROMPT);
 	gl_load_history(gl, FGL_HISTFILE_CSTR(), FGL_COMMENT);
 	gl_range_of_history(gl, &range);
-	lineno = (ficlInteger)range.newest;
+	lineno = (ficlInteger) range.newest;
 #else
 	lineno = 1;
 #endif
@@ -1544,12 +1689,12 @@ fth_repl(int argc, char **argv)
 		prompt = NULL;
 #if defined(HAVE_LIBTECLA)
 		gl_range_of_history(gl, &range);
-		lineno = (ficlInteger)range.newest + 1;
+		lineno = (ficlInteger) range.newest + 1;
 #endif
 		if (compile_p)
 			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
 		else if (!fth_hook_empty_p(before_prompt_hook)) {
-			FTH fs;
+			FTH 		fs;
 
 			fs = fth_run_hook_again(before_prompt_hook,
 			    2,
@@ -1638,7 +1783,7 @@ fth_repl(int argc, char **argv)
 			if (fth_print_p)
 				fth_print("\n");
 			continue;
-		}	
+		}
 		len = FTH_STACK_DEPTH(vm);
 		switch (len) {
 		case 0:
@@ -1646,17 +1791,17 @@ fth_repl(int argc, char **argv)
 				fth_printf("%S", FTH_UNDEF);
 			break;
 		case 1:
-			fth_printf("%M", fth_pop_ficl_cell(vm));
+			fth_printf("%S", fth_pop_ficl_cell(vm));
 			break;
 		default:
 			for (i = len - 1; i >= 0; i--) {
 				ficlStackRoll(vm->dataStack, i);
-				fth_printf("%M ", fth_pop_ficl_cell(vm));
+				fth_printf("%S ", fth_pop_ficl_cell(vm));
 			}
 			break;
 		}
 		fth_print("\n");
-	}	/* while */
+	}			/* while */
 #if defined(HAVE_LIBTECLA)
 	if (FGL_SAVEHIST_P())
 		gl_save_history(gl, FGL_HISTFILE_CSTR(), FGL_COMMENT,
@@ -1680,7 +1825,7 @@ ficl_repl_cb(ficlVm *vm)
 A hard coded before-repl-hook.  \
 Before adding your own, do:\n\
 before-repl-hook reset-hook!."
-	(void)vm;
+	(void) vm;
 	if (FTH_TRUE_P(fth_variable_ref("*fth-verbose*"))) {
 		fth_print("\\\n");
 		fth_print("\\ type help <word> to get help, \
@@ -1710,8 +1855,8 @@ static void
 ficl_ps_cb(ficlVm *vm)
 {
 #define h_ps_cb "( val -- res )  callback for setting *promptstyle*."
-	bool fp;
-	GetLine *gl;
+	bool 		fp;
+	GetLine        *gl;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fp = ficlStackPopBoolean(vm->dataStack);
@@ -1739,7 +1884,11 @@ init_utils(void)
 	FGL_SET_CONSTANT(show);
 	FGL_SET_CONSTANT(load);
 	FGL_SET_CONSTANT(save);
+	FGL_SET_CONSTANT(add);
 	FGL_SET_CONSTANT(clear);
+	FTH_PRI1("history-lineno", ficl_history_lineno, h_hist_lineno);
+	FTH_PRI1("history-next", ficl_history_next, h_hist_next);
+	FTH_PRI1("history-prev", ficl_history_prev, h_hist_prev);
 	FTH_PRI1("history", ficl_history, h_history);
 #endif
 	/* bindkey constants */
@@ -1838,9 +1987,9 @@ before-prompt-hook lambda: <{ prompt pos -- new-prompt }>\n\
   \"fth (%d)> \" #( pos ) string-format\n\
 ; add-hook!");
 	{
-		ficlWord *ps, *rcb;
+		ficlWord       *ps, *rcb;
 #if defined(HAVE_LIBTECLA)
-		ficlWord *pscb;
+		ficlWord       *pscb;
 #endif
 
 		ps = FTH_CONSTANT_SET("*promptstyle*", FTH_FALSE);
@@ -1850,10 +1999,10 @@ see gl_prompt_style(3).\n\
 Default is #f.");
 #if defined(HAVE_LIBTECLA)
 		pscb = FTH_PRI1("prompt-style-cb", ficl_ps_cb, h_ps_cb);
-		fth_trace_var((FTH)ps, (FTH)pscb);
+		fth_trace_var((FTH) ps, (FTH) pscb);
 #endif
 		rcb = FTH_PRI1("repl-cb", ficl_repl_cb, h_repl_cb);
-		fth_add_hook(before_repl_hook, (FTH)rcb);
+		fth_add_hook(before_repl_hook, (FTH) rcb);
 	}
 }
 

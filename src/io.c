@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.160 12/2/17
+ * @(#)io.c	1.161 12/26/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -42,7 +42,7 @@
 
 /* === IO === */
 
-static FTH	io_tag;
+static FTH 	io_tag;
 
 /* --- General IO Macros --- */
 
@@ -88,8 +88,8 @@ static FTH	io_tag;
 /* --- SOCKET IO --- */
 
 typedef struct {
-	int		fd;	/* file descriptor */
-	FTH		host;	/* host name */
+	int 		fd;	/* file descriptor */
+	FTH 		host;	/* host name */
 } FIO_Socket;
 
 #define SOCKET_REF(Obj)		((FIO_Socket *)(Obj))
@@ -97,119 +97,119 @@ typedef struct {
 #define FTH_IO_SOCKET_HOST(Obj)	SOCKET_REF(Obj)->host
 
 static char    *fam_to_mode(int fam);
-static void	ficl_accept(ficlVm *vm);
-static void	ficl_bind(ficlVm *vm);
-static void	ficl_connect(ficlVm *vm);
-static void	ficl_exit_status(ficlVm *vm);
-static void	ficl_io_close(ficlVm *vm);
-static void	ficl_io_closed_p(ficlVm *vm);
-static void	ficl_io_eof_p(ficlVm *vm);
-static void	ficl_io_equal_p(ficlVm *vm);
-static void	ficl_io_fdopen(ficlVm *vm);
-static void	ficl_io_filename(ficlVm *vm);
-static void	ficl_io_fileno(ficlVm *vm);
-static void	ficl_io_flush(ficlVm *vm);
-static void	ficl_io_getc(ficlVm *vm);
-static void	ficl_io_input_p(ficlVm *vm);
-static void	ficl_io_mode(ficlVm *vm);
-static void	ficl_io_nopen(ficlVm *vm);
-static void	ficl_io_open(ficlVm *vm);
-static void	ficl_io_open_file(ficlVm *vm);
-static void	ficl_io_open_input_file(ficlVm *vm);
-static void	ficl_io_open_output_file(ficlVm *vm);
-static void	ficl_io_open_read(ficlVm *vm);
-static void	ficl_io_open_write(ficlVm *vm);
-static void	ficl_io_output_p(ficlVm *vm);
-static void	ficl_io_p(ficlVm *vm);
-static void	ficl_io_popen(ficlVm *vm);
-static void	ficl_io_popen_read(ficlVm *vm);
-static void	ficl_io_popen_write(ficlVm *vm);
-static void	ficl_io_pos_ref(ficlVm *vm);
-static void	ficl_io_pos_set(ficlVm *vm);
-static void	ficl_io_putc(ficlVm *vm);
-static void	ficl_io_reopen(ficlVm *vm);
-static void	ficl_io_rewind(ficlVm *vm);
-static void	ficl_io_seek(ficlVm *vm);
-static void	ficl_io_sopen(ficlVm *vm);
-static void	ficl_io_sopen_read(ficlVm *vm);
-static void	ficl_io_sopen_write(ficlVm *vm);
-static void	ficl_io_stderr(ficlVm *vm);
-static void	ficl_io_stdin(ficlVm *vm);
-static void	ficl_io_stdout(ficlVm *vm);
-static void	ficl_io_write(ficlVm *vm);
-static void	ficl_io_write_format(ficlVm *vm);
-static void	ficl_listen(ficlVm *vm);
-static void	ficl_print_io(ficlVm *vm);
-static void	ficl_readlines(ficlVm *vm);
-static void	ficl_recv(ficlVm *vm);
-static void	ficl_recvfrom(ficlVm *vm);
-static void	ficl_send(ficlVm *vm);
-static void	ficl_sendto(ficlVm *vm);
-static void	ficl_set_io_stderr(ficlVm *vm);
-static void	ficl_set_io_stdin(ficlVm *vm);
-static void	ficl_set_io_stdout(ficlVm *vm);
-static void	ficl_set_version_control(ficlVm *vm);
-static void	ficl_shutdown(ficlVm *vm);
-static void	ficl_socket(ficlVm *vm);
-static void	ficl_version_control(ficlVm *vm);
-static void	ficl_writelines(ficlVm *vm);
-static void	file_close(void *ptr);
-static bool	file_eof_p(void *ptr);
-static void	file_flush(void *ptr);
-static int	file_number(char *name);
-static int	file_read_char(void *ptr);
+static void 	ficl_accept(ficlVm *vm);
+static void 	ficl_bind(ficlVm *vm);
+static void 	ficl_connect(ficlVm *vm);
+static void 	ficl_exit_status(ficlVm *vm);
+static void 	ficl_io_close(ficlVm *vm);
+static void 	ficl_io_closed_p(ficlVm *vm);
+static void 	ficl_io_eof_p(ficlVm *vm);
+static void 	ficl_io_equal_p(ficlVm *vm);
+static void 	ficl_io_fdopen(ficlVm *vm);
+static void 	ficl_io_filename(ficlVm *vm);
+static void 	ficl_io_fileno(ficlVm *vm);
+static void 	ficl_io_flush(ficlVm *vm);
+static void 	ficl_io_getc(ficlVm *vm);
+static void 	ficl_io_input_p(ficlVm *vm);
+static void 	ficl_io_mode(ficlVm *vm);
+static void 	ficl_io_nopen(ficlVm *vm);
+static void 	ficl_io_open(ficlVm *vm);
+static void 	ficl_io_open_file(ficlVm *vm);
+static void 	ficl_io_open_input_file(ficlVm *vm);
+static void 	ficl_io_open_output_file(ficlVm *vm);
+static void 	ficl_io_open_read(ficlVm *vm);
+static void 	ficl_io_open_write(ficlVm *vm);
+static void 	ficl_io_output_p(ficlVm *vm);
+static void 	ficl_io_p(ficlVm *vm);
+static void 	ficl_io_popen(ficlVm *vm);
+static void 	ficl_io_popen_read(ficlVm *vm);
+static void 	ficl_io_popen_write(ficlVm *vm);
+static void 	ficl_io_pos_ref(ficlVm *vm);
+static void 	ficl_io_pos_set(ficlVm *vm);
+static void 	ficl_io_putc(ficlVm *vm);
+static void 	ficl_io_reopen(ficlVm *vm);
+static void 	ficl_io_rewind(ficlVm *vm);
+static void 	ficl_io_seek(ficlVm *vm);
+static void 	ficl_io_sopen(ficlVm *vm);
+static void 	ficl_io_sopen_read(ficlVm *vm);
+static void 	ficl_io_sopen_write(ficlVm *vm);
+static void 	ficl_io_stderr(ficlVm *vm);
+static void 	ficl_io_stdin(ficlVm *vm);
+static void 	ficl_io_stdout(ficlVm *vm);
+static void 	ficl_io_write(ficlVm *vm);
+static void 	ficl_io_write_format(ficlVm *vm);
+static void 	ficl_listen(ficlVm *vm);
+static void 	ficl_print_io(ficlVm *vm);
+static void 	ficl_readlines(ficlVm *vm);
+static void 	ficl_recv(ficlVm *vm);
+static void 	ficl_recvfrom(ficlVm *vm);
+static void 	ficl_send(ficlVm *vm);
+static void 	ficl_sendto(ficlVm *vm);
+static void 	ficl_set_io_stderr(ficlVm *vm);
+static void 	ficl_set_io_stdin(ficlVm *vm);
+static void 	ficl_set_io_stdout(ficlVm *vm);
+static void 	ficl_set_version_control(ficlVm *vm);
+static void 	ficl_shutdown(ficlVm *vm);
+static void 	ficl_socket(ficlVm *vm);
+static void 	ficl_version_control(ficlVm *vm);
+static void 	ficl_writelines(ficlVm *vm);
+static void 	file_close(void *ptr);
+static bool 	file_eof_p(void *ptr);
+static void 	file_flush(void *ptr);
+static int 	file_number(char *name);
+static int 	file_read_char(void *ptr);
 static char    *file_read_line(void *ptr);
-static void	file_rewind(void *ptr);
+static void 	file_rewind(void *ptr);
 static ficl2Integer file_seek(void *ptr, ficl2Integer pos, int whence);
 static ficl2Integer file_tell(void *ptr);
-static void	file_version_rename(char *name);
-static void	file_write_char(void *ptr, int c);
-static void	file_write_line(void *ptr, const char *line);
-static void	generic_close(void *ptr);
-static bool	generic_eof_p(void *ptr);
-static void	generic_flush(void *ptr);
-static int	generic_read_char(void *ptr);
+static void 	file_version_rename(char *name);
+static void 	file_write_char(void *ptr, int c);
+static void 	file_write_line(void *ptr, const char *line);
+static void 	generic_close(void *ptr);
+static bool 	generic_eof_p(void *ptr);
+static void 	generic_flush(void *ptr);
+static int 	generic_read_char(void *ptr);
 static char    *generic_read_line(void *ptr);
-static void	generic_rewind(void *ptr);
+static void 	generic_rewind(void *ptr);
 static ficl2Integer generic_seek(void *ptr, ficl2Integer pos, int whence);
 static ficl2Integer generic_tell(void *ptr);
-static void	generic_write_char(void *ptr, int c);
-static void	generic_write_line(void *ptr, const char *line);
-static FTH	io_equal_p(FTH self, FTH obj);
-static void	io_free(FTH self);
-static void	io_if_exists(char *name, FTH exists, int fam);
-static FTH	io_inspect(FTH self);
-static FTH	io_length(FTH self);
-static void	io_mark(FTH self);
-static FTH	io_ref(FTH self, FTH idx);
-static FTH	io_to_array(FTH self);
-static FTH	io_to_string(FTH self);
-static FTH	make_file_io(FILE * fp, const char *name, int fam);
-static FTH	make_socket_io(const char *host, int port, int domain, int fd);
-static void	pipe_close(void *ptr);
-static bool	seek_constant_p(int whence);
-static int	socket_accept(int domain, int fd);
-static int	socket_bind(const char *host, int port, int domain, int fd);
-static void	socket_close(void *ptr);
-static int	socket_connect(const char *host, int port, int domain, int fd);
-static bool	socket_eof_p(void *ptr);
-static int	socket_open(int domain, int type);
-static int	socket_read_char(void *ptr);
+static void 	generic_write_char(void *ptr, int c);
+static void 	generic_write_line(void *ptr, const char *line);
+static FTH 	io_equal_p(FTH self, FTH obj);
+static void 	io_free(FTH self);
+static void 	io_if_exists(char *name, FTH exists, int fam);
+static FTH 	io_inspect(FTH self);
+static FTH 	io_length(FTH self);
+static void 	io_mark(FTH self);
+static FTH 	io_ref(FTH self, FTH idx);
+static FTH 	io_to_array(FTH self);
+static FTH 	io_to_string(FTH self);
+static FTH 	make_file_io(FILE *fp, const char *name, int fam);
+static FTH 	make_socket_io(const char *host, int port, int domain, int fd);
+static void 	pipe_close(void *ptr);
+static bool 	seek_constant_p(int whence);
+static int 	socket_accept(int domain, int fd);
+static int 	socket_bind(const char *host, int port, int domain, int fd);
+static void 	socket_close(void *ptr);
+static int 	socket_connect(const char *host, int port, int domain, int fd);
+static bool 	socket_eof_p(void *ptr);
+static int 	socket_open(int domain, int type);
+static int 	socket_read_char(void *ptr);
 static char    *socket_read_line(void *ptr);
-static void	socket_rewind(void *ptr);
+static void 	socket_rewind(void *ptr);
 static ficl2Integer socket_seek(void *ptr, ficl2Integer pos, int whence);
 static ficl2Integer socket_tell(void *ptr);
-static void	socket_unlink(const char *host);
-static void	socket_write_char(void *ptr, int c);
-static void	socket_write_line(void *ptr, const char *line);
-static bool	string_eof_p(void *ptr);
-static int	string_read_char(void *ptr);
+static void 	socket_unlink(const char *host);
+static void 	socket_write_char(void *ptr, int c);
+static void 	socket_write_line(void *ptr, const char *line);
+static bool 	string_eof_p(void *ptr);
+static int 	string_read_char(void *ptr);
 static char    *string_read_line(void *ptr);
-static void	string_rewind_and_close(void *ptr);
+static void 	string_rewind_and_close(void *ptr);
 static ficl2Integer string_seek(void *ptr, ficl2Integer dpos, int whence);
 static ficl2Integer string_tell(void *ptr);
-static void	string_write_char(void *ptr, int c);
-static void	string_write_line(void *ptr, const char *line);
+static void 	string_write_char(void *ptr, int c);
+static void 	string_write_line(void *ptr, const char *line);
 
 #define h_list_of_io_functions "\
 *** IO and FILE PRIMITIVES ***\n\
@@ -297,7 +297,7 @@ net-socket          ( domain type -- fd )"
 static FTH
 io_inspect(FTH self)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = fth_make_string(FTH_INSTANCE_NAME(self));
 	if (fth_io_pos_ref(self) >= 0)
@@ -322,19 +322,19 @@ io_to_string(FTH self)
 	return (fth_make_string_format("#<%S>", io_inspect(self)));
 }
 
-static FTH	string_empty;
-static FTH	string_cr;
-static FTH	string_space;
+static FTH 	string_empty;
+static FTH 	string_cr;
+static FTH 	string_space;
 
 static FTH
 io_to_array(FTH self)
 {
-	FTH ary;
+	FTH 		ary;
 
 	if (FTH_ARRAY_P(FTH_IO_BUFFER(self)))
 		return (FTH_IO_BUFFER(self));
 	if (FTH_IO_TYPE(self) == FTH_IO_STRING)
-		ary = fth_string_split_2((FTH)FTH_IO_DATA(self), string_cr);
+		ary = fth_string_split_2((FTH) FTH_IO_DATA(self), string_cr);
 	else
 		ary = fth_io_readlines(self);
 	FTH_IO_BUFFER(self) = ary;
@@ -351,7 +351,7 @@ io_ref(FTH self, FTH idx)
 static FTH
 io_equal_p(FTH self, FTH obj)
 {
-	bool flag;
+	bool 		flag;
 
 	flag = fth_string_equal_p(FTH_IO_FILENAME(self),
 	    FTH_IO_FILENAME(obj)) &&
@@ -393,13 +393,13 @@ io_free(FTH self)
 	FTH_FREE(FTH_IO_OBJECT(self));
 }
 
-static char *
+static char    *
 fam_to_mode(int fam)
 {
 #define WARN_STR "\
 %s accepts only r/o (r), w/o (w), r/w (w+), a/o (a), and r/a (a+)"
-	static char mode[3];
-	int i;
+	static char 	mode[3];
+	int 		i;
 
 	i = 0;
 	switch (fam) {
@@ -435,7 +435,7 @@ fam_to_mode(int fam)
 static int
 generic_read_char(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 	return (EOF);
 }
 
@@ -443,15 +443,15 @@ generic_read_char(void *ptr)
 static void
 generic_write_char(void *ptr, int c)
 {
-	(void)ptr;
-	(void)c;
+	(void) ptr;
+	(void) c;
 }
 
 /* ARGSUSED */
-static char *
+static char    *
 generic_read_line(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 	return (NULL);
 }
 
@@ -459,15 +459,15 @@ generic_read_line(void *ptr)
 static void
 generic_write_line(void *ptr, const char *line)
 {
-	(void)ptr;
-	(void)line;
+	(void) ptr;
+	(void) line;
 }
 
 /* ARGSUSED */
 static bool
 generic_eof_p(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 	return (false);
 }
 
@@ -475,7 +475,7 @@ generic_eof_p(void *ptr)
 static ficl2Integer
 generic_tell(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 	return (0);
 }
 
@@ -483,9 +483,9 @@ generic_tell(void *ptr)
 static ficl2Integer
 generic_seek(void *ptr, ficl2Integer pos, int whence)
 {
-	(void)ptr;
-	(void)pos;
-	(void)whence;
+	(void) ptr;
+	(void) pos;
+	(void) whence;
 	return (0);
 }
 
@@ -493,27 +493,27 @@ generic_seek(void *ptr, ficl2Integer pos, int whence)
 static void
 generic_flush(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 }
 
 /* ARGSUSED */
 static void
 generic_rewind(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 }
 
 /* ARGSUSED */
 static void
 generic_close(void *ptr)
 {
-	(void)ptr;
+	(void) ptr;
 }
 
 FTH
 make_io_base(int fam)
 {
-	FIO *io;
+	FIO            *io;
 
 	io = FTH_CALLOC(1, sizeof(FIO));
 	io->type = FTH_IO_UNDEF;
@@ -544,8 +544,8 @@ make_io_base(int fam)
 static int
 file_read_char(void *ptr)
 {
-	FILE *fp = (FILE *)ptr;
-	int c;
+	FILE           *fp = (FILE *) ptr;
+	int 		c;
 
 	c = fgetc(fp);
 	if (c == EOF) {
@@ -562,7 +562,7 @@ file_read_char(void *ptr)
 static void
 file_write_char(void *ptr, int c)
 {
-	FILE *fp = (FILE *)ptr;
+	FILE           *fp = (FILE *) ptr;
 
 	if (fputc(c, fp) == EOF)
 		if (ferror(fp)) {
@@ -571,15 +571,15 @@ file_write_char(void *ptr, int c)
 		}
 }
 
-static char io_scratch[BUFSIZ];
+static char 	io_scratch[BUFSIZ];
 
-static char *
+static char    *
 file_read_line(void *ptr)
 {
-	FILE *fp = (FILE *)ptr;
-	char *p;
+	FILE           *fp = (FILE *) ptr;
+	char           *p;
 
-	p = fgets(io_scratch, (int)sizeof(io_scratch), fp);
+	p = fgets(io_scratch, (int) sizeof(io_scratch), fp);
 	if (p != NULL)
 		return (p);
 	else {
@@ -597,7 +597,7 @@ file_read_line(void *ptr)
 static void
 file_write_line(void *ptr, const char *line)
 {
-	FILE *fp = (FILE *)ptr;
+	FILE           *fp = (FILE *) ptr;
 
 	if (fputs(line, fp) == EOF)
 		if (ferror(fp)) {
@@ -609,37 +609,37 @@ file_write_line(void *ptr, const char *line)
 static bool
 file_eof_p(void *ptr)
 {
-	return ((bool)feof((FILE *)ptr));
+	return ((bool) feof((FILE *) ptr));
 }
 
 static ficl2Integer
 file_tell(void *ptr)
 {
-	FILE *fp = (FILE *)ptr;
+	FILE           *fp = (FILE *) ptr;
 
 	fflush(fp);
-	return ((ficl2Integer)lseek(fileno(fp), (off_t)0, SEEK_CUR));
+	return ((ficl2Integer) lseek(fileno(fp), (off_t) 0, SEEK_CUR));
 }
 
 static ficl2Integer
 file_seek(void *ptr, ficl2Integer pos, int whence)
 {
-	FILE *fp = (FILE *)ptr;
+	FILE           *fp = (FILE *) ptr;
 
 	fflush(fp);
-	return ((ficl2Integer)lseek(fileno(fp), (off_t)pos, whence));
+	return ((ficl2Integer) lseek(fileno(fp), (off_t) pos, whence));
 }
 
 static void
 file_flush(void *ptr)
 {
-	fflush((FILE *)ptr);
+	fflush((FILE *) ptr);
 }
 
 static void
 file_rewind(void *ptr)
 {
-	FILE *fp = (FILE *)ptr;
+	FILE           *fp = (FILE *) ptr;
 
 	fflush(fp);
 	rewind(fp);
@@ -648,14 +648,14 @@ file_rewind(void *ptr)
 static void
 file_close(void *ptr)
 {
-	fclose((FILE *)ptr);
+	fclose((FILE *) ptr);
 }
 
 static FTH
 make_file_io(FILE *fp, const char *name, int fam)
 {
-	char *mode;
-	FTH io;
+	char           *mode;
+	FTH 		io;
 
 	mode = fam_to_mode(fam);
 	if (fp == NULL) {
@@ -670,7 +670,7 @@ make_file_io(FILE *fp, const char *name, int fam)
 	FTH_IO_TYPE(io) = FTH_IO_FILE;
 	FTH_IO_NAME(io) = fth_make_string("file");
 	FTH_IO_FILENAME(io) = fth_make_string(name);
-	FTH_IO_DATA(io) = (void *)fp;
+	FTH_IO_DATA(io) = (void *) fp;
 	FTH_IO_OBJECT(io)->read_char = file_read_char;
 	FTH_IO_OBJECT(io)->write_char = file_write_char;
 	FTH_IO_OBJECT(io)->read_line = file_read_line;
@@ -689,16 +689,16 @@ make_file_io(FILE *fp, const char *name, int fam)
 static void
 pipe_close(void *ptr)
 {
-	fth_set_exit_status(pclose((FILE *)ptr));
+	fth_set_exit_status(pclose((FILE *) ptr));
 }
 
 /* cmd: string or array of strings */
 FTH
 fth_io_popen(FTH cmd, int fam)
 {
-	char *name;
-	FTH io;
-	FILE *fp;
+	char           *name;
+	FTH 		io;
+	FILE           *fp;
 
 	FTH_ASSERT_ARGS((FTH_STRING_P(cmd) || FTH_ARRAY_P(cmd)),
 	    cmd, FTH_ARG1, "a string or an array of strings");
@@ -709,7 +709,7 @@ fth_io_popen(FTH cmd, int fam)
 		FTH_IO_FILENAME(io) = cmd;
 	} else if (FTH_ARRAY_P(cmd)) {
 		name = fth_string_ref(fth_array_join(cmd, string_space));
-		FTH_IO_FILENAME(io) = fth_array_ref(cmd, 0L); 
+		FTH_IO_FILENAME(io) = fth_array_ref(cmd, 0L);
 	}
 	if (name == NULL) {
 		FTH_ASSERT_ARGS(false, cmd, FTH_ARG1,
@@ -725,7 +725,7 @@ fth_io_popen(FTH cmd, int fam)
 	}
 	FTH_IO_TYPE(io) = FTH_IO_PIPE;
 	FTH_IO_NAME(io) = fth_make_string("pipe");
-	FTH_IO_DATA(io) = (void *)fp;
+	FTH_IO_DATA(io) = (void *) fp;
 	FTH_IO_OBJECT(io)->read_char = file_read_char;
 	FTH_IO_OBJECT(io)->write_char = file_write_char;
 	FTH_IO_OBJECT(io)->read_line = file_read_line;
@@ -741,13 +741,13 @@ fth_io_popen(FTH cmd, int fam)
 static int
 string_read_char(void *ptr)
 {
-	ficlInteger idx;
-	int c;
+	ficlInteger 	idx;
+	int 		c;
 
 	c = EOF;
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
 	if (idx < FTH_IO_STRING_LENGTH(ptr)) {
-		c = fth_string_c_char_fast_ref((FTH)ptr, idx++);
+		c = fth_string_c_char_fast_ref((FTH) ptr, idx++);
 		FTH_IO_STRING_INDEX_SET(ptr, idx);
 	}
 	return (c);
@@ -756,36 +756,36 @@ string_read_char(void *ptr)
 static void
 string_write_char(void *ptr, int c)
 {
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
 	if (idx >= FTH_IO_STRING_LENGTH(ptr) - 1) {
-		FTH fs;
+		FTH 		fs;
 
-		fs = fth_make_string_format("%c", (char)c);
-		fth_string_push((FTH)ptr, fs);
+		fs = fth_make_string_format("%c", (char) c);
+		fth_string_push((FTH) ptr, fs);
 	} else
-		fth_string_c_char_fast_set((FTH)ptr, idx, (char)c);
+		fth_string_c_char_fast_set((FTH) ptr, idx, (char) c);
 	FTH_IO_STRING_INDEX_SET(ptr, ++idx);
 }
 
-static char *
+static char    *
 string_read_line(void *ptr)
 {
-	ficlInteger idx, len;
-	size_t i, size;
-	char *line;
+	ficlInteger 	idx, len;
+	size_t 		i, size;
+	char           *line;
 
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
-	len = FTH_IO_STRING_LENGTH(ptr); 
+	len = FTH_IO_STRING_LENGTH(ptr);
 	if (idx >= len)
 		return (NULL);
 	line = io_scratch;
 	size = sizeof(io_scratch);
 	for (i = 0; i < size && idx < len; i++, idx++) {
-		char c;
+		char 		c;
 
-		c = fth_string_c_char_fast_ref((FTH)ptr, idx);
+		c = fth_string_c_char_fast_ref((FTH) ptr, idx);
 		line[i] = c;
 		if (c == '\n') {
 			idx++;
@@ -801,22 +801,22 @@ string_read_line(void *ptr)
 static void
 string_write_line(void *ptr, const char *line)
 {
-	ficlInteger idx, len;
-	size_t i, size;
+	ficlInteger 	idx, len;
+	size_t 		i, size;
 
 	if (line == NULL)
 		return;
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
-	len = FTH_IO_STRING_LENGTH(ptr); 
+	len = FTH_IO_STRING_LENGTH(ptr);
 	size = fth_strlen(line);
 	if (idx >= len - 1) {
-		fth_string_push((FTH)ptr, fth_make_string(line));
+		fth_string_push((FTH) ptr, fth_make_string(line));
 		idx += size;
 	} else {
 		for (i = 0; i < size && idx < len; i++, idx++)
-			fth_string_c_char_fast_set((FTH)ptr, idx, line[i]);
+			fth_string_c_char_fast_set((FTH) ptr, idx, line[i]);
 		if (i < size) {
-			fth_string_push((FTH)ptr, fth_make_string(line + i));
+			fth_string_push((FTH) ptr, fth_make_string(line + i));
 			idx += (size - i);
 		}
 	}
@@ -838,9 +838,9 @@ string_tell(void *ptr)
 static ficl2Integer
 string_seek(void *ptr, ficl2Integer dpos, int whence)
 {
-	ficlInteger pos, end;
+	ficlInteger 	pos, end;
 
-	pos = (ficlInteger)dpos;
+	pos = (ficlInteger) dpos;
 	switch (whence) {
 	case SEEK_SET:
 		FTH_IO_STRING_INDEX_SET(ptr, pos);
@@ -859,26 +859,26 @@ string_seek(void *ptr, ficl2Integer dpos, int whence)
 		FTH_IO_STRING_INDEX_SET(ptr, end);
 		break;
 	}
-	return ((ficl2Integer)FTH_IO_STRING_INDEX_REF(ptr));
+	return ((ficl2Integer) FTH_IO_STRING_INDEX_REF(ptr));
 }
 
 static void
 string_rewind_and_close(void *ptr)
 {
-	fth_cycle_pos_0((FTH)ptr);
+	fth_cycle_pos_0((FTH) ptr);
 }
 
 FTH
 fth_io_sopen(FTH string, int fam)
 {
-	FTH io;
+	FTH 		io;
 
 	if (!FTH_STRING_P(string))
 		string = fth_make_empty_string();
 	io = make_io_base(fam);
 	FTH_IO_TYPE(io) = FTH_IO_STRING;
 	FTH_IO_NAME(io) = fth_make_string("string");
-	FTH_IO_DATA(io) = (void *)string;
+	FTH_IO_DATA(io) = (void *) string;
 	FTH_IO_LENGTH(io) = fth_string_length(string);
 	FTH_IO_OBJECT(io)->read_char = string_read_char;
 	FTH_IO_OBJECT(io)->write_char = string_write_char;
@@ -899,7 +899,7 @@ fth_io_sopen(FTH string, int fam)
 ficl2Integer
 fth_io_length(FTH io)
 {
-	ficl2Integer io_len, pos;
+	ficl2Integer 	io_len, pos;
 
 	IO_ASSERT_IO(io);
 	if (!FTH_INSTANCE_CHANGED_P(io))
@@ -910,7 +910,7 @@ fth_io_length(FTH io)
 			io_len = FTH_IO_TELL(io);
 		else {
 			pos = FTH_IO_TELL(io);
-			io_len = FTH_IO_SEEK(io, (off_t)0, SEEK_END);
+			io_len = FTH_IO_SEEK(io, (off_t) 0, SEEK_END);
 			FTH_IO_SEEK(io, pos, SEEK_SET);
 		}
 		break;
@@ -936,7 +936,7 @@ ficl_io_filename(ficlVm *vm)
 \".fthrc\" io-open-read value io\n\
 io io-filename => \".fthrc\"\n\
 Return filename of IO object or #f if filename is not available."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -951,7 +951,7 @@ ficl_io_mode(ficlVm *vm)
 \".fthrc\" io-open-read value io\n\
 io io-mode => \"r\"\n\
 Return access mode of IO object."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -966,11 +966,11 @@ ficl_io_fileno(ficlVm *vm)
 \".fthrc\" io-open-read value io\n\
 io io-fileno => 3\n\
 Return file descriptor of IO."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)fth_io_fileno(io));
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) fth_io_fileno(io));
 }
 
 FTH
@@ -982,7 +982,7 @@ io io->string => \"...\"\n\
 Return content of IO object as string if possible."
 	IO_ASSERT_IO(io);
 	if (FTH_IO_TYPE(io) == FTH_IO_STRING)
-		return (fth_string_copy((FTH)FTH_IO_DATA(io)));
+		return (fth_string_copy((FTH) FTH_IO_DATA(io)));
 	return (fth_array_join(fth_object_to_array(io), string_empty));
 }
 
@@ -994,7 +994,7 @@ ficl_io_p(ficlVm *vm)
 io io? => #t\n\
 10 io? => #f\n\
 Return #t if OBJ is an IO object, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1016,7 +1016,7 @@ ficl_io_input_p(ficlVm *vm)
 io1 io-input? => #t\n\
 io2 io-input? => #f\n\
 Return #t if OBJ is an input IO object, otherwise #f."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -1038,7 +1038,7 @@ ficl_io_output_p(ficlVm *vm)
 io1 io-output? => #f\n\
 io2 io-output? => #t\n\
 Return #t if OBJ is an output IO object, otherwise #f."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -1060,42 +1060,42 @@ io io-closed? => #f\n\
 io io-close\n\
 io io-closed? => #t\n\
 Return #t if IO object is closed, otherwise #f."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
 	ficlStackPushBoolean(vm->dataStack, fth_io_closed_p(io));
 }
 
-static FTH	version_control;
-static FTH	version_number_string;
+static FTH 	version_control;
+static FTH 	version_number_string;
 
 static int
 file_number(char *name)
 {
-	FTH dir, files;
-	char *bname, *path, *s;
-	size_t flen, blen, plen;
-	ficlInteger i, len;
-	int numb, x;
+	FTH 		dir, files;
+	char           *bname, *path, *s;
+	size_t 		flen, blen, plen;
+	ficlInteger 	i, len;
+	int 		numb, x;
 
 	if (name == NULL)
 		return (0);
 	dir = fth_file_dirname(name);
 	files = fth_file_match_dir(dir, version_number_string);
-	flen = (size_t)fth_array_length(files);
+	flen = (size_t) fth_array_length(files);
 	bname = fth_basename(name);
 	blen = fth_strlen(bname);
 	if (flen <= 0 || blen <= 0)
 		return (0);
 	numb = 0;
-	len = (ficlInteger)flen;
-	path = fth_format("%S/%.*s", dir, (int)blen, bname);
+	len = (ficlInteger) flen;
+	path = fth_format("%S/%.*s", dir, (int) blen, bname);
 	plen = fth_strlen(path);
 	for (i = 0; i < len; i++) {
 		s = fth_string_ref(fth_array_ref(files, i));
 		if (s != NULL && (strncmp(s, path, plen) == 0)) {
-			x = (int)strtol(s + plen + 2, NULL, 10);
+			x = (int) strtol(s + plen + 2, NULL, 10);
 			if (++x > numb)
 				numb = x;
 		}
@@ -1107,8 +1107,8 @@ file_number(char *name)
 static void
 file_version_rename(char *name)
 {
-	char *new_name;
-	int numb;
+	char           *new_name;
+	int 		numb;
 
 	if (FTH_TRUE_P(version_control)) {
 		/* numbered backups */
@@ -1176,7 +1176,7 @@ Accepted values:\n\
 nil   => numbered/simple backups\n\
 #f    => simple backups\n\
 undef => no backups"
-	FTH val;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -1201,7 +1201,7 @@ Keyword argument :fam defaults to r/o.\n\
 General IO open function.  \
 Return IO object for io-read/io-write etc.\n\
 " keyword_args_string
-	int arg;
+	int 		arg;
 
 	arg = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
 	fth_push_ficl_cell(vm, io_keyword_args_ref(arg));
@@ -1276,9 +1276,9 @@ Open file NAME and return new IO object.  \
 If keyword FAM was not specified, open file read-only, otherwise take FAM.\n\
 " h_fam_values "\n" h_if_exist_help "\n\
 See also io-open-read and io-open-write."
-	FTH exists, fs;
-	int fam;
-	char *name;
+	FTH 		exists, fs;
+	int 		fam;
+	char           *name;
 
 	exists = fth_get_optkey(FTH_KEYWORD_IF_EXISTS, FTH_KEYWORD_OVERWRITE);
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
@@ -1297,8 +1297,8 @@ ficl_io_open_read(ficlVm *vm)
 \"in-test\" io-open-read value read-io1\n\
 Open file NAME for reading and return new IO object.\n\
 See also io-open and io-open-write."
-	FTH fs;
-	char *name;
+	FTH 		fs;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1321,8 +1321,8 @@ ficl_io_open_write(ficlVm *vm)
 Open file NAME for writing and return new IO object.\n\
 " h_if_exist_help "\n\
 See also io-open and io-open-read."
-	FTH exists, fs;
-	char *name;
+	FTH 		exists, fs;
+	char           *name;
 
 	exists = fth_get_optkey(FTH_KEYWORD_IF_EXISTS, FTH_KEYWORD_OVERWRITE);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -1352,10 +1352,10 @@ If keyword FAM was not given, use mode from IO1, otherwise use FAM.  \
 All restrictions on reopen apply, \
 ie. a file opened for reading can't reopened for writing etc.\n\
 See freopen(3) for more information."
-	FTH io, fname, ffam;
-	char *name;
-	int fam;
-	FILE *fp;
+	FTH 		io, fname, ffam;
+	char           *name;
+	int 		fam;
+	FILE           *fp;
 
 	ffam = fth_get_optkey(FTH_KEYWORD_FAM, FTH_UNDEF);
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -1395,13 +1395,13 @@ err-io io-flush => \"our error log\" (on stderr)\n\
 Connect file descriptor FD to new IO object.  \
 If keyword FAM was not given, open file read-only, otherwise use FAM.\n\
 See fdopen(3) for more information."
-	FTH io;
-	FILE *fp;
-	int fd, fam;
+	FTH 		io;
+	FILE           *fp;
+	int 		fd, fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	fp = fdopen(fd, fam_to_mode(fam));
 	if (fp == NULL) {
 		IO_FILE_ERROR(fdopen);
@@ -1428,8 +1428,8 @@ CMD may be a string (with shell expansion) or an array of strings.  \
 If keyword FAM was not given, open pipe read-only, otherwise use FAM.\n\
 " h_fam_values "\n\
 See also io-popen-read, io-popen-write and exec."
-	FTH obj, io;
-	int fam;
+	FTH 		obj, io;
+	int 		fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -1449,7 +1449,7 @@ io1 io-close\n\
 Open read-only pipe for command CMD and return new IO object.  \
 CMD may be a string (with shell expansion) or an array of strings.\n\
 See also io-popen, io-popen-write and exec."
-	FTH obj, io;
+	FTH 		obj, io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1468,7 +1468,7 @@ io1 io-close\n\
 Open write-only pipe for command CMD and return new IO object.  \
 CMD may be a string (with shell expansion) or an array of strings.\n\
 See also io-popen, io-popen-read and exec."
-	FTH obj, io;
+	FTH 		obj, io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1493,15 +1493,15 @@ s1 .string => \"test-string with append content\"\n\
 Open string with content STRING and return new IO object.  \
 If keyword FAM was not given, opens string read-only, otherwise takes FAM.\n\
 " h_fam_values
-	FTH fs, io;
-	int fam;
+	FTH 		fs, io;
+	int 		fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
-	io = fth_io_sopen(fs, fam); 
+	io = fth_io_sopen(fs, fam);
 	ficlStackPushFTH(vm->dataStack, io);
-	    
+
 }
 
 static void
@@ -1514,7 +1514,7 @@ io1 io-read => \"test-string\"\n\
 io1 io-close\n\
 Open read-only string with content STRING and return new IO object.\n\
 See also io-sopen."
-	FTH fs, io;
+	FTH 		fs, io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1533,7 +1533,7 @@ io1 io-close\n\
 s1 .string => \"test-string\"\n\
 Open STRING for writing and return new IO object.\n\
 See also io-sopen."
-	FTH fs, io;
+	FTH 		fs, io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1548,8 +1548,8 @@ See also io-sopen."
 static int
 socket_read_char(void *ptr)
 {
-	char msg[2];
-	ssize_t len;
+	char 		msg[2];
+	ssize_t 	len;
 
 	msg[0] = '\0';
 	len = recv(FTH_IO_SOCKET_FD(ptr), msg, 1L, 0);
@@ -1559,28 +1559,28 @@ socket_read_char(void *ptr)
 		return (-1);
 	}
 	if (len == 1)
-		return ((int)msg[0]);
+		return ((int) msg[0]);
 	return (-1);
 }
 
 static void
 socket_write_char(void *ptr, int c)
 {
-	char msg[2];
+	char 		msg[2];
 
-	msg[0] = (char)c;
+	msg[0] = (char) c;
 	msg[1] = '\0';
 	if (send(FTH_IO_SOCKET_FD(ptr), msg, 1L, 0) == -1)
 		IO_SOCKET_ERROR(send);
 }
 
-static char *
+static char    *
 socket_read_line(void *ptr)
 {
-	char *line;
-	size_t size;
-	ssize_t len;
-	socklen_t slen;
+	char           *line;
+	size_t 		size;
+	ssize_t 	len;
+	socklen_t 	slen;
 
 	line = io_scratch;
 	size = sizeof(io_scratch);
@@ -1607,14 +1607,14 @@ socket_write_line(void *ptr, const char *line)
 static bool
 socket_eof_p(void *ptr)
 {
-	int fd;
-	off_t cur, end;
+	int 		fd;
+	off_t 		cur, end;
 
 	fd = FTH_IO_SOCKET_FD(ptr);
-	cur = lseek(fd, (off_t)0, SEEK_CUR);
+	cur = lseek(fd, (off_t) 0, SEEK_CUR);
 	if (cur == -1)
 		IO_SOCKET_ERROR(lseek);
-	end = lseek(fd, (off_t)0, SEEK_END);
+	end = lseek(fd, (off_t) 0, SEEK_END);
 	if (end == -1)
 		IO_SOCKET_ERROR(lseek);
 	if (lseek(fd, cur, SEEK_SET) == -1)
@@ -1625,32 +1625,32 @@ socket_eof_p(void *ptr)
 static ficl2Integer
 socket_tell(void *ptr)
 {
-	off_t pos;
+	off_t 		pos;
 
-	pos = lseek(FTH_IO_SOCKET_FD(ptr), (off_t)0, SEEK_CUR);
-	return ((ficl2Integer)pos);
+	pos = lseek(FTH_IO_SOCKET_FD(ptr), (off_t) 0, SEEK_CUR);
+	return ((ficl2Integer) pos);
 }
 
 static ficl2Integer
 socket_seek(void *ptr, ficl2Integer pos, int whence)
 {
-	off_t npos;
+	off_t 		npos;
 
-	npos = lseek(FTH_IO_SOCKET_FD(ptr), (off_t)pos, whence);
-	return ((ficl2Integer)npos);
+	npos = lseek(FTH_IO_SOCKET_FD(ptr), (off_t) pos, whence);
+	return ((ficl2Integer) npos);
 }
 
 static void
 socket_rewind(void *ptr)
 {
-	lseek(FTH_IO_SOCKET_FD(ptr), (off_t)0, SEEK_SET);
+	lseek(FTH_IO_SOCKET_FD(ptr), (off_t) 0, SEEK_SET);
 }
 
 static void
 socket_unlink(const char *host)
 {
-	char *host_del;
-	int old_errno;
+	char           *host_del;
+	int 		old_errno;
 
 	host_del = fth_format("%.*s", fth_strlen(host) - 1, host);
 	old_errno = errno;
@@ -1668,6 +1668,7 @@ socket_close(void *ptr)
 }
 
 #if defined(HAVE_STRUCT_SOCKADDR_UN_SUN_LEN)
+
 #define IO_SOCKADDR(Addr, Host, Port, Domain, Len) do {			\
 	if (Domain == AF_UNIX) {					\
 		struct sockaddr_un sun;					\
@@ -1695,7 +1696,9 @@ socket_close(void *ptr)
 			IO_SOCKET_ERROR_ARG(gethostbyname, Host);	\
 	}								\
 } while (0)
-#else /* !HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
+
+#else		/* !HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
+
 #define IO_SOCKADDR(Addr, Host, Port, Domain, Len) do {			\
 	if (Domain == AF_UNIX) {					\
 		struct sockaddr_un sun;					\
@@ -1722,13 +1725,14 @@ socket_close(void *ptr)
 			IO_SOCKET_ERROR_ARG(gethostbyname, Host);	\
 	}								\
 } while (0)
-#endif /* HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
+
+#endif		/* HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
 
 static int
 socket_bind(const char *host, int port, int domain, int fd)
 {
 	struct sockaddr *addr;
-	socklen_t len;
+	socklen_t 	len;
 
 	if (host == NULL)
 		return (-1);
@@ -1743,13 +1747,13 @@ socket_accept(int domain, int fd)
 	struct sockaddr_un sun;
 	struct sockaddr_in sin;
 	struct sockaddr *addr;
-	socklen_t len;
+	socklen_t 	len;
 
 	len = 0;
 	if (domain == AF_UNIX)
-		addr = (struct sockaddr *)&sun;
+		addr = (struct sockaddr *) & sun;
 	else
-		addr = (struct sockaddr *)&sin;
+		addr = (struct sockaddr *) & sin;
 	return (accept(fd, addr, &len));
 }
 
@@ -1757,7 +1761,7 @@ static int
 socket_connect(const char *host, int port, int domain, int fd)
 {
 	struct sockaddr *addr;
-	socklen_t len;
+	socklen_t 	len;
 
 	if (host == NULL)
 		return (-1);
@@ -1778,8 +1782,8 @@ socket_open(int domain, int type)
 static FTH
 make_socket_io(const char *host, int port, int domain, int fd)
 {
-	FIO_Socket *s;
-	FTH io;
+	FIO_Socket     *s;
+	FTH 		io;
 
 	if (fd == -1) {
 		fd = socket_open(domain, SOCK_STREAM);
@@ -1802,7 +1806,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 	FTH_IO_TYPE(io) = FTH_IO_SOCKET;
 	FTH_IO_FILENAME(io) = s->host;
 	FTH_IO_NAME(io) = fth_make_string("socket");
-	FTH_IO_DATA(io) = (void *)s;
+	FTH_IO_DATA(io) = (void *) s;
 	FTH_IO_OBJECT(io)->read_char = socket_read_char;
 	FTH_IO_OBJECT(io)->write_char = socket_write_char;
 	FTH_IO_OBJECT(io)->read_line = socket_read_line;
@@ -1820,7 +1824,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 static FTH
 make_socket_io(const char *host, int port, int domain, int fd)
 {
-	FTH io;
+	FTH 		io;
 
 	io = make_io_base(FICL_FAM_READ | FICL_FAM_WRITE);
 	FTH_IO_FILENAME(io) = fth_make_string(host);
@@ -1868,8 +1872,8 @@ io io-close\n\
 Connect to an already established server and return new IO object.  \
 Raise an SOCKET-ERROR exception if an error occured.\n\
 " h_socket_open_info
-	int domain, port;
-	FTH fs, io;
+	int 		domain, port;
+	FTH 		fs, io;
 
 	domain = fth_get_optkey_fix(FTH_KEYWORD_DOMAIN, FTH_DEFAULT_ADDRFAM);
 	port = fth_get_optkey_fix(FTH_KEYWORD_PORT, FTH_DEFAULT_PORT);
@@ -1879,7 +1883,7 @@ Raise an SOCKET-ERROR exception if an error occured.\n\
 	ficlStackPushFTH(vm->dataStack, io);
 }
 
-/*
+/*-
   : connection-handler { io -- }
     begin
       io io-read ( line ) dup
@@ -1924,18 +1928,18 @@ TYPE can be SOCK_STREAM or SOCK_DGRAM.  \
 The third argument to socket is 0 and can't be set by the user.  \
 Raise SOCKET-ERROR exception if socket fails.\n\
 See socket(2) for more information."
-	int fd, domain, type;
+	int 		fd, domain, type;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	type = (int)ficlStackPopInteger(vm->dataStack);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
+	type = (int) ficlStackPopInteger(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
 	fd = socket_open(domain, type);
 	if (fd == -1) {
 		IO_SOCKET_ERROR(socket);
 		/* NOTREACHED */
 		return;
 	}
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)fd);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) fd);
 }
 
 static void
@@ -1954,15 +1958,15 @@ and DOMAIN is one of AF_INET or AF_UNIX.  \
 This is used on the server side of a socket connection.  \
 Raise SOCKET-ERROR exception if bind fails.\n\
 See bind(2) for more information."
-	FTH fs;
-	char *host;
-	int fd, domain, port;
+	FTH 		fs;
+	char           *host;
+	int 		fd, domain, port;
 
 	FTH_STACK_CHECK(vm, 4, 0);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
-	port = (int)ficlStackPopInteger(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
+	port = (int) ficlStackPopInteger(vm->dataStack);
 	fs = fth_pop_ficl_cell(vm);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fs);
 	if (socket_bind(host, port, domain, fd) == -1) {
 		close(fd);
@@ -1983,10 +1987,10 @@ FD is the previously opened socket descriptor.  \
 This is used on the server side of a socket connection.  \
 Raise SOCKET-ERROR exception if listen fails.\n\
 See listen(2) for more information."
-	int fd;
+	int 		fd;
 
 	FTH_STACK_CHECK(vm, 1, 0);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	if (listen(fd, -1) == -1)
 		IO_SOCKET_ERROR(listen);
 }
@@ -2003,11 +2007,11 @@ Close socket connection.  \
 FD is the socket descriptor and HOW is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  \
 Raise SOCKET-ERROR exception if shutdown fails.\n\
 See shutdown(2) for more information."
-	int fd, how;
+	int 		fd, how;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	how = (int)ficlStackPopInteger(vm->dataStack);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	how = (int) ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	if (shutdown(fd, how) == -1)
 		IO_SOCKET_ERROR(shutdown);
 }
@@ -2029,13 +2033,13 @@ DOMAIN is one of AF_INET or AF_UNIX.  \
 This is used on the server side of a socket connection.  \
 Raise SOCKET-ERROR exception if accept fails.\n\
 See accept(2) for more information."
-	FTH fs, io;
-	int fd, nd, domain;
+	FTH 		fs, io;
+	int 		fd, nd, domain;
 
 	FTH_STACK_CHECK(vm, 3, 1);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
 	fs = fth_pop_ficl_cell(vm);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	nd = socket_accept(domain, fd);
 	if (nd == -1) {
 		close(fd);
@@ -2062,15 +2066,15 @@ and DOMAIN is one of AF_INET or AF_UNIX.  \
 This is used on the client side of a socket connection.  \
 Raise SOCKET-ERROR exception if connect fails.\n\
 See connet(2) for more information."
-	FTH fs, io;
-	char *host;
-	int domain, fd, port;
+	FTH 		fs, io;
+	char           *host;
+	int 		domain, fd, port;
 
 	FTH_STACK_CHECK(vm, 4, 1);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
-	port = (int)ficlStackPopInteger(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
+	port = (int) ficlStackPopInteger(vm->dataStack);
 	fs = fth_pop_ficl_cell(vm);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fs);
 	if (socket_connect(host, port, domain, fd) == -1) {
 		close(fd);
@@ -2093,16 +2097,16 @@ MSG is the data to send \
 and FLAGS can be 0, MSG_PEEK or MSG_OOB.  \
 Raise SOCKET-ERROR exception if send fails.\n\
 See send(2) for more information."
-	int fd, flags;
-	size_t size;
-	FTH msg;
-	char *text;
+	int 		fd, flags;
+	size_t 		size;
+	FTH 		msg;
+	char           *text;
 
 	FTH_STACK_CHECK(vm, 3, 0);
-	flags = (int)ficlStackPopInteger(vm->dataStack);
+	flags = (int) ficlStackPopInteger(vm->dataStack);
 	msg = fth_pop_ficl_cell(vm);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
-	size = (size_t)fth_string_length(msg);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
+	size = (size_t) fth_string_length(msg);
 	text = IO_STRING_REF(msg);
 	if (send(fd, text, size, flags) == -1)
 		IO_SOCKET_ERROR_ARG(send, text);
@@ -2118,20 +2122,20 @@ FD is the socket descriptor \
 and FLAGS can be 0, MSG_PEEK, or MSG_OOB.  \
 Raise SOCKET-ERROR exception if recv fails.\n\
 See recv(2) for more information."
-	FTH fs;
-	int fd, flags;
-	ssize_t len;
+	FTH 		fs;
+	int 		fd, flags;
+	ssize_t 	len;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	flags = (int)ficlStackPopInteger(vm->dataStack);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	flags = (int) ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	len = recv(fd, vm->pad, sizeof(vm->pad), flags);
 	if (len == -1) {
 		IO_SOCKET_ERROR(recv);
 		/* NOTREACHED */
 		return;
 	}
-	fs = fth_make_string_len(vm->pad, (ficlInteger)len);
+	fs = fth_make_string_len(vm->pad, (ficlInteger) len);
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
@@ -2149,20 +2153,20 @@ PORT is the port if DOMAIN is AF_INET, otherwise unused, \
 and DOMAIN is one of AF_INET or AF_UNIX.  \
 Raise SOCKET-ERROR exception if sendto fails.\n\
 See sendto(2) for more information."
-	FTH fhost, fmsg;
-	int fd, flags, domain;
-	char *host, *msg;
-	ficlUnsigned16 port;
+	FTH 		fhost, fmsg;
+	int 		fd, flags, domain;
+	char           *host, *msg;
+	ficlUnsigned16 	port;
 	struct sockaddr *addr;
-	socklen_t len = 0;
+	socklen_t 	len = 0;
 
 	FTH_STACK_CHECK(vm, 6, 0);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
-	port = (ficlUnsigned16)ficlStackPopUnsigned(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
+	port = (ficlUnsigned16) ficlStackPopUnsigned(vm->dataStack);
 	fhost = fth_pop_ficl_cell(vm);
-	flags = (int)ficlStackPopInteger(vm->dataStack);
+	flags = (int) ficlStackPopInteger(vm->dataStack);
 	fmsg = fth_pop_ficl_cell(vm);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fhost);
 	msg = IO_STRING_REF(fmsg);
 	IO_SOCKADDR(addr, host, port, domain, len);
@@ -2183,19 +2187,19 @@ PORT is the port if DOMAIN is AF_INET, otherwise unused, \
 and DOMAIN is one of AF_INET or AF_UNIX.  \
 Raise SOCKET-ERROR exception if recvfrom fails.\n\
 See recvfrom(2) for more information."
-	FTH fhost, fs;
-	int fd, flags, domain;
-	ficlUnsigned16 port;
-	char *host;
+	FTH 		fhost, fs;
+	int 		fd, flags, domain;
+	ficlUnsigned16 	port;
+	char           *host;
 	struct sockaddr *addr;
-	socklen_t len = 0;
+	socklen_t 	len = 0;
 
 	FTH_STACK_CHECK(vm, 5, 1);
-	domain = (int)ficlStackPopInteger(vm->dataStack);
-	port = (ficlUnsigned16)ficlStackPopUnsigned(vm->dataStack);
+	domain = (int) ficlStackPopInteger(vm->dataStack);
+	port = (ficlUnsigned16) ficlStackPopUnsigned(vm->dataStack);
 	fhost = fth_pop_ficl_cell(vm);
-	flags = (int)ficlStackPopInteger(vm->dataStack);
-	fd = (int)ficlStackPopInteger(vm->dataStack);
+	flags = (int) ficlStackPopInteger(vm->dataStack);
+	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fhost);
 	IO_SOCKADDR(addr, host, port, domain, len);
 	if (recvfrom(fd, vm->pad, sizeof(vm->pad), flags, addr, &len) == -1) {
@@ -2203,19 +2207,19 @@ See recvfrom(2) for more information."
 		/* NOTREACHED */
 		return;
 	}
-	fs = fth_make_string_len(vm->pad, (ficlInteger)len);
+	fs = fth_make_string_len(vm->pad, (ficlInteger) len);
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
 #endif				/* HAVE_SOCKET */
 
-static int	fth_exit_status = 0;
+static int 	fth_exit_status = 0;
 
 int
 fth_set_exit_status(int status)
 {
 	if (WIFEXITED(status))
-		fth_exit_status = (int)WEXITSTATUS(status);
+		fth_exit_status = (int) WEXITSTATUS(status);
 	else
 		fth_exit_status = -1;
 	return (fth_exit_status);
@@ -2231,7 +2235,7 @@ exit-status => 0\n\
 exit-status => 127\n\
 Return exit status of last extern process \
 called via file-shell, file-system, etc."
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)fth_exit_status);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) fth_exit_status);
 }
 
 void
@@ -2264,7 +2268,7 @@ ficl_print_io(ficlVm *vm)
 \"test\" io-open value io\n\
 io .io => #<io[0]: \"test\", file-input>\n\
 Print IO object to current output."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	io = fth_pop_ficl_cell(vm);
@@ -2292,7 +2296,7 @@ io1 io2 io= => #t\n\
 io1 io3 io= => #f\n\
 Return #t if OBJ1 and OBJ2 are IO objects with equal filenames, \
 modes and file positions, otherwise #f."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -2317,8 +2321,8 @@ io io-getc => 101\n\
 io io-close\n\
 Return next character from IO object or #f if EOF.\n\
 See also io-read."
-	FTH io;
-	int c;
+	FTH 		io;
+	int 		c;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2345,7 +2349,7 @@ io <char> c io-putc\n\
 io io-close\n\
 Write character C to IO object.\n\
 See also io-write, io-write-format."
-	FTH ch, io;
+	FTH 		ch, io;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	ch = fth_pop_ficl_cell(vm);
@@ -2354,7 +2358,7 @@ See also io-write, io-write-format."
 	fth_io_putc(io, FTH_TO_CHAR(ch));
 }
 
-char *
+char           *
 fth_io_read(FTH io)
 {
 	IO_ASSERT_IO_INPUT(io);
@@ -2371,7 +2375,7 @@ io io-read => \"content of entire line\"\n\
 io io-close\n\
 Return next line from IO object or #f if EOF.\n\
 See also io-getc."
-	char *line;
+	char           *line;
 
 	line = fth_io_read(io);
 	if (line == NULL)
@@ -2403,7 +2407,7 @@ io \"content of entire line\" io-write\n\
 io io-close\n\
 Write LINE to IO object.\n\
 See also io-putc, io-write-format."
-	FTH io, fs;
+	FTH 		io, fs;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	fs = fth_pop_ficl_cell(vm);
@@ -2427,7 +2431,7 @@ io  \"%d %d + .\\n\"  #( 10 20 )  string-format  io-write\n\
 io io-close\n\
 Write string built from FMT and array FMT-ARGS to IO object.\n\
 See also io-putc, io-write."
-	FTH io, fmt, args;
+	FTH 		io, fmt, args;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	args = fth_pop_ficl_cell(vm);
@@ -2445,9 +2449,9 @@ io io-readlines => #( \"1st line\\n\" \"2nd line\\n\" ...)\n\
 io io-close\n\
 Return the entire IO object content as an array of strings, line by line.\n\
 See also io-getc, io-read."
-	FTH array;
-	char *line;
-	ficl2Integer pos;
+	FTH 		array;
+	char           *line;
+	ficl2Integer 	pos;
 
 	IO_ASSERT_IO_NOT_CLOSED(io);
 	array = fth_make_empty_array();
@@ -2468,9 +2472,9 @@ io #( \"1st line\\n\" \"2nd line\\n\" ...) io-writelines\n\
 io io-close\n\
 Write ARRAY-OF-LINES to IO object.\n\
 See also io-putc, io-write, io-write-format."
-	FTH fs;
-	ficlInteger i, len;
-	ficl2Integer pos;
+	FTH 		fs;
+	ficlInteger 	i, len;
+	ficl2Integer 	pos;
 
 	IO_ASSERT_IO_OUTPUT(io);
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG2, "an array");
@@ -2502,8 +2506,8 @@ io io-readlines => #( \"1st line\\n\" \"2nd line\\n\" ...)\n\
 io io-eof? => #t\n\
 io io-close\n\
 Return #t if EOF is reached, otherwise #f."
-	FTH io;
-	bool flag;
+	FTH 		io;
+	bool 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2511,14 +2515,14 @@ Return #t if EOF is reached, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
-char *
+char           *
 fth_io_filename(FTH io)
 {
 	IO_ASSERT_IO(io);
 	return (IO_STRING_REF(FTH_IO_FILENAME(io)));
 }
 
-void *
+void           *
 fth_io_ptr(FTH io)
 {
 	IO_ASSERT_IO(io);
@@ -2539,7 +2543,7 @@ fth_io_fileno(FTH io)
 	switch (FTH_IO_TYPE(io)) {
 	case FTH_IO_FILE:
 	case FTH_IO_PIPE:
-		return (fileno((FILE *)FTH_IO_DATA(io)));
+		return (fileno((FILE *) FTH_IO_DATA(io)));
 		break;
 	case FTH_IO_SOCKET:
 		return (FTH_IO_SOCKET_FD(FTH_IO_DATA(io)));
@@ -2576,9 +2580,9 @@ Keyword WHENCE can have the following values:\n\
 SEEK_SET  --  offset counts from begin of file (default)\n\
 SEEK_CUR  --  offset counts from current position\n\
 SEEK_END  --  offset counts from end of file."
-	FTH io, pos;
-	int whence;
-	ficl2Integer where;
+	FTH 		io, pos;
+	int 		whence;
+	ficl2Integer 	where;
 
 	whence = fth_get_optkey_fix(FTH_KEYWORD_WHENCE, SEEK_SET);
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -2608,8 +2612,8 @@ io io-pos-ref => 0\n\
 io io-close\n\
 Return current IO object position.\n\
 See also io-pos-set!, io-seek and io-rewind."
-	FTH io;
-	ficl2Integer pos;
+	FTH 		io;
+	ficl2Integer 	pos;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2633,8 +2637,8 @@ io 10 io-pos-set!\n\
 io io-close\n\
 Set IO object position to POS.\n\
 See also io-pos-ref, io-seek and io-rewind."
-	FTH io;
-	ficl2Integer pos;
+	FTH 		io;
+	ficl2Integer 	pos;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	pos = ficlStackPop2Integer(vm->dataStack);
@@ -2660,7 +2664,7 @@ io io-pos-ref => 0\n\
 io io-close\n\
 Rewind position to begin of IO object.\n\
 See also io-pos-ref, io-pos-set!, io-seek."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	io = fth_pop_ficl_cell(vm);
@@ -2670,7 +2674,7 @@ See also io-pos-ref, io-pos-set!, io-seek."
 FTH
 fth_readlines(const char *name)
 {
-	FTH io, array;
+	FTH 		io, array;
 
 	io = fth_io_open(name, FICL_FAM_READ);
 	array = fth_io_readlines(io);
@@ -2685,7 +2689,7 @@ ficl_readlines(ficlVm *vm)
 \"test\" readlines => #( \"1st line\\n\" \"2nd line\\n\" ...)\n\
 Open file FNAME, read its content in an array, \
 close file and return the array."
-	FTH fs, array;
+	FTH 		fs, array;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -2696,7 +2700,7 @@ close file and return the array."
 void
 fth_writelines(const char *name, FTH array)
 {
-	FTH io;
+	FTH 		io;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG2, "an array");
 	io = fth_io_open(name, FICL_FAM_WRITE);
@@ -2710,7 +2714,7 @@ ficl_writelines(ficlVm *vm)
 #define h_writelines "( fname array-of-lines -- )  write array\n\
 \"test\" #( \"1st line\\n\" \"2nd line\\n\" ) writelines\n\
 Open file FNAME, write the content of ARRAY-OF-LINES to it and close file."
-	FTH array, fs;
+	FTH 		array, fs;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	array = fth_pop_ficl_cell(vm);
@@ -2734,7 +2738,7 @@ io #( \"1st line\\n\" \"2nd line\\n\" ...) io-writelines\n\
 io io-flush\n\
 io io-close\n\
 Flushe IO object if possible."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	io = fth_pop_ficl_cell(vm);
@@ -2744,42 +2748,48 @@ Flushe IO object if possible."
 FTH
 fth_set_io_stdin(FTH io)
 {
-	FTH old_io;
+	FTH 		old_io;
+	int 		fd;
 
 	if (!IO_INPUT_P(io))
 		return (FTH_FALSE);
 	old_io = FTH_FICL_VM()->callback.port_in;
+	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_in = io;
 	FTH_FICL_VM()->callback.stdin_ptr = FTH_IO_DATA(io);
-	FTH_FICL_VM()->callback.stdin_fileno = fileno((FILE *)FTH_IO_DATA(io));
+	FTH_FICL_VM()->callback.stdin_fileno = fd;
 	return (old_io);
 }
 
 FTH
 fth_set_io_stdout(FTH io)
 {
-	FTH old_io;
+	FTH 		old_io;
+	int 		fd;
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
 	old_io = FTH_FICL_VM()->callback.port_out;
+	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_out = io;
 	FTH_FICL_VM()->callback.stdout_ptr = FTH_IO_DATA(io);
-	FTH_FICL_VM()->callback.stdout_fileno = fileno((FILE *)FTH_IO_DATA(io));
+	FTH_FICL_VM()->callback.stdout_fileno = fd;
 	return (old_io);
 }
 
 FTH
 fth_set_io_stderr(FTH io)
 {
-	FTH old_io;
+	FTH 		old_io;
+	int 		fd;
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
 	old_io = FTH_FICL_VM()->callback.port_err;
+	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_err = io;
 	FTH_FICL_VM()->callback.stderr_ptr = FTH_IO_DATA(io);
-	FTH_FICL_VM()->callback.stderr_fileno = fileno((FILE *)FTH_IO_DATA(io));
+	FTH_FICL_VM()->callback.stderr_fileno = fd;
 	return (old_io);
 }
 
@@ -2801,7 +2811,7 @@ ficl_set_io_stdin(ficlVm *vm)
 \"input-file\" io-open-read set-*stdin* value old-stdin\n\
 Set IO to current standard input and return old IO object.\n\
 See also *stdin*, *stdout*, set-*stdout*, *stderr*, set-*stderr*."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2826,7 +2836,7 @@ ficl_set_io_stdout(ficlVm *vm)
 \"stdout.log\" io-open-write set-*stdout* value old-stdout\n\
 Set IO to current standard output and return old IO object.\n\
 See also *stdin*, set-*stdin*, *stdout*, *stderr*, set-*stderr*."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2851,7 +2861,7 @@ ficl_set_io_stderr(ficlVm *vm)
 \"error.log\" io-open-write set-*stderr* value old-stderr\n\
 Set IO to current standard error and return old IO object.\n\
 See also *stdin*, set-*stdin*, *stdout*, set-*stdout*, *stderr*."
-	FTH io;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2876,7 +2886,7 @@ init_io_type(void)
 void
 init_io(void)
 {
-	char *vc;
+	char           *vc;
 
 	vc = fth_getenv("VERSION_CONTROL", NULL);
 	if (vc != NULL) {
@@ -2893,11 +2903,13 @@ init_io(void)
 			version_control = FTH_UNDEF;
 	} else
 		version_control = FTH_UNDEF;
-	fth_set_object_apply(io_tag, (void *)fth_io_read_line, 0, 0, 0);
+
+	fth_set_object_apply(io_tag, (void *) fth_io_read_line, 0, 0, 0);
 	version_number_string = fth_gc_permanent(fth_make_string("~[0-9]+~$"));
 	string_empty = fth_gc_permanent(fth_make_string(""));
 	string_cr = fth_gc_permanent(fth_make_string("\n"));
 	string_space = fth_gc_permanent(fth_make_string(" "));
+
 	/* io */
 	fth_set_io_stdin(make_file_io(stdin, "*stdin*", FICL_FAM_READ));
 	fth_set_io_stdout(make_file_io(stdout, "*stdout*", FICL_FAM_WRITE));
@@ -2912,6 +2924,7 @@ init_io(void)
 	FTH_PRI1("io-closed?", ficl_io_closed_p, h_io_closed_p);
 	FTH_PRI1("version-control", ficl_version_control, h_version_control);
 	FTH_PRI1("set-version-control", ficl_set_version_control, h_set_vc);
+
 	/* file */
 	FTH_PRI1("io-open-file", ficl_io_open_file, h_io_open_file);
 	FTH_PRI1("io-open-input-file", ficl_io_open_input_file, h_io_oi_file);
@@ -2924,6 +2937,7 @@ init_io(void)
 	FTH_PRI1("make-file-output-port", ficl_io_open_write, h_io_open_write);
 	FTH_PRI1("io-reopen", ficl_io_reopen, h_io_reopen);
 	FTH_PRI1("io-fdopen", ficl_io_fdopen, h_io_fdopen);
+
 	/* pipe */
 	FTH_PRI1("io-popen", ficl_io_popen, h_io_popen);
 	FTH_PRI1("make-pipe-port", ficl_io_popen, h_io_popen);
@@ -2931,6 +2945,7 @@ init_io(void)
 	FTH_PRI1("make-pipe-input-port", ficl_io_popen_read, h_io_popen_read);
 	FTH_PRI1("io-popen-write", ficl_io_popen_write, h_io_powrite);
 	FTH_PRI1("make-pipe-output-port", ficl_io_popen_write, h_io_powrite);
+
 	/* io-string */
 	FTH_PRI1("io-sopen", ficl_io_sopen, h_io_sopen);
 	FTH_PRI1("make-string-port", ficl_io_sopen, h_io_sopen);
@@ -2938,6 +2953,7 @@ init_io(void)
 	FTH_PRI1("make-string-input-port", ficl_io_sopen_read, h_io_soread);
 	FTH_PRI1("io-sopen-write", ficl_io_sopen_write, h_io_sowrite);
 	FTH_PRI1("make-string-output-port", ficl_io_sopen_write, h_io_sowrite);
+
 #if HAVE_SOCKET
 	/* socket */
 	FTH_PRI1("io-nopen", ficl_io_nopen, h_io_nopen);
@@ -2954,6 +2970,7 @@ init_io(void)
 	FTH_PRI1("net-recvfrom", ficl_recvfrom, h_recvfrom);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_SOCKET, h_list_of_io_socket_functions);
 #endif				/* HAVE_SOCKET */
+
 	/* io words */
 	FTH_PRI1("io-exit-status", ficl_exit_status, h_exit_status);
 	FTH_PRI1("exit-status", ficl_exit_status, h_exit_status);
@@ -2983,6 +3000,7 @@ init_io(void)
 	FTH_PRI1("*stderr*", ficl_io_stderr, h_io_stderr);
 	FTH_PRI1("set-*stderr*", ficl_set_io_stderr, h_set_io_stderr);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_IO, h_list_of_io_functions);
+
 	FTH_SET_CONSTANT(SEEK_SET);
 	FTH_SET_CONSTANT(SEEK_CUR);
 	FTH_SET_CONSTANT(SEEK_END);
