@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)primitives.c	1.109 3/22/16
+ * @(#)primitives.c	1.110 12/27/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2733,7 +2733,7 @@ TO_GLOBAL:
     {
       FTH x = CELL_FTH_REF(word->param);
       
-      if (FTH_FLOAT_P(x))
+      if (FTH_FLOAT_T_P(x))
 	FTH_FLOAT_OBJECT(x) += fth_float_ref(fth_pop_ficl_cell(vm));
       else if (FTH_LLONG_P(x))
 	FTH_LONG_OBJECT(x) += fth_long_long_ref(fth_pop_ficl_cell(vm));
@@ -2807,7 +2807,7 @@ TO_GLOBAL:
     {
       FTH x = CELL_FTH_REF(word->param);
       
-      if (FTH_FLOAT_P(x))
+      if (FTH_FLOAT_T_P(x))
 	FTH_FLOAT_OBJECT(x) += fth_float_ref(fth_pop_ficl_cell(vm));
       else if (FTH_LLONG_P(x))
 	FTH_LONG_OBJECT(x) += fth_long_long_ref(fth_pop_ficl_cell(vm));

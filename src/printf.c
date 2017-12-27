@@ -32,7 +32,7 @@
  * SUCH DAMAGE.
  */
 /*-
- * Copyright (c) 2012-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2012-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)printf.c	1.21 1/10/15
+ * @(#)printf.c	1.22 12/27/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -960,7 +960,7 @@ format_argument_error(const char *format)
 	(FTH_ULLONG_P(X) ? FTH_ULONG_OBJECT(X) : (ficl2Unsigned)(X)))
 
 #define FTH_FLOAT_REF(X)						\
-	(((X) && FTH_FLOAT_P(X)) ? FTH_FLOAT_OBJECT(X) : (ficlFloat)(X))
+	(((X) && FTH_FLOAT_T_P(X)) ? FTH_FLOAT_OBJECT(X) : (ficlFloat)(X))
 
 static void
 string_doprnt(void (*addchar)(int), const char *sfmt, FTH ap)

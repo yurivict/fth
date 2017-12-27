@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/23 05:26:21
+\ Changed: 17/12/27 06:36:15
 \
-\ @(#)clm.fs	1.136 12/23/17
+\ @(#)clm.fs	1.137 12/27/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -338,7 +338,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/23"	value *clm-version*
+"fth 2017/12/27"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -1704,19 +1704,17 @@ lambda: ( -- )\n\
 	snd-file file-exists? if
 		snd-file file-mtime
 	else
-		#f
+		0 s>d
 	then { snd-time }
 	body-str string? if
 		mix-file file-exists? if
 			mix-file readlines "" array-join
 		else
 			""
-		then ( old-body ) body-str string= if
-			mix-file file-mtime
-		else
+		then ( old-body ) body-str string<> if
 			mix-file #( body-str ) writelines
-			#f
 		then
+		mix-file file-mtime
 	else			\ body-str is nil
 		mix-file file-exists? if
 			mix-file file-mtime
@@ -1726,9 +1724,7 @@ lambda: ( -- )\n\
 			    fth-throw
 		then
 	then { mix-time }
-	snd-time      false?
-	mix-time      false? ||
-	snd-time mix-time d< || if
+	snd-time mix-time d< if
 		mix-file args each
 			( put all args on stack )
 		end-each :output snd-file :reverb-file-name rev-file
