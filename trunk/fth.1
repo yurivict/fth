@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.138 9/25/17
+.\" @(#)fth.1	1.139 12/27/17
 .\"
-.Dd 2017/09/25
+.Dd 2017/12/27
 .Dt FTH 1
 .Os
 .\"
@@ -4522,7 +4522,7 @@ Miscellaneous math functions:
 .\"
 .\" >bignum
 .\"
-.It Cm >bignum No (\ x -- b\ )
+.It Cm >bignum No (\ x -- b\ ) alias for Sx s>b
 Convert any number
 .Ar x
 to a bignum object.
@@ -4544,14 +4544,14 @@ and image
 .\"
 .\" >llong
 .\"
-.It Cm >llong No (\ x -- d\ )
+.It Cm >llong No (\ x -- d\ ) alias fo Sx s>d
 Convert any number
 .Ar x
-to a long-long object.
+to a llong object.
 .\"
 .\" >ratio
 .\"
-.It Cm >ratio No (\ x -- q\ )
+.It Cm >ratio No (\ x -- q\ ) alias for Sx s>q
 Convert any number
 .Ar x
 to a ratio object.
@@ -4598,7 +4598,7 @@ Return a new bignum object.
 .\"
 .\" make-long-long
 .\"
-.It Cm make-long-long No (\ val -- d\ )
+.It Cm make-long-long No (\ val -- d\ ) alias for Sx s>d
 Return new llong object (ficl2Integer) from
 .Ar val .
 .\"
@@ -4624,8 +4624,8 @@ and denumerator
 .\"
 .\" make-ulong-long
 .\"
-.It Cm make-ulong-long No (\ val -- ud\ )
-Return new unsigned llong object (ficl2Unsigned) from
+.It Cm make-ulong-long No (\ val -- ud\ ) alias for Sx s>ud
+Return new ullong object (ficl2Unsigned) from
 .Ar val .
 .\"
 .\" nan
@@ -5000,7 +5000,7 @@ can be any type of number.
 Convertion between number types:
 .Bl -tag -width MMM -compact
 .\"
-.\" f>b s>b
+.\" f>b s>b >bignum
 .\"
 .It Cm >bignum No (\ x -- b\ )
 .It Cm f>b No (\ r -- b\ ) alias for Sx >bignum
@@ -5017,9 +5017,15 @@ Convert any number to a complex object (ficlComplex).
 .\"
 .\" f>d s>d
 .\"
-.It Cm f>d No (\ r -- d\ )
-.It Cm s>d No (\ n -- d\ ) alias for Sx f>d
-Convert any number to Forth double word set number (ficl2Integer).
+.It Cm f>d No (\ r -- d\ ) alias for Sx s>d
+.It Cm s>d No (\ n -- d\ )
+Convert any number to a llong object (ficl2Integer).
+.\"
+.\" f>ud s>ud
+.\"
+.It Cm f>ud No (\ r -- ud\ ) alias for Sx s>ud
+.It Cm s>ud No (\ n -- ud\ )
+Convert any number to an ullong object (ficl2Unsigned).
 .\"
 .\" b>f c>f d>f q>f s>f
 .\"
@@ -5030,13 +5036,13 @@ Convert any number to Forth double word set number (ficl2Integer).
 .It Cm s>f No (\ n -- r\ )
 Convert any number to a float object (ficlFloat).
 .\"
-.\" c>q f>q s>q
+.\" c>q f>q s>q >ratio
 .\"
-.It Cm c>q No (\ c -- q\ ) alias for Sx f>q
-.It Cm f>q No (\ r -- q\ )
+.It Cm >ratio (\ c -- q\ ) alias for Sx s>q
+.It Cm c>q No (\ c -- q\ ) alias for Sx s>q
+.It Cm f>q No (\ r -- q\ ) alias for Sx s>q
 .It Cm s>q No (\ n -- q\ )
-Convert complex (c>q), float (f>q), and integer (s>q) to ratio object
-(ficlRatio).
+Convert any number to a ratio object (ficlRatio).
 .\"
 .\" b>s c>s d>s f>s r>s
 .\"
