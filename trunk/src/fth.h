@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.217 12/26/17
+ * @(#)fth.h	1.218 12/27/17
  */
 
 #if !defined(_FTH_H_)
@@ -79,7 +79,7 @@
 /* from ruby/ruby.h */
 #if defined(__STDC__)
 #include <limits.h>
-#else				/* !__STDC__ */
+#else		/* !__STDC__ */
 #if !defined(LONG_MAX)
 #if defined(HAVE_LIMITS_H)
 #include <limits.h>
@@ -91,7 +91,7 @@
 #define LONG_MAX		0x7fffffffffffffffL
 #endif
 #endif
-#endif				/* !LONG_MAX */
+#endif		/* !LONG_MAX */
 #if !defined(LONG_MIN)
 #define LONG_MIN		(-LONG_MAX - 1)
 #endif
@@ -101,8 +101,8 @@
 #else
 #define ULONG_MAX		0x7fffffffffffffffUL
 #endif
-#endif				/* !ULONG_MAX */
-#endif				/* __STDC__ */
+#endif		/* !ULONG_MAX */
+#endif		/* __STDC__ */
 
 #if defined(HAVE_LONG_LONG)
 #if !defined(LLONG_MAX)
@@ -114,9 +114,9 @@
 #else
 /* assuming 64bit (2's complement) long long */
 #define LLONG_MAX		0x7fffffffffffffffLL
-#endif				/* _I64_MAX */
-#endif				/* LONG_LONG_MAX */
-#endif				/* !LLONG_MAX */
+#endif		/* _I64_MAX */
+#endif		/* LONG_LONG_MAX */
+#endif		/* !LLONG_MAX */
 #if !defined(LLONG_MIN)
 #if defined(LONG_LONG_MIN)
 #define LLONG_MIN		LONG_LONG_MIN
@@ -125,13 +125,13 @@
 #define LLONG_MIN		_I64_MIN
 #else
 #define LLONG_MIN		(-LLONG_MAX - 1)
-#endif				/* _I64_MIN */
-#endif				/* LONG_LONG_MIN */
-#endif				/* !LLONG_MIN */
+#endif		/* _I64_MIN */
+#endif		/* LONG_LONG_MIN */
+#endif		/* !LLONG_MIN */
 #if !defined(ULLONG_MAX)
 #define ULLONG_MAX		0xffffffffffffffffULL
 #endif
-#endif				/* HAVE_LONG_LONG */
+#endif		/* HAVE_LONG_LONG */
 
 #if (FTH_SIZEOF_LONG_LONG == FTH_SIZEOF_VOID_P)
 #define FIXNUM_MAX		(LLONG_MAX >> 1L)
@@ -257,10 +257,8 @@ extern out_cb	fth_error_hook;
 extern exit_cb	fth_exit_hook;
 
 /* === Predicates === */
-#define FTH_INSTANCE_FLAG_P(Obj, Type)					\
-	fth_instance_flag_p(Obj, Type)
-#define FTH_INSTANCE_TYPE_P(Obj, Type)					\
-	fth_instance_type_p(Obj, Type)
+#define FTH_INSTANCE_FLAG_P(Obj, Type)	fth_instance_flag_p(Obj, Type)
+#define FTH_INSTANCE_TYPE_P(Obj, Type)	fth_instance_type_p(Obj, Type)
 
 #define FTH_CHAR_P(Obj)		fth_char_p(Obj)
 #define FTH_EXACT_P(Obj)	fth_exact_p(Obj)
@@ -284,8 +282,9 @@ extern exit_cb	fth_exit_hook;
 
 #define FTH_BIGNUM_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_BIGNUM_T)
 #define FTH_COMPLEX_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_COMPLEX_T)
-#define FTH_FLOAT_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_FLOAT_T)
+#define FTH_FLOAT_T_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_FLOAT_T)
 #define FTH_LONG_LONG_P(Obj)	FTH_INTEGER_P(Obj)
+#define FTH_FLOAT_P(Obj)	FTH_NUMBER_P(Obj)
 #define FTH_LLONG_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_LLONG_T)
 #define FTH_RATIO_P(Obj)	FTH_INSTANCE_TYPE_P(Obj, FTH_RATIO_T)
 
@@ -722,7 +721,7 @@ int		fth_ullong_p(FTH obj);
 int		fth_unsigned_p(FTH obj);
 #if HAVE_COMPLEX
 ficlComplex	fth_complex_ref(FTH x);
-#endif				/* HAVE_COMPLEX */
+#endif
 ficlFloat	fth_float_ref(FTH x);
 ficlFloat	fth_float_ref_or_else(FTH x, ficlFloat fallback);
 ficlInteger	fth_integer_ref(FTH x);
@@ -755,11 +754,11 @@ void		ficlStackPushComplex(ficlStack *stack, ficlComplex cp);
 FTH		fth_make_complex(ficlComplex z);
 FTH		fth_make_polar(ficlFloat real, ficlFloat theta);
 FTH		fth_make_rectangular(ficlFloat real, ficlFloat image);
-#endif				/* HAVE_COMPLEX */
+#endif		/* HAVE_COMPLEX */
 #if HAVE_BN
 FTH		fth_make_bignum(ficlBignum bn);
 FTH		fth_make_big(FTH m);
-#endif				/* HAVE_BN */
+#endif		/* HAVE_BN */
 /* ratio */
 FTH		fth_exact_to_inexact(FTH x);
 FTH		fth_inexact_to_exact(FTH x);
@@ -772,7 +771,7 @@ FTH		fth_make_ratio_from_int(ficlInteger num, ficlInteger den);
 FTH		fth_make_rational(ficlRatio r);
 FTH		fth_ratio_floor(FTH x);
 FTH		fth_rationalize(FTH x, FTH err);
-#endif				/* HAVE_BN */
+#endif		/* HAVE_BN */
 FTH		fth_number_add(FTH x, FTH y);
 FTH		fth_number_div(FTH x, FTH y);
 int		fth_number_equal_p(FTH x, FTH y);
@@ -1060,7 +1059,7 @@ FTH		fth_set_argv(int from, int to, char **argv);
 
 __END_DECLS
 
-#endif	/* _FTH_H_ */
+#endif		/* _FTH_H_ */
 
 /*
  * fth.h ends here

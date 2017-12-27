@@ -1,3 +1,11 @@
+2017-12-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/primitive.c:
+	* ficl/vm.c:
+	* src/fth.h:
+	* src/number.c: FTH_FLOAT_P renamed to FTH_FLOAT_T_P.
+	FTH_FLOAT_P is now an alias for FTH_NUMBER_P.
+
 2017-12-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/utils.c (history-lineno, history-next, history-prev):

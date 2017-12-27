@@ -50,7 +50,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)vm.c	1.150 1/23/14
+ * @(#)vm.c	1.151 12/27/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -525,7 +525,7 @@ void ficlVmInnerLoop(ficlVm *vm, ficlWord *volatile fw)
 								\
 	cell = (cp);						\
 	x = ficl_to_fth(CELL_FTH_REF(cell));			\
-	if (FTH_FLOAT_P(x))					\
+	if (FTH_FLOAT_T_P(x))					\
 	  FTH_FLOAT_OBJECT(x) += VM_STACK_FLOAT_REF(dataTop);	\
 	else if (FTH_LLONG_P(x))				\
 	  FTH_LONG_OBJECT(x) += VM_STACK_LONG_REF(dataTop);	\
@@ -556,7 +556,7 @@ void ficlVmInnerLoop(ficlVm *vm, ficlWord *volatile fw)
 								\
 	cell = (cp);						\
 	x = ficl_to_fth(CELL_FTH_REF(cell));			\
-	if (FTH_FLOAT_P(x))					\
+	if (FTH_FLOAT_T_P(x))					\
 	  FTH_FLOAT_OBJECT(x) += VM_STACK_FLOAT_REF(dataTop);	\
 	else							\
 	  VM_STACK_FLOAT_SET(cell, VM_STACK_FLOAT_REF(cell) + VM_STACK_FLOAT_REF(dataTop)); \
@@ -764,7 +764,7 @@ MINUSROLL:
       cell = VM_STACK_VOIDP_REF(dataTop);
       dataTop--;
       x = ficl_to_fth(CELL_FTH_REF(cell));
-      if (FTH_FLOAT_P(x))
+      if (FTH_FLOAT_T_P(x))
 	FTH_FLOAT_OBJECT(x) += VM_STACK_FLOAT_REF(dataTop);
       else if (FTH_LLONG_P(x))
 	FTH_LONG_OBJECT(x) += VM_STACK_LONG_REF(dataTop);
@@ -1700,7 +1700,7 @@ MINUSROLL:
       ce = VM_STACK_VOIDP_REF(dataTop);
       dataTop--;
       x = ficl_to_fth(CELL_FTH_REF(ce));
-      if (FTH_FLOAT_P(x))
+      if (FTH_FLOAT_T_P(x))
 	FTH_FLOAT_OBJECT(x) += VM_STACK_FLOAT_REF(dataTop);
       else
 	VM_STACK_FLOAT_SET(ce, VM_STACK_FLOAT_REF(ce) + VM_STACK_FLOAT_REF(dataTop));

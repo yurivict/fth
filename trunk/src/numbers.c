@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.168 12/26/17
+ * @(#)numbers.c	1.169 12/27/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -804,7 +804,7 @@ static void
 ficl_to_f(ficlVm *vm)
 {
 #define h_to_f "( x -- y )  Convert any number X to ficlFloat"
-	ficlFloat 	f;
+	ficlFloat	f;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	f = ficlStackPopFloat(vm->dataStack);
@@ -1206,8 +1206,7 @@ fth_int_ref(FTH x)
 
 /*
  * Return C ficlInteger from X.  If X doesn't fit in Fixnum, FTH llong,
- * FTH float, FTH complex, or any bignum,
- * FIXME: throw an exception or warn and return 0?
+ * FTH float, FTH complex, or any bignum, return fallback.
  */
 ficlInteger
 fth_int_ref_or_else(FTH x, ficlInteger fallback)
@@ -1357,8 +1356,7 @@ fth_ulong_long_ref(FTH x)
 
 /*
  * Return C ficlFloat from X.  If X isn't of type Fixnum, FTH llong,
- * FTH float, FTH complex, or any bignum,
- * FIXME: throw an exception or show a warning and return 0.0?
+ * FTH float, FTH complex, or any bignum, throw an exception.
  */
 ficlFloat
 fth_float_ref(FTH x)
@@ -1366,7 +1364,7 @@ fth_float_ref(FTH x)
 	int 		type = -1;
 	ficlFloat 	f;
 
-	if (FTH_FLOAT_P(x))
+	if (FTH_FLOAT_T_P(x))
 		return (FTH_FLOAT_OBJECT(x));
 	if (NUMB_FIXNUM_P(x))
 		return ((ficlFloat) FIX_TO_INT(x));
@@ -1385,10 +1383,8 @@ fth_float_ref(FTH x)
 		f = (ficlFloat) FTH_BIGNUM_REF_INT(x);
 		break;
 	case FTH_RATIO_T:
-		f = FTH_RATIO_REF_FLOAT(x);
-		break;
 	default:
-		f = 0.0;
+		f = FTH_RATIO_REF_FLOAT(x);
 		break;
 	}
 	return (f);
@@ -1409,7 +1405,7 @@ fth_float_ref_or_else(FTH x, ficlFloat fallback)
 	int 		type = -1;
 	ficlFloat 	f;
 
-	if (FTH_FLOAT_P(x))
+	if (FTH_FLOAT_T_P(x))
 		return (FTH_FLOAT_OBJECT(x));
 	if (NUMB_FIXNUM_P(x))
 		return ((ficlFloat) FIX_TO_INT(x));
@@ -1826,7 +1822,7 @@ fth_make_float(ficlFloat f)
 FTH
 fth_float_copy(FTH obj)
 {
-	if (FTH_FLOAT_P(obj))
+	if (FTH_FLOAT_T_P(obj))
 		return (fl_copy(obj));
 	return (obj);
 }
@@ -1843,7 +1839,7 @@ Return #t if OBJ is a float object, otherwise #f."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
-	ficlStackPushBoolean(vm->dataStack, FTH_FLOAT_P(obj));
+	ficlStackPushBoolean(vm->dataStack, FTH_FLOAT_T_P(obj));
 }
 
 static void
@@ -1860,7 +1856,7 @@ See also nan?, inf, nan."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
-	if (FTH_FLOAT_P(obj))
+	if (FTH_NUMBER_P(obj))
 		flag = fth_isinf(fth_float_ref(obj));
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -1879,7 +1875,7 @@ See also inf?, inf, nan."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
-	if (FTH_FLOAT_P(obj))
+	if (FTH_NUMBER_P(obj))
 		flag = fth_isnan(fth_float_ref(obj));
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -2600,7 +2596,7 @@ fth_to_bn(ficlBignum m, FTH x)
 		float_to_bn(m, fth_float_ref(x));
 		break;
 	default:
-		int_to_bn(m, fth_int_ref(x));
+		int_to_bn(m, fth_integer_ref(x));
 		break;
 	}
 }
@@ -3083,7 +3079,7 @@ finish:
 	return (flag);
 }
 
-#endif				/* HAVE_BN */
+#endif		/* HAVE_BN */
 
 /* === RATIO via bn(3) === */
 
@@ -3228,7 +3224,7 @@ fth_to_rt(ficlRatio m, FTH x)
 		BN_CHECKP(BN_copy(m->den, FTH_RATIO_DEN(x)));
 		break;
 	default:
-		int_to_bn(m->num, fth_int_ref(x));
+		int_to_bn(m->num, fth_integer_ref(x));
 		BN_CHECKP(BN_copy(m->den, &fth_bn_one));
 		break;
 	}
