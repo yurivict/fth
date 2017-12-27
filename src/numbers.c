@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.169 12/27/17
+ * @(#)numbers.c	1.170 12/27/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -122,9 +122,6 @@ static void 	ficl_prime_p(ficlVm *vm);
 static void 	ficl_ratio_p(ficlVm *vm);
 static void 	ficl_unsigned_p(ficlVm *vm);
 static void 	ficl_ullong_p(ficlVm *vm);
-
-static void 	ficl_make_long_long(ficlVm *vm);
-static void 	ficl_make_ulong_long(ficlVm *vm);
 
 static void 	ficl_frandom(ficlVm *vm);
 static void 	ficl_rand_seed_ref(ficlVm *vm);
@@ -235,8 +232,6 @@ static void 	rt_canonicalize(ficlRatio r);
 static FTH 	make_rational(ficlBignum num, ficlBignum den);
 static void 	ficl_to_ratio(ficlVm *vm);
 static void 	ficl_q_dot(ficlVm *vm);
-static void 	ficl_s_to_q(ficlVm *vm);
-static void 	ficl_f_to_q(ficlVm *vm);
 static void 	ficl_qnegate(ficlVm *vm);
 static void 	ficl_qfloor(ficlVm *vm);
 static void 	ficl_qceil(ficlVm *vm);
@@ -801,6 +796,17 @@ ficl_to_d(ficlVm *vm)
 }
 
 static void
+ficl_to_ud(ficlVm *vm)
+{
+#define h_to_ud "( x -- ud )  Convert any number X to ficl2Unsigned"
+	ficl2Unsigned	ud;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	ud = ficlStackPop2Unsigned(vm->dataStack);
+	ficlStackPushFTH(vm->dataStack, fth_make_ullong(ud));
+}
+
+static void
 ficl_to_f(ficlVm *vm)
 {
 #define h_to_f "( x -- y )  Convert any number X to ficlFloat"
@@ -1123,32 +1129,6 @@ fth_make_ulong_long(ficl2Unsigned ud)
 	if (UFIXABLE_P(ud))
 		return (UNSIGNED_TO_FIX((ficlUnsigned) ud));
 	return (fth_make_ullong(ud));
-}
-
-static void
-ficl_make_long_long(ficlVm *vm)
-{
-#define h_make_long_long "( val -- d )  return ficl2Integer\n\
-1 make-long-long long-long? => #t\n\
-Return VAL as Forth double (ficl2Integer)."
-	ficl2Integer 	d;
-
-	FTH_STACK_CHECK(vm, 1, 1);
-	d = ficlStackPop2Integer(vm->dataStack);
-	ficlStackPushFTH(vm->dataStack, fth_make_llong(d));
-}
-
-static void
-ficl_make_ulong_long(ficlVm *vm)
-{
-#define h_make_ulong_long "( val -- ud )  return ficl2Unsigned\n\
-1 make-ulong-long ulong-long? => #t\n\
-Return VAL as Forth unsigned double (ficl2Unsigned)."
-	ficl2Unsigned 	ud;
-
-	FTH_STACK_CHECK(vm, 1, 1);
-	ud = ficlStackPop2Unsigned(vm->dataStack);
-	ficlStackPushFTH(vm->dataStack, fth_make_ullong(ud));
 }
 
 /*
@@ -3408,11 +3388,13 @@ static void
 ficl_to_ratio(ficlVm *vm)
 {
 #define h_to_ratio "( numb -- ratio )  NUMB to ratio\n\
-1 >ratio => 1/1\n\
-1 >ratio ratio? => #t\n\
-0.25 >ratio => 1/4\n\
-Convert any number NUMB to a ratio object.\n\
-See also s>r and f>r."
+1 s>r => 1/1\n\
+1 s>r ratio? => #t\n\
+0.25 s>r => 1/4\n\
+1 s>d s>r => 1/1\n\
+1 s>b s>r => 1/1\n\
+aliases: f>r, c>r, >ratio\n\
+Convert any number NUMB to a ratio object."
 	ficlRatio 	res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -3441,34 +3423,6 @@ Print rational number NUMB."
 		f = fth_float_ref(obj);
 		fth_printf("%S ", fth_make_ratio_from_float(f));
 	}
-}
-
-static void
-ficl_s_to_q(ficlVm *vm)
-{
-#define h_s_to_q "( n -- ratio )  convert N to rational number\n\
-10 s>r => 10/1\n\
-Convert integer N to a ratio object.\n\
-See also f>r and >ratio."
-	ficlInteger 	n;
-
-	FTH_STACK_CHECK(vm, 1, 1);
-	n = ficlStackPopInteger(vm->dataStack);
-	ficlStackPushFTH(vm->dataStack, fth_make_ratio_from_int(n, 1L));
-}
-
-static void
-ficl_f_to_q(ficlVm *vm)
-{
-#define h_f_to_q "( r -- ratio )  convert R to rational number\n\
-1.5 f>r => 3/2\n\
-Convert float R to a ratio object.\n\
-See also s>r and >ratio."
-	ficlFloat 	f;
-
-	FTH_STACK_CHECK(vm, 1, 1);
-	f = ficlStackPopFloat(vm->dataStack);
-	ficlStackPushFTH(vm->dataStack, fth_make_ratio_from_float(f));
 }
 
 static void
@@ -4478,11 +4432,10 @@ init_number(void)
 	FTH_PRI1("integer?", ficl_integer_p, h_integer_p);
 	FTH_PRI1("exact?", ficl_exact_p, h_exact_p);
 	FTH_PRI1("inexact?", ficl_inexact_p, h_inexact_p);
-	FTH_PRI1("make-long-long", ficl_make_long_long, h_make_long_long);
-	FTH_PRI1(">llong", ficl_make_long_long, h_make_long_long);
-	FTH_PRI1("make-off-t", ficl_make_long_long, h_make_long_long);
-	FTH_PRI1("make-ulong-long", ficl_make_ulong_long, h_make_ulong_long);
-	FTH_PRI1("make-off-t", ficl_make_ulong_long, h_make_ulong_long);
+	FTH_PRI1("make-long-long", ficl_to_d, h_to_d);
+	FTH_PRI1(">llong", ficl_to_d, h_to_d);
+	FTH_PRI1("make-off-t", ficl_to_d, h_to_d);
+	FTH_PRI1("make-ulong-long", ficl_to_ud, h_to_ud);
 	FTH_PRI1("rand-seed-ref", ficl_rand_seed_ref, h_rand_seed_ref);
 	FTH_PRI1("rand-seed-set!", ficl_rand_seed_set, h_rand_seed_set);
 	FTH_PRI1("random", ficl_random, h_random);
@@ -4500,8 +4453,10 @@ init_number(void)
 	FTH_PRI1("u>", ficl_ugreater, h_ugreater);
 	FTH_PRI1("u>=", ficl_ugreatereq, h_ugreatereq);
 	FTH_PRI1("s>d", ficl_to_d, h_to_d);
+	FTH_PRI1("s>ud", ficl_to_ud, h_to_ud);
 	FTH_PRI1("d>s", ficl_to_s, h_to_s);
 	FTH_PRI1("f>d", ficl_to_d, h_to_d);
+	FTH_PRI1("f>ud", ficl_to_ud, h_to_ud);
 	FTH_PRI1("d>f", ficl_to_f, h_to_f);
 	FTH_PRI1("dzero?", ficl_dzero, h_dzero);
 	FTH_PRI1("d0=", ficl_dzero, h_dzero);
@@ -4741,14 +4696,14 @@ init_number(void)
 	FTH_PRI1("rationalize", ficl_rationalize, h_rationalize);
 	FTH_PRI1("q.", ficl_q_dot, h_q_dot);
 	FTH_PRI1("r.", ficl_q_dot, h_q_dot);
-	FTH_PRI1("s>q", ficl_s_to_q, h_s_to_q);
-	FTH_PRI1("s>r", ficl_s_to_q, h_s_to_q);
+	FTH_PRI1("s>q", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("s>r", ficl_to_ratio, h_to_ratio);
 	FTH_PRI1("q>s", ficl_to_s, h_to_s);
 	FTH_PRI1("r>s", ficl_to_s, h_to_s);
-	FTH_PRI1("c>q", ficl_f_to_q, h_f_to_q);
-	FTH_PRI1("c>r", ficl_f_to_q, h_f_to_q);
-	FTH_PRI1("f>q", ficl_f_to_q, h_f_to_q);
-	FTH_PRI1("f>r", ficl_f_to_q, h_f_to_q);
+	FTH_PRI1("c>q", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("c>r", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("f>q", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("f>r", ficl_to_ratio, h_to_ratio);
 	FTH_PRI1("q>f", ficl_to_f, h_to_f);
 	FTH_PRI1("r>f", ficl_to_f, h_to_f);
 	FTH_PRI1("q0=", ficl_qeqz, h_qeqz);
