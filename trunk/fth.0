@@ -1675,15 +1675,15 @@ DDEESSCCRRIIPPTTIIOONN
           Return #t if a given object is of corresponding type, otherwise #f.
 
      Miscellaneous math functions:
-     >>bbiiggnnuumm ( x -- b )
+     >>bbiiggnnuumm ( x -- b ) alias for _s_>_b
           Convert any number _x to a bignum object.
      >>cc ( x -- c )
           Convert any number _x to a complex object.
      >>ccoommpplleexx ( r1 r2 -- c )
           Return complex object with real _r_1 and image _r_2.
-     >>lllloonngg ( x -- d )
-          Convert any number _x to a long-long object.
-     >>rraattiioo ( x -- q )
+     >>lllloonngg ( x -- d ) alias fo _s_>_d
+          Convert any number _x to a llong object.
+     >>rraattiioo ( x -- q ) alias for _s_>_q
           Convert any number _x to a ratio object.
      ddeennoommiinnaattoorr ( x -- n )
           Return denominator of _x or 1.
@@ -1698,15 +1698,15 @@ DDEESSCCRRIIPPTTIIOONN
           Return Infinity.
      mmaakkee--bbiiggnnuumm ( x -- b )
           Return a new bignum object.
-     mmaakkee--lloonngg--lloonngg ( val -- d )
+     mmaakkee--lloonngg--lloonngg ( val -- d ) alias for _s_>_d
           Return new llong object (ficl2Integer) from _v_a_l.
      mmaakkee--ppoollaarr ( real theta -- c )
           Return polar complex object from _r_e_a_l and _t_h_e_t_a.
      mmaakkee--rraattiioo ( num den -- q )
           Return a new ratio object with numerator _n_u_m and denumerator _d_e_n.
      mmaakkee--rreeccttaanngguullaarr ( r1 r2 -- c ) alias for _>_c_o_m_p_l_e_x
-     mmaakkee--uulloonngg--lloonngg ( val -- ud )
-          Return new unsigned llong object (ficl2Unsigned) from _v_a_l.
+     mmaakkee--uulloonngg--lloonngg ( val -- ud ) alias for _s_>_u_d
+          Return new ullong object (ficl2Unsigned) from _v_a_l.
      nnaann ( -- NaN )
           Return Not-A-Number.
      nnuummeerraattoorr ( x -- n )
@@ -1884,20 +1884,23 @@ DDEESSCCRRIIPPTTIIOONN
      qq>>cc ( q -- c ) alias for _>_c
      ss>>cc ( n -- c ) alias for _>_c
           Convert any number to a complex object (ficlComplex).
-     ff>>dd ( r -- d )
-     ss>>dd ( n -- d ) alias for _f_>_d
-          Convert any number to Forth double word set number (ficl2Integer).
+     ff>>dd ( r -- d ) alias for _s_>_d
+     ss>>dd ( n -- d )
+          Convert any number to a llong object (ficl2Integer).
+     ff>>uudd ( r -- ud ) alias for _s_>_u_d
+     ss>>uudd ( n -- ud )
+          Convert any number to an ullong object (ficl2Unsigned).
      bb>>ff ( b -- r ) alias for _s_>_f
      cc>>ff ( c -- r ) alias for _s_>_f
      dd>>ff ( d -- r ) alias for _s_>_f
      qq>>ff ( q -- r ) alias for _s_>_f
      ss>>ff ( n -- r )
           Convert any number to a float object (ficlFloat).
-     cc>>qq ( c -- q ) alias for _f_>_q
-     ff>>qq ( r -- q )
+     >>rraattiioo (( cc ---- qq )) aalliiaass ffoorr _s_>_q
+     cc>>qq ( c -- q ) alias for _s_>_q
+     ff>>qq ( r -- q ) alias for _s_>_q
      ss>>qq ( n -- q )
-          Convert complex (c>q), float (f>q), and integer (s>q) to ratio
-          object (ficlRatio).
+          Convert any number to a ratio object (ficlRatio).
      bb>>ss ( b -- n ) alias for _f_>_s
      cc>>ss ( c -- n ) alias for _f_>_s
      dd>>ss ( d -- n ) alias for _f_>_s
@@ -3420,4 +3423,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 8.99.3                     2017/09/25                     NetBSD 8.99.3
+NetBSD 8.99.9                     2017/12/27                     NetBSD 8.99.9
