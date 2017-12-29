@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/29 07:46:48
+\ Changed: 17/12/29 09:18:24
 \
-\ @(#)clm.fs	1.138 12/29/17
+\ @(#)clm.fs	1.139 12/29/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -1401,7 +1401,7 @@ hide
 	ws :to-dac ws-ref if
 		:output "dac" ws set-args
 	else
-		ws :output "dac" string= if
+		ws :output ws-ref "dac" string= if
 			:to-dac #t ws set-args
 		then
 	then
