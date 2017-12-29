@@ -1,3 +1,9 @@
+2017-12-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/proc.c: local-variables moved from array to hash.
+	
+	* examples/site-lib/clm.fs (with-sound): Add option :to-dac.
+
 2017-12-27  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* ficl/primitive.c:
@@ -21,6 +27,7 @@
 2017-12-22  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/clm.fs (with-sound): Add run-reverb.
+	* examples/site-lib/clm.fs (with-sound): Add option :to-snd.
 
 2017-12-18  Michael Scholz  <mi-scholz@users.sourceforge.net>
 

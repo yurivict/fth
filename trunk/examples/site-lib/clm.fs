@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/27 06:36:15
+\ Changed: 17/12/29 07:46:48
 \
-\ @(#)clm.fs	1.137 12/27/17
+\ @(#)clm.fs	1.138 12/29/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -44,7 +44,7 @@
 \ ;event		( -- )
 \
 \ find-file		( file -- fname|#f )
-\ snd-info		( output keyword-args -- )
+\ snd-info		( obj -- )
 \
 \ play-sound		( :optional input verbose player -- )
 \ clm-mix		( infile keyword-args -- )
@@ -338,7 +338,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/27"	value *clm-version*
+"fth 2017/12/29"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -352,6 +352,7 @@ mus-lshort	value *clm-audio-format*
 #()		value *clm-reverb-data*
 "test.reverb"	value *clm-reverb-file-name*
 #f		value *clm-statistics*
+#f		value *clm-to-dac*
 #f		value *clm-to-snd*
 #f		value *clm-verbose*
 #f		value *clm-debug*
@@ -359,10 +360,16 @@ mus-lshort	value *clm-audio-format*
 
 <'> *clm-search-list*
 "List of directories with sound files." help-set!
+
 #() value *clm-instruments*
 <'> *clm-instruments*
 "List of #( ins-name start dur local-vars ) elements.  \
 Instruments using RUN or RUN-INSTRUMENT add entries to the list." help-set!
+
+#() value *dac-instruments*
+<'> *dac-instruments*
+"List of collected dac instruments of #( ins-xt beg end ) elements.  \
+Used with :to-dac #t." help-set!
 
 'snd provided? [unless]
 	<'> *clm-file-name* is *clm-fname*
@@ -471,8 +478,8 @@ Produces something like:\n\
 			   vals 1 array-ref
 			   vals 2 array-ref ) clm-message
 			vals 3 array-ref each { var }
-				\ var: '( name . value ) )
-				"%s = %s" var clm-message
+				\ var: '( name value ) )
+				"%16s = %s" var clm-message
 			end-each
 			"" #() clm-message
 		end-each
@@ -905,6 +912,11 @@ set-current
 <'> ;instrument alias ;event immediate
 previous
 
+<'> #{}      alias #w{}    ( -- ws )
+<'> hash?    alias ws?     ( obj -- f )
+<'> hash-ref alias ws-ref  ( ws key     -- val )
+: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
+
 \ === Playing and Recording Sound Files ===
 : find-file ( file -- fname|#f )
 	doc" Return the possible full path name of FILE if FILE exists or \
@@ -965,15 +977,18 @@ hide
 		"   ratio: no ratio" #()
 	then clm-message
 ;
-set-current
 
-: snd-info <{ output :key reverb-file-name #f scaled? #f timer #f -- }>
+: .file { output chans srate -- }
+	"filename: %s" #( output ) clm-message
+	"   chans: %d, srate: %d" #( chans srate ) clm-message
+;
+
+: .file-info { output reverb-file-name scaled? timer -- }
 	output mus-sound-duration { dur }
 	output mus-sound-framples { frms }
-	output mus-sound-chans { channels }
+	output mus-sound-chans { chans }
 	output mus-sound-srate { srate }
-	"filename: %s" #( output ) clm-message
-	"   chans: %d, srate: %d" #( channels srate f>s ) clm-message
+	output chans srate .file
 	"  format: %s [%s]"
 	    #( output mus-sound-sample-type mus-sample-type-name
 	       output mus-sound-header-type mus-header-type-name ) clm-message
@@ -991,23 +1006,41 @@ set-current
 		" comment: %s" #( comm ) clm-message
 	then
 ;
+
+: .dac-info { ws -- }
+	ws :output ws-ref { output }
+	ws :channels ws-ref { chans }
+	ws :srate ws-ref { srate }
+	ws :timer ws-ref { timer }
+	ws :framples ws-ref { framples }
+	output chans srate .file
+	timer if
+		timer .timer
+		srate framples timer .timer-ratio
+	then
+;
+set-current
+
+\ obj:	a string or ws object
+\	string: an existing file name (for play-sound)
+\	    ws: *clm-to-dac* is #t and keyargs are not used
+: snd-info { obj -- }
+	obj string? if
+		obj #f #f #f .file-info
+	else
+		*clm-to-dac* if
+			obj .dac-info
+		else
+			obj :output ws-ref		{ output }
+			obj :reverb-file-name ws-ref	{ reverb-file }
+			obj :scaled-to ws-ref
+			obj :scaled-by ws-ref ||	{ scaled }
+			obj :timer ws-ref		{ tm }
+			output reverb-file scaled tm .file-info
+		then
+	then
+;
 previous
-
-[ifundef] ws-is-array?
-	#f value ws-is-array?
-[then]
-
-ws-is-array? [if]
-	<'> #()              alias #w{}    ( -- ws )
-	<'> array?           alias ws?     ( obj -- f )
-	<'> array-assoc-ref  alias ws-ref  ( ws key     -- val )
-	<'> array-assoc-set! alias ws-set! ( ws key val -- 'ws )
-[else]
-	<'> #{}              alias #w{}    ( -- ws )
-	<'> hash?            alias ws?     ( obj -- f )
-	<'> hash-ref         alias ws-ref  ( ws key     -- val )
-	: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
-[then]
 
 \ === Playing Sounds ===
 
@@ -1220,6 +1253,9 @@ hide
 	else
 		*clm-clipped*
 	then set-mus-clipping drop
+	ws :to-dac ws-ref if
+		#t set-mus-clipping drop
+	then
 	ws :srate	ws-ref set-mus-srate drop
 	ws :locsig-type	ws-ref set-locsig-type drop
 ;
@@ -1239,13 +1275,6 @@ hide
 	ws :old-notehook		ws-ref to *notehook*
 	ws :old-decay-time		ws-ref to *clm-decay-time*
 	*ws-args* array-pop
-;
-
-: ws-statistics { ws -- }
-	ws :output ws-ref
-	:reverb-file-name	ws :reverb-file-name ws-ref
-	:scaled?		ws :scaled-to ws-ref ws :scaled-by ws-ref ||
-	:timer			ws :timer ws-ref snd-info
 ;
 
 : set-args { key def ws -- }
@@ -1367,7 +1396,16 @@ hide
 	:srate			*clm-srate*		ws set-args
 	:statistics		*clm-statistics*	ws set-args
 	:to-snd			*clm-to-snd*		ws set-args	
+	:to-dac			*clm-to-dac*		ws set-args	
 	:verbose		*clm-verbose*		ws set-args
+	ws :to-dac ws-ref if
+		:output "dac" ws set-args
+	else
+		ws :output "dac" string= if
+			:to-dac #t ws set-args
+		then
+	then
+	ws :to-dac ws-ref to *clm-to-dac*
 	ws :to-snd ws-ref set-to-snd
 	ws
 ;  
@@ -1456,7 +1494,7 @@ hide
 	#f #f #f fth-raise
 ;
 
-: (with-sound-main) ( body-xt ws -- ws )
+: (with-sound-file-main) ( body-xt ws -- ws )
 	2 stack-check
 	{ body-xt ws }
 	body-xt word? body-xt 1 "a proc or xt" assert-type
@@ -1532,7 +1570,7 @@ hide
 		ws ws-get-snd drop
 	then
 	ws :statistics ws-ref if
-		ws ws-statistics
+		ws snd-info
 	then
 	reverb-xt if
 		ws :delete-reverb ws-ref if
@@ -1550,10 +1588,69 @@ hide
 	then
 	ws ws-after-output ( ws )
 ;
+
+: play-cb { len -- prc; self -- val }
+	0 proc-create ( prc )
+	0 , len ,
+  does> { self -- val }
+	self @ { samp }
+	self cell+ @ { len }
+	samp len <= if
+		0 0 { beg end }
+		nil nil { args prc }
+		0.0 { sum }
+		*dac-instruments* each to args
+			args 0 array-ref to prc
+			args 1 array-ref to beg
+			args 2 array-ref to end
+			samp beg end within if
+				samp prc execute sum f+ to sum
+			then
+		end-each
+		samp 1+ self !
+		sum
+	else
+		#f
+	then
+;
+
+: (with-sound-dac-main) ( body-xt ws -- ws )
+	1 stack-check
+	{ ws }
+	ws ws? ws 1 "a ws object" assert-type
+	0 #f get-optarg { body-xt }
+	ws ws-before-output
+	ws :timer make-timer ws-set! drop
+	body-xt if
+		body-xt execute
+	then
+	*notehook* word? if
+		*clm-instruments* each { args }
+			*notehook* args run-proc drop
+		end-each
+	then
+	0 { len }
+	*dac-instruments* each ( args )
+		2 array-ref len max to len
+	end-each
+	ws :framples len ws-set! drop
+	len play-cb play drop
+	ws :timer ws-ref stop-timer
+	ws :statistics ws-ref if
+		ws snd-info
+	then
+	#() to *clm-instruments*
+	#() to *dac-instruments*
+	ws ws-after-output ( ws )
+;
 set-current
 
 : with-sound-main ( body-xt ws -- ws )
-	<'> (with-sound-main) #t <'> ws-reset-handler fth-catch drop ( ws )
+	*clm-to-dac* if
+		<'> (with-sound-dac-main)
+	else
+		<'> (with-sound-file-main)
+	then #t <'> ws-reset-handler fth-catch drop ( ws )
 ;
 
 \ Usage: <'> resflt-test with-sound drop
@@ -1561,29 +1658,31 @@ set-current
 \        lambda: resflt-test ; :output "resflt.snd" with-sound drop
 : with-sound ( body-xt keyword-args -- ws )
 	doc" \\ keywords and default values:\n\
-:play              *clm-play*             (#f)\n\
-:statistics        *clm-statistics*       (#f)\n\
-:verbose           *clm-verbose*          (#f)\n\
-:debug             *clm-debug*            (#f)\n\
-:continue-old-file                        (#f)\n\
-:output            *clm-file-name*        (\"test.snd\")\n\
 :channels          *clm-channels*         (1)\n\
-:srate             *clm-srate*            (44100)\n\
-:locsig-type       *clm-locsig-type*      (mus-interp-linear)\n\
-:header-type       *clm-header-type*      (mus-next)\n\
-:sample-type       *clm-sample-type*      (mus-lfloat)\n\
 :clipped           *clm-clipped*          (#f)\n\
 :comment           *clm-comment*          (#f)\n\
-:notehook          *clm-notehook*         (#f)\n\
-:scaled-to                                (#f)\n\
-:scaled-by                                (#f)\n\
-:delete-reverb     *clm-delete-reverb*    (#f)\n\
-:reverb            *clm-reverb*           (#f)\n\
-:reverb-data       *clm-reverb-data*      (#())\n\
-:reverb-channels   *clm-reverb-channels*  (1)\n\
-:reverb-file-name  *clm-reverb-file-name* (\"test.reverb\")\n\
-:player            *clm-player*           (#f)\n\
+:continue-old-file                        (#f)\n\
+:debug             *clm-debug*            (#f)\n\
 :decay-time        *clm-decay-time*       (1.0)\n\
+:delete-reverb     *clm-delete-reverb*    (#f)\n\
+:header-type       *clm-header-type*      (mus-next)\n\
+:locsig-type       *clm-locsig-type*      (mus-interp-linear)\n\
+:notehook          *clm-notehook*         (#f)\n\
+:output            *clm-file-name*        (\"test.snd\")\n\
+:play              *clm-play*             (#f)\n\
+:player            *clm-player*           (#f)\n\
+:reverb            *clm-reverb*           (#f)\n\
+:reverb-channels   *clm-reverb-channels*  (1)\n\
+:reverb-data       *clm-reverb-data*      (#())\n\
+:reverb-file-name  *clm-reverb-file-name* (\"test.reverb\")\n\
+:sample-type       *clm-sample-type*      (mus-lfloat)\n\
+:scaled-by                                (#f)\n\
+:scaled-to                                (#f)\n\
+:srate             *clm-srate*            (44100)\n\
+:statistics        *clm-statistics*       (#f)\n\
+:to-snd            *clm-to-snd*           (#f)\n\
+:to-dac            *clm-to-dac*           (#f)\n\
+:verbose           *clm-verbose*          (#f)\n\
 Execute BODY-XT, a proc object or an xt, \
 and returns a ws-args object with with-sound arguments.\n\
 <'> resflt-test with-sound .$ cr\n\

@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.139 12/27/17
+.\" @(#)fth.1	1.140 12/29/17
 .\"
-.Dd 2017/12/27
+.Dd 2017/12/29
 .Dt FTH 1
 .Os
 .\"
@@ -6875,7 +6875,7 @@ Return latest defined xt.
 .\" local-variables
 .\"
 .It Cm local-variables No (\ -- vars\ )
-Return array of local variable name-value pairs up to the location in
+Returns a hash of local variable name-value pairs up to the location in
 definition.  This word is immediate and compile only and can only be
 used in word definitions.
 .Bd -literal -offset indent -compact
@@ -6885,7 +6885,7 @@ used in word definitions.
 		.$ space
 	end-each
 ;
-20 word-with-locals \(rA #( \(dqbar\(dq 10 ) #( \(dqfoo\(dq 20 )
+20 word-with-locals \(rA #{ \(dqbar\(dq => 10  \(dqfoo\(dq => 20 }
 .Ed
 .\"
 .\" make-proc

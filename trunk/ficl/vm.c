@@ -74,7 +74,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)vm.c	1.151 12/27/17
+ * @(#)vm.c	1.152 12/29/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -591,7 +591,8 @@ void ficlVmInnerLoop(ficlVm *vm, ficlWord *volatile fw)
     /* [ms] ( test low high -- flag ) */
     case ficlInstructionWithin:
     {
-      FTH test, low, high, tmp1, tmp2;
+      FTH test, low, high;
+      int flag;
       
       CHECK_STACK(3, 1);
       high = ficl_to_fth(VM_STACK_FTH_REF(dataTop));
@@ -599,9 +600,8 @@ void ficlVmInnerLoop(ficlVm *vm, ficlWord *volatile fw)
       low  = ficl_to_fth(VM_STACK_FTH_REF(dataTop));
       dataTop--;
       test = ficl_to_fth(VM_STACK_FTH_REF(dataTop));
-      tmp2 = fth_number_sub(high, low);
-      tmp1 = fth_number_sub(test, low);
-      VM_STACK_BOOL_SET(dataTop, fth_number_less_p(tmp1, tmp2));
+      flag = !fth_number_less_p(test, low) && fth_number_less_p(test, high);
+      VM_STACK_BOOL_SET(dataTop, flag);
       continue;
     }
 	

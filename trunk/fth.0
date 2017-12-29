@@ -2707,7 +2707,7 @@ DDEESSCCRRIIPPTTIIOONN
      llaatteessttxxtt ( -- xt )
           Return latest defined xt.
      llooccaall--vvaarriiaabblleess ( -- vars )
-          Return array of local variable name-value pairs up to the location
+          Returns a hash of local variable name-value pairs up to the location
           in definition.  This word is immediate and compile only and can only
           be used in word definitions.
                 : word-with-locals { foo -- }
@@ -2716,7 +2716,7 @@ DDEESSCCRRIIPPTTIIOONN
                                 .$ space
                         end-each
                 ;
-                20 word-with-locals => #( "bar" 10 ) #( "foo" 20 )
+                20 word-with-locals => #{ "bar" => 10  "foo" => 20 }
      mmaakkee--pprroocc ( xt arity -- prc )
           Return new proc object.  _a_r_i_t_y can be an integer or an array of
           length 3, #( req opt rest ).
@@ -3423,4 +3423,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 8.99.9                     2017/12/27                     NetBSD 8.99.9
+NetBSD 8.99.9                     2017/12/29                     NetBSD 8.99.9

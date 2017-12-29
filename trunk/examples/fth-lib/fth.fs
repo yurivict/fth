@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth.fs	1.67 12/16/17
+\ @(#)fth.fs	1.68 12/29/17
 
 \ alias			( xt "name" -- ; self -- ?? )
 \ shell-alias		( cmd-str "cmd" -- ; self -- f )
@@ -615,8 +615,8 @@ set-current
 	doc" set word-property\n\
 If this function appears in a colon definition, \
 it sets LOCAL-VARIABLES and stores the result \
-in an associative array for later use.  \
-GET-LOCAL-VARIABLES retrieves the content and \
+in a hash for later use.  \
+GET-LOCAL-VARIABLES retrieves the contents and \
 DISPLAY-VARIABLES prints it.  \
 This word is immediate and compile only, \
 it can only be used in colon definitions.\n\
@@ -630,8 +630,8 @@ previous
 : get-local-variables ( xt -- vars )
 	 doc" get word-property\n\
 If XT was prepared with SET-LOCAL-VARIABLES \
-and was called before, one can retrieve the content of the property list, \
-a lists of variable names and their current values, with this word.\n\
+and was called before, this word retrieves the contents of the property list, \
+a lists of variable names and their current values.\n\
 See also set-local-variables, display-variables, and local-variables."
 	:debug-property swap word-property-ref
 ;
@@ -646,18 +646,18 @@ See also set-local-variables, display-variables, and local-variables."
 <'> word-with-locals display-variables\n\
 \\\n\
 \\ local variables for: word-with-locals\n\
-\\ bar = 10\n\
-\\ foo = 20\n\
+\\              bar = 10\n\
+\\              foo = 20\n\
 If XT was prepared with SET-LOCAL-VARIABLES \
-and was called before, one can print the content of the property list, \
-a lists of variable names and their current values, with this word.\n\
+and was called before, this word prints the contents of the property list, \
+a lists of variable names and their current values.\n\
 See also set-local-variables, get-local-variables, and local-variables."
 	{ xt }
 	"\\\n" '() fth-print
 	"\\ local variables for: %s\n" '( xt xt->name ) fth-print
 	"\\\n" '() fth-print
 	xt 'debug-property word-property-ref each { vals }
-		"\\ %s = %s\n" vals fth-print
+		"\\ %16s = %s\n" vals fth-print
 	end-each
 ;
 
