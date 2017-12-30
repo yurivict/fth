@@ -831,10 +831,9 @@ DDEESSCCRRIIPPTTIIOONN
           even.
                 'foo 0  'bar 1  4 >hash =>  #{ 'foo => 0  'bar => 1 }
      hhaasshh-->>aarrrraayy ( hash -- ass )
-          Return associated array with '( key . value ) pairs of _h_a_s_h_'_s
-          content.
+          Return array with #( key value ) pairs of _h_a_s_h_'_s content.
                 #{ 'foo 0 'bar 1 } hash->array
-                  => #a( '( 'foo . 0 ) '( 'bar . 1 ) )
+                  => #( #( 'foo  0 ) #( 'bar  1 ) )
      hhaasshh--cclleeaarr ( hash -- )
           Remove all entries from _h_a_s_h, _h_a_s_h_'_s length is zero.
      hhaasshh--ccooppyy ( hash1 -- hash2 )
@@ -1488,8 +1487,7 @@ DDEESSCCRRIIPPTTIIOONN
      ddaattee ( -- str )
           Return date in default UNIX format as a string.
      eennvviirroonn ( -- ary )
-          Return assoc array of all shell environment variables and their
-          values.
+          Return hash of all shell environment variables and their values.
      eexxeecc ( cmd -- )
           Replace current process by running _c_m_d as shell command.  If _c_m_d is
           a string, shell expansion takes place and $SHELL -- or sshh if $SHELL
@@ -3423,4 +3421,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 8.99.9                     2017/12/29                     NetBSD 8.99.9
+NetBSD 8.99.9                     2017/12/30                     NetBSD 8.99.9
