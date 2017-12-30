@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.171 12/29/17
+ * @(#)proc.c	1.172 12/30/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -32,11 +32,6 @@
 
 #include "fth.h"
 #include "utils.h"
-
-/*
- * FIXME: assoc versus hash for local-variables
- */
-#define WITH_ASSOC	0
 
 #define FICL_WORD_DOC(Obj)						\
 	fth_word_property_ref((FTH)(Obj), FTH_SYMBOL_DOCUMENTATION)
@@ -108,12 +103,7 @@ static void 	ficl_xt_to_origin(ficlVm *vm);
 static char    *get_help(FTH obj, char *name);
 static ficlString get_string_from_tib(ficlVm *vm, int pos);
 static char    *help_formatted(char *str, int line_length);
-/* FIXME */
-#if WITH_ASSOC
-static FTH 	local_vars_cb(FTH value, FTH data);
-#else
 static FTH 	local_vars_cb(FTH key, FTH value, FTH data);
-#endif
 static ficlWord *make_procedure(const char *name, void *func, bool void_p,
     int req, int opt, bool rest, const char *doc);
 static void 	word_documentation(ficlVm *vm, ficlWord *word);
@@ -797,10 +787,11 @@ See also set!, set-xt and set-execute."
 		set_word = FICL_WORD_REF(FTH_FALSE);
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendPointer(dict, set_word);
 	} else
 		ficlStackPushPointer(vm->dataStack, set_word);
@@ -860,10 +851,11 @@ See also <'set>, set! and set-execute."
 		set_word = FICL_WORD_REF(FTH_FALSE);
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendPointer(dict, set_word);
 	} else
 		ficlStackPushPointer(vm->dataStack, set_word);
@@ -1460,10 +1452,11 @@ This word is immediate and compile only and can only be \
 used in word definitions.\n\
 See also get-func-name and latestxt."
 	ficlDictionary *dict;
+	ficlUnsigned	u;
 
 	dict = ficlVmGetDictionary(vm);
-	ficlDictionaryAppendUnsigned(dict,
-	    (ficlUnsigned) ficlInstructionLiteralParen);
+	u = (ficlUnsigned) ficlInstructionLiteralParen;
+	ficlDictionaryAppendUnsigned(dict, u);
 	ficlDictionaryAppendPointer(dict, dict->smudge);
 }
 
@@ -1481,10 +1474,11 @@ This word is immediate and compile only and can only be \
 used in word definitions.\n\
 See also running-word and latestxt."
 	ficlDictionary *dict;
+	ficlUnsigned	u;
 
 	dict = ficlVmGetDictionary(vm);
-	ficlDictionaryAppendUnsigned(dict,
-	    (ficlUnsigned) ficlInstructionLiteralParen);
+	u = (ficlUnsigned) ficlInstructionLiteralParen;
+	ficlDictionaryAppendUnsigned(dict, u);
 	ficlDictionaryAppendFTH(dict, FTH_WORD_NAME(dict->smudge));
 }
 
@@ -1497,10 +1491,11 @@ Return currently read filename.\n\
 See also *lineno*."
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, fth_current_file);
 	} else
 		ficlStackPushFTH(vm->dataStack, fth_current_file);
@@ -1515,10 +1510,11 @@ Return current read line number.\n\
 See also *filename*."
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendInteger(dict, fth_current_line);
 	} else
 		ficlStackPushInteger(vm->dataStack, fth_current_line);
@@ -1937,7 +1933,7 @@ get_string_from_tib(ficlVm *vm, int pos)
 static void
 ficl_extended_args_co_im(ficlVm *vm)
 {
-#define h_extended_args_co_im "( -- )  turn colon definition in proc\n\
+#define h_extended_args_co_im "( -- )  turn colon definition into a proc\n\
 : optkey-test\n\
   <{ a b c\n\
      :key d 10 e 20\n\
@@ -1946,7 +1942,7 @@ ficl_extended_args_co_im(ficlVm *vm)
 ;\n\
 1 2 3               optkey-test => #( 1 2 3 10 20 30 40 )\n\
 :d 11 1 :e 22 2 3 4 optkey-test => #( 1 2 3 11 22  4 40 )\n\
-Turn current colon definition in a proc object.  \
+Turn current colon definition into a proc object.  \
 Take tokens up to closing '}>' as local variables, \
 '--' start a comment ignoring rest to closing '}>'.  \
 In addition to other local variable words like { } and {{ }} \
@@ -1962,11 +1958,13 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	ficlDictionary *dict;
 	ficlWord       *word;
 	ficlInteger 	i, len, req, opt, in_lst;
+	ficlUnsigned	u;
 	int 		keyslen, defslen;
 	bool 		key_p, opt_p;
 	char           *buffer, *s;
 	FTH 		arg, arg1, arg2, keys, defs, args, fs;
 
+	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	req = opt = 0;
 	key_p = opt_p = false;
 	dict = FTH_FICL_DICT();
@@ -2081,11 +2079,9 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 		 * req postpone literal
 		 * postpone (args-keys)
 		 */
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, keys);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendInteger(dict, req);
 		ficlDictionaryAppendPointer(dict, args_keys_paren);
 		keyslen = fth_array_length(keys);
@@ -2133,11 +2129,9 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 		 * req postpone literal
 		 * postpone (args-optional)
 		 */
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, defs);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned) ficlInstructionLiteralParen);
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendInteger(dict, req);
 		ficlDictionaryAppendPointer(dict, args_optional_paren);
 		defslen = fth_array_length(defs);
@@ -2171,13 +2165,15 @@ static char 	locals_dummy[] = " ___dummy___ ";
 void
 ficl_init_locals(ficlVm *vm, ficlDictionary *dict)
 {
+	ficlUnsigned	u;
+
 	/*-
 	 * 0 postpone literal ( dummy value for dummy variable )
 	 * s" ___dummy___" (local)
 	 * 0 0 (local)
 	 */
-	ficlDictionaryAppendUnsigned(dict,
-	    (ficlUnsigned) ficlInstructionLiteralParen);
+	u = (ficlUnsigned) ficlInstructionLiteralParen;
+	ficlDictionaryAppendUnsigned(dict, u);
 	ficlDictionaryAppendUnsigned(dict, 0UL);
 	push_forth_string(vm, locals_dummy);
 	ficlVmExecuteXT(vm, local_paren);
@@ -2380,100 +2376,6 @@ See also constant."
 
 static ficlWord *local_variables_paren;
 
-/* FIXME */
-#if WITH_ASSOC
-
-/* locals with assoc */
-static FTH
-local_vars_cb(FTH value, FTH data)
-{
-	ficlInteger 	offset;
-	ficlCell       *frame;
-	FTH 		key, val;
-
-	offset = (ficlInteger) fth_acell_value(value);
-	frame = ((ficlCell *) (data)) + offset;
-	key = fth_acell_key(value);
-	val = ficl_to_fth(CELL_FTH_REF(frame));
-	return (fth_make_acell(key, val));
-}
-
-static void
-ficl_local_variables_paren_co(ficlVm *vm)
-{
-	FTH 		vars, frm, res;
-
-	FTH_STACK_CHECK(vm, 1, 1);
-	vars = ficlStackPopFTH(vm->dataStack);
-	frm = (FTH) (vm->returnStack->frame);
-	res = fth_array_map(vars, local_vars_cb, frm);
-	ficlStackPushFTH(vm->dataStack, res);
-}
-
-static void
-ficl_local_variables_co_im(ficlVm *vm)
-{
-#define h_local_variables_co_im "( -- vars )  return local variables\n\
-: word-with-locals { foo -- }\n\
-	10 { bar }\n\
-	local-variables each .$ space end-each\n\
-;\n\
-20 word-with-locals => #( \"bar\" 10 ) #( \"foo\" 20 )\n\
-Return array of local variable name-value pairs up to \
-the location in definition.  \
-This word is immediate and compile only and can only \
-be used in word definitions."
-	ficlDictionary *dict, *locals;
-	ficlSystem     *sys;
-	ficlHash       *hash;
-	ficlWord       *word;
-	ficlInteger 	i;
-	ficlUnsigned	u;
-	FTH 		vars, cl, name, offset;
-
-	dict = ficlVmGetDictionary(vm);
-	sys = vm->callback.system;
-	u = (ficlUnsigned) ficlInstructionLiteralParen;
-	vars = fth_make_empty_array();
-	if (sys->localsCount == 0)
-		goto finish;
-	/*
-	 * At compile time we can only collect the names and the
-	 * offset to frame of every local variable.  At interpret
-	 * time we can find the current values on frame + offset (in
-	 * ficl_local_variables_paren_co).
-	 */
-	locals = ficlSystemGetLocals(sys);
-	hash = locals->wordlists[0];
-	while (hash != NULL) {
-		for (i = (int) hash->size - 1; i >= 0; i--) {
-			word = hash->table[i];
-			while (word != NULL) {
-				if (strcmp(word->name, locals_dummy) == 0) {
-					word = word->link;
-					continue;
-				}
-				/*-
-				 * acell: #( FTH (name) ficlInteger (offset) )
-				 */
-				name = FTH_WORD_NAME(word);
-				offset = (FTH) FICL_WORD_PARAM(word);
-				cl = fth_make_acell(name, offset);
-				fth_array_push(vars, cl);
-				word = word->link;
-			}
-		}
-		hash = hash->link;
-	}
-finish:
-	ficlDictionaryAppendUnsigned(dict, u);
-	ficlDictionaryAppendFTH(dict, vars);
-	ficlDictionaryAppendPointer(dict, local_variables_paren);
-}
-
-#else		/* !WITH_ASSOC */
-
-/* locals with hash */
 static FTH
 local_vars_cb(FTH key, FTH value, FTH data)
 {
@@ -2496,12 +2398,13 @@ ficl_local_variables_paren_co(ficlVm *vm)
 	frm = (FTH) (vm->returnStack->frame);
 	res = fth_hash_map(vars, local_vars_cb, frm);
 	ficlStackPushFTH(vm->dataStack, res);
+
 }
 
 static void
 ficl_local_variables_co_im(ficlVm *vm)
 {
-#define h_local_variables_co_im "( -- vars )  return local variables\n\
+#define h_lvars "( -- vars )  return local variables\n\
 : word-with-locals { foo -- }\n\
 	10 { bar }\n\
 	local-variables each .$ space end-each\n\
@@ -2519,10 +2422,8 @@ be used in word definitions."
 	ficlUnsigned	u;
 	FTH 		vars, name, offset;
 
-	dict = ficlVmGetDictionary(vm);
-	sys = vm->callback.system;
-	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	vars = fth_make_hash();
+	sys = vm->callback.system;
 	if (sys->localsCount == 0)
 		goto finish;
 	/*
@@ -2554,12 +2455,12 @@ be used in word definitions."
 		hash = hash->link;
 	}
 finish:
+	dict = ficlVmGetDictionary(vm);
+	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	ficlDictionaryAppendUnsigned(dict, u);
 	ficlDictionaryAppendFTH(dict, vars);
 	ficlDictionaryAppendPointer(dict, local_variables_paren);
 }
-
-#endif		/* WITH_ASSOC */
 
 FTH
 proc_from_proc_or_xt(FTH proc_or_xt, int req, int opt, bool rest)
@@ -2929,12 +2830,10 @@ init_proc(void)
 	/* redefinition of constant and value with gc protection */
 	FTH_PRIMITIVE_SET("constant", ficl_constant,
 	    FICL_WORD_DEFAULT, h_constant);
-	FTH_PRIMITIVE_SET("value", ficl_value,
-	    FICL_WORD_DEFAULT, h_value);
+	FTH_PRIMITIVE_SET("value", ficl_value, FICL_WORD_DEFAULT, h_value);
 	local_variables_paren = FTH_PRIM_CO("(local-variables)",
 	    ficl_local_variables_paren_co, NULL);
-	FTH_PRIM_CO_IM("local-variables", ficl_local_variables_co_im,
-	    h_local_variables_co_im);
+	FTH_PRIM_CO_IM("local-variables", ficl_local_variables_co_im, h_lvars);
 	FTH_PRI1("defined?", ficl_defined_p, h_defined_p);
 	FTH_VOID_PROC("trace-var", fth_trace_var, 2, 0, 0, h_trace_var);
 	FTH_VOID_PROC("untrace-var", fth_untrace_var, 1, 0, 0, h_untrace_var);

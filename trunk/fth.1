@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.140 12/29/17
+.\" @(#)fth.1	1.141 12/30/17
 .\"
-.Dd 2017/12/29
+.Dd 2017/12/30
 .Dt FTH 1
 .Os
 .\"
@@ -2386,12 +2386,12 @@ is not even.
 .\" hash->array
 .\"
 .It Cm hash->array No (\ hash -- ass\ )
-Return associated array with \(aq( key . value ) pairs of
+Return array with #( key value ) pairs of
 .Ar hash's
 content.
 .Bd -literal -offset indent -compact
 #{ \(aqfoo 0 \(aqbar 1 } hash->array
-  \(rA #a( \(aq( \(aqfoo . 0 ) \(aq( \(aqbar . 1 ) )
+  \(rA #( #( \(aqfoo  0 ) #( \(aqbar  1 ) )
 .Ed
 .\"
 .\" hash-clear
@@ -4099,7 +4099,7 @@ format as a string.
 .\" environ
 .\"
 .It Cm environ No (\ -- ary\ )
-Return assoc array of all shell environment variables and their values.
+Return hash of all shell environment variables and their values.
 .\"
 .\" exec
 .\"
