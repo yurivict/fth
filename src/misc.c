@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.711 12/29/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.712 12/30/17";
 #endif /* not lint */
 
-#define FTH_DATE		"2017/12/29"
+#define FTH_DATE		"2017/12/30"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -2339,19 +2339,26 @@ static void
 ficl_environ(ficlVm *vm)
 {
 #define h_environ "( -- ary )  return environment variables\n\
-environ => #a( '( \"HOME\" . \"/home/mike\" ) ... )\n\
-Return assoc array of all shell environment variables and their values.\n\
+environ => #{ \"HOME\" => \"/home/mike\"  ... }\n\
+Return hash of all shell environment variables and their values.\n\
 See also getenv and putenv."
 	char          **env;
 	FTH 		vals;
 	ficlInteger 	sep;
 
 	env = environ;
-	vals = fth_make_empty_array();
+	vals = fth_make_hash();
 	for (; *env; env++) {
 		sep = strchr(*env, '=') - *env;
-		fth_assoc(vals, fth_make_string_len(*env, sep),
+		fth_hash_set(vals,
+		    fth_make_string_len(*env, sep),
 		    fth_make_string(*env + sep + 1));
+		/*
+		 * FIXME
+		fth_assoc(vals,
+		    fth_make_string_len(*env, sep),
+		    fth_make_string(*env + sep + 1));
+		 */
 	}
 	ficlStackPushFTH(vm->dataStack, vals);
 }

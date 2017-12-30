@@ -1,3 +1,8 @@
+2017-12-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/misc.c (ficl_environ): Returns a hash instead of an
+	assoc array.
+
 2017-12-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* ficl/proc.c: local-variables moved from array to hash.

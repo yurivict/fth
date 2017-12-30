@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/29 09:18:24
+\ Changed: 17/12/30 08:47:07
 \
-\ @(#)clm.fs	1.139 12/29/17
+\ @(#)clm.fs	1.140 12/30/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -24,6 +24,16 @@
 \ make-default-comment	( -- str )
 \ times->samples	( start dur -- len beg )
 \ 
+\ instrument:		( "name" -- )
+\ ;instrument		( -- )
+\ event:		( "name" -- )
+\ ;event		( -- )
+\
+\ find-file		( file -- fname|#f )
+\ snd-info		( obj -- )
+\ play-sound		( :optional input verbose player -- )
+\ clm-mix		( infile keyword-args -- )
+\ 
 \ ws-local-variables	( -- )
 \ ws-info		( start dur vars -- start dur )
 \ run			( start dur -- )
@@ -38,16 +48,11 @@
 \ end-run-reverb-out-2	( samp1 samp2 -- )
 \ end-run-reverb-out-4	( samp1 samp2 samp3 samp4 -- )
 \ set-to-snd		( f -- )
-\ instrument:		( "name" -- )
-\ ;instrument		( -- )
-\ event:		( "name" -- )
-\ ;event		( -- )
+\ run-gen-instrument	( start dur dummy --; samp args -- val )
+\ end-run-gen		( -- )
+\ run-gen-body		( samp y -- y' )
+\ run-gen		( -- prc; y self -- y' )
 \
-\ find-file		( file -- fname|#f )
-\ snd-info		( obj -- )
-\
-\ play-sound		( :optional input verbose player -- )
-\ clm-mix		( infile keyword-args -- )
 \ ws-play		( ws -- )
 \ ws-output		( ws -- fname )
 \ ws-framples		( gen -- len )
@@ -68,6 +73,7 @@
 \ src-simp		( start dur amp sr sr-env fname -- )
 \ conv-simp		( start dur filt fname amp -- )
 \ arpeggio		( start dur freq amp keyword-args -- )
+\ simp-gen		( start dur freq amp -- ; samp args -- val )
 \
 \ from generators.scm:
 \ make-waveshape	( :optional freq parts wave size -- )
@@ -338,7 +344,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/29"	value *clm-version*
+"fth 2017/12/30"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -370,6 +376,10 @@ Instruments using RUN or RUN-INSTRUMENT add entries to the list." help-set!
 <'> *dac-instruments*
 "List of collected dac instruments of #( ins-xt beg end ) elements.  \
 Used with :to-dac #t." help-set!
+
+#f value *clm-current-instrument*
+<'> *clm-current-instrument*
+"Current instrument set in INSTRUMENT:." help-set!
 
 'snd provided? [unless]
 	<'> *clm-file-name* is *clm-fname*
@@ -460,11 +470,292 @@ Produces something like:\n\
 	beg len d+ beg
 ;
 
+\ === Helper functions for instruments ===
+hide
+: ins-info ( ins-name -- )   to *clm-current-instrument* ;
+: event-info { ename -- }
+	*clm-verbose* if
+		ename #() clm-message
+	then
+;
+set-current
+
+: instrument: ( "name" -- )
+	>in @ parse-word $>string { ins-name } >in !
+	:
+	ins-name postpone literal <'> ins-info compile,
+;
+
+: event: ( "name" -- )
+	>in @ parse-word $>string { ev-name }  >in !
+	:
+	ev-name  postpone literal <'> event-info compile,
+;
+
+: ;instrument ( -- ) postpone ; ; immediate
+<'> ;instrument alias ;event immediate
+previous
+
+<'> #{}      alias #w{}    ( -- ws )
+<'> hash?    alias ws?     ( obj -- f )
+<'> hash-ref alias ws-ref  ( ws key     -- val )
+: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
+
+\ === Playing Sound Files ===
+: find-file ( file -- fname|#f )
+	doc" Return the possible full path name of FILE if FILE exists or \
+if FILE was found in *CLM-SEARCH-LIST*, otherwise return #f."
+	{ file }
+	file file-exists? if
+		file
+	else
+		#f { fname }
+		file string?
+		*clm-search-list* array? && if
+			*clm-search-list* each ( dir )
+				"/" $+ file $+ dup file-exists? if
+					to fname leave
+				else
+					drop
+				then
+			end-each
+		then
+		fname
+	then
+;
+
+hide
+: .maxamps { fname name sr scl? -- }
+	fname file-exists? if
+		fname mus-sound-maxamp { vals }
+		scl? if
+			" (before scaling)"
+		else
+			""
+		then { scaled }
+		vals length 0 ?do
+			"%6s %c: %.3f (near %.3f secs)%s"
+			    #( name
+			       [char] A i 2/ +
+			       vals i 1+ array-ref
+			       vals i    array-ref sr f/
+			       scaled ) clm-message
+		2 +loop
+	then
+;
+
+: .timer { obj -- }
+	"    real: %.3f  (utime %.3f, stime %.3f)"
+	    #( obj real-time@
+	       obj user-time@
+	       obj system-time@ ) clm-message
+;
+
+: .timer-ratio { sr frms obj -- }
+	frms 0> if
+		sr frms f/ { m }
+		"   ratio: %.2f  (uratio %.2f)"
+		    #( obj real-time@ m f*
+		       obj user-time@ m f* )
+	else
+		"   ratio: no ratio" #()
+	then clm-message
+;
+
+: .file { output chans srate -- }
+	"filename: %s" #( output ) clm-message
+	"   chans: %d, srate: %d" #( chans srate ) clm-message
+;
+
+: .file-info { output reverb-file-name scaled? timer -- }
+	output mus-sound-duration { dur }
+	output mus-sound-framples { frms }
+	output mus-sound-chans { chans }
+	output mus-sound-srate { srate }
+	output chans srate .file
+	"  format: %s [%s]"
+	    #( output mus-sound-sample-type mus-sample-type-name
+	       output mus-sound-header-type mus-header-type-name ) clm-message
+	"  length: %.3f  (%d framples)" #( dur frms ) clm-message
+	timer timer? if
+		timer .timer
+		srate frms timer .timer-ratio
+	then
+	output "maxamp" srate scaled? .maxamps
+	reverb-file-name ?dup-if
+		"revamp" srate #f .maxamps
+	then
+	output mus-sound-comment { comm }
+	comm empty? unless
+		" comment: %s" #( comm ) clm-message
+	then
+;
+
+: .dac-info { ws -- }
+	ws :output ws-ref { output }
+	ws :channels ws-ref { chans }
+	ws :srate ws-ref { srate }
+	ws :timer ws-ref { timer }
+	ws :framples ws-ref { framples }
+	output chans srate .file
+	timer if
+		timer .timer
+		srate framples timer .timer-ratio
+	then
+;
+set-current
+
+\ obj:	a string or ws object
+\	string: an existing file name (for play-sound)
+\	    ws: *clm-to-dac* is #t and keyargs are not used
+: snd-info { obj -- }
+	obj string? if
+		obj #f #f #f .file-info
+	else
+		*clm-to-dac* if
+			obj .dac-info
+		else
+			obj :output ws-ref		{ output }
+			obj :reverb-file-name ws-ref	{ reverb-file }
+			obj :scaled-to ws-ref
+			obj :scaled-by ws-ref ||	{ scaled }
+			obj :timer ws-ref		{ tm }
+			output reverb-file scaled tm .file-info
+		then
+	then
+;
+previous
+
+\ === Playing Sounds ===
+
+defer ws-play
+
+: play-sound <{ :optional
+    input   *clm-file-name*
+    verbose *clm-verbose*
+    player  *clm-player* -- }>
+	doc" Play sound file INPUT.\n\
+\"bell.snd\" #t play-sound\n\
+\"bell.snd\" #f \"sndplay\" play-sound"
+	input string? if
+		input find-file dup unless
+			drop
+			'no-such-file
+			    #( "%s: %s" get-func-name input ) fth-throw
+		else
+			to input
+		then
+	else
+		input mus-output? if
+			input mus-file-name
+		else
+			*output* mus-output? if
+				*output* mus-file-name
+			else
+				#f
+			then
+		then to input
+	then
+	input if
+		verbose if
+			input snd-info
+		then
+		#w{} :output input ws-set! :player player ws-set! ws-play
+	then
+;
+
+'snd provided? [unless]
+	: play ( keyword-args :optional obj -- f )
+		:start		#f get-optkey drop
+		:end		#f get-optkey drop
+		:channel	#f get-optkey drop
+		:edit-position	#f get-optkey drop
+		:out-channel	#f get-optkey drop
+		:with-sync	#f get-optkey drop
+		:wait		#f get-optkey drop
+		:stop		#f get-optkey drop
+		:srate		#f get-optkey drop
+		:channels	#f get-optkey drop
+		0 *clm-file-name* get-optarg #f #f play-sound
+		#f
+	;
+[then]
+
+: clm-mix <{ infile :key
+    output #f
+    output-frame 0
+    framples #f
+    input-frame 0
+    scaler #f -- }>
+	doc" Mix files in with-sound's *output* generator.\n\
+\"oboe.snd\" clm-mix\n\
+Mixes oboe.snd in *output* at *output*'s \
+location 0 from oboe.snd's location 0 on.  \
+The whole oboe.snd file will be mixed in because :framples is not specified."
+	0 { chans }
+	*output* mus-output? { outgen }
+	*output* sound? { outsnd }
+	output unless
+		outgen if
+			*output* mus-channels to chans
+			*output* mus-file-name to output
+		else
+			outsnd if
+				*output* channels to chans
+				*output* file-name to output
+			else
+				'with-sound-error
+				    #( "%s: *output* gen or :output required"
+				       get-func-name ) fth-throw
+			then
+		then
+	then
+	infile find-file to infile
+	infile unless
+		'file-not-found
+		    #( "%s: %S not found" get-func-name infile ) fth-throw
+	then
+	framples
+	infile mus-sound-framples || dup unless
+		drop undef
+	then to framples
+	outgen if
+		*output* mus-close drop
+	else
+		outsnd if
+			*output* save-sound drop
+			*output* close-sound drop
+		then
+	then
+	scaler number? if
+		scaler f0<> scaler 1.0 f<> && if
+			chans chans * scaler make-vct
+		else
+			#f
+		then
+	else
+		#f
+	then { mx }
+	output       ( outfile )
+	infile       ( infile )
+	output-frame ( outloc )
+	framples     ( framples )
+	input-frame  ( inloc )
+	mx           ( matrix )
+	#f           ( envs ) mus-file-mix drop
+	outgen if
+		output continue-sample->file to *output*
+	else
+		outsnd if
+			output open-sound to *output*
+		then
+	then
+;
+
 \ === With-Sound Run-Instrument ===
 "with-sound error"     create-exception with-sound-error
 "with-sound interrupt" create-exception with-sound-interrupt
 #() value *ws-args*			\ array for recursive with-sound calls 
-#f value *clm-current-instrument*	\ current instrument set in INSTRUMENT:
 
 : ws-local-variables ( -- )
 	nil { vals }
@@ -886,287 +1177,107 @@ set-current
 ;
 previous
 
-\ === Helper functions for instruments ===
+\ Instruments prepared with run-gen-instrument ... end-run-gen can
+\ be used for map-channel or ":to-dac #t with-sound".  An example
+\ instrument and test-gen can be found at the end of this file.
+\
+\ <'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop
+\ or
+\ test-gen run-gen map-channel
 hide
-: ins-info ( ins-name -- )   to *clm-current-instrument* ;
-: event-info { ename -- }
-	*clm-verbose* if
-		ename #() clm-message
+lambda: <{ a b -- f }>
+	a 1 array-ref { ba }
+	b 1 array-ref { bb }
+	ba bb < if
+		-1
+	else
+		ba bb > if
+			1
+		else
+			0
+		then
 	then
+; value dac-sort
+
+lambda: <{ a b -- f }>
+	a 1 array-ref { ba }
+	b 1 array-ref { bb }
+	ba bb f< if
+		-1
+	else
+		ba bb f> if
+			1
+		else
+			0
+		then
+	then
+; value clm-sort
+
+: (run-gen-instrument) { start dur dummy vars -- vars }
+	start s>f to start
+	dur   s>f to dur
+	#( *clm-current-instrument* start dur vars ) { args }
+	*clm-instruments* args array-push clm-sort array-sort! drop
+	start dur times->samples { end beg }
+	1 proc-create { prc }
+	*dac-instruments* #( prc beg end ) array-push dac-sort array-sort! drop
+	vars
 ;
 set-current
 
-: instrument: ( "name" -- )
-	>in @ parse-word $>string { ins-name } >in !
-	:
-	ins-name postpone literal <'> ins-info compile,
-;
+: run-gen-instrument ( start dur dummy --; samp args -- val )
+	\ This replaces the following:
+	\ 	start dur dummy local-variables (instrument-does) ,
+	\   does> ( samp self -- val )
+	\ 	@	this replaces self's address with its contents,
+	\ 		a hash with local variables
+	\ the stack is now: ( samp args )
+	postpone local-variables
+	postpone (run-gen-instrument) ( vars ) postpone compile,
+	postpone does> ( samp self -- val )
+	postpone @ ( samp args )
+; immediate compile-only
 
-: event: ( "name" -- )
-	>in @ parse-word $>string { ev-name }  >in !
-	:
-	ev-name  postpone literal <'> event-info compile,
-;
+<'> noop	alias end-run-gen
+<'> hash-ref	alias args@
 
-: ;instrument ( -- ) postpone ; ; immediate
-<'> ;instrument alias ;event immediate
-previous
-
-<'> #{}      alias #w{}    ( -- ws )
-<'> hash?    alias ws?     ( obj -- f )
-<'> hash-ref alias ws-ref  ( ws key     -- val )
-: ws-set! ( ws key val -- 'ws ) 3 pick >r hash-set! r> ;
-
-\ === Playing and Recording Sound Files ===
-: find-file ( file -- fname|#f )
-	doc" Return the possible full path name of FILE if FILE exists or \
-if FILE was found in *CLM-SEARCH-LIST*, otherwise return #f."
-	{ file }
-	file file-exists? if
-		file
-	else
-		#f { fname }
-		file string?
-		*clm-search-list* array? && if
-			*clm-search-list* each ( dir )
-				"/" $+ file $+ dup file-exists? if
-					to fname leave
-				else
-					drop
-				then
-			end-each
+: run-gen-body { samp y -- y' }
+	0 0 { beg end }
+	nil nil { args prc }
+	*dac-instruments* each to args
+		args 0 array-ref to prc
+		args 1 array-ref to beg
+		args 2 array-ref to end
+		samp beg end within if
+			samp prc execute y f+ to y
 		then
-		fname
+	end-each
+	y
+;
+
+: run-gen ( -- prc; y self -- y' )
+	*dac-instruments* empty? if
+		'with-sound-error
+		    #( "%s: filled *dac-instruments* required"
+		       get-func-name ) fth-throw
 	then
-;
-
-hide
-: .maxamps { fname name sr scl? -- }
-	fname file-exists? if
-		fname mus-sound-maxamp { vals }
-		scl? if
-			" (before scaling)"
-		else
-			""
-		then { scaled }
-		vals length 0 ?do
-			"%6s %c: %.3f (near %.3f secs)%s"
-			    #( name
-			       [char] A i 2/ +
-			       vals i 1+ array-ref
-			       vals i    array-ref sr f/
-			       scaled ) clm-message
-		2 +loop
-	then
-;
-
-: .timer { obj -- }
-	"    real: %.3f  (utime %.3f, stime %.3f)"
-	    #( obj real-time@
-	       obj user-time@
-	       obj system-time@ ) clm-message
-;
-
-: .timer-ratio { sr frms obj -- }
-	frms 0> if
-		sr frms f/ { m }
-		"   ratio: %.2f  (uratio %.2f)"
-		    #( obj real-time@ m f*
-		       obj user-time@ m f* )
+	0 { len }
+	*dac-instruments* each ( args )
+		2 array-ref len max to len
+	end-each
+	1 proc-create ( prc )
+	0 , len ,
+  does> { y self -- val }
+	self @ { samp }
+	self cell+ @ { len }
+	samp len <= if
+		samp y run-gen-body ( y' )
+		samp 1+ self !
 	else
-		"   ratio: no ratio" #()
-	then clm-message
-;
-
-: .file { output chans srate -- }
-	"filename: %s" #( output ) clm-message
-	"   chans: %d, srate: %d" #( chans srate ) clm-message
-;
-
-: .file-info { output reverb-file-name scaled? timer -- }
-	output mus-sound-duration { dur }
-	output mus-sound-framples { frms }
-	output mus-sound-chans { chans }
-	output mus-sound-srate { srate }
-	output chans srate .file
-	"  format: %s [%s]"
-	    #( output mus-sound-sample-type mus-sample-type-name
-	       output mus-sound-header-type mus-header-type-name ) clm-message
-	"  length: %.3f  (%d framples)" #( dur frms ) clm-message
-	timer timer? if
-		timer .timer
-		srate frms timer .timer-ratio
-	then
-	output "maxamp" srate scaled? .maxamps
-	reverb-file-name ?dup-if
-		"revamp" srate #f .maxamps
-	then
-	output mus-sound-comment { comm }
-	comm empty? unless
-		" comment: %s" #( comm ) clm-message
-	then
-;
-
-: .dac-info { ws -- }
-	ws :output ws-ref { output }
-	ws :channels ws-ref { chans }
-	ws :srate ws-ref { srate }
-	ws :timer ws-ref { timer }
-	ws :framples ws-ref { framples }
-	output chans srate .file
-	timer if
-		timer .timer
-		srate framples timer .timer-ratio
-	then
-;
-set-current
-
-\ obj:	a string or ws object
-\	string: an existing file name (for play-sound)
-\	    ws: *clm-to-dac* is #t and keyargs are not used
-: snd-info { obj -- }
-	obj string? if
-		obj #f #f #f .file-info
-	else
-		*clm-to-dac* if
-			obj .dac-info
-		else
-			obj :output ws-ref		{ output }
-			obj :reverb-file-name ws-ref	{ reverb-file }
-			obj :scaled-to ws-ref
-			obj :scaled-by ws-ref ||	{ scaled }
-			obj :timer ws-ref		{ tm }
-			output reverb-file scaled tm .file-info
-		then
+		0.0
 	then
 ;
 previous
-
-\ === Playing Sounds ===
-
-defer ws-play
-
-: play-sound <{ :optional
-    input   *clm-file-name*
-    verbose *clm-verbose*
-    player  *clm-player* -- }>
-	doc" Play sound file INPUT.\n\
-\"bell.snd\" #t play-sound\n\
-\"bell.snd\" #f \"sndplay\" play-sound"
-	input string? if
-		input find-file dup unless
-			drop
-			'no-such-file
-			    #( "%s: %s" get-func-name input ) fth-throw
-		else
-			to input
-		then
-	else
-		input mus-output? if
-			input mus-file-name
-		else
-			*output* mus-output? if
-				*output* mus-file-name
-			else
-				#f
-			then
-		then to input
-	then
-	input if
-		verbose if
-			input snd-info
-		then
-		#w{} :output input ws-set! :player player ws-set! ws-play
-	then
-;
-
-'snd provided? [unless]
-	: play ( keyword-args :optional obj -- f )
-		:start		#f get-optkey drop
-		:end		#f get-optkey drop
-		:channel	#f get-optkey drop
-		:edit-position	#f get-optkey drop
-		:out-channel	#f get-optkey drop
-		:with-sync	#f get-optkey drop
-		:wait		#f get-optkey drop
-		:stop		#f get-optkey drop
-		:srate		#f get-optkey drop
-		:channels	#f get-optkey drop
-		0 *clm-file-name* get-optarg #f #f play-sound
-		#f
-	;
-[then]
-
-: clm-mix <{ infile :key
-    output #f
-    output-frame 0
-    framples #f
-    input-frame 0
-    scaler #f -- }>
-	doc" Mix files in with-sound's *output* generator.\n\
-\"oboe.snd\" clm-mix\n\
-Mixes oboe.snd in *output* at *output*'s \
-location 0 from oboe.snd's location 0 on.  \
-The whole oboe.snd file will be mixed in because :framples is not specified."
-	0 { chans }
-	*output* mus-output? { outgen }
-	*output* sound? { outsnd }
-	output unless
-		outgen if
-			*output* mus-channels to chans
-			*output* mus-file-name to output
-		else
-			outsnd if
-				*output* channels to chans
-				*output* file-name to output
-			else
-				'with-sound-error
-				    #( "%s: *output* gen or :output required"
-				       get-func-name ) fth-throw
-			then
-		then
-	then
-	infile find-file to infile
-	infile unless
-		'file-not-found
-		    #( "%s: %S not found" get-func-name infile ) fth-throw
-	then
-	framples
-	infile mus-sound-framples || dup unless
-		drop undef
-	then to framples
-	outgen if
-		*output* mus-close drop
-	else
-		outsnd if
-			*output* save-sound drop
-			*output* close-sound drop
-		then
-	then
-	scaler number? if
-		scaler f0<> scaler 1.0 f<> && if
-			chans chans * scaler make-vct
-		else
-			#f
-		then
-	else
-		#f
-	then { mx }
-	output       ( outfile )
-	infile       ( infile )
-	output-frame ( outloc )
-	framples     ( framples )
-	input-frame  ( inloc )
-	mx           ( matrix )
-	#f           ( envs ) mus-file-mix drop
-	outgen if
-		output continue-sample->file to *output*
-	else
-		outsnd if
-			output open-sound to *output*
-		then
-	then
-;
 
 hide
 : ws-get-snd ( ws -- snd )
@@ -1494,6 +1605,20 @@ hide
 	#f #f #f fth-raise
 ;
 
+: play-cb { len -- prc; self -- val }
+	0 proc-create ( prc )
+	0 , len ,
+  does> { self -- val }
+	self @ { samp }
+	self cell+ @ { len }
+	samp len <= if
+		samp 0.0 run-gen-body ( sum )
+		samp 1+ self !
+	else
+		#f
+	then
+;
+
 : (with-sound-file-main) ( body-xt ws -- ws )
 	2 stack-check
 	{ body-xt ws }
@@ -1587,31 +1712,6 @@ hide
 		ws ws-play
 	then
 	ws ws-after-output ( ws )
-;
-
-: play-cb { len -- prc; self -- val }
-	0 proc-create ( prc )
-	0 , len ,
-  does> { self -- val }
-	self @ { samp }
-	self cell+ @ { len }
-	samp len <= if
-		0 0 { beg end }
-		nil nil { args prc }
-		0.0 { sum }
-		*dac-instruments* each to args
-			args 0 array-ref to prc
-			args 1 array-ref to beg
-			args 2 array-ref to end
-			samp beg end within if
-				samp prc execute sum f+ to sum
-			then
-		end-each
-		samp 1+ self !
-		sum
-	else
-		#f
-	then
 ;
 
 : (with-sound-dac-main) ( body-xt ws -- ws )
@@ -2102,6 +2202,27 @@ instrument: arpeggio <{ start dur freq amp :key
 event: arpeggio-test ( -- )
 	0 10 65 0.5 arpeggio
 ;event
+
+instrument: simp-gen { start dur freq amp -- ; samp args -- val }
+	:frequency freq make-oscil { os }
+	:envelope #( 0 0 25 1 75 1 100 0 )
+	:duration dur :scaler amp make-env { en }
+	start dur nil run-gen-instrument { samp args -- val }
+		args "os" args@ 0.0 0.0 oscil  args "en" args@ env f*
+	end-run-gen
+;instrument
+
+: test-gen ( -- )
+	0.0 0.1  440 0.2 simp-gen
+	0.5 0.2  550 0.2 simp-gen
+	0.6 0.1  660 0.2 simp-gen
+	1.0 0.1  880 0.2 simp-gen
+	1.1 0.1 1320 0.2 simp-gen
+	2.0 0.1  220 0.2 simp-gen
+;
+\ <'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop
+\ or
+\ test-gen run-gen map-channel drop
 
 \ generators.scm
 : make-waveshape <{ :optional

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	1.88 3/22/16
+ * @(#)hash.c	1.89 12/30/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -234,7 +234,7 @@ hs_dump(FTH self)
 static FTH
 hs_to_array_each(FTH key, FTH value, FTH data)
 {
-	return (fth_assoc(data, key, value));
+	return (fth_array_push(data, fth_make_array_var(2, key, value)));
 }
 
 static FTH
@@ -282,10 +282,12 @@ static FTH
 hs_set(FTH self, FTH idx, FTH value)
 {
 	if (fth_array_length(value) == 2)
-		fth_hash_set(self, fth_array_fast_ref(value, 0L),
+		fth_hash_set(self,
+		    fth_array_fast_ref(value, 0L),
 		    fth_array_fast_ref(value, 1L));
 	else
-		fth_hash_set(self, fth_array_ref(hs_ref(self, idx), 0L),
+		fth_hash_set(self,
+		    fth_array_ref(hs_ref(self, idx), 0L),
 		    value);
 	return (value);
 }
@@ -665,8 +667,8 @@ fth_hash_to_array(FTH hash)
 {
 #define h_hash_to_array "( hash -- ass )  return hash as array\n\
 #{ 'foo 0 'bar 1 } value h1\n\
-h1 hash->array => #a( '( 'foo . 0 ) '( 'bar . 1 ) )\n\
-Return associated array with '( key . value ) pairs of HASH's content."
+h1 hash->array => #( #( 'foo  0 ) #( 'bar  1 ) )\n\
+Return array with #( key  value ) pairs of HASH's contents."
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
 	return (hs_to_array(hash));
 }
@@ -796,20 +798,18 @@ See also hash-each."
 
 /* === PROPERTIES === */
 
-#define PROPERTY_IS_HASH_P	true
+#define PROPERTY_IS_HASH_P	1
 
 #if PROPERTY_IS_HASH_P
 #define PROPERTY_P(Obj)		FTH_HASH_P(Obj)
 #define MAKE_PROPERTY()		fth_make_hash()
 #define PROPERTY_REF(Obj, Key)	fth_hash_ref(Obj, Key)
-#define PROPERTY_SET(Obj, Key, Value)					\
-	fth_hash_set(Obj, Key, Value)
+#define PROPERTY_SET(Obj, Key, Value)	fth_hash_set(Obj, Key, Value)
 #else
 #define PROPERTY_P(Obj)		FTH_ARRAY_P(Obj)
 #define MAKE_PROPERTY()		fth_make_empty_array()
 #define PROPERTY_REF(Obj, Key)	fth_array_assoc_ref(Obj, Key)
-#define PROPERTY_SET(Obj, Key, Value)					\
-	fth_array_assoc_set(Obj, Key, Value)
+#define PROPERTY_SET(Obj, Key, Value)	fth_array_assoc_set(Obj, Key, Value)
 #endif
 
 static FTH	properties;
