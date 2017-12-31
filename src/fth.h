@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.218 12/27/17
+ * @(#)fth.h	1.219 12/31/17
  */
 
 #if !defined(_FTH_H_)
@@ -251,10 +251,10 @@ extern Ficl    *fth_ficl;
 typedef char   *(*in_cb) (ficlVm *);
 typedef void    (*out_cb) (ficlVm *, char *);
 typedef void    (*exit_cb) (int);
-extern in_cb	fth_read_hook;
-extern out_cb	fth_print_hook;
-extern out_cb	fth_error_hook;
-extern exit_cb	fth_exit_hook;
+extern in_cb 	fth_read_hook;
+extern out_cb 	fth_print_hook;
+extern out_cb 	fth_error_hook;
+extern exit_cb 	fth_exit_hook;
 
 /* === Predicates === */
 #define FTH_INSTANCE_FLAG_P(Obj, Type)	fth_instance_flag_p(Obj, Type)
@@ -472,21 +472,17 @@ FTH		fth_array_compact(FTH array);
 FTH		fth_array_copy(FTH array);
 FTH		fth_array_delete(FTH array, ficlInteger index);
 FTH		fth_array_delete_key(FTH array, FTH key);
-FTH		fth_array_each(FTH array,
-		    FTH (*func) (FTH value, FTH data), FTH data);
-FTH		fth_array_each_with_index(FTH array,
-		    FTH (*func) (FTH value, FTH data, ficlInteger idx),
-		FTH data);
-bool		fth_array_equal_p(FTH obj1, FTH obj2);
+FTH		fth_array_each(FTH, FTH (*) (FTH, FTH), FTH);
+FTH		fth_array_each_with_index(FTH,FTH(*)(FTH,FTH,ficlInteger),FTH);
+int		fth_array_equal_p(FTH obj1, FTH obj2);
 FTH		fth_array_fill(FTH array, FTH value);
 FTH		fth_array_find(FTH array, FTH key);
 ficlInteger	fth_array_index(FTH array, FTH key);
 FTH		fth_array_insert(FTH array, ficlInteger index, FTH value);
 FTH		fth_array_join(FTH array, FTH sep);
 ficlInteger	fth_array_length(FTH obj);
-FTH		fth_array_map(FTH array,
-		    FTH (*func) (FTH value, FTH data), FTH data);
-bool		fth_array_member_p(FTH array, FTH key);
+FTH		fth_array_map(FTH, FTH (*) (FTH, FTH), FTH);
+int		fth_array_member_p(FTH array, FTH key);
 FTH		fth_array_pop(FTH array);
 FTH		fth_array_push(FTH array, FTH value);
 FTH		fth_array_ref(FTH array, ficlInteger index);
@@ -495,8 +491,7 @@ FTH		fth_array_reverse(FTH array);
 FTH		fth_array_set(FTH array, ficlInteger index, FTH value);
 FTH		fth_array_shift(FTH array);
 FTH		fth_array_sort(FTH array, FTH proc_or_xt);
-FTH		fth_array_subarray(FTH array,
-		    ficlInteger start, ficlInteger end);
+FTH		fth_array_subarray(FTH, ficlInteger, ficlInteger);
 FTH		fth_array_to_array(FTH array);
 FTH		fth_array_to_list(FTH list);
 FTH		fth_array_uniq(FTH array);
@@ -554,7 +549,7 @@ void		fth_file_copy(const char *src, const char *dst);
 FTH		fth_file_ctime(const char *name);
 void		fth_file_delete(const char *name);
 FTH		fth_file_dirname(const char *name);
-bool		fth_file_install(const char *src, const char *dst, mode_t mode);
+int		fth_file_install(const char *src, const char *dst, mode_t mode);
 FTH		fth_file_length(const char *name);
 FTH		fth_file_match_dir(FTH string, FTH regexp);
 void		fth_file_mkdir(const char *name, mode_t mode);
@@ -566,36 +561,34 @@ void		fth_file_rmdir(const char *name);
 FTH		fth_file_split(const char *name);
 void		fth_file_symlink(const char *src, const char *dst);
 /* file test */
-bool		fth_file_block_p(const char *name);
-bool		fth_file_character_p(const char *name);
-bool		fth_file_directory_p(const char *name);
-bool		fth_file_executable_p(const char *name);
-bool		fth_file_exists_p(const char *name);
-bool		fth_file_fifo_p(const char *name);
-bool		fth_file_grpowned_p(const char *name);
-bool		fth_file_owned_p(const char *name);
-bool		fth_file_readable_p(const char *name);
-bool		fth_file_setgid_p(const char *name);
-bool		fth_file_setuid_p(const char *name);
-bool		fth_file_socket_p(const char *name);
-bool		fth_file_sticky_p(const char *name);
-bool		fth_file_symlink_p(const char *name);
-bool		fth_file_writable_p(const char *name);
-bool		fth_file_zero_p(const char *name);
+int		fth_file_block_p(const char *name);
+int		fth_file_character_p(const char *name);
+int		fth_file_directory_p(const char *name);
+int		fth_file_executable_p(const char *name);
+int		fth_file_exists_p(const char *name);
+int		fth_file_fifo_p(const char *name);
+int		fth_file_grpowned_p(const char *name);
+int		fth_file_owned_p(const char *name);
+int		fth_file_readable_p(const char *name);
+int		fth_file_setgid_p(const char *name);
+int		fth_file_setuid_p(const char *name);
+int		fth_file_socket_p(const char *name);
+int		fth_file_sticky_p(const char *name);
+int		fth_file_symlink_p(const char *name);
+int		fth_file_writable_p(const char *name);
+int		fth_file_zero_p(const char *name);
 
 /* === hash.c === */
 /* hash */
 void		fth_hash_clear(FTH hash);
 FTH		fth_hash_copy(FTH hash);
 FTH		fth_hash_delete(FTH hash, FTH key);
-FTH		fth_hash_each(FTH hash,
-		    FTH (*f) (FTH key, FTH val, FTH data), FTH data);
-bool		fth_hash_equal_p(FTH obj1, FTH obj2);
+FTH		fth_hash_each(FTH, FTH (*) (FTH, FTH, FTH), FTH);
+int		fth_hash_equal_p(FTH obj1, FTH obj2);
 FTH		fth_hash_find(FTH hash, FTH key);
 FTH		fth_hash_keys(FTH hash);
-FTH		fth_hash_map(FTH hash,
-		    FTH (*f) (FTH key, FTH val, FTH data), FTH data);
-bool		fth_hash_member_p(FTH hash, FTH key);
+FTH		fth_hash_map(FTH, FTH (*) (FTH, FTH, FTH), FTH);
+int		fth_hash_member_p(FTH hash, FTH key);
 FTH		fth_hash_ref(FTH hash, FTH key);
 void		fth_hash_set(FTH hash, FTH key, FTH value);
 FTH		fth_hash_to_array(FTH hash);
@@ -621,14 +614,13 @@ void		fth_add_hook(FTH hook, FTH proc);
 FTH		fth_hook_apply(FTH hook, FTH args, const char *caller);
 int		fth_hook_arity(FTH hook);
 void		fth_hook_clear(FTH hook);
-bool		fth_hook_empty_p(FTH hook);
-bool		fth_hook_equal_p(FTH obj1, FTH obj2);
-bool		fth_hook_member_p(FTH hook, FTH name);
+int		fth_hook_empty_p(FTH hook);
+int		fth_hook_equal_p(FTH obj1, FTH obj2);
+int		fth_hook_member_p(FTH hook, FTH name);
 FTH		fth_hook_names(FTH hook);
 FTH		fth_hook_to_array(FTH hook);
 FTH		fth_make_hook(const char *name, int arity, const char *doc);
-FTH		fth_make_hook_with_arity(const char *n,
-		    int req, int opt, bool rest, const char *d);
+FTH		fth_make_hook_with_arity(const char *, int, int, int, const char *);
 FTH		fth_make_simple_hook(int arity);
 FTH		fth_remove_hook(FTH hook, FTH name);
 FTH		fth_run_hook(FTH hook, int len,...);
@@ -638,19 +630,19 @@ FTH		fth_run_hook_bool(FTH hook, int len,...);
 /* === io.c === */
 /* io */
 void		fth_io_close(FTH io);
-bool		fth_io_closed_p(FTH obj);
-bool		fth_io_eof_p(FTH io);
-bool		fth_io_equal_p(FTH obj1, FTH obj2);
+int		fth_io_closed_p(FTH obj);
+int		fth_io_eof_p(FTH io);
+int		fth_io_equal_p(FTH obj1, FTH obj2);
 char           *fth_io_filename(FTH io);
 int		fth_io_fileno(FTH io);
 void		fth_io_flush(FTH io);
 int		fth_io_getc(FTH io);
-bool		fth_io_input_p(FTH obj);
+int		fth_io_input_p(FTH obj);
 ficl2Integer	fth_io_length(FTH obj);
 int		fth_io_mode(FTH io);
 FTH		fth_io_nopen(const char *host, int port, int type);
 FTH		fth_io_open(const char *name, int fam);
-bool		fth_io_output_p(FTH obj);
+int		fth_io_output_p(FTH obj);
 FTH		fth_io_popen(FTH cmd, int fam);
 ficl2Integer	fth_io_pos_ref(FTH io);
 void		fth_io_pos_set(FTH io, ficl2Integer pos);
@@ -675,8 +667,7 @@ void		fth_writelines(const char *name, FTH array);
 
 /* === misc.c === */
 void		fth_exit  (int n);
-void		fth_make_ficl(unsigned int d_size, unsigned int s_size,
-		    unsigned int r_size, unsigned int l_size);
+void		fth_make_ficl(unsigned, unsigned, unsigned, unsigned);
 void		fth_reset (void);
 /* eval */
 void		fth_add_feature(const char *name);
@@ -684,7 +675,7 @@ int		fth_catch_eval(const char *buffer);
 int		fth_catch_exec(ficlWord *word);
 FTH		fth_eval   (const char *buffer);
 void		fth_init  (void);
-bool		fth_provided_p(const char *name);
+int		fth_provided_p(const char *name);
 /* load */
 void		fth_add_load_lib_path(const char *path);
 void		fth_add_load_path(const char *path);
@@ -708,8 +699,7 @@ char           *fth_parse_word(void);
 char           *fth_short_version(void);
 char           *fth_version(void);
 FTH		fth_word_ref(const char *name);
-FTH		fth_wordlist_each(bool(*func) (ficlWord *word, FTH data),
-		    FTH data);
+FTH		fth_wordlist_each(int (*) (ficlWord *, FTH), FTH);
 
 /* === numbers.c === */
 int		fth_char_p(FTH obj);
@@ -792,46 +782,41 @@ FTH		fth_gc_unprotect(FTH obj);
 /* object */
 FTH		fth_make_object_type(const char *name);
 FTH		fth_make_object_type_from(const char *name, FTH base);
-bool		fth_object_type_p(FTH obj);
+int		fth_object_type_p(FTH obj);
 /* instance */
-bool		fth_instance_flag_p(FTH obj, int flags);
-bool		fth_instance_p(FTH obj);
+int		fth_instance_flag_p(FTH obj, int flags);
+int		fth_instance_p(FTH obj);
 void           *fth_instance_ref_gen(FTH obj);
-bool		fth_instance_type_p(FTH obj, fobj_t type);
+int		fth_instance_type_p(FTH obj, fobj_t type);
 FTH		fth_make_instance(FTH obj, void *gen);
-bool		fth_object_is_instance_of(FTH obj, FTH type);
+int		fth_object_is_instance_of(FTH obj, FTH type);
 /* object set functions */
 /* NOSTRICT */
-FTH		fth_set_object_apply(FTH obj, void *apply,
-		    int req, int opt, int rest);
+FTH		fth_set_object_apply(FTH, void *, int, int, int);
 FTH		fth_set_object_copy(FTH obj, FTH (*copy) (FTH obj));
 FTH		fth_set_object_dump(FTH obj, FTH (*dump) (FTH obj));
-FTH		fth_set_object_equal_p(FTH obj,
-		    FTH (*equal_p) (FTH obj1, FTH obj2));
+FTH		fth_set_object_equal_p(FTH, FTH (*) (FTH, FTH));
 FTH		fth_set_object_free(FTH obj, void (*free) (FTH obj));
 FTH		fth_set_object_inspect(FTH obj, FTH (*inspect) (FTH obj));
 FTH		fth_set_object_length(FTH obj, FTH (*length) (FTH obj));
 FTH		fth_set_object_mark(FTH obj, void (*mark) (FTH obj));
 FTH		fth_set_object_to_array(FTH obj, FTH (*to_array) (FTH obj));
-FTH		fth_set_object_to_string(FTH obj,
-		    FTH (*to_string) (FTH obj));
-FTH		fth_set_object_value_ref(FTH obj,
-		    FTH (*value_ref) (FTH obj, FTH index));
-FTH		fth_set_object_value_set(FTH obj,
-		    FTH (*value_set) (FTH obj, FTH index, FTH value));
+FTH		fth_set_object_to_string(FTH, FTH (*) (FTH));
+FTH		fth_set_object_value_ref(FTH, FTH (*) (FTH, FTH));
+FTH		fth_set_object_value_set(FTH, FTH (*) (FTH, FTH, FTH));
 /* object functions */
 FTH		fth_object_apply(FTH obj, FTH args);
 FTH		fth_object_copy(FTH obj);
 FTH		fth_object_dump(FTH obj);
-bool		fth_object_empty_p(FTH obj);
-bool		fth_object_equal_p(FTH obj1, FTH obj2);
+int		fth_object_empty_p(FTH obj);
+int		fth_object_equal_p(FTH obj1, FTH obj2);
 FTH		fth_object_find(FTH obj, FTH key);
 FTH		fth_object_index(FTH obj, FTH key);
 FTH		fth_object_inspect(FTH obj);
 ficlInteger	fth_object_length(FTH obj);
-bool		fth_object_member_p(FTH obj, FTH key);
+int		fth_object_member_p(FTH obj, FTH key);
 char           *fth_object_name(FTH obj);
-bool		fth_object_range_p(FTH obj, ficlInteger index);
+int		fth_object_range_p(FTH obj, ficlInteger index);
 FTH		fth_object_sort(FTH obj, FTH proc);
 FTH		fth_object_to_array(FTH obj);
 FTH		fth_object_to_string(FTH obj);
@@ -897,19 +882,16 @@ char           *fth_vformat(const char *fmt, va_list ap);
 int		fth_vfprintf(FILE * fp, const char *fmt, va_list ap);
 int		fth_vioprintf(FTH io, const char *fmt, va_list ap);
 int		fth_vprintf(const char *fmt, va_list ap);
-int		fth_vsnprintf(char *buffer, size_t size,
-		    const char *fmt, va_list ap);
+int		fth_vsnprintf(char *, size_t, const char *, va_list);
 int		fth_vsprintf(char *buffer, const char *fmt, va_list ap);
 int		fth_warning(const char *fmt,...);
 
 /* === proc.c === */
-bool		fth_word_defined_p(FTH obj);
-bool		fth_word_type_p(FTH obj, int type);
+int		fth_word_defined_p(FTH obj);
+int		fth_word_type_p(FTH obj, int type);
 /* proc */
-ficlWord       *fth_define_procedure(const char *,
-		    FTH (*) (), int, int, int, const char *);
-ficlWord       *fth_define_void_procedure(const char *, 
-		    void (*) (), int, int, int, const char *);
+ficlWord       *fth_define_procedure(const char *, FTH (*) (), int, int, int, const char *);
+ficlWord       *fth_define_void_procedure(const char *, void (*) (), int, int, int, const char *);
 FTH		fth_documentation_ref(FTH obj);
 void		fth_documentation_set(FTH obj, FTH doc);
 FTH		fth_get_optarg(ficlInteger req, FTH def);
@@ -918,9 +900,8 @@ ficl2Integer	fth_get_optkey_2int(FTH key, ficl2Integer def);
 ficlInteger	fth_get_optkey_int(FTH key, ficlInteger def);
 int		fth_get_optkey_fix(FTH key, int def);
 char           *fth_get_optkey_str(FTH key, char *def);
-FTH		fth_make_proc(ficlWord *word, int req, int opt, bool rest);
-FTH		fth_make_proc_from_func(const char *,
-		    FTH (*) (), bool, int, int, bool);
+FTH		fth_make_proc(ficlWord *word, int req, int opt, int rest);
+FTH		fth_make_proc_from_func(const char *, FTH (*) (), int, int, int, int);
 FTH		fth_proc_apply(FTH proc, FTH args, const char *caller);
 int		fth_proc_arity(FTH proc);
 FTH		fth_proc_call(FTH proc, const char *caller, int len,...);
@@ -936,14 +917,12 @@ ficlWord       *fth_word_doc_set(ficlWord *word, const char *str);
 FTH		fth_xt_apply(const char *name, FTH args, const char *caller);
 FTH		fth_xt_call(const char *name, const char *caller, int len,...);
 FTH		proc_from_proc_or_xt(FTH proc_or_xt,
-		    int req, int opt, bool rest);
+		    int req, int opt, int rest);
 /* define, variable */
 FTH		fth_define (const char *name, FTH value);
-FTH		fth_define_constant(const char *name,
-		    FTH value, const char *doc);
-FTH		fth_define_variable(const char *name,
-		    FTH value, const char *doc);
-bool		fth_defined_p(const char *name);
+FTH		fth_define_constant(const char *, FTH, const char *);
+FTH		fth_define_variable(const char *, FTH, const char *);
+int		fth_defined_p(const char *name);
 void		fth_trace_var(FTH obj, FTH proc_or_xt);
 FTH		fth_trace_var_execute(ficlWord *word);
 void		fth_untrace_var(FTH obj);
@@ -958,8 +937,7 @@ FTH		fth_make_regexp(const char *str);
 int		fth_regexp_find(const char *reg, const char *str);
 ficlInteger	fth_regexp_match(FTH regexp, FTH string);
 FTH		fth_regexp_replace(FTH regexp, FTH string, FTH replace);
-ficlInteger	fth_regexp_search(FTH regexp, FTH string,
-		    ficlInteger beg, ficlInteger len);
+ficlInteger	fth_regexp_search(FTH, FTH, ficlInteger, ficlInteger);
 FTH		fth_regexp_var_ref(ficlInteger index);
 
 /* === string.c === */
@@ -980,18 +958,18 @@ char		fth_string_c_char_ref(FTH string, ficlInteger index);
 char		fth_string_c_char_set(FTH string, ficlInteger index, char c);
 FTH		fth_string_delete(FTH string, ficlInteger index);
 FTH		fth_string_downcase(FTH string);
-bool		fth_string_equal_p(FTH obj1, FTH obj2);
+int		fth_string_equal_p(FTH obj1, FTH obj2);
 int		fth_string_eval(FTH string);
 FTH		fth_string_fill(FTH string, FTH fill_char);
 FTH		fth_string_find(FTH string, FTH key);
 FTH		fth_string_format(FTH string, FTH args_list);
-bool		fth_string_greater_p(FTH obj1, FTH obj2);
+int		fth_string_greater_p(FTH obj1, FTH obj2);
 FTH		fth_string_index(FTH string, FTH key);
 FTH		fth_string_insert(FTH string, ficlInteger index, FTH value);
 ficlInteger	fth_string_length(FTH string);
-bool		fth_string_less_p(FTH obj1, FTH obj2);
-bool		fth_string_member_p(FTH string, FTH key);
-bool		fth_string_not_equal_p(FTH obj1, FTH obj2);
+int		fth_string_less_p(FTH obj1, FTH obj2);
+int		fth_string_member_p(FTH string, FTH key);
+int		fth_string_not_equal_p(FTH obj1, FTH obj2);
 FTH		fth_string_pop(FTH string);
 FTH		fth_string_push(FTH string, FTH add_str);
 char           *fth_string_ref(FTH string);
@@ -1010,27 +988,27 @@ FTH		fth_string_vsformat(FTH string, const char *fmt, va_list ap);
 
 /* === symbol.c === */
 /* symbol */
-bool		fth_string_or_symbol_p(FTH obj);
+int		fth_string_or_symbol_p(FTH obj);
 char           *fth_string_or_symbol_ref(FTH obj);
 FTH		fth_symbol (const char *name);
-bool		fth_symbol_equal_p(FTH obj1, FTH obj2);
-bool		fth_symbol_p(const char *name);
+int		fth_symbol_equal_p(FTH obj1, FTH obj2);
+int		fth_symbol_p(const char *name);
 char           *fth_symbol_ref(FTH obj);
 /* keyword */
 FTH		fth_keyword(const char *name);
-bool		fth_keyword_equal_p(FTH obj1, FTH obj2);
-bool		fth_keyword_p(const char *name);
+int		fth_keyword_equal_p(FTH obj1, FTH obj2);
+int		fth_keyword_p(const char *name);
 char           *fth_keyword_ref(FTH obj);
 /* exception */
 FTH		fth_exception(const char *name);
-bool		fth_exception_equal_p(FTH obj1, FTH obj2);
+int		fth_exception_equal_p(FTH obj1, FTH obj2);
 FTH		fth_exception_last_message_ref(FTH exc);
 void		fth_exception_last_message_set(FTH exc, FTH msg);
 FTH		fth_exception_message_ref(FTH exc);
 void		fth_exception_message_set(FTH exc, FTH msg);
 char           *fth_exception_ref(FTH obj);
 FTH		fth_make_exception(const char *name, const char *message);
-bool		fth_symbol_or_exception_p(FTH obj);
+int		fth_symbol_or_exception_p(FTH obj);
 FTH		fth_symbol_or_exception_ref(FTH obj);
 FTH		fth_symbol_to_exception(FTH obj);
 

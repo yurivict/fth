@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)primitives.c	1.110 12/27/17
+ * @(#)primitives.c	1.111 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -3304,7 +3304,7 @@ A string of blanks should be treated as a special case representing zero."
   if (len == 0)
   {
     ficlStackPushFloat(vm->dataStack, 0.0f);
-    ficlStackPushBoolean(vm->dataStack, true);
+    ficlStackPushBoolean(vm->dataStack, 1);
   }
   else
   {
@@ -3315,10 +3315,10 @@ A string of blanks should be treated as a special case representing zero."
     if (*test == '\0' || errno != ERANGE)
     {
       ficlStackPushFloat(vm->dataStack, r);
-      ficlStackPushBoolean(vm->dataStack, true);
+      ficlStackPushBoolean(vm->dataStack, 1);
     }
     else
-      ficlStackPushBoolean(vm->dataStack, false);
+      ficlStackPushBoolean(vm->dataStack, 0);
     FTH_FREE(buf);
   }
 }
@@ -3599,7 +3599,7 @@ FLAG is true if the input source specification cannot be so restored."
   FICL_STACK_CHECK(vm->dataStack, 2, 1);
   ficlStackDrop(vm->dataStack, 1);
   fth_set_io_stdin(ficlStackPopFTH(vm->dataStack));
-  ficlStackPushBoolean(vm->dataStack, false);
+  ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 static void

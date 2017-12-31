@@ -42,7 +42,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficllocal.h	1.69 3/22/16
+ * @(#)ficllocal.h	1.70 12/31/17
  */
 
 #if !defined(_FICLLOCAL_H_)
@@ -163,22 +163,9 @@ typedef FRatio * ficlRatio;
 #define HAVE_BN		0
 #endif
 
-#if defined(HAVE_STDBOOL_H)
-#include <stdbool.h>
-#else
-#if !defined(HAVE__BOOL)
-#if defined(__cplusplus)
-typedef bool	_Bool;
-#else
-typedef unsigned char _Bool;
-#endif
-#endif
 #if !defined(true)
-#define bool 		_Bool
 #define false 		0
 #define true 		1
-#define __bool_true_false_are_defined 1
-#endif
 #endif
 
 #define FICL_FORTH_NAME			FTH_PACKAGE_TARNAME

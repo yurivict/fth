@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.116 12/25/17";
+const char fth_sccsid[] = "@(#)fth.c	1.117 12/31/17";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -38,11 +38,10 @@ const char fth_sccsid[] = "@(#)fth.c	1.116 12/25/17";
 
 #define FTH_COPYRIGHT	"(c) 2004-2017 Michael Scholz"
 
-static FTH 	eval_with_error_exit(void *p, int kind);
-static void	repl_in_place(char *in, FTH out, ficlWord *word,
-    bool auto_split_p, bool print_p, bool chomp_p);
-static ficlWord *source_to_word(const char *buffer);
-static FTH 	string_split(char *str, char *delim);
+static FTH 	eval_with_error_exit(void *, int);
+static void 	repl_in_place(char *, FTH, ficlWord *, int, int, int);
+static ficlWord *source_to_word(const char *);
+static FTH 	string_split(char *, char *);
 
 enum {
 	REPL_COMPILE,
@@ -59,6 +58,7 @@ source_to_word(const char *buffer)
 	bstr = fth_format("lambda: ( ?? -- ?? ) %s ;", buffer);
 	status = fth_catch_eval(bstr);
 	FTH_FREE(bstr);
+
 	switch (status) {
 	case FTH_BYE:
 		fth_exit(EXIT_SUCCESS);
@@ -70,6 +70,7 @@ source_to_word(const char *buffer)
 		word = ficlStackPopPointer(FTH_FICL_STACK());
 		break;
 	}
+
 	return (word);
 }
 
@@ -85,11 +86,14 @@ eval_with_error_exit(void *p, int kind)
 	int 		status;
 
 	val = FTH_UNDEF;
+
 	if (p == NULL)
 		return (val);
-	fth_eval_p = true;
+
+	fth_eval_p = 1;
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
+
 	switch (kind) {
 	case REPL_COMPILE:
 		status = fth_catch_exec((ficlWord *) p);
@@ -99,6 +103,7 @@ eval_with_error_exit(void *p, int kind)
 		status = fth_catch_eval((const char *) p);
 		break;
 	}
+
 	switch (status) {
 	case FTH_BYE:
 		fth_exit(EXIT_SUCCESS);
@@ -109,6 +114,7 @@ eval_with_error_exit(void *p, int kind)
 		break;
 	default:
 		new_depth = FTH_STACK_DEPTH(vm) - depth;
+
 		switch (new_depth) {
 		case 0:
 			val = FTH_UNDEF;
@@ -124,7 +130,8 @@ eval_with_error_exit(void *p, int kind)
 		}
 		break;
 	}
-	fth_eval_p = false;
+
+	fth_eval_p = 0;
 	return (val);
 }
 
@@ -136,9 +143,11 @@ string_split(char *str, char *delim)
 
 	s = t = FTH_STRDUP(str);
 	result = fth_make_empty_array();
+
 	while ((p = strsep(&s, delim)) != NULL)
 		if (*p != '\0')
 			fth_array_push(result, fth_make_string(p));
+
 	FTH_FREE(t);
 	return (result);
 }
@@ -146,8 +155,7 @@ string_split(char *str, char *delim)
 static char 	fth_scratch[BUFSIZ];
 
 static void
-repl_in_place(char *in, FTH out, ficlWord *word,
-    bool auto_split_p, bool print_p, bool chomp_p)
+repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, int chomp_p)
 {
 	char           *delim, *buf;
 	size_t 		len;
@@ -156,8 +164,10 @@ repl_in_place(char *in, FTH out, ficlWord *word,
 	FILE           *ifp;
 
 	ifp = stdin;
+
 	if (in != NULL) {
 		ifp = fopen(in, "r");
+
 		if (ifp == NULL) {
 			FTH_SYSTEM_ERROR_ARG_THROW(fopen, in);
 			return;
@@ -167,9 +177,11 @@ repl_in_place(char *in, FTH out, ficlWord *word,
 	delim = fth_string_ref(fth_variable_ref("*fs*"));
 	line_no = 0;
 	buf = fth_scratch;
+
 	while (fgets(buf, BUFSIZ, ifp) != NULL) {
 		if (print_p)
 			fth_print(buf);
+
 		if (chomp_p) {
 			len = fth_strlen(buf);
 			if (buf[len - 1] == '\n')
@@ -177,16 +189,21 @@ repl_in_place(char *in, FTH out, ficlWord *word,
 		}
 		if (auto_split_p)
 			fth_variable_set("*farray*", string_split(buf, delim));
+
 		fth_variable_set("*line*", fth_make_string(buf));
 		fth_variable_set("*fnr*", fth_make_int(line_no++));
 		line = eval_with_error_exit(word, REPL_COMPILE);
 		fth_variable_set("*nr*",
 		    fth_number_add(fth_variable_ref("*nr*"), FTH_ONE));
+
 		if (FTH_NOT_FALSE_P(out))
 			fth_array_push(out, line);
+
 		gc_loop_reset();
 	}
+
 	gc_pop();
+
 	if (in != NULL)
 		fclose(ifp);
 }
@@ -207,10 +224,10 @@ extern int 	optopt;
 int
 main(int argc, char **argv)
 {
-	bool 		die, no_init_file, auto_split, debug;
-	bool 		in_place_p, ficl_repl;
-	bool 		line_end, implicit_loop, loop_print;
-	bool 		script_p, finish_getopt;
+	int 		die, no_init_file, auto_split, debug;
+	int 		in_place_p, ficl_repl;
+	int 		line_end, implicit_loop, loop_print;
+	int 		script_p, finish_getopt;
 	int 		i, c, exit_value, stay_in_repl, verbose;
 	int 		lp_len, llp_len, bufs_len, libs_len;
 	char           *field_separator, *init_file, *suffix, *script;
@@ -240,7 +257,7 @@ main(int argc, char **argv)
 
 	exit_value = EXIT_SUCCESS;
 	llp_len = 0;		/* -C path */
-	die = false;		/* -D */
+	die = 0;		/* -D */
 	/*
 	 * stay_in_repl: -1 not set 0 -e || -s 1 -E || -r
 	 */
@@ -248,20 +265,21 @@ main(int argc, char **argv)
 	bufs_len = 0;		/* -Ee pattern */
 	field_separator = NULL;	/* -F fs */
 	lp_len = 0;		/* -I path */
-	no_init_file = false;	/* -Q */
+	no_init_file = 0;	/* -Q */
 	libs_len = 0;		/* -S path */
-	auto_split = false;	/* -a */
-	debug = false;		/* -d */
+	auto_split = 0;		/* -a */
+	debug = 0;		/* -d */
 	init_file = NULL;	/* -f file */
-	in_place_p = false;	/* -i[suffix] */
+	in_place_p = 0;		/* -i[suffix] */
 	suffix = NULL;		/* -isuffix */
-	line_end = false;	/* -l */
-	implicit_loop = false;	/* -n || -p */
-	loop_print = false;	/* -n 0 || -p 1 */
-	ficl_repl = false;	/* -r */
-	script_p = false;	/* -s */
-	finish_getopt = false;	/* -s */
+	line_end = 0;		/* -l */
+	implicit_loop = 0;	/* -n || -p */
+	loop_print = 0;		/* -n 0 || -p 1 */
+	ficl_repl = 0;		/* -r */
+	script_p = 0;		/* -s */
+	finish_getopt = 0;	/* -s */
 	script = NULL;		/* -s file */
+
 	/*-
 	 * verbose: -1 not set --> true in interactive repl
 	 *           0 -q quiet
@@ -281,7 +299,7 @@ main(int argc, char **argv)
 				fprintf(stderr, WARN_STR, c, optarg);
 			break;
 		case 'D':	/* -D */
-			die = true;
+			die = 1;
 			break;
 		case 'E':	/* -E PATTERN */
 			stay_in_repl = 1;
@@ -300,7 +318,7 @@ main(int argc, char **argv)
 				fprintf(stderr, WARN_STR, c, optarg);
 			break;
 		case 'Q':	/* -Q */
-			no_init_file = true;
+			no_init_file = 1;
 			break;
 		case 'S':	/* -S "LIB FUNC" */
 			if (libs_len < LIBSLEN)
@@ -315,10 +333,10 @@ main(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 			break;
 		case 'a':	/* -a */
-			auto_split = true;
+			auto_split = 1;
 			break;
 		case 'd':	/* -d */
-			debug = true;
+			debug = 1;
 			break;
 		case 'e':	/* -e PATTERN */
 			stay_in_repl = 0;
@@ -331,33 +349,33 @@ main(int argc, char **argv)
 			init_file = optarg;
 			break;
 		case 'i':	/* -i [SUFFIX] */
-			in_place_p = true;
+			in_place_p = 1;
 			if (optarg)
 				suffix = optarg;
 			break;
 		case 'l':	/* -l */
-			line_end = true;
+			line_end = 1;
 			break;
 		case 'n':	/* -n */
-			loop_print = false;
-			implicit_loop = true;
+			loop_print = 0;
+			implicit_loop = 1;
 			break;
 		case 'p':	/* -p */
-			loop_print = true;
-			implicit_loop = true;
+			loop_print = 1;
+			implicit_loop = 1;
 			break;
 		case 'q':	/* -q */
 			verbose = 0;
 			break;
 		case 'r':	/* -r */
 			stay_in_repl = 1;
-			ficl_repl = true;
+			ficl_repl = 1;
 			break;
 		case 's':	/* -s FILE */
 			stay_in_repl = 0;
-			script_p = true;
+			script_p = 1;
 			script = optarg;
-			finish_getopt = true;
+			finish_getopt = 1;
 			break;
 		case 'v':	/* -v */
 			verbose = 1;
@@ -378,6 +396,7 @@ main(int argc, char **argv)
 	fth_variable_set("*fth-debug*", BOOL_TO_FTH(debug));
 	fth_die_on_signal_p = die;
 	fth_true_repl_p = !ficl_repl;
+
 	/*
 	 * If -I or -C was given, we have to add these paths before finishing
 	 * Forth init; calling 'make test' before 'make install' requires
@@ -391,22 +410,26 @@ main(int argc, char **argv)
 	if (llp_len > 0)	/* -C PATH */
 		for (i = 0; i < llp_len; i++)
 			fth_unshift_load_lib_path(load_lib_paths[i]);
+
 	/*
 	 * Finish init forth.
 	 */
 	forth_init();
+
 	/*
 	 * Adjust command line array.
 	 */
 	fth_set_argv(script_p ? optind - 1 : 0, argc, argv);
 	argc -= optind;
 	argv += optind;
+
 	/*
 	 * Reset getopt for further use in Forth scripts.
 	 */
 	optind = 1;
 	if (field_separator != NULL)	/* -F SEP */
 		fth_variable_set("*fs*", fth_make_string(field_separator));
+
 	if (libs_len > 0) {	/* -S "LIB FUNC" */
 		char           *lib, *name, *fnc;
 
@@ -417,17 +440,20 @@ main(int argc, char **argv)
 			fth_dl_load(name, fnc);
 		}
 	}
+
 	/*
 	 * Run script and exit.
 	 */
 	if (script_p) {		/* -s FILE */
 		ret = fth_load_file(script);
+
 		if (FTH_STRING_P(ret)) {
 			fth_throw(FTH_LOAD_ERROR, "%S", ret);
 			fth_exit(EXIT_FAILURE);
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
+
 	/*
 	 * In-place or implicit-loop action and exit.
 	 */
@@ -447,15 +473,18 @@ main(int argc, char **argv)
 			/* NOTREACHED */
 			return (EXIT_FAILURE);
 		}
+
 		/*
 		 * If multiple -e, eval all but last.
 		 */
 		for (i = 0; i < bufs_len - 1; i++)
 			eval_with_error_exit(buffers[i], REPL_INTERPRET);
+
 		/*
 		 * Last or only -e: compile and use it for in-place.
 		 */
 		word = source_to_word(buffers[i]);
+
 		/*
 		 * Read from stdin ...
 		 */
@@ -464,16 +493,19 @@ main(int argc, char **argv)
 			    auto_split, loop_print, line_end);
 			fth_exit(EXIT_SUCCESS);
 		}
+
 		/*
 		 * ... or process all remaining files in order.
 		 */
 		for (i = 0; argv[i]; i++) {
 			in_file = argv[i];
 			fth_variable_set("*fname*", fth_make_string(in_file));
+
 			if (in_place_p) {	/* -i [SUFFIX] */
 				out = fth_make_empty_array();
 				repl_in_place(in_file, out, word,
 				    auto_split, loop_print, line_end);
+
 				if (suffix != NULL) {	/* -i SUFFIX */
 					fth_strcpy(out_file, sizeof(out_file),
 					    in_file);
@@ -488,6 +520,7 @@ main(int argc, char **argv)
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
+
 	/*
 	 * Load remaining args as fth source files.
 	 */
@@ -515,12 +548,14 @@ main(int argc, char **argv)
 			fth_exit(EXIT_SUCCESS);
 		} else {
 			ret = fth_load_file(argv[i]);
+
 			if (FTH_STRING_P(ret)) {
 				exit_value++;
 				fth_throw(FTH_LOAD_ERROR, "%S", ret);
 			}
 		}
 	}
+
 	/*
 	 * Adjust exit-value; if -D, exit.
 	 */
@@ -529,6 +564,7 @@ main(int argc, char **argv)
 		if (die)
 			fth_exit(exit_value);
 	}
+
 	/*
 	 * Eval strings from command line.
 	 */
@@ -538,16 +574,19 @@ main(int argc, char **argv)
 		 */
 		for (i = 0; i < bufs_len - 1; i++)
 			eval_with_error_exit(buffers[i], REPL_INTERPRET);
+
 		/*
 		 * Compile last or only -e.
 		 */
 		eval_with_error_exit(source_to_word(buffers[i]), REPL_COMPILE);
 	}
+
 	/*
 	 * Adjust stay_in_repl if not set.
 	 */
 	if (stay_in_repl == -1)
 		stay_in_repl = (argc == 0) ? 1 : 0;
+
 	if (stay_in_repl > 0) {
 		/*
 		 * If not set, be verbose in repl (and while loading init
@@ -555,6 +594,7 @@ main(int argc, char **argv)
 		 */
 		if (verbose == -1)
 			fth_variable_set("*fth-verbose*", FTH_TRUE);
+
 		/*
 		 * Print banner if we are still here.
 		 */
@@ -564,16 +604,19 @@ main(int argc, char **argv)
 			fth_printf("\\ %s %s\n",
 			    FTH_PACKAGE_NAME, fth_version());
 		}
+
 		/*
 		 * Load init files if not -Q.
 		 */
 		if (!no_init_file) {	/* -f FILE */
 			ret = fth_load_global_init_file();
+
 			if (FTH_STRING_P(ret)) {
 				exit_value++;
 				fth_throw(FTH_LOAD_ERROR, "%S", ret);
 			}
 			ret = fth_load_init_file(init_file);
+
 			if (FTH_STRING_P(ret)) {
 				exit_value++;
 				fth_throw(FTH_LOAD_ERROR, "%S", ret);
@@ -584,6 +627,7 @@ main(int argc, char **argv)
 	}
 	if (!stay_in_repl || ((exit_value != EXIT_SUCCESS) && die))
 		fth_exit(exit_value);
+
 	/*
 	 * Finally, start interactive mode.
 	 */

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)file.c	1.86 1/1/15
+ * @(#)file.c	1.87 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -133,7 +133,7 @@ file-zero?          ( name -- f )"
 #if defined(HAVE_ACCESS)
 #define FTH_ACCESS_P(name, mode)	(access(name, mode) == 0)
 #else
-#define FTH_ACCESS_P(name, mode)	(false)
+#define FTH_ACCESS_P(name, mode)	(0)
 #endif
 
 #define h_mode_info "\
@@ -460,7 +460,7 @@ Raise SYSTEM-ERROR exception if fopen(3) fails on any of the two files."
 	fth_file_copy(fth_string_ref(s), fth_string_ref(d));
 }
 
-bool
+int
 fth_file_install(const char *src, const char *dst, mode_t mode)
 {
 	struct stat st_src, st_dst;
@@ -468,7 +468,7 @@ fth_file_install(const char *src, const char *dst, mode_t mode)
 	size_t size;
 
 	if (src == NULL || dst == NULL)
-		return (false);
+		return (0);
 	buf = file_scratch;
 	size = sizeof(file_scratch);
 	fth_strcpy(buf, size, dst);
@@ -482,9 +482,9 @@ fth_file_install(const char *src, const char *dst, mode_t mode)
 	     st_src.st_mtime > st_dst.st_mtime)) {
 		fth_file_copy(src, buf);
 		fth_file_chmod(buf, mode);
-		return (true);
+		return (1);
 	}
-	return (false);
+	return (0);
 }
 
 static void
@@ -505,7 +505,7 @@ If DST is a directory, install SRC to DST/SRC.  \
 Return #t if SRC could be installed, otherwise #f.  " h_mode_info
 	FTH s, d;
 	mode_t mode;
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	mode = (mode_t)ficlStackPopInteger(vm->dataStack);
@@ -637,7 +637,7 @@ If EXT is a string or a regexp, discard found EXT from basename NAME."
 		else
 			result = fbase;
 	} else {
-		FTH_ASSERT_ARGS(false, ext, FTH_ARG2,
+		FTH_ASSERT_ARGS(0, ext, FTH_ARG2,
 		    "a string, regexp, #f or nil");
 		/* NOTREACHED */
 		return;
@@ -907,7 +907,7 @@ Set read-only variable EXIT-STATUS and return #t for success, #f otherwise.  \
 In the latter case you can check EXIT-STATUS.\n\
 See also file-shell and exit-status."
 	FTH fs;
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
@@ -1005,7 +1005,7 @@ See also open-pipe, open-file, close-file."
 static void								\
 ficl_file_ ## Name ## _p(ficlVm *vm)					\
 {									\
-	bool flag;							\
+	int		flag;						\
 									\
 	FTH_STACK_CHECK(vm, 1, 1);					\
 	flag = fth_file_ ## Name ## _p(pop_cstring(vm));		\
@@ -1029,7 +1029,7 @@ fth_stat(const char *name, struct stat *buf)
 	return (buf->st_mode);
 }
 
-bool
+int
 fth_file_block_p(const char *name)
 {
 	struct stat buf;
@@ -1039,7 +1039,7 @@ fth_file_block_p(const char *name)
 
 MAKE_FILE_TEST_WORD(block, b, "is a block special file");
 
-bool
+int
 fth_file_character_p(const char *name)
 {
 	struct stat buf;
@@ -1049,7 +1049,7 @@ fth_file_character_p(const char *name)
 
 MAKE_FILE_TEST_WORD(character, c, "is a character special file");
 
-bool
+int
 fth_file_directory_p(const char *name)
 {
 	struct stat buf;
@@ -1059,16 +1059,16 @@ fth_file_directory_p(const char *name)
 
 MAKE_FILE_TEST_WORD(directory, d, "is a directory");
 
-bool
+int
 fth_file_exists_p(const char *name)
 {
-	bool flag;
+	int flag;
 	int old_errno;
 
-	flag = false;
+	flag = 0;
 	old_errno = errno;
 	if (name != NULL && *name != '\0' && FTH_ACCESS_P(name, F_OK))
-		flag = true;
+		flag = 1;
 	errno = old_errno;
 	return (flag);
 }
@@ -1079,14 +1079,14 @@ ficl_file_exists_p(ficlVm *vm)
 #define h_file_exists_p "( name -- f )  test if file exists\n\
 \"abc\" file-exists? => #t|#f\n\
 Return #t if NAME is an existing file, otherwise #f."
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	flag = fth_file_exists_p(pop_cstring(vm));
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
-bool
+int
 fth_file_fifo_p(const char *name)
 {
 	struct stat buf;
@@ -1096,11 +1096,11 @@ fth_file_fifo_p(const char *name)
 
 MAKE_FILE_TEST_WORD(fifo, p, "is a named pipe");
 
-bool
+int
 fth_file_symlink_p(const char *name)
 {
 #if defined(_WIN32)
-	return (false);
+	return (0);
 #else
 	struct stat buf;
 
@@ -1110,11 +1110,11 @@ fth_file_symlink_p(const char *name)
 
 MAKE_FILE_TEST_WORD(symlink, L, "is a symbolic link");
 
-bool
+int
 fth_file_socket_p(const char *name)
 {
 #if !defined(HAVE_SYS_SOCKET_H)
-	return (false);
+	return (0);
 #else
 	struct stat buf;
 
@@ -1124,7 +1124,7 @@ fth_file_socket_p(const char *name)
 
 MAKE_FILE_TEST_WORD(socket, S, "is a socket");
 
-bool
+int
 fth_file_executable_p(const char *name)
 {
 #if defined(HAVE_GETEUID) && defined(HAVE_GETEGID)
@@ -1133,23 +1133,23 @@ fth_file_executable_p(const char *name)
 	if (fth_stat(name, &buf)) {
 #if defined(S_IXUSR)
 		if (buf.st_uid == geteuid())
-			return ((bool) (buf.st_mode & S_IXUSR));
+			return (buf.st_mode & S_IXUSR);
 #endif
 #if defined(S_IXGRP)
 		if (buf.st_gid == getegid())
-			return ((bool) (buf.st_mode & S_IXGRP));
+			return (buf.st_mode & S_IXGRP);
 #endif
 #if defined(S_IXOTH)
-		return ((bool) (buf.st_mode & S_IXOTH));
+		return (buf.st_mode & S_IXOTH);
 #endif
 	}
 #endif				/* HAVE_GETEUID */
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(executable, x, "is an executable file");
 
-bool
+int
 fth_file_readable_p(const char *name)
 {
 #if defined(HAVE_GETEUID) && defined(HAVE_GETEGID)
@@ -1158,50 +1158,50 @@ fth_file_readable_p(const char *name)
 	if (fth_stat(name, &buf)) {
 #if defined(S_IRUSR)
 		if (buf.st_uid == geteuid())
-			return ((bool) (buf.st_mode & S_IRUSR));
+			return (buf.st_mode & S_IRUSR);
 #endif
 #if defined(S_IRGRP)
 		if (buf.st_gid == getegid())
-			return ((bool) (buf.st_mode & S_IRGRP));
+			return (buf.st_mode & S_IRGRP);
 #endif
 #if defined(S_IROTH)
-		return ((bool) (buf.st_mode & S_IROTH));
+		return (buf.st_mode & S_IROTH);
 #endif
 	}
 #endif				/* HAVE_GETEUID */
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(readable, r, "is a readable file");
 
-bool
+int
 fth_file_writable_p(const char *name)
 {
 #if !defined(HAVE_GETEUID) || !defined(HAVE_GETEGID)
-	return (false);
+	return (0);
 #else				/* !HAVE_GETEUID */
 	struct stat buf;
 
 	if (fth_stat(name, &buf)) {
 #if defined(S_IWUSR)
 		if (buf.st_uid == geteuid())
-			return ((bool) (buf.st_mode & S_IWUSR));
+			return (buf.st_mode & S_IWUSR);
 #endif
 #if defined(S_IWGRP)
 		if (buf.st_gid == getegid())
-			return ((bool) (buf.st_mode & S_IWGRP));
+			return (buf.st_mode & S_IWGRP);
 #endif
 #if defined(S_IWOTH)
-		return ((bool) (buf.st_mode & S_IWOTH));
+		return (buf.st_mode & S_IWOTH);
 #endif
 	}
 #endif				/* !HAVE_GETEUID */
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(writable, w, "is a writable file");
 
-bool
+int
 fth_file_owned_p(const char *name)
 {
 #if defined(HAVE_GETEUID)
@@ -1210,12 +1210,12 @@ fth_file_owned_p(const char *name)
 	if (fth_stat(name, &buf))
 		return (buf.st_uid == geteuid());
 #endif
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(owned, O, "matches effective uid");
 
-bool
+int
 fth_file_grpowned_p(const char *name)
 {
 #if defined(HAVE_GETEUID)
@@ -1224,61 +1224,61 @@ fth_file_grpowned_p(const char *name)
 	if (fth_stat(name, &buf))
 		return (buf.st_gid == geteuid());
 #endif
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(grpowned, G, "matches effective gid");
 
-bool
+int
 fth_file_setuid_p(const char *name)
 {
 #if defined(S_ISUID)
 	struct stat buf;
 
 	if (fth_stat(name, &buf))
-		return ((bool) (buf.st_mode & S_ISUID));
+		return (buf.st_mode & S_ISUID);
 #endif
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(setuid, u, "has set uid bit");
 
-bool
+int
 fth_file_setgid_p(const char *name)
 {
 #if defined(S_ISGID)
 	struct stat buf;
 
 	if (fth_stat(name, &buf))
-		return ((bool) (buf.st_mode & S_ISGID));
+		return (buf.st_mode & S_ISGID);
 #endif
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(setgid, g, "has set gid bit");
 
-bool
+int
 fth_file_sticky_p(const char *name)
 {
 #if defined(S_ISVTX)
 	struct stat buf;
 
 	if (fth_stat(name, &buf))
-		return ((bool) (buf.st_mode & S_ISVTX));
+		return (buf.st_mode & S_ISVTX);
 #endif
-	return (false);
+	return (0);
 }
 
 MAKE_FILE_TEST_WORD(sticky, k, "has set sticky bit");
 
-bool
+int
 fth_file_zero_p(const char *name)
 {
 	struct stat buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_size == 0);
-	return (false);
+	return (0);
 }
 
 static void
@@ -1287,7 +1287,7 @@ ficl_file_zero_p(ficlVm *vm)
 #define h_file_zero_p "( name -- f )  test if file length is zero\n\
 \"abc\" file-zero?\n\
 Return #t if file NAME length is zero, otherwise #f."
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	flag = fth_file_zero_p(pop_cstring(vm));

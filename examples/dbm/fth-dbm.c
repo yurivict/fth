@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2012-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-dbm.c	1.15 1/22/14
+ * @(#)fth-dbm.c	1.16 12/31/17
  *
  * Commentary:
  *
@@ -70,7 +70,7 @@
  */
 
 #if !defined(lint)
-const char dbm_sccsid[] = "@(#)fth-dbm.c	1.15 1/22/14";
+const char dbm_sccsid[] = "@(#)fth-dbm.c	1.16 12/31/17";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -94,7 +94,7 @@ static int	dbm_type;
 typedef struct {
 	ficlInteger	length;	/* key-data pairs */
 	DBM            *data;	/* DBM database */
-	bool		closed;	/* flag if db is closed */
+	int		closed;	/* flag if db is closed */
 	FTH		filename;	/* db file name w/o suffix '.db' */
 	FTH		array;	/* db content as array of arrays for each ...
 				 * end-each */
@@ -136,63 +136,66 @@ typedef struct {
 #define dbm_strlen(Str)		strlen(Str)
 #endif
 
-static FTH	dbm_copy(FTH self);
-static FTH	dbm_dump(FTH self);
-static FTH	dbm_dump_each(datum key, datum val, FTH fs);
-static void	dbm_free(FTH self);
-static FTH	dbm_length(FTH self);
-static void	dbm_mark(FTH self);
-static FTH	dbm_ref(FTH self, FTH idx);
-static FTH	dbm_set(FTH self, FTH fkey, FTH fdata);
-static FTH	dbm_to_array(FTH self);
-static FTH	dbm_to_array_each(datum key, datum val, FTH array);
-static FTH	dbm_to_hash_each(datum key, datum val, FTH hash);
-static FTH	dbm_to_string(FTH self);
-static FTH	dbm_to_string_each(datum key, datum val, FTH fs);
-static void	ficl_begin_dbm(ficlVm *vm);
-static void	ficl_dbm_close(ficlVm *vm);
-static void	ficl_dbm_closed_p(ficlVm *vm);
-static void	ficl_dbm_delete(ficlVm *vm);
-static void	ficl_dbm_member_p(ficlVm *vm);
-static void	ficl_dbm_name(ficlVm *vm);
-static void	ficl_dbm_p(ficlVm *vm);
-static void	ficl_dbm_print(ficlVm *vm);
-static void	ficl_dbm_ref(ficlVm *vm);
-static void	ficl_dbm_set(ficlVm *vm);
-static void	ficl_dbm_to_array(ficlVm *vm);
-static void	ficl_dbm_to_hash(ficlVm *vm);
-static void	ficl_hash_to_dbm(ficlVm *vm);
-static void	ficl_make_dbm(ficlVm *vm);
-static void	ficl_values_to_dbm(ficlVm *vm);
-static FTH	fth_dbm_each(FTH db,
-		    FTH (*func) (datum key, datum val, FTH data), FTH data);
-static FTH	hash_to_dbm_each(FTH key, FTH val, FTH db);
-static FTH	make_dbm(FTH name);
-void		Init_dbm(void);
+static FTH 	dbm_copy(FTH);
+static FTH 	dbm_dump(FTH);
+static FTH 	dbm_dump_each(datum, datum, FTH);
+static void 	dbm_free(FTH);
+static FTH 	dbm_length(FTH);
+static void 	dbm_mark(FTH);
+static FTH 	dbm_ref(FTH, FTH);
+static FTH 	dbm_set(FTH, FTH, FTH);
+static FTH 	dbm_to_array(FTH);
+static FTH 	dbm_to_array_each(datum, datum, FTH);
+static FTH 	dbm_to_hash_each(datum, datum, FTH);
+static FTH 	dbm_to_string(FTH);
+static FTH 	dbm_to_string_each(datum, datum, FTH);
+static void 	ficl_begin_dbm(ficlVm *);
+static void 	ficl_dbm_close(ficlVm *);
+static void 	ficl_dbm_closed_p(ficlVm *);
+static void 	ficl_dbm_delete(ficlVm *);
+static void 	ficl_dbm_member_p(ficlVm *);
+static void 	ficl_dbm_name(ficlVm *);
+static void 	ficl_dbm_p(ficlVm *);
+static void 	ficl_dbm_print(ficlVm *);
+static void 	ficl_dbm_ref(ficlVm *);
+static void 	ficl_dbm_set(ficlVm *);
+static void 	ficl_dbm_to_array(ficlVm *);
+static void 	ficl_dbm_to_hash(ficlVm *);
+static void 	ficl_hash_to_dbm(ficlVm *);
+static void 	ficl_make_dbm(ficlVm *);
+static void 	ficl_values_to_dbm(ficlVm *);
+static FTH 	fth_dbm_each(FTH, FTH (*) (datum, datum, FTH), FTH);
+static FTH 	hash_to_dbm_each(FTH, FTH, FTH);
+static FTH 	make_dbm(FTH);
+void 		Init_dbm (void);
 
 static FTH
 make_dbm(FTH name)
 {
-	DBM *dbm;
-	FDbm *db;
-	datum k;
-	char *s;
+	DBM            *dbm;
+	FDbm           *db;
+	datum 		k;
+	char           *s;
 
 	s = fth_string_ref(name);
 	dbm = dbm_open(s, O_RDWR | O_CREAT, 0660);
+
 	if (dbm == NULL) {
 		dbm = dbm_open(s, O_RDONLY, 0660);
 		if (dbm == NULL)
 			FTH_DBM_THROW_ERROR(dbm);
 	}
+
 	db = FTH_MALLOC(sizeof(FDbm));
 	db->length = 0;
 	db->data = dbm;
-	db->closed = false;
+	db->closed = 0;
 	db->filename = name;
 	db->array = FTH_FALSE;
+
 	for (k = dbm_firstkey(dbm); k.dptr != NULL; k = dbm_nextkey(dbm))
 		db->length++;
+
 	return (fth_make_instance(dbm_tag, db));
 }
 
@@ -204,15 +207,17 @@ fth_dbm_each(FTH db,
     FTH (*func) (datum key, datum val, FTH data),
     FTH data)
 {
-	DBM *d;
-	datum k, v;
+	DBM            *d;
+	datum 		k, v;
 
 	FTH_ASSERT_ARGS(FTH_DBM_NOT_CLOSED_P(db), db, FTH_ARG1, "open dbm");
 	d = FTH_DBM_DATA(db);
+
 	for (k = dbm_firstkey(d); k.dptr != NULL; k = dbm_nextkey(d)) {
 		v = dbm_fetch(d, k);
 		data = (*func) (k, v, data);
 	}
+
 	return (data);
 }
 
@@ -220,8 +225,8 @@ static FTH
 dbm_to_string_each(datum k, datum v, FTH fs)
 {
 	return (fth_string_sformat(fs, " \"%.*s\" => \"%.*s\" ",
-	    k.dsize, k.dptr,
-	    v.dsize, v.dptr));
+		k.dsize, k.dptr,
+		v.dsize, v.dptr));
 }
 
 /*
@@ -230,13 +235,16 @@ dbm_to_string_each(datum k, datum v, FTH fs)
 static FTH
 dbm_to_string(FTH self)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = fth_make_string("dbm{");
+
 	if (FTH_DBM_CLOSED_P(self))
 		return (fth_string_scat(fs, " closed "));
+
 	if (FTH_DBM_LENGTH(self) > 0)
 		fth_dbm_each(self, dbm_to_string_each, fs);
+
 	return (fth_string_scat(fs, "}"));
 }
 
@@ -244,8 +252,8 @@ static FTH
 dbm_dump_each(datum k, datum v, FTH fs)
 {
 	return (fth_string_sformat(fs, " \"%.*s\" \"%.*s\" ",
-	    k.dsize, k.dptr,
-	    v.dsize, v.dptr));
+		k.dsize, k.dptr,
+		v.dsize, v.dptr));
 }
 
 /*
@@ -254,21 +262,23 @@ dbm_dump_each(datum k, datum v, FTH fs)
 static FTH
 dbm_dump(FTH self)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = fth_make_string_format("\"%S\" dbm{", FTH_DBM_FILENAME(self));
+
 	if (FTH_DBM_LENGTH(self) > 0)
 		fth_dbm_each(self, dbm_dump_each, fs);
+
 	return (fth_string_scat(fs, "}"));
 }
 
 static FTH
 dbm_to_array_each(datum k, datum v, FTH array)
 {
-	FTH fsk, fsv;
+	FTH 		fsk, fsv;
 
-	fsk = fth_make_string_len(k.dptr, (ficlInteger)k.dsize);
-	fsv = fth_make_string_len(v.dptr, (ficlInteger)v.dsize);
+	fsk = fth_make_string_len(k.dptr, (ficlInteger) k.dsize);
+	fsv = fth_make_string_len(v.dptr, (ficlInteger) v.dsize);
 	return (fth_array_push(array, FTH_LIST_2(fsk, fsv)));
 }
 
@@ -278,11 +288,12 @@ dbm_to_array_each(datum k, datum v, FTH array)
 static FTH
 dbm_to_array(FTH self)
 {
-	FTH array;
+	FTH 		array;
 
 	array = FTH_DBM_ARRAY(self);
+
 	if (FTH_FALSE_P(array) || FTH_INSTANCE_CHANGED_P(self)) {
-		FTH a;
+		FTH 		a;
 
 		a = fth_make_empty_array();
 		array = fth_dbm_each(self, dbm_to_array_each, a);
@@ -291,7 +302,7 @@ dbm_to_array(FTH self)
 	return (array);
 }
 
-static int	copy_number;
+static int 	copy_number;
 
 /*
  * dbm object-copy => dbm-copy with dbm-filename-0x
@@ -299,19 +310,22 @@ static int	copy_number;
 static FTH
 dbm_copy(FTH self)
 {
-	FTH fs, nfs, copy;
-	DBM *d;
-	datum k, v;
+	FTH 		fs, nfs, copy;
+	DBM            *d;
+	datum 		k, v;
 
 	fs = FTH_DBM_FILENAME(self);
 	nfs = fth_make_string_format("%S-%02d", fs, ++copy_number);
 	copy = make_dbm(nfs);
 	d = FTH_DBM_DATA(self);
+
 	for (k = dbm_firstkey(d); k.dptr != NULL; k = dbm_nextkey(d)) {
 		v = dbm_fetch(d, k);
+
 		if (dbm_store(FTH_DBM_DATA(copy), k, v, DBM_REPLACE) == -1)
 			FTH_DBM_THROW_ERROR(FTH_DBM_DATA(copy));
 	}
+
 	return (copy);
 }
 
@@ -328,17 +342,20 @@ dbm_ref(FTH self, FTH idx)
 static FTH
 dbm_set(FTH self, FTH fkey, FTH fdata)
 {
-	datum k, v, f;
+	datum 		k, v, f;
 
 	k.dptr = fth_to_c_string(fkey);
 	k.dsize = dbm_strlen(k.dptr);
 	v.dptr = fth_to_c_string(fdata);
 	v.dsize = dbm_strlen(v.dptr);
 	f = dbm_fetch(FTH_DBM_DATA(self), k);
+
 	if (f.dptr == NULL)
 		FTH_DBM_LENGTH(self)++;
+
 	if (dbm_store(FTH_DBM_DATA(self), k, v, DBM_REPLACE) == -1)
 		FTH_DBM_THROW_ERROR(FTH_DBM_DATA(self));
+
 	FTH_INSTANCE_CHANGED(self);
 	return (self);
 }
@@ -364,8 +381,10 @@ dbm_free(FTH self)
 {
 	if (FTH_DBM_OBJECT(self) == NULL)
 		return;
+
 	if (!FTH_DBM_CLOSED_P(self))
 		dbm_close(FTH_DBM_DATA(self));
+
 	FTH_FREE(FTH_DBM_OBJECT(self));
 }
 
@@ -376,7 +395,7 @@ ficl_dbm_p(ficlVm *vm)
 nil dbm? => #f\n\
 dbm dbm? => #t\n\
 Return #t if OBJ is a dbm object, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -389,7 +408,7 @@ ficl_dbm_name(ficlVm *vm)
 #define h_dbm_name "( dbm -- name )  return file name of dbm\n\
 dbm dbm-name => \"dbm-filename\"\n\
 Return file name of DBM object."
-	FTH db;
+	FTH 		db;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	db = fth_pop_ficl_cell(vm);
@@ -403,7 +422,7 @@ ficl_dbm_print(ficlVm *vm)
 #define h_dbm_print "( dbm -- )  print dbm\n\
 dbm .dbm\n\
 Print DBM object to current output."
-	FTH db;
+	FTH 		db;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	db = fth_pop_ficl_cell(vm);
@@ -417,7 +436,7 @@ ficl_make_dbm(ficlVm *vm)
 #define h_make_dbm "( fname -- dbm )  create new dbm\n\
 \"dbm-name\" make-dbm value dbm\n\
 Create FNAME as new database."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -431,22 +450,26 @@ ficl_values_to_dbm(ficlVm *vm)
 #define h_values_to_dbm "( key-vals len name -- dbm )  create dbm\n\
 'foo 0  2 \"test-db\" >dbm => dbm{ \"'foo\" => \"0\" }\n\
 Return a new dbm with LEN/2 key-data pairs found on stack."
-	FTH key, val, fs, db;
-	ficlInteger i, len;
+	FTH 		key, val, fs, db;
+	ficlInteger 	i, len;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	fs = fth_pop_ficl_cell(vm);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "negative");
+
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG2, "a string");
 	FTH_STACK_CHECK(vm, len, 1);
 	db = make_dbm(fs);
+
 	for (i = 0; i < len; i += 2) {
 		val = fth_pop_ficl_cell(vm);
 		key = fth_pop_ficl_cell(vm);
 		dbm_set(db, key, val);
 	}
+
 	fth_push_ficl_cell(vm, db);
 }
 
@@ -456,14 +479,16 @@ ficl_dbm_close(ficlVm *vm)
 #define h_dbm_close "( dbm -- )  close dbm\n\
 dbm dbm-close\n\
 Close DBM database."
-	FTH db;
+	FTH 		db;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	db = fth_pop_ficl_cell(vm);
 	FTH_ASSERT_ARGS(FTH_DBM_P(db), db, FTH_ARG1, "a dbm");
+
 	if (!FTH_DBM_CLOSED_P(db))
 		dbm_close(FTH_DBM_DATA(db));
-	FTH_DBM_CLOSED_P(db) = true;
+
+	FTH_DBM_CLOSED_P(db) = 1;
 }
 
 static void
@@ -472,7 +497,7 @@ ficl_dbm_closed_p(ficlVm *vm)
 #define h_dbm_closed_p "( dbm -- f )  test if dbm is closed\n\
 dbm dbm-closed? => flag\n\
 Return #t if DBM is closed, otherwise #f."
-	FTH db;
+	FTH 		db;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	db = fth_pop_ficl_cell(vm);
@@ -487,8 +512,8 @@ ficl_dbm_ref(ficlVm *vm)
 dbm 'foo dbm-ref => \"#( 0 1 2 )\"\n\
 dbm 'bar dbm-ref => #f\n\
 Return data associated with KEY or #f if no key was found."
-	datum k, v;
-	FTH db, fkey, fdata;
+	datum 		k, v;
+	FTH 		db, fkey, fdata;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	fkey = fth_pop_ficl_cell(vm);
@@ -498,8 +523,10 @@ Return data associated with KEY or #f if no key was found."
 	k.dsize = dbm_strlen(k.dptr);
 	fdata = FTH_FALSE;
 	v = dbm_fetch(FTH_DBM_DATA(db), k);
+
 	if (v.dptr != NULL)
-		fdata = fth_make_string_len(v.dptr, (ficlInteger)v.dsize);
+		fdata = fth_make_string_len(v.dptr, (ficlInteger) v.dsize);
+
 	fth_push_ficl_cell(vm, fdata);
 }
 
@@ -509,7 +536,7 @@ ficl_dbm_set(ficlVm *vm)
 #define h_dbm_set "( dbm key data -- )  set KEY to DATA\n\
 dbm 'foo #( 0 1 2 ) dbm-set!\n\
 Set KEY-DATA pair."
-	FTH db, fkey, fdata;
+	FTH 		db, fkey, fdata;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	fdata = fth_pop_ficl_cell(vm);
@@ -527,8 +554,8 @@ dbm 'foo dbm-delete => \"#( 0 1 2 )\"\n\
 dbm 'bar dbm-delete => #f\n\
 Delete KEY and associated data from DBM.  \
 If KEY exists, return associated data, otherwise #f."
-	FTH db, fkey, fdata;
-	datum k, v;
+	FTH 		db, fkey, fdata;
+	datum 		k, v;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	fkey = fth_pop_ficl_cell(vm);
@@ -538,10 +565,13 @@ If KEY exists, return associated data, otherwise #f."
 	k.dsize = dbm_strlen(k.dptr);
 	fdata = FTH_FALSE;
 	v = dbm_fetch(FTH_DBM_DATA(db), k);
+
 	if (v.dptr != NULL)
-		fdata = fth_make_string_len(v.dptr, (ficlInteger)v.dsize);
+		fdata = fth_make_string_len(v.dptr, (ficlInteger) v.dsize);
+
 	if (dbm_delete(FTH_DBM_DATA(db), k) == -1)
 		FTH_DBM_THROW_ERROR(FTH_DBM_DATA(db));
+
 	fth_push_ficl_cell(vm, fdata);
 }
 
@@ -552,8 +582,8 @@ ficl_dbm_member_p(ficlVm *vm)
 dbm 'foo dbm-member? => #t\n\
 dbm 'bar dbm-member? => #f\n\
 If KEY exists in DBM, return #t, otherwise #f."
-	FTH db, fkey;
-	datum k, v;
+	FTH 		db, fkey;
+	datum 		k, v;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	fkey = fth_pop_ficl_cell(vm);
@@ -571,7 +601,7 @@ ficl_dbm_to_array(ficlVm *vm)
 #define h_dbm_to_array "( dbm -- ary )  return DBM as array\n\
 dbm dbm->array => #( #( \"'foo\" \"#( 0 1 2 )\" ) )\n\
 Return an array of #( key data ) arrays."
-	FTH db;
+	FTH 		db;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	db = fth_pop_ficl_cell(vm);
@@ -582,10 +612,10 @@ Return an array of #( key data ) arrays."
 static FTH
 dbm_to_hash_each(datum k, datum v, FTH hash)
 {
-	FTH fsk, fsv;
+	FTH 		fsk, fsv;
 
-	fsk = fth_make_string_len(k.dptr, (ficlInteger)k.dsize);
-	fsv = fth_make_string_len(v.dptr, (ficlInteger)v.dsize);
+	fsk = fth_make_string_len(k.dptr, (ficlInteger) k.dsize);
+	fsv = fth_make_string_len(v.dptr, (ficlInteger) v.dsize);
 	fth_hash_set(hash, fsk, fsv);
 	return (hash);
 }
@@ -596,7 +626,7 @@ ficl_dbm_to_hash(ficlVm *vm)
 #define h_dbm_to_hash "( dbm -- hash )  return DBM as hash\n\
 dbm dbm->hash => #{ \"'foo\" => \"#( 0 1 2 )\" }\n\
 Return content of DBM as a hash."
-	FTH db, d;
+	FTH 		db, d;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	db = fth_pop_ficl_cell(vm);
@@ -618,7 +648,7 @@ ficl_hash_to_dbm(ficlVm *vm)
 #{ 'foo 10 'bar 20 } \"test-db\" hash->dbm =>\n\
   dbm{ \"'foo\" => \"10\"  \"'bar\" => \"20\" }\n\
 Create FNAME as new database with content of HASH."
-	FTH fs, hs, d;
+	FTH 		fs, hs, d;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -644,8 +674,10 @@ void
 Init_dbm(void)
 {
 	FTH_DBM_ERROR;
+
 	/* filename suffix number */
 	copy_number = 0;
+
 	/* init dbm object type and add 'dbm' to *features* */
 	dbm_tag = fth_make_object_type(FTH_STR_DBM);
 	dbm_type = FTH_OBJECT_TYPE(dbm_tag);
@@ -657,9 +689,11 @@ Init_dbm(void)
 	fth_set_object_length(dbm_tag, dbm_length);
 	fth_set_object_mark(dbm_tag, dbm_mark);
 	fth_set_object_free(dbm_tag, dbm_free);
-	fth_set_object_apply(dbm_tag, (void *)dbm_ref, 1, 0, 0);
+	fth_set_object_apply(dbm_tag, (void *) dbm_ref, 1, 0, 0);
+
 	/* dbm exception */
 	fth_make_exception(STR_DBM_ERROR, "DBM error");
+
 	/* dbm words */
 	FTH_PRI1("dbm?", ficl_dbm_p, h_dbm_p);
 	FTH_PRI1("dbm-name", ficl_dbm_name, h_dbm_name);
@@ -682,7 +716,7 @@ Init_dbm(void)
 	FTH_PRI1("dbm{", ficl_begin_dbm, h_begin_dbm);
 }
 
-#endif				/* HAVE_DBM */
+#endif		/* HAVE_DBM */
 
 /*
  * fth-dbm.c ends here

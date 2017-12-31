@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.4 10/6/17
+# @(#)SConstruct	1.5 12/31/17
 
 #
 # scons -h
@@ -544,8 +544,6 @@ def fth_conf_test(env):
 		'ctanh',
 		'strncasecmp']:
 		fth_conf_h.CheckFunc(cf)
-	if fth_conf_h.CheckHeader('stdbool.h'):
-		fth_conf_h.CheckType('_Bool', '#include <stdbool.h>')
 	e = fth_conf_h.Finish()
 	if e:
 		env = e

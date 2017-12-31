@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.172 12/30/17
+ * @(#)proc.c	1.173 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -104,8 +104,8 @@ static char    *get_help(FTH obj, char *name);
 static ficlString get_string_from_tib(ficlVm *vm, int pos);
 static char    *help_formatted(char *str, int line_length);
 static FTH 	local_vars_cb(FTH key, FTH value, FTH data);
-static ficlWord *make_procedure(const char *name, void *func, bool void_p,
-    int req, int opt, bool rest, const char *doc);
+static ficlWord *make_procedure(const char *name, void *func, int void_p,
+    int req, int opt, int rest, const char *doc);
 static void 	word_documentation(ficlVm *vm, ficlWord *word);
 
 /* === PROC === */
@@ -172,11 +172,11 @@ xt?                 ( obj -- f )"
  * fth_word_defined_p(x);			=> true
  * fth_word_defined_p(FTH_FALSE);		=> false
  */
-bool
+int
 fth_word_defined_p(FTH obj)
 {
 	if (obj == 0 || IMMEDIATE_P(obj))
-		return (false);
+		return (0);
 	return (ficlDictionaryIncludes(FTH_FICL_DICT(), FICL_WORD_REF(obj)));
 }
 
@@ -194,7 +194,7 @@ fth_word_defined_p(FTH obj)
  * fth_word_type_p(x, FW_WORD);			=> true
  * fth_word_type_p(x, FW_KEYWORD);		=> false
  */
-bool
+int
 fth_word_type_p(FTH obj, int type)
 {
 	return (FICL_WORD_DEFINED_P(obj) && FICL_WORD_TYPE(obj) == type);
@@ -224,7 +224,7 @@ lambda: <{ -- }> ; thunk? => #t\n\
 Return #t if OBJ is a proc object with arity #( 0 0 #f ), otherwise #f.\n\
 See also proc?, xt?, word?."
 	FTH 		obj;
-	bool 		flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -268,8 +268,8 @@ See also proc?, thunk?, xt?."
 }
 
 static ficlWord *
-make_procedure(const char *name, void *func, bool void_p,
-    int req, int opt, bool rest, const char *doc)
+make_procedure(const char *name, void *func, int void_p,
+    int req, int opt, int rest, const char *doc)
 {
 	ficlWord       *word;
 
@@ -297,23 +297,23 @@ make_procedure(const char *name, void *func, bool void_p,
 }
 
 FTH
-fth_make_proc(ficlWord *word, int req, int opt, bool rest)
+fth_make_proc(ficlWord *word, int req, int opt, int rest)
 {
 	if (word != NULL && FICL_WORD_P(word)) {
 		ficlWord       *prc;
 		char           *name;
 
 		name = FICL_WORD_NAME(word);
-		prc = make_procedure(name, word, false, req, opt, rest, NULL);
+		prc = make_procedure(name, word, 0, req, opt, rest, NULL);
 		return ((FTH) prc);
 	}
-	FTH_ASSERT_ARGS(false, (FTH) word, FTH_ARG1, "an existing ficl word");
+	FTH_ASSERT_ARGS(0, (FTH) word, FTH_ARG1, "an existing ficl word");
 	return (FTH_FALSE);
 }
 
 FTH
 fth_make_proc_from_func(const char *name,
-    FTH (*func) (), bool void_p, int req, int opt, bool rest)
+    FTH (*func) (), int void_p, int req, int opt, int rest)
 {
 	ficlWord       *prc;
 
@@ -323,7 +323,7 @@ fth_make_proc_from_func(const char *name,
 
 /*
  * Return new ficlWord NAME tied to C function FUNC with REQ required
- * arguments, OPT optional arguments and REST (true) or no REST (false)
+ * arguments, OPT optional arguments and REST (1) or no REST (0)
  * arguments with optional documentation string DOC.  FUNC takes zero
  * or more FTH objects and returns a FTH object.
  */
@@ -331,20 +331,20 @@ ficlWord       *
 fth_define_procedure(const char *name,
     FTH (*func) (), int req, int opt, int rest, const char *doc)
 {
-	return (make_procedure(name, (void *) func, false, req, opt, rest, doc));
+	return (make_procedure(name, (void *) func, 0, req, opt, rest, doc));
 }
 
 /*
  * Return new ficlWord NAME tied to C function FUNC with REQ required
- * arguments, OPT optional arguments and REST (true) or no REST (false)
+ * arguments, OPT optional arguments and REST (1) or no REST (0)
  * arguments with optional documentation string DOC.  FUNC takes zero
  * or more FTH objects and doesn't return any (void).
  */
 ficlWord       *
 fth_define_void_procedure(const char *name,
-    void (*f) (), int req, int opt, int rest, const char *d)
+    void (*f) (), int req, int opt, int rest, const char *doc)
 {
-	return (make_procedure(name, (void *) f, true, req, opt, rest, d));
+	return (make_procedure(name, (void *) f, 1, req, opt, rest, doc));
 }
 
 static void
@@ -359,14 +359,13 @@ Return new proc object.  \
 ARITY can be an integer or an array of length 3, #( req opt rest )."
 	FTH 		arity, prc;
 	ficlWord       *word;
-	int 		req, opt;
-	bool 		rest;
+	int 		req, opt, rest;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	arity = fth_pop_ficl_cell(vm);
 	word = ficlStackPopPointer(vm->dataStack);
 	opt = 0;
-	rest = false;
+	rest = 0;
 	if (fth_array_length(arity) == 3) {
 		req = FIX_TO_INT32(fth_array_ref(arity, 0L));
 		opt = FIX_TO_INT32(fth_array_ref(arity, 1L));
@@ -429,7 +428,7 @@ or #f if not a proc object."
 		    BOOL_TO_FTH(FICL_WORD_REST(proc)));
 		ficlStackPushFTH(vm->dataStack, ary);
 	} else
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 /*
@@ -524,7 +523,7 @@ Return the actual word (the execution token xt) of PRC."
 	if (FICL_WORD_P(proc))
 		ficlStackPushPointer(vm->dataStack, FICL_WORD_REF(proc));
 	else
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 static FTH
@@ -685,17 +684,24 @@ fth_proc_call(FTH proc, const char *caller, int len,...)
 
 	if (!FTH_PROC_P(proc))
 		return (FTH_FALSE);
+
 	if (FICL_WORD_REQ(proc) > len)
 		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1,
-		    proc, len, 0, false, FICL_WORD_REQ(proc),
-		    FICL_WORD_OPT(proc), FICL_WORD_REST(proc));
+		    proc, len, 0, 0,
+		    FICL_WORD_REQ(proc),
+		    FICL_WORD_OPT(proc),
+		    FICL_WORD_REST(proc));
+
 	if (len > FICL_WORD_LENGTH(proc))
 		len = FICL_WORD_LENGTH(proc);
+
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
 	va_start(list, len);
+
 	for (i = 0; i < len; i++)
 		fth_push_ficl_cell(vm, va_arg(list, FTH));
+
 	va_end(list);
 	return (execute_proc(vm, FICL_WORD_REF(proc), depth, caller));
 }
@@ -726,18 +732,26 @@ fth_proc_apply(FTH proc, FTH args, const char *caller)
 
 	if (proc == 0 || !FTH_PROC_P(proc))
 		return (FTH_FALSE);
+
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(args), args, FTH_ARG2, "an array");
 	len = (int) fth_array_length(args);
+
 	if (FICL_WORD_REQ(proc) > len)
 		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1,
-		    proc, len, 0, false, FICL_WORD_REQ(proc),
-		    FICL_WORD_OPT(proc), FICL_WORD_REST(proc));
+		    proc, len, 0, 0,
+		    FICL_WORD_REQ(proc),
+		    FICL_WORD_OPT(proc),
+		    FICL_WORD_REST(proc));
+
 	if (len > FICL_WORD_LENGTH(proc))
 		len = FICL_WORD_LENGTH(proc);
+
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
+
 	for (i = 0; i < len; i++)
 		fth_push_ficl_cell(vm, fth_array_fast_ref(args, i));
+
 	return (execute_proc(vm, FICL_WORD_REF(proc), depth, caller));
 }
 
@@ -763,7 +777,7 @@ raise BAD-ARITY exception."
 		proc = proc_or_xt;
 	else if (FTH_WORD_P(proc_or_xt))
 		proc = fth_make_proc(FICL_WORD_REF(proc_or_xt),
-		    (int) fth_array_length(args), 0, false);
+		    (int) fth_array_length(args), 0, 0);
 	else
 		proc = FTH_FALSE;
 	fth_push_ficl_cell(vm, fth_proc_apply(proc, args, RUNNING_WORD_VM(vm)));
@@ -1902,7 +1916,7 @@ See also <{."
 
 	smudge = ficlVmGetDictionary(vm)->smudge;
 	if (!FTH_PROC_P(smudge))
-		smudge = FICL_WORD_REF(fth_make_proc(smudge, 0, 0, false));
+		smudge = FICL_WORD_REF(fth_make_proc(smudge, 0, 0, 0));
 	if (FTH_FALSE_P(FICL_WORD_DOC(smudge)))
 		fth_word_doc_set(smudge, "( -- )");
 }
@@ -1960,13 +1974,13 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	ficlInteger 	i, len, req, opt, in_lst;
 	ficlUnsigned	u;
 	int 		keyslen, defslen;
-	bool 		key_p, opt_p;
+	int 		key_p, opt_p;
 	char           *buffer, *s;
 	FTH 		arg, arg1, arg2, keys, defs, args, fs;
 
 	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	req = opt = 0;
-	key_p = opt_p = false;
+	key_p = opt_p = 0;
 	dict = FTH_FICL_DICT();
 	word = dict->smudge;
 	keys = fth_make_empty_array();
@@ -2018,11 +2032,11 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	while (FTH_NOT_FALSE_P(arg = fth_array_shift(args))) {
 		s = fth_string_ref(arg);
 		if (s != NULL && strncmp(s, ":key", 4L) == 0) {
-			key_p = true;
+			key_p = 1;
 			break;
 		}
 		if (s != NULL && strncmp(s, ":optional", 9L) == 0) {
-			opt_p = true;
+			opt_p = 1;
 			break;
 		}
 		/*
@@ -2041,7 +2055,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 		while (FTH_NOT_FALSE_P(arg1 = fth_array_shift(args))) {
 			s = fth_string_ref(arg1);
 			if (s != NULL && strncmp(s, ":optional", 9L) == 0) {
-				opt_p = true;
+				opt_p = 1;
 				break;
 			}
 			/*
@@ -2226,7 +2240,7 @@ See also lambda:."
 	ficlStackPushPointer(vm->dataStack, colon_tag);
 	word = ficlDictionaryAppendWord(dict, s, code, flag);
 	vm->callback.system->localsCount = 0;
-	word->primitive_p = false;
+	word->primitive_p = 0;
 	word_documentation(vm, word);
 	fth_latest_xt = word;
 	ficl_init_locals(vm, dict);
@@ -2260,7 +2274,7 @@ See also `:'."
 	vm->callback.system->localsCount = 0;
 	ficlStackPushPointer(vm->dataStack, word);
 	ficlStackPushPointer(vm->dataStack, colon_tag);
-	word->primitive_p = false;
+	word->primitive_p = 0;
 	word_documentation(vm, word);
 	fth_latest_xt = word;
 	ficl_init_locals(vm, dict);
@@ -2295,7 +2309,7 @@ This word is compile only and can only be used in word definitions."
 	FICL_STRING_SET_LENGTH(name, 0);
 	FICL_STRING_SET_POINTER(name, NULL);
 	word = ficlDictionaryAppendWord(dict, name, code, flag);
-	word->primitive_p = false;
+	word->primitive_p = 0;
 	fth_latest_xt = word;
 	arity = (int) ficlStackPopInteger(vm->dataStack);
 	prc = fth_make_proc(word, arity, 0, 0);
@@ -2337,7 +2351,7 @@ See also proc-create."
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	name = fth_string_ref(fs);
 	word = ficlDictionaryAppendPrimitive(dict, name, code, flag);
-	word->primitive_p = false;
+	word->primitive_p = 0;
 	fth_latest_xt = word;
 	ficlVmDictionaryAllotCells(dict, 1);
 }
@@ -2463,7 +2477,7 @@ finish:
 }
 
 FTH
-proc_from_proc_or_xt(FTH proc_or_xt, int req, int opt, bool rest)
+proc_from_proc_or_xt(FTH proc_or_xt, int req, int opt, int rest)
 {
 	if (FTH_PROC_P(proc_or_xt)) {
 		if ((FICL_WORD_REQ(proc_or_xt) != req) ||
@@ -2569,7 +2583,7 @@ fth_word_dump(FTH obj)
  * Return true if NAME is defined in the dictionary, otherwise false.
  */
 
-bool
+int
 fth_defined_p(const char *name)
 {
 	return (name != NULL && FICL_NAME_DEFINED_P(name));

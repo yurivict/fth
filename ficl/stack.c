@@ -43,7 +43,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)stack.c	1.49 10/17/13
+ * @(#)stack.c	1.50 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -290,9 +290,9 @@ ficl2Unsigned ficlStackPop2Unsigned(ficlStack *stack)
   return ud;
 }
 
-bool ficlStackPopBoolean(ficlStack *stack)
+int ficlStackPopBoolean(ficlStack *stack)
 {
-  bool i = STACK_BOOL_REF(stack);
+  int i = STACK_BOOL_REF(stack);
 
   stack->top--;
   return i;
@@ -359,7 +359,7 @@ void ficlStackPush2Unsigned(ficlStack *stack, ficl2Unsigned ud)
     STACK_ULONG_SET(stack, ud);
 }
 
-void ficlStackPushBoolean(ficlStack *stack, bool b)
+void ficlStackPushBoolean(ficlStack *stack, int b)
 {
   ++stack->top;
   STACK_BOOL_SET(stack, b);

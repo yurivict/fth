@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.184 3/22/16
+dnl @(#)configure.ac	1.185 12/31/17
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -135,7 +135,6 @@ AC_CHECK_TOOL([LLC], [llc], [:])
 dnl
 dnl Check for header files.
 dnl
-AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h openssl/bn.h openssl/err.h])

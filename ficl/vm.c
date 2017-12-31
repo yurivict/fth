@@ -74,7 +74,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)vm.c	1.152 12/29/17
+ * @(#)vm.c	1.153 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1844,9 +1844,8 @@ MINUSROLL:
 		      FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF,
 		      FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF};
       FTH (*func)();
-      int  req, opt, length, depth;
-      bool rest;
-	    
+      int  req, opt, rest, length, depth;
+    
       FICL_FW_CHECK(fw);
       vm->runningWord = fw;
       req    = fw->req;
@@ -1955,9 +1954,8 @@ MINUSROLL:
       FTH args[10] = {FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF,
 		      FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF, FTH_UNDEF};
       void (*vfunc)();
-      int  req, opt, length, depth;
-      bool rest;
-	    
+      int  req, opt, rest, length, depth;
+
       FICL_FW_CHECK(fw);
       vm->runningWord = fw;
       req    = fw->req;
@@ -2523,7 +2521,7 @@ ficlVmThrowErrorVararg(ficlVm *vm, int exc, const char *fmt, va_list ap)
 		fth_string_sformat(fs, "%s in %s: ",
 		    ficl_ans_exc_name(exc), RUNNING_WORD_VM(vm));
 	}
-	fth_hit_error_p = false;
+	fth_hit_error_p = 0;
 	if (fmt != NULL) {
 		fth_string_vsformat(fs, fmt, ap);
 		va_end(ap);
@@ -2533,11 +2531,11 @@ ficlVmThrowErrorVararg(ficlVm *vm, int exc, const char *fmt, va_list ap)
 	fth_exception_last_message_set(ex, fs);
 	/* We don't come from fth-catch, do we? */
 	if (!vm->fth_catch_p) {
-		fth_hit_error_p = true;
+		fth_hit_error_p = 1;
 		if (fth_eval_p)
 			fth_errorf("\n");
 		fth_errorf("#<%S>\n", fs);
-		fth_show_backtrace(false);
+		fth_show_backtrace(0);
 		errno = 0;
 		fth_reset_loop_and_depth();
 		ficlVmReset(vm);
