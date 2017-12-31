@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/30 08:47:07
+\ Changed: 17/12/31 19:08:09
 \
-\ @(#)clm.fs	1.140 12/30/17
+\ @(#)clm.fs	1.141 12/31/17
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -344,7 +344,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/30"	value *clm-version*
+"fth 2017/12/31"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -572,11 +572,14 @@ hide
 	output mus-sound-framples { frms }
 	output mus-sound-chans { chans }
 	output mus-sound-srate { srate }
+	output mus-sound-sample-type mus-sample-type-name { st }
+	output mus-sound-header-type mus-header-type-name { ht }
+	output mus-sound-write-date { dt }
+	"%a %b %d %H:%M:%S %Z %Y" dt strftime { tm }
+	output mus-sound-comment { meta }
 	output chans srate .file
-	"  format: %s [%s]"
-	    #( output mus-sound-sample-type mus-sample-type-name
-	       output mus-sound-header-type mus-header-type-name ) clm-message
-	"  length: %.3f  (%d framples)" #( dur frms ) clm-message
+	"  format: %s [%s]"		#( st ht ) clm-message
+	"  length: %.3f  (%d framples)"	#( dur frms ) clm-message
 	timer timer? if
 		timer .timer
 		srate frms timer .timer-ratio
@@ -585,9 +588,9 @@ hide
 	reverb-file-name ?dup-if
 		"revamp" srate #f .maxamps
 	then
-	output mus-sound-comment { comm }
-	comm empty? unless
-		" comment: %s" #( comm ) clm-message
+	" written: %s"			#( tm ) clm-message
+	meta empty? unless
+		" comment: %s"		#( meta ) clm-message
 	then
 ;
 
