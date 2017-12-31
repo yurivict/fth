@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.134 12/3/14
+ * @(#)fth-lib.h	1.135 12/31/17
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -434,8 +434,8 @@ typedef struct FInstance {
 	FTH		values;
 	FTH		debug_hook;	/* ( inspect-string obj -- str ) */
 	ficlInteger	cycle;
-	bool		changed_p;
-	bool		extern_p;
+	int		changed_p;
+	int		extern_p;
 	union {
 		ficlInteger	i;
 		ficlUnsigned	u;
@@ -522,10 +522,8 @@ typedef struct FInstance {
 #define FTH_INSTANCE_PROPERTIES(Obj)	FTH_INSTANCE_REF(Obj)->properties
 #define FTH_INSTANCE_DEBUG_HOOK(Obj)	FTH_INSTANCE_REF(Obj)->debug_hook
 #define FTH_INSTANCE_CHANGED_P(Obj)	FTH_INSTANCE_REF(Obj)->changed_p
-#define FTH_INSTANCE_CHANGED(Obj)					\
-	(FTH_INSTANCE_REF(Obj)->changed_p = true)
-#define FTH_INSTANCE_CHANGED_CLR(Obj)					\
-	(FTH_INSTANCE_REF(Obj)->changed_p = false)
+#define FTH_INSTANCE_CHANGED(Obj)	(FTH_INSTANCE_REF(Obj)->changed_p = 1)
+#define FTH_INSTANCE_CHANGED_CLR(Obj)	(FTH_INSTANCE_REF(Obj)->changed_p = 0)
 
 /* === Word === */
 #define FICL_WORD_NAME_REF(Name)					\
@@ -539,18 +537,16 @@ typedef struct FInstance {
 #define FICL_WORD_PROPERTIES(Obj)	FICL_WORD_REF(Obj)->properties
 #define FICL_WORD_REQ(Obj)		FICL_WORD_REF(Obj)->req
 #define FICL_WORD_OPT(Obj)		FICL_WORD_REF(Obj)->opt
-#define FICL_WORD_REST(Obj)		((bool)FICL_WORD_REF(Obj)->rest)
+#define FICL_WORD_REST(Obj)		FICL_WORD_REF(Obj)->rest
 #define FICL_WORD_FUNC(Obj)		FICL_WORD_REF(Obj)->func
 #define FICL_WORD_VFUNC(Obj)		FICL_WORD_REF(Obj)->vfunc
 #define FICL_WORD_CODE(Obj)		FICL_WORD_REF(Obj)->code
 #define FICL_WORD_PARAM(Obj)		CELL_FTH_REF(FICL_WORD_REF(Obj)->param)
 
 /* return FTH string and FTH int */
-#define FTH_WORD_NAME(Obj)						\
-	fth_make_string_or_false(FICL_WORD_NAME(Obj))
+#define FTH_WORD_NAME(Obj)	fth_make_string_or_false(FICL_WORD_NAME(Obj))
 
-#define FTH_WORD_PARAM(Obj)						\
-	ficl_to_fth(FICL_WORD_PARAM(Obj))
+#define FTH_WORD_PARAM(Obj)	ficl_to_fth(FICL_WORD_PARAM(Obj))
 
 #define FTH_STACK_CHECK(Vm, Pop, Push) do {				\
 	ficlInteger _depth;						\
@@ -647,7 +643,7 @@ exception")
 #define fth_set_object_equal(Obj, Func)	fth_set_object_equal_p(Obj, Func)
 #define fth_uoff_t_p(Obj)		fth_ullong_p(Obj)
 
-#endif				/* _FTH_LIB_H_ */
+#endif		/* _FTH_LIB_H_ */
 
 /*
  * fth-lib.h ends here

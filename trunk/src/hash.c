@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	1.89 12/30/17
+ * @(#)hash.c	1.90 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -477,12 +477,12 @@ Print HASH object to current output."
 	fth_print(fth_string_ref(hs_to_string(obj)));
 }
 
-bool
+int
 fth_hash_equal_p(FTH obj1, FTH obj2)
 {
 	if (FTH_HASH_P(obj1) && FTH_HASH_P(obj2))
 		return (FTH_TO_BOOL(hs_equal_p(obj1, obj2)));
-	return (false);
+	return (0);
 }
 
 static void
@@ -606,7 +606,7 @@ and return key-value array or #f if not found."
 	return (FTH_FALSE);
 }
 
-bool
+int
 fth_hash_member_p(FTH hash, FTH key)
 {
 	if (FTH_HASH_P(hash) && FTH_HASH_LENGTH(hash) > 0) {
@@ -618,9 +618,9 @@ fth_hash_member_p(FTH hash, FTH key)
 		    entry != NULL;
 		    entry = entry->next)
 			if (entry->key && fth_object_equal_p(key, entry->key))
-				return (true);
+				return (1);
 	}
-	return (false);
+	return (0);
 }
 
 static void
@@ -762,7 +762,7 @@ See also hash-map."
 	FTH_STACK_CHECK(vm, 2, 0);
 	proc = fth_pop_ficl_cell(vm);
 	hash = fth_pop_ficl_cell(vm);
-	proc = proc_from_proc_or_xt(proc, 2, 0, false);
+	proc = proc_from_proc_or_xt(proc, 2, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2, "a proc");
 	fth_hash_each(hash, hs_each, proc);
 }
@@ -791,7 +791,7 @@ See also hash-each."
 	FTH_STACK_CHECK(vm, 2, 1);
 	proc = fth_pop_ficl_cell(vm);
 	hash = fth_pop_ficl_cell(vm);
-	proc = proc_from_proc_or_xt(proc, 2, 0, false);
+	proc = proc_from_proc_or_xt(proc, 2, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2, "a proc");
 	fth_push_ficl_cell(vm, fth_hash_map(hash, hs_map, proc));
 }

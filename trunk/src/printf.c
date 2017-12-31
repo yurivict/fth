@@ -56,7 +56,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)printf.c	1.22 12/27/17
+ * @(#)printf.c	1.23 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -581,11 +581,11 @@ fth_basic_printf(void *port, int type, const char *sstr)
 		return (0);
 	switch (type) {
 	case PORT_FICLOUT:
-		fth_print_p = true;
+		fth_print_p = 1;
 		(*fth_print_hook)((ficlVm *)port, str);
 		break;
 	case PORT_FICLERR:
-		fth_print_p = true;
+		fth_print_p = 1;
 		(*fth_error_hook)((ficlVm *)port, str);
 		break;
 	case PORT_FILE:
@@ -763,7 +763,7 @@ fth_port_vprintf(FTH port, const char *fmt, va_list ap)
 		len = fth_basic_vprintf((void *)port, PORT_IO, fmt, ap);
 		return (len);
 	}
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an io or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an io or #f");
 	return (-1);
 }
 

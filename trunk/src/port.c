@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)port.c	1.66 12/25/17
+ * @(#)port.c	1.67 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -305,7 +305,7 @@ nil port? => #f\n\
 Return #t if OBJ is an IO object or #f, otherwise #f.\n\
 See also port-input? and port-output?."
 	FTH 		obj;
-	bool 		flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -323,7 +323,7 @@ nil port-input? => #f\n\
 Return #t if OBJ is an input IO object or #f, otherwise #f.\n\
 See also port? and port-output?."
 	FTH 		obj;
-	bool 		flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -341,7 +341,7 @@ nil port-output? => #f\n\
 Return #t if OBJ is an output IO object or #f, otherwise #f.\n\
 See also port? and port-input?."
 	FTH 		obj;
-	bool 		flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -359,7 +359,7 @@ o1 port-close\n\
 o1 port-closed? => #t\n\
 Return #t if IO object is closed, otherwise #f."
 	FTH 		obj;
-	bool 		flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -474,7 +474,7 @@ fth_port_getc(FTH port)
 		port = ficlVmGetPortIn(FTH_FICL_VM());
 	if (FTH_IO_P(port))
 		return (fth_io_getc(port));
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an open IO object or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 	/* NOTREACHED */
 	return (-1);
 }
@@ -502,7 +502,7 @@ fth_port_gets(FTH port)
 		port = ficlVmGetPortIn(FTH_FICL_VM());
 	if (FTH_IO_P(port))
 		return (fth_io_read(port));
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an open IO object or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 	/* NOTREACHED */
 	return (NULL);
 }
@@ -529,7 +529,7 @@ fth_port_putc(FTH port, int c)
 		fth_io_putc(port, c);
 		return;
 	}
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an open IO object or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 }
 
 static void
@@ -564,7 +564,7 @@ fth_port_puts(FTH port, const char *str)
 		fth_io_write_and_flush(port, str);
 		return;
 	}
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an open IO object or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 }
 
 static void
@@ -614,7 +614,7 @@ fth_port_display(FTH port, FTH obj)
 		fth_io_write_and_flush(port, fth_to_c_string(obj));
 		return;
 	}
-	FTH_ASSERT_ARGS(false, port, FTH_ARG1, "an open IO object or #f");
+	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 }
 
 static void
@@ -804,7 +804,7 @@ with-error-to-port."
 	if (FTH_NIL_P(arg))
 		res = fth_io_read_line(io);
 	else {
-		proc = proc_from_proc_or_xt(arg, 1, 0, false);
+		proc = proc_from_proc_or_xt(arg, 1, 0, 0);
 		FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG1, "a proc");
 		res = fth_proc_call(proc, RUNNING_WORD(), 1, io);
 	}
@@ -847,7 +847,7 @@ with-error-to-port."
 	if (FTH_STRING_P(arg))
 		fth_io_write(io, fth_string_ref(arg));
 	else {
-		proc = proc_from_proc_or_xt(arg, 1, 0, false);
+		proc = proc_from_proc_or_xt(arg, 1, 0, 0);
 		FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG1, "a proc");
 		fth_proc_call(proc, RUNNING_WORD(), 1, io);
 	}
@@ -888,10 +888,10 @@ with-error-to-port."
 	if (FTH_NIL_P(arg))
 		res = fth_io_read_line(io);
 	else {
-		proc = proc_from_proc_or_xt(arg, 0, 0, false);
+		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 		if (!FTH_PROC_P(proc)) {
 			fth_io_close(fth_set_io_stdin(old_io));
-			FTH_ASSERT_ARGS(false, proc, FTH_ARG1, "a proc");
+			FTH_ASSERT_ARGS(0, proc, FTH_ARG1, "a proc");
 		}
 		res = fth_proc_call(proc, RUNNING_WORD(), 0);
 	}
@@ -936,10 +936,10 @@ with-error-to-port."
 	if (FTH_STRING_P(arg))
 		fth_io_write(io, fth_string_ref(arg));
 	else {
-		proc = proc_from_proc_or_xt(arg, 0, 0, false);
+		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 		if (!FTH_PROC_P(proc)) {
 			fth_io_close(fth_set_io_stdout(old_io));
-			FTH_ASSERT_ARGS(false, proc, FTH_ARG1, "a proc");
+			FTH_ASSERT_ARGS(0, proc, FTH_ARG1, "a proc");
 		}
 		fth_proc_call(proc, RUNNING_WORD(), 0);
 	}
@@ -983,10 +983,10 @@ with-output-to-port."
 	if (FTH_STRING_P(arg))
 		fth_io_write(io, fth_string_ref(arg));
 	else {
-		proc = proc_from_proc_or_xt(arg, 0, 0, false);
+		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 		if (!FTH_PROC_P(proc)) {
 			fth_io_close(fth_set_io_stderr(old_io));
-			FTH_ASSERT_ARGS(false, proc, FTH_ARG1, "a proc");
+			FTH_ASSERT_ARGS(0, proc, FTH_ARG1, "a proc");
 		}
 		fth_proc_call(proc, RUNNING_WORD(), 0);
 	}
@@ -1074,7 +1074,7 @@ fth_set_print_and_error_cb(out_cb cb)
 void
 init_port(void)
 {
-#define MPFF(Name, Args) fth_make_proc_from_func(NULL, Name, false, Args, 0, 0)
+#define MPFF(Name, Args) fth_make_proc_from_func(NULL, Name, 0, Args, 0, 0)
 #define MPFVF(Name, Args) fth_make_proc_from_vfunc(NULL, Name, Args, 0, 0)
 	gn_read_char = MPFF(soft_read_char, 0);
 	gn_write_char = MPFVF(soft_write_char, 1);

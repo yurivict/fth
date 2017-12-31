@@ -1,3 +1,7 @@
+2017-12-31  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* ficl/* src/*: remove bool header and bool type
+
 2017-12-30  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* src/misc.c (ficl_environ): Returns a hash instead of an

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)array.c	1.142 3/22/16
+ * @(#)array.c	1.143 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -35,15 +35,15 @@
 
 /* === ARRAY === */
 
-static FTH	array_tag;
-static FTH	list_tag;
-static FTH	acell_tag;
+static FTH 	array_tag;
+static FTH 	list_tag;
+static FTH 	acell_tag;
 
 typedef struct {
-	int		type;	/* array, list, assoc */
-	ficlInteger	length;	/* actual array length */
-	ficlInteger	buf_length;	/* entire buffer length */
-	ficlInteger	top;	/* begin of actual array in buffer */
+	int 		type;	/* array, list, assoc */
+	ficlInteger 	length;	/* actual array length */
+	ficlInteger 	buf_length;	/* entire buffer length */
+	ficlInteger 	top;	/* begin of actual array in buffer */
 	FTH            *data;	/* actual array */
 	FTH            *buf;	/* entire array buffer */
 } FArray;
@@ -83,98 +83,98 @@ MAKE_ARRAY_MEMBER(Integer, top)
 /*
  * Array
  */
-static FTH	ary_compact_each(FTH value, FTH new);
-static FTH	ary_copy(FTH self);
-static FTH	ary_dump(FTH self);
-static FTH	ary_dump_each(FTH value, FTH data);
-static FTH	ary_equal_p(FTH self, FTH obj);
-static void	ary_free(FTH self);
-static FTH	ary_inspect(FTH self);
-static FTH	ary_inspect_each(FTH value, FTH data);
-static FTH	ary_length(FTH self);
-static void	ary_mark(FTH self);
-static FTH	ary_ref(FTH self, FTH fidx);
-static FTH	ary_set(FTH self, FTH fidx, FTH value);
-static FTH	ary_to_array(FTH self);
-static FTH	ary_to_string(FTH self);
-static FTH	ary_uniq_each(FTH value, FTH new);
+static FTH 	ary_compact_each(FTH value, FTH new);
+static FTH 	ary_copy(FTH self);
+static FTH 	ary_dump(FTH self);
+static FTH 	ary_dump_each(FTH value, FTH data);
+static FTH 	ary_equal_p(FTH self, FTH obj);
+static void 	ary_free(FTH self);
+static FTH 	ary_inspect(FTH self);
+static FTH 	ary_inspect_each(FTH value, FTH data);
+static FTH 	ary_length(FTH self);
+static void 	ary_mark(FTH self);
+static FTH 	ary_ref(FTH self, FTH fidx);
+static FTH 	ary_set(FTH self, FTH fidx, FTH value);
+static FTH 	ary_to_array(FTH self);
+static FTH 	ary_to_string(FTH self);
+static FTH 	ary_uniq_each(FTH value, FTH new);
 #if defined(HAVE_QSORT)
-static int	cmpit(const void *a, const void *b);
+static int 	cmpit(const void *a, const void *b);
 #endif
-static void	ficl_array_compact(ficlVm *vm);
-static void	ficl_array_copy(ficlVm *vm);
-static void	ficl_array_delete(ficlVm *vm);
-static void	ficl_array_equal_p(ficlVm *vm);
-static void	ficl_array_index(ficlVm *vm);
-static void	ficl_array_insert(ficlVm *vm);
-static void	ficl_array_insert_bang(ficlVm *vm);
-static void	ficl_array_length(ficlVm *vm);
-static void	ficl_array_member_p(ficlVm *vm);
-static void	ficl_array_p(ficlVm *vm);
-static void	ficl_array_ref(ficlVm *vm);
-static void	ficl_array_reject(ficlVm *vm);
-static void	ficl_array_reverse(ficlVm *vm);
-static void	ficl_array_set(ficlVm *vm);
-static void	ficl_array_sort(ficlVm *vm);
-static void	ficl_array_subarray(ficlVm *vm);
-static void	ficl_array_uniq(ficlVm *vm);
-static void	ficl_make_array(ficlVm *vm);
-static void	ficl_make_empty_array(ficlVm *vm);
-static void	ficl_print_array(ficlVm *vm);
-static void	ficl_values_to_array(ficlVm *vm);
+static void 	ficl_array_compact(ficlVm *vm);
+static void 	ficl_array_copy(ficlVm *vm);
+static void 	ficl_array_delete(ficlVm *vm);
+static void 	ficl_array_equal_p(ficlVm *vm);
+static void 	ficl_array_index(ficlVm *vm);
+static void 	ficl_array_insert(ficlVm *vm);
+static void 	ficl_array_insert_bang(ficlVm *vm);
+static void 	ficl_array_length(ficlVm *vm);
+static void 	ficl_array_member_p(ficlVm *vm);
+static void 	ficl_array_p(ficlVm *vm);
+static void 	ficl_array_ref(ficlVm *vm);
+static void 	ficl_array_reject(ficlVm *vm);
+static void 	ficl_array_reverse(ficlVm *vm);
+static void 	ficl_array_set(ficlVm *vm);
+static void 	ficl_array_sort(ficlVm *vm);
+static void 	ficl_array_subarray(ficlVm *vm);
+static void 	ficl_array_uniq(ficlVm *vm);
+static void 	ficl_make_array(ficlVm *vm);
+static void 	ficl_make_empty_array(ficlVm *vm);
+static void 	ficl_print_array(ficlVm *vm);
+static void 	ficl_values_to_array(ficlVm *vm);
 static FArray  *make_array(ficlInteger len);
-static FTH	make_array_instance(FArray *ary);
+static FTH 	make_array_instance(FArray *ary);
 
 /*
  * Acell
  */
-static FTH	acl_dump(FTH self);
-static FTH	acl_inspect(FTH self);
-static FTH	acl_to_string(FTH self);
+static FTH 	acl_dump(FTH self);
+static FTH 	acl_inspect(FTH self);
+static FTH 	acl_to_string(FTH self);
 
 /*
  * Assoc
  */
-static FTH	assoc_insert(FTH assoc, FTH id, FTH val);
-static void	ficl_assoc_p(ficlVm *vm);
-static void	ficl_values_to_assoc(ficlVm *vm);
+static FTH 	assoc_insert(FTH assoc, FTH id, FTH val);
+static void 	ficl_assoc_p(ficlVm *vm);
+static void 	ficl_values_to_assoc(ficlVm *vm);
 static ficlInteger assoc_index(FTH assoc, FTH key);
 
 /*
  * List
  */
-static void	ficl_cons_p(ficlVm *vm);
-static void	ficl_last_pair(ficlVm *vm);
-static void	ficl_list_append(ficlVm *vm);
-static void	ficl_list_delete(ficlVm *vm);
-static void	ficl_list_delete_bang(ficlVm *vm);
-static void	ficl_list_equal_p(ficlVm *vm);
-static void	ficl_list_fill(ficlVm *vm);
-static void	ficl_list_head(ficlVm *vm);
-static void	ficl_list_index(ficlVm *vm);
-static void	ficl_list_insert(ficlVm *vm);
-static void	ficl_list_length(ficlVm *vm);
-static void	ficl_list_p(ficlVm *vm);
-static void	ficl_list_ref(ficlVm *vm);
-static void	ficl_list_set(ficlVm *vm);
-static void	ficl_list_slice(ficlVm *vm);
-static void	ficl_list_slice_bang(ficlVm *vm);
-static void	ficl_list_tail(ficlVm *vm);
-static void	ficl_make_list(ficlVm *vm);
-static void	ficl_nil_p(ficlVm *vm);
-static void	ficl_pair_p(ficlVm *vm);
-static void	ficl_print_list(ficlVm *vm);
-static void	ficl_set_car(ficlVm *vm);
-static void	ficl_set_cdr(ficlVm *vm);
-static void	ficl_values_to_list(ficlVm *vm);
-static FTH	ls_append_each(FTH value, FTH ls);
-static FTH	ls_delete_each(FTH value, FTH data);
-static FTH	make_list_instance(FArray *ary);
+static void 	ficl_cons_p(ficlVm *vm);
+static void 	ficl_last_pair(ficlVm *vm);
+static void 	ficl_list_append(ficlVm *vm);
+static void 	ficl_list_delete(ficlVm *vm);
+static void 	ficl_list_delete_bang(ficlVm *vm);
+static void 	ficl_list_equal_p(ficlVm *vm);
+static void 	ficl_list_fill(ficlVm *vm);
+static void 	ficl_list_head(ficlVm *vm);
+static void 	ficl_list_index(ficlVm *vm);
+static void 	ficl_list_insert(ficlVm *vm);
+static void 	ficl_list_length(ficlVm *vm);
+static void 	ficl_list_p(ficlVm *vm);
+static void 	ficl_list_ref(ficlVm *vm);
+static void 	ficl_list_set(ficlVm *vm);
+static void 	ficl_list_slice(ficlVm *vm);
+static void 	ficl_list_slice_bang(ficlVm *vm);
+static void 	ficl_list_tail(ficlVm *vm);
+static void 	ficl_make_list(ficlVm *vm);
+static void 	ficl_nil_p(ficlVm *vm);
+static void 	ficl_pair_p(ficlVm *vm);
+static void 	ficl_print_list(ficlVm *vm);
+static void 	ficl_set_car(ficlVm *vm);
+static void 	ficl_set_cdr(ficlVm *vm);
+static void 	ficl_values_to_list(ficlVm *vm);
+static FTH 	ls_append_each(FTH value, FTH ls);
+static FTH 	ls_delete_each(FTH value, FTH data);
+static FTH 	make_list_instance(FArray *ary);
 
 /*
  * Alist
  */
-static void	ficl_values_to_alist(ficlVm *vm);
+static void 	ficl_values_to_alist(ficlVm *vm);
 
 #define h_list_of_array_functions "\
 *** ARRAY PRIMITIVES ***\n\
@@ -227,26 +227,28 @@ assoc               ( ary key val -- 'ary )\n\
 assoc?              ( obj -- f )"
 
 FTH
-fth_array_each(FTH array, FTH (*fnc)(FTH value, FTH data), FTH data)
+fth_array_each(FTH array, FTH (*fnc) (FTH value, FTH data), FTH data)
 {
-	ficlInteger i;
+	ficlInteger 	i;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	for (i = 0; i < FTH_ARRAY_LENGTH(array); i++)
-		data = (*fnc)(FTH_ARRAY_DATA(array)[i], data);
+		data = (*fnc) (FTH_ARRAY_DATA(array)[i], data);
+
 	return (data);
 }
 
 FTH
-fth_array_each_with_index(FTH array,
-    FTH (*fnc)(FTH value, FTH data, ficlInteger idx),
-    FTH data)
+fth_array_each_with_index(FTH array, FTH (*fnc) (FTH value, FTH data, ficlInteger idx), FTH data)
 {
-	ficlInteger i;
+	ficlInteger 	i;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	for (i = 0; i < FTH_ARRAY_LENGTH(array); i++)
-		data = (*fnc)(FTH_ARRAY_DATA(array)[i], data, i);
+		data = (*fnc) (FTH_ARRAY_DATA(array)[i], data, i);
+
 	return (data);
 }
 
@@ -254,16 +256,18 @@ fth_array_each_with_index(FTH array,
  * Create new array filled with values from FNC.
  */
 FTH
-fth_array_map(FTH array, FTH (*fnc)(FTH value, FTH data), FTH data)
+fth_array_map (FTH array, FTH (*f) (FTH value, FTH data), FTH data)
 {
-	ficlInteger i, len;
-	FTH ary;
+	ficlInteger 	i, len;
+	FTH 		ary;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	len = FTH_ARRAY_LENGTH(array);
 	ary = fth_make_array_len(len);
+
 	for (i = 0; i < len; i++)
-		FTH_ARRAY_DATA(ary)[i] = (*fnc)(FTH_ARRAY_DATA(array)[i], data);
+		FTH_ARRAY_DATA(ary)[i] = (*f) (FTH_ARRAY_DATA(array)[i], data);
+
 	return (ary);
 }
 
@@ -276,14 +280,16 @@ ary_inspect_each(FTH value, FTH data)
 static FTH
 ary_inspect(FTH self)
 {
-	char *name;
-	ficlInteger len;
-	FTH fs;
+	char           *name;
+	ficlInteger 	len;
+	FTH 		fs;
 
 	name = FTH_INSTANCE_NAME(self);
 	len = FTH_ARRAY_LENGTH(self);
+
 	if (len == 0)
 		return (fth_make_string_format("%s empty", name));
+
 	fs = fth_make_string_format("%s[%ld]:", name, len);
 	return (fth_array_each(self, ary_inspect_each, fs));
 }
@@ -291,21 +297,26 @@ ary_inspect(FTH self)
 static FTH
 ary_to_string(FTH self)
 {
-	ficlInteger i, len;
-	FTH fs;
+	ficlInteger 	i, len;
+	FTH 		fs;
 
 	len = FTH_ARRAY_LENGTH(self);
+
 	/* Negative fth_print_length shows all entries! */
 	if (fth_print_length >= 0 && len > fth_print_length)
 		len = FICL_MIN(len, fth_print_length);
+
 	fs = fth_make_string_format("%c%s(",
 	    FTH_ARRAY_LIST_P(self) ? '\'' : '#',
 	    FTH_ARRAY_ASSOC_P(self) ? "a" : "");
+
 	if (len > 0) {
 		for (i = 0; i < len; i++)
 			fth_string_sformat(fs, " %M", FTH_ARRAY_DATA(self)[i]);
+
 		if (len < FTH_ARRAY_LENGTH(self))
 			fth_string_sformat(fs, " ...");
+
 		fth_string_sformat(fs, " ");
 	}
 	return (fth_string_sformat(fs, ")"));
@@ -320,26 +331,28 @@ ary_dump_each(FTH value, FTH data)
 static FTH
 ary_dump(FTH self)
 {
-	FTH fs;
+	FTH 		fs;
 
 	fs = fth_make_string_format("%c%s(",
 	    FTH_ARRAY_LIST_P(self) ? '\'' : '#',
 	    FTH_ARRAY_ASSOC_P(self) ? "a" : "");
+
 	if (FTH_ARRAY_LENGTH(self) > 0)
 		fth_array_each(self, ary_dump_each, fs);
+
 	return (fth_string_sformat(fs, ")"));
 }
 
 static FTH
 ary_to_array(FTH self)
 {
-	ficlInteger len;
-	size_t size;
-	FTH new;
+	ficlInteger 	len;
+	size_t 		size;
+	FTH 		new;
 
 	len = FTH_ARRAY_LENGTH(self);
 	new = fth_make_array_len(len);
-	size = sizeof(FTH) * (size_t)len;
+	size = sizeof(FTH) * (size_t) len;
 	memmove(FTH_ARRAY_DATA(new), FTH_ARRAY_DATA(self), size);
 	return (new);
 }
@@ -347,38 +360,44 @@ ary_to_array(FTH self)
 static FTH
 ary_copy(FTH self)
 {
-	ficlInteger i;
-	FTH new, el;
+	ficlInteger 	i;
+	FTH 		new, el;
 
 	new = fth_make_array_len(FTH_ARRAY_LENGTH(self));
+
 	for (i = 0; i < FTH_ARRAY_LENGTH(self); i++) {
 		el = fth_object_copy(FTH_ARRAY_DATA(self)[i]);
 		FTH_ARRAY_DATA(new)[i] = el;
 	}
+
 	return (new);
 }
 
 static FTH
 ary_ref(FTH self, FTH fidx)
 {
-	ficlInteger idx, len;
+	ficlInteger 	idx, len;
 
 	idx = FTH_INT_REF(fidx);
 	len = FTH_ARRAY_LENGTH(self);
+
 	if (idx < 0 || idx >= len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	return (FTH_ARRAY_DATA(self)[idx]);
 }
 
 static FTH
 ary_set(FTH self, FTH fidx, FTH value)
 {
-	ficlInteger idx, len;
+	ficlInteger 	idx, len;
 
 	idx = FTH_INT_REF(fidx);
 	len = FTH_ARRAY_LENGTH(self);
+
 	if (idx < 0 || idx >= len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	FTH_INSTANCE_CHANGED(self);
 	return (FTH_ARRAY_DATA(self)[idx] = value);
 }
@@ -386,18 +405,21 @@ ary_set(FTH self, FTH fidx, FTH value)
 static FTH
 ary_equal_p(FTH self, FTH obj)
 {
-	ficlInteger i;
-	FTH a, b;
+	ficlInteger 	i;
+	FTH 		a, b;
 
 	if (self == obj)
 		return (FTH_TRUE);
+
 	if (FTH_ARRAY_LENGTH(self) == FTH_ARRAY_LENGTH(obj)) {
 		for (i = 0; i < FTH_ARRAY_LENGTH(self); i++) {
 			a = FTH_ARRAY_DATA(self)[i];
 			b = FTH_ARRAY_DATA(obj)[i];
+
 			if (!fth_object_equal_p(a, b))
 				return (FTH_FALSE);
 		}
+
 		return (FTH_TRUE);
 	}
 	return (FTH_FALSE);
@@ -412,7 +434,7 @@ ary_length(FTH self)
 static void
 ary_mark(FTH self)
 {
-	ficlInteger i;
+	ficlInteger 	i;
 
 	for (i = 0; i < FTH_ARRAY_LENGTH(self); i++)
 		fth_gc_mark(FTH_ARRAY_DATA(self)[i]);
@@ -443,7 +465,7 @@ ficl_array_length(ficlVm *vm)
 #( 0 1 2 ) array-length => 3\n\
 5          array-length => -1\n\
 If OBJ is an array object, return its length, otherwise -1."
-	ficlInteger len;
+	ficlInteger 	len;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	len = fth_array_length(fth_pop_ficl_cell(vm));
@@ -458,18 +480,21 @@ If OBJ is an array object, return its length, otherwise -1."
  *
  * buf + top --> start of data
  */
-static FArray *
+static FArray  *
 make_array(ficlInteger len)
 {
-	FArray *ary;
-	ficlInteger buf_len, top_len;
+	FArray         *ary;
+	ficlInteger 	buf_len, top_len;
 
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "negative");
+
 	top_len = NEW_SEQ_LENGTH(len) / 3;
 	buf_len = NEW_SEQ_LENGTH(len + top_len);
+
 	if (buf_len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	ary = FTH_MALLOC(sizeof(FArray));
 	ary->type = 0;
 	ary->length = len;
@@ -490,14 +515,16 @@ make_array_instance(FArray *ary)
 FTH
 fth_make_array_var(int len,...)
 {
-	int i;
-	FArray *ary;
-	va_list list;
+	int 		i;
+	FArray         *ary;
+	va_list 	list;
 
-	ary = make_array((ficlInteger)len);
+	ary = make_array((ficlInteger) len);
 	va_start(list, len);
+
 	for (i = 0; i < len; i++)
 		ary->data[i] = va_arg(list, FTH);
+
 	va_end(list);
 	return (make_array_instance(ary));
 }
@@ -514,12 +541,14 @@ fth_make_array_len(ficlInteger len)
 FTH
 fth_make_array_with_init(ficlInteger len, FTH init)
 {
-	ficlInteger i;
-	FArray *ary;
+	ficlInteger 	i;
+	FArray         *ary;
 
 	ary = make_array(len);
+
 	for (i = 0; i < ary->length; i++)
 		ary->data[i] = init;
+
 	return (make_array_instance(ary));
 }
 
@@ -536,7 +565,7 @@ ficl_array_p(ficlVm *vm)
 #( 0 1 2 ) array? => #t\n\
 nil        array? => #f\n\
 Return #t if OBJ is an array object, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -553,7 +582,7 @@ ficl_make_array(ficlVm *vm)
 Return array of length LEN filled with keyword INITIAL-ELEMENT values.  \
 INITIAL-ELEMENT defaults to nil if not specified.  \
 Raise OUT-OF-RANGE exception if LEN < 0."
-	FTH size, init, ary;
+	FTH 		size, init, ary;
 
 	init = fth_get_optkey(FTH_KEYWORD_INIT, FTH_NIL);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -570,19 +599,24 @@ ficl_values_to_array(ficlVm *vm)
 0 1 2   3 >array => #( 0 1 2 )\n\
 Return array object with LEN objects found on parameter stack.  \
 Raise OUT-OF-RANGE exception if LEN < 0."
-	ficlInteger i, len;
-	FTH array;
+	ficlInteger 	i, len;
+	FTH 		array;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	FTH_STACK_CHECK(vm, len, 1);
 	array = fth_make_array_len(len);
+
 	for (i = len - 1; i >= 0; i--)
 		FTH_ARRAY_DATA(array)[i] = fth_pop_ficl_cell(vm);
+
 	ficlStackPushFTH(vm->dataStack, array);
 }
 
@@ -606,7 +640,7 @@ ficl_print_array(ficlVm *vm)
 #define h_print_array "( ary -- )  print array\n\
 #( 0 1 2 ) .array => #( 0 1 2 )\n\
 Print array object ARY to current output."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -614,12 +648,12 @@ Print array object ARY to current output."
 	fth_print(fth_string_ref(ary_to_string(obj)));
 }
 
-bool
+int
 fth_array_equal_p(FTH obj1, FTH obj2)
 {
 	if (FTH_ARRAY_P(obj1) && FTH_ARRAY_P(obj2))
 		return (FTH_TO_BOOL(ary_equal_p(obj1, obj2)));
-	return (false);
+	return (0);
 }
 
 static void
@@ -634,7 +668,7 @@ a1 a2 array= #t\n\
 a1 a3 array= #f\n\
 Return #t if ARY1 and ARY2 are array objects of same length and content, \
 otherwise #f."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -676,15 +710,17 @@ Return copy of ARY as list only with references of each element \
 in contrary to array-copy.  \
 If ARY is not an array, return '( ary ).\n\
 See also array-copy."
-	FTH ls;
-	ficlInteger i;
+	FTH 		ls;
+	ficlInteger 	i;
 
 	if (FTH_ARRAY_P(obj)) {
 		ls = fth_make_list_len(FTH_ARRAY_LENGTH(obj));
+
 		for (i = 0; i < FTH_ARRAY_LENGTH(obj); i++)
 			FTH_ARRAY_DATA(ls)[i] = FTH_ARRAY_DATA(obj)[i];
 	} else
 		ls = fth_make_list_var(1, obj);
+
 	return (ls);
 }
 
@@ -707,7 +743,7 @@ ary2 => #( 0 #{ 'foo 10 } 2 )\n\
 Return copy of ARY1 with all elements new created \
 in contrary to array->array.\n\
 See also array->array."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -722,8 +758,10 @@ FTH
 fth_array_ref(FTH array, ficlInteger idx)
 {
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	if (idx < 0)
 		idx += FTH_ARRAY_LENGTH(array);
+
 	return (ary_ref(array, fth_make_int(idx)));
 }
 
@@ -742,8 +780,8 @@ ficl_array_ref(ficlVm *vm)
 Return element at position IDX.  \
 Negative index counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in ARY's range."
-	ficlInteger idx;
-	FTH ary;
+	ficlInteger 	idx;
+	FTH 		ary;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -760,8 +798,10 @@ FTH
 fth_array_set(FTH array, ficlInteger idx, FTH value)
 {
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	if (idx < 0)
 		idx += FTH_ARRAY_LENGTH(array);
+
 	return (ary_set(array, fth_make_int(idx), value));
 }
 
@@ -783,8 +823,8 @@ ary => #( 'a 'e 'c )\n\
 Store VAL at position IDX.  \
 Negative index counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in ARY's range."
-	ficlInteger idx;
-	FTH value;
+	ficlInteger 	idx;
+	FTH 		value;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -799,21 +839,24 @@ fth_array_push(FTH array, FTH value)
 #( 0 1 2 ) 10 array-push => #( 0 1 2 10 )\n\
 Append VAL to ARY.\n\
 See also array-pop, array-unshift, array-shift."
-	ficlInteger new_buf_len, lenp1;
+	ficlInteger 	new_buf_len, lenp1;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	/* HINT: top + length + 1 is the new length (thanks Bill!) */
 	lenp1 = FTH_ARRAY_LENGTH(array) + 1;
 	new_buf_len = FTH_ARRAY_TOP(array) + lenp1;
+
 	if (new_buf_len > FTH_ARRAY_BUF_LENGTH(array)) {
-		ficlInteger len;
-		size_t size;
+		ficlInteger 	len;
+		size_t 		size;
 
 		len = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (len > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 		FTH_ARRAY_BUF_LENGTH(array) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array), size);
 		FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
 		    FTH_ARRAY_TOP(array);
@@ -836,20 +879,23 @@ ary array-pop => #f\n\
 Remove and return last element from ARY.  \
 If ARY is empty, return #f.\n\
 See also array-push, array-unshift, array-shift."
-	FTH result;
-	ficlInteger len;
+	FTH 		result;
+	ficlInteger 	len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	if (FTH_ARRAY_LENGTH(array) == 0)
 		return (FTH_FALSE);
+
 	FTH_ARRAY_LENGTH(array)--;
 	result = FTH_ARRAY_DATA(array)[FTH_ARRAY_LENGTH(array)];
 	len = NEW_SEQ_LENGTH(FTH_ARRAY_TOP(array) + FTH_ARRAY_LENGTH(array));
+
 	if (len < FTH_ARRAY_BUF_LENGTH(array)) {
-		size_t size;
+		size_t 		size;
 
 		FTH_ARRAY_BUF_LENGTH(array) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array), size);
 		FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
 		    FTH_ARRAY_TOP(array);
@@ -868,23 +914,27 @@ ary 20 array-unshift drop\n\
 ary => #( 20 10 0 1 2 )\n\
 Prepend VAL to ARY.\n\
 See also array-push, array-pop, array-shift."
-	ficlInteger len, new_top, new_len, new_buf_len;
-	size_t size;
+	ficlInteger 	len, new_top, new_len, new_buf_len;
+	size_t 		size;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	new_top = FTH_ARRAY_TOP(array) - 1;
 	new_len = FTH_ARRAY_LENGTH(array) + 1;
 	new_buf_len = new_top + new_len;
+
 	if (new_top < 1) {
 		new_top = FTH_ARRAY_BUF_LENGTH(array) / 3;
 		new_buf_len = new_top + new_len;
+
 		if (new_buf_len > FTH_ARRAY_BUF_LENGTH(array)) {
 			len = NEW_SEQ_LENGTH(new_buf_len);
+
 			if (len > MAX_SEQ_LENGTH)
 				FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len,
 				    "too long");
+
 			FTH_ARRAY_BUF_LENGTH(array) = len;
-			size = sizeof(FTH) * (size_t)len;
+			size = sizeof(FTH) * (size_t) len;
 			FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array),
 			    size);
 			FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
@@ -892,13 +942,15 @@ See also array-push, array-pop, array-shift."
 		}
 		memmove(FTH_ARRAY_BUF(array) + new_top + 1,
 		    FTH_ARRAY_DATA(array),
-		    sizeof(FTH) * (size_t)FTH_ARRAY_LENGTH(array));
+		    sizeof(FTH) * (size_t) FTH_ARRAY_LENGTH(array));
 	} else if (new_buf_len > FTH_ARRAY_BUF_LENGTH(array)) {
 		len = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (len > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 		FTH_ARRAY_BUF_LENGTH(array) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array), size);
 		FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
 		    FTH_ARRAY_TOP(array);
@@ -923,27 +975,31 @@ ary array-shift => #f\n\
 Remove and return first element from ARY.  \
 If ARY is empty, return #f.\n\
 See also array-push, array-pop, array-unshift."
-	FTH result;
-	ficlInteger len;
+	FTH 		result;
+	ficlInteger 	len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	if (FTH_ARRAY_LENGTH(array) == 0)
 		return (FTH_FALSE);
+
 	result = FTH_ARRAY_DATA(array)[0];
+
 	if ((FTH_ARRAY_TOP(array) + 1) > (FTH_ARRAY_BUF_LENGTH(array) / 2)) {
 		FTH_ARRAY_TOP(array) = FTH_ARRAY_BUF_LENGTH(array) / 3;
 		memmove(FTH_ARRAY_BUF(array) + FTH_ARRAY_TOP(array),
 		    FTH_ARRAY_DATA(array),
-		    sizeof(FTH) * (size_t)FTH_ARRAY_LENGTH(array));
+		    sizeof(FTH) * (size_t) FTH_ARRAY_LENGTH(array));
 	}
 	FTH_ARRAY_LENGTH(array)--;
 	len = NEW_SEQ_LENGTH(FTH_ARRAY_TOP(array) + FTH_ARRAY_LENGTH(array));
 	FTH_ARRAY_TOP(array)++;
+
 	if (len < FTH_ARRAY_BUF_LENGTH(array)) {
-		size_t size;
+		size_t 		size;
 
 		FTH_ARRAY_BUF_LENGTH(array) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array), size);
 	}
 	FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) + FTH_ARRAY_TOP(array);
@@ -965,25 +1021,31 @@ ary1 10 array-append => #( 0 1 2 10 )\n\
 Append two arrays and return new one.  \
 If ARY2 is not an array, append it as a single element.\n\
 See also array-concat (alias >array) and array-push."
-	ficlInteger i, j, alen, vlen;
-	FTH result;
+	ficlInteger 	i, j, alen, vlen;
+	FTH 		result;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	alen = FTH_ARRAY_LENGTH(array);
+
 	if (!FTH_ARRAY_P(value)) {
 		result = fth_make_array_len(alen + 1);
+
 		for (i = 0; i < alen; i++)
 			FTH_ARRAY_DATA(result)[i] = FTH_ARRAY_DATA(array)[i];
+
 		FTH_ARRAY_DATA(result)[i] = value;
 		return (result);
 	}
 	vlen = FTH_ARRAY_LENGTH(value);
 	result = fth_make_array_len(alen + vlen);
+
 	for (i = 0; i < alen; i++)
 		FTH_ARRAY_DATA(result)[i] = FTH_ARRAY_DATA(array)[i];
+
 	if (vlen > 0)
 		for (i = alen, j = 0; j < vlen; i++, j++)
 			FTH_ARRAY_DATA(result)[i] = FTH_ARRAY_DATA(value)[j];
+
 	return (result);
 }
 
@@ -996,16 +1058,20 @@ ary array-reverse! drop\n\
 ary => #( 2 1 0 )\n\
 Return ARY in reversed order.\n\
 See also array-reverse."
-	ficlInteger i, j, len;
-	FTH tmp;
+	ficlInteger 	i, j, len;
+	FTH 		tmp;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
+
 	if (FTH_ARRAY_LENGTH(array) == 0)
 		return (array);
+
 	tmp = ary_copy(array);
 	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0, j = len - 1; i < len; i++, j--)
 		FTH_ARRAY_DATA(array)[i] = FTH_ARRAY_DATA(tmp)[j];
+
 	return (array);
 }
 
@@ -1019,7 +1085,7 @@ ary1 => #( 0 1 2 )\n\
 ary2 => #( 2 1 0 )\n\
 Return new array with reversed order of ARY1.\n\
 See also array-reverse!."
-	FTH ary;
+	FTH 		ary;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	ary = fth_array_copy(fth_pop_ficl_cell(vm));
@@ -1029,49 +1095,58 @@ See also array-reverse!."
 FTH
 fth_array_insert(FTH array, ficlInteger idx, FTH value)
 {
-	ficlInteger ary_len, ins_len, res_len, new_buf_len;
-	FTH ins;
+	ficlInteger 	ary_len, ins_len, res_len, new_buf_len;
+	FTH 		ins;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	ary_len = FTH_ARRAY_LENGTH(array);
+
 	if (idx < 0)
 		idx += ary_len;
+
 	if (idx == 0) {
-		ficlInteger i;
+		ficlInteger 	i;
 
 		if (!FTH_ARRAY_P(value))
 			return (fth_array_unshift(array, value));
+
 		for (i = FTH_ARRAY_LENGTH(value) - 1; i >= 0; i--)
 			fth_array_unshift(array, FTH_ARRAY_DATA(value)[i]);
+
 		return (array);
 	}
 	if (idx < 0 || idx >= ary_len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	if (FTH_ARRAY_P(value))
 		ins = value;
 	else
 		ins = fth_make_array_var(1, value);
+
 	ins_len = FTH_ARRAY_LENGTH(ins);
 	res_len = ary_len + ins_len;
 	new_buf_len = FTH_ARRAY_TOP(array) + res_len;
+
 	if (new_buf_len > FTH_ARRAY_BUF_LENGTH(array)) {
-		ficlInteger len;
-		size_t size;
+		ficlInteger 	len;
+		size_t 		size;
 
 		len = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (len > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 		FTH_ARRAY_BUF_LENGTH(array) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array), size);
 		FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
 		    FTH_ARRAY_TOP(array);
 	}
 	memmove(FTH_ARRAY_DATA(array) + idx + ins_len,
 	    FTH_ARRAY_DATA(array) + idx,
-	    sizeof(FTH) * (size_t)(ary_len - idx));
+	    sizeof(FTH) * (size_t) (ary_len - idx));
 	memmove(FTH_ARRAY_DATA(array) + idx,
-	    FTH_ARRAY_DATA(ins), sizeof(FTH) * (size_t)ins_len);
+	    FTH_ARRAY_DATA(ins), sizeof(FTH) * (size_t) ins_len);
 	FTH_ARRAY_LENGTH(array) += FTH_ARRAY_LENGTH(ins);
 	FTH_INSTANCE_CHANGED(array);
 	return (array);
@@ -1090,8 +1165,8 @@ Insert VAL to ARY1 at position IDX and return new array.  \
 VAL can be an array or any other object.  \
 Negative IDX counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in ARY1's range."
-	FTH ary, val;
-	ficlInteger idx;
+	FTH 		ary, val;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	val = fth_pop_ficl_cell(vm);
@@ -1112,21 +1187,21 @@ Insert VAL to ARY at position IDX and return changed array.  \
 VAL can be a single object or an array.  \
 Negative IDX counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in ARY's range."
-	FTH val;
-	ficlInteger idx;
+	FTH 		ary, val;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	val = fth_pop_ficl_cell(vm);
 	idx = ficlStackPopInteger(vm->dataStack);
-	ficlStackPushFTH(vm->dataStack,
-	    fth_array_insert(fth_pop_ficl_cell(vm), idx, val));
+	ary = fth_array_insert(fth_pop_ficl_cell(vm), idx, val);
+	ficlStackPushFTH(vm->dataStack, ary);
 }
 
 FTH
 fth_array_delete(FTH array, ficlInteger idx)
 {
-	FTH value;
-	ficlInteger len, cur_len;
+	FTH 		value;
+	ficlInteger 	len, cur_len;
 
 	FTH_ASSERT_ARGS(fth_array_length(array) > 0,
 	    array, FTH_ARG1, "a nonempty array");
@@ -1134,25 +1209,30 @@ fth_array_delete(FTH array, ficlInteger idx)
 
 	if (idx < 0)
 		idx += cur_len;
+
 	if (idx < 0 || idx >= cur_len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	if (idx == 0)
 		return (fth_array_shift(array));
+
 	if (idx == (cur_len - 1))
 		return (fth_array_pop(array));
+
 	value = FTH_ARRAY_DATA(array)[idx];
 	FTH_ARRAY_LENGTH(array)--;
 	len = NEW_SEQ_LENGTH(FTH_ARRAY_TOP(array) + FTH_ARRAY_LENGTH(array));
+
 	if (len < FTH_ARRAY_BUF_LENGTH(array)) {
 		FTH_ARRAY_BUF_LENGTH(array) = len;
 		FTH_ARRAY_BUF(array) = FTH_REALLOC(FTH_ARRAY_BUF(array),
-		    sizeof(FTH) * (size_t)len);
+		    sizeof(FTH) * (size_t) len);
 		FTH_ARRAY_DATA(array) = FTH_ARRAY_BUF(array) +
 		    FTH_ARRAY_TOP(array);
 	}
 	memmove(FTH_ARRAY_DATA(array) + idx,
 	    FTH_ARRAY_DATA(array) + idx + 1,
-	    sizeof(FTH) * (size_t)(FTH_ARRAY_LENGTH(array) - idx));
+	    sizeof(FTH) * (size_t) (FTH_ARRAY_LENGTH(array) - idx));
 	FTH_INSTANCE_CHANGED(array);
 	return (value);
 }
@@ -1168,8 +1248,8 @@ Delete and return one element from ARY at position IDX.  \
 Negative index counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in ARY's range.\n\
 See also array-delete-key."
-	FTH ary;
-	ficlInteger idx;
+	FTH 		ary;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -1186,17 +1266,19 @@ ary 'c array-delete-key => 'c\n\
 ary 'c array-delete-key => #f\n\
 Delete and return KEY from ARY if found, otherwise return #f.\n\
 See also array-delete!."
-	ficlInteger i;
-	FTH res;
+	ficlInteger 	i;
+	FTH 		res;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	res = FTH_FALSE;
+
 	for (i = 0; i < FTH_ARRAY_LENGTH(array); i++) {
 		if (fth_object_equal_p(FTH_ARRAY_DATA(array)[i], key)) {
 			res = fth_array_delete(array, i);
 			break;
 		}
 	}
+
 	return (res);
 }
 
@@ -1218,9 +1300,9 @@ and the current array element set as first arg in ARGS array.  \
 The length of ARGS + 1 is the required arity of PROC-OR-XT.  \
 If PROC-OR-XT returns neither #f nor nil nor 0, the element will be removed.\n\
 See also array-reject."
-	char *caller = RUNNING_WORD();
-	ficlInteger i, len;
-	FTH proc, tmp;
+	char           *caller = RUNNING_WORD();
+	ficlInteger 	i, len;
+	FTH 		proc, tmp;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 
@@ -1233,13 +1315,13 @@ See also array-reject."
 		args = fth_make_array_var(1, args);
 
 	len = FTH_ARRAY_LENGTH(args);
-	proc = proc_from_proc_or_xt(proc_or_xt, (int)len + 1, 0, false);
+	proc = proc_from_proc_or_xt(proc_or_xt, (int) len + 1, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2, "a proc");
 	tmp = ary_copy(args);
 	fth_array_unshift(tmp, FTH_UNDEF);
 
 	for (i = 0; i < FTH_ARRAY_LENGTH(array); i++) {
-		FTH ret;
+		FTH 		ret;
 
 		FTH_ARRAY_DATA(tmp)[0] = FTH_ARRAY_DATA(array)[i];
 		ret = fth_proc_apply(proc, tmp, caller);
@@ -1247,6 +1329,7 @@ See also array-reject."
 		if (!(FTH_FALSE_P(ret) || FTH_NIL_P(ret) || FTH_ZERO == ret))
 			fth_array_delete(array, i--);
 	}
+
 	return (array);
 }
 
@@ -1267,7 +1350,7 @@ If PROC-OR-XT returns neither #f nor nil nor 0, \
 the element will be pushed in a new array object.  \
 The new array object will be returned.\n\
 See also array-reject!."
-	FTH ary, proc, args;
+	FTH 		ary, proc, args;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	args = fth_pop_ficl_cell(vm);
@@ -1293,7 +1376,7 @@ ary array-compact! drop\n\
 ary => #( 0 1 2 )\n\
 Remove all nil elements from ARY and return changed array object.\n\
 See also array-compact."
-	FTH old;
+	FTH 		old;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	old = fth_array_copy(array);
@@ -1312,7 +1395,7 @@ ary1 => #( 0 nil 1 nil 2 )\n\
 ary2 => #( 0 1 2 )\n\
 Return new array object with nil elements removed.\n\
 See also array-compact!."
-	FTH ary, new;
+	FTH 		ary, new;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	ary = fth_pop_ficl_cell(vm);
@@ -1328,12 +1411,14 @@ fth_array_fill(FTH array, FTH value)
 ary 10 array-fill drop\n\
 ary => #( 10 10 10 )\n\
 Set all elements of ARY to VAL."
-	ficlInteger i, len;
+	ficlInteger 	i, len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
-	len = FTH_ARRAY_LENGTH(array); 
+	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0; i < len; i++)
 		FTH_ARRAY_DATA(array)[i] = value;
+
 	FTH_INSTANCE_CHANGED(array);
 	return (array);
 }
@@ -1341,14 +1426,17 @@ Set all elements of ARY to VAL."
 ficlInteger
 fth_array_index(FTH array, FTH key)
 {
-	ficlInteger i, len;
+	ficlInteger 	i, len;
 
 	if (!FTH_ARRAY_P(array))
 		return (-1);
-	len = FTH_ARRAY_LENGTH(array); 
+
+	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0; i < len; i++)
 		if (fth_object_equal_p(FTH_ARRAY_DATA(array)[i], key))
 			return (i);
+
 	return (-1);
 }
 
@@ -1360,7 +1448,7 @@ ficl_array_index(ficlVm *vm)
 #( 'a 'b 'c ) 'f array-index => -1\n\
 Return index of KEY in ARY or -1 if not found.\n\
 See also array-member? and array-find."
-	FTH ary, key;
+	FTH 		ary, key;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
@@ -1368,17 +1456,19 @@ See also array-member? and array-find."
 	ficlStackPushInteger(vm->dataStack, fth_array_index(ary, key));
 }
 
-bool
+int
 fth_array_member_p(FTH array, FTH item)
 {
-	ficlInteger i, len;
+	ficlInteger 	i, len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
-	len = FTH_ARRAY_LENGTH(array); 
+	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0; i < len; i++)
 		if (fth_object_equal_p(FTH_ARRAY_DATA(array)[i], item))
-			return (true);
-	return (false);
+			return (1);
+
+	return (0);
 }
 
 static void
@@ -1389,7 +1479,7 @@ ficl_array_member_p(ficlVm *vm)
 #( 'a 'b 'c ) 'f array-member? => #f\n\
 Return #t if KEY exists in ARY, otherwise #f.\n\
 See also array-index and array-find."
-	FTH ary, key;
+	FTH 		ary, key;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
@@ -1405,13 +1495,15 @@ fth_array_find(FTH array, FTH key)
 #( 'a 'b 'c ) 'f array-find => #f\n\
 Return key if KEY exists in ARY, otherwise #f.\n\
 See also array-index and array-member?."
-	ficlInteger i, len;
+	ficlInteger 	i, len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
-	len = FTH_ARRAY_LENGTH(array); 
+	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0; i < len; i++)
 		if (fth_object_equal_p(FTH_ARRAY_DATA(array)[i], key))
 			return (FTH_ARRAY_DATA(array)[i]);
+
 	return (FTH_FALSE);
 }
 
@@ -1432,7 +1524,7 @@ ary array-uniq! drop\n\
 ary => #( 0 1 2 3 )\n\
 Return ARY without duplicated elements.\n\
 See also array-uniq."
-	FTH old;
+	FTH 		old;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	old = fth_array_copy(array);
@@ -1448,7 +1540,7 @@ ficl_array_uniq(ficlVm *vm)
 #( 0 1 2 3 2 1 0 ) array-uniq => #( 0 1 2 3 )\n\
 Return new array without duplicated elements of ARY1.\n\
 See also array-uniq!."
-	FTH ary, new;
+	FTH 		ary, new;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	ary = fth_pop_ficl_cell(vm);
@@ -1458,11 +1550,11 @@ See also array-uniq!."
 
 #if defined(HAVE_QSORT)
 
-static FTH	fth_cmp_proc;
+static FTH 	fth_cmp_proc;
 static int
 cmpit(const void *a, const void *b)
 {
-	FTH r;
+	FTH 		r;
 
 	r = fth_proc_call(fth_cmp_proc, "array-sort", 2, *(FTH *)a, *(FTH *)b);
 	return (FIX_TO_INT32(r));
@@ -1493,18 +1585,20 @@ and should return a negative integer if A < B, \
 0 if A == B, and a positive integer if A > B.  \
 Raise BAD-ARITY exception if PROC-OR-XT doesn't take two arguments.\n\
 See also array-sort."
-	FTH proc;
-	size_t len;
+	FTH 		proc;
+	size_t 		len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
-	len = (size_t)FTH_ARRAY_LENGTH(array);
+	len = (size_t) FTH_ARRAY_LENGTH(array);
+
 	if (len < 2)
 		return (array);
-	proc = proc_from_proc_or_xt(proc_or_xt, 2, 0, false);
+
+	proc = proc_from_proc_or_xt(proc_or_xt, 2, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2, "a compare proc");
 #if defined(HAVE_QSORT)
 	fth_cmp_proc = proc;
-	qsort((void *)FTH_ARRAY_DATA(array), len, sizeof(FTH), cmpit);
+	qsort((void *) FTH_ARRAY_DATA(array), len, sizeof(FTH), cmpit);
 #endif
 	FTH_INSTANCE_CHANGED(array);
 	return (array);
@@ -1532,13 +1626,13 @@ and should return a negative integer if A < B, \
 0 if A == B, and a positive integer if A > B.  \
 Raise BAD-ARITY exception if PROC-OR-XT doesn't take two arguments.\n\
 See also array-sort!."
-	FTH ary, proc;
+	FTH 		ary1, ary2, proc;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	proc = fth_pop_ficl_cell(vm);
-	ary = fth_pop_ficl_cell(vm);
-	ficlStackPushFTH(vm->dataStack,
-	    fth_array_sort(fth_array_copy(ary), proc));
+	ary1 = fth_pop_ficl_cell(vm);
+	ary2 = fth_array_sort(fth_array_copy(ary1), proc);
+	ficlStackPushFTH(vm->dataStack, ary2);
 }
 
 FTH
@@ -1551,38 +1645,46 @@ Return string with all elements of ARY \
 converted to their string representation \
 and joined together separated by the string SEP.  \
 If SEP is not a string, a space will be used as separator."
-	ficlInteger i, len;
-	FTH fs, el;
+	ficlInteger 	i, len;
+	FTH 		fs, el;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	fs = fth_make_empty_string();
 	len = FTH_ARRAY_LENGTH(array);
+
 	if (len == 0)
 		return (fs);
+
 	if (!FTH_STRING_P(sep))
 		sep = fth_make_string(" ");
+
 	fth_string_push(fs, fth_object_to_string(FTH_ARRAY_DATA(array)[0]));
+
 	for (i = 1; i < len; i++) {
 		fth_string_push(fs, sep);
 		el = fth_object_to_string(FTH_ARRAY_DATA(array)[i]);
 		fth_string_push(fs, el);
 	}
+
 	return (fs);
 }
 
 FTH
 fth_array_subarray(FTH array, ficlInteger start, ficlInteger end)
 {
-	FTH result;
-	ficlInteger len;
-	size_t size;
+	FTH 		result;
+	ficlInteger 	len;
+	size_t 		size;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	len = FTH_ARRAY_LENGTH(array);
+
 	if (start < 0)
 		start += len;
+
 	if (start < 0 || start >= len)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, start);
+
 	if (end < 0) {
 		/*
 		 * We are looking for end length not last entry, hence end++.
@@ -1592,8 +1694,9 @@ fth_array_subarray(FTH array, ficlInteger start, ficlInteger end)
 	}
 	if (end < start || end > len)
 		end = len;
+
 	result = fth_make_array_len(end - start);
-	size = sizeof(FTH) * (size_t)len;
+	size = sizeof(FTH) * (size_t) len;
 	memmove(FTH_ARRAY_DATA(result), FTH_ARRAY_DATA(array) + start, size);
 	return (result);
 }
@@ -1610,8 +1713,8 @@ beginning with index START up to but excluding index END.  \
 If END is NIL, up to end of array will be returned.  \
 Negative index counts from backward.  \
 Raise OUT-OF-RANGE exception if START is not in ARY's range."
-	FTH ary, last;
-	ficlInteger beg, end;
+	FTH 		ary, last;
+	ficlInteger 	beg, end;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	last = fth_pop_ficl_cell(vm);
@@ -1629,12 +1732,14 @@ fth_array_clear(FTH array)
 ary array-clear\n\
 ary => #( #f #f #f )\n\
 Clear array and set all elements to #f."
-	ficlInteger i, len;
+	ficlInteger 	i, len;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
-	len = FTH_ARRAY_LENGTH(array); 
+	len = FTH_ARRAY_LENGTH(array);
+
 	for (i = 0; i < len; i++)
 		FTH_ARRAY_DATA(array)[i] = FTH_FALSE;
+
 	FTH_INSTANCE_CHANGED(array);
 }
 
@@ -1650,7 +1755,7 @@ Clear array and set all elements to #f."
 static FTH
 acl_inspect(FTH self)
 {
-	FTH key, val;
+	FTH 		key, val;
 
 	key = FTH_ACELL_KEY(self);
 	val = FTH_ACELL_VAL(self);
@@ -1660,7 +1765,7 @@ acl_inspect(FTH self)
 static FTH
 acl_to_string(FTH self)
 {
-	FTH key, val;
+	FTH 		key, val;
 
 	key = FTH_ACELL_KEY(self);
 	val = FTH_ACELL_VAL(self);
@@ -1670,7 +1775,7 @@ acl_to_string(FTH self)
 static FTH
 acl_dump(FTH self)
 {
-	FTH key, val;
+	FTH 		key, val;
 
 	key = FTH_ACELL_KEY(self);
 	val = FTH_ACELL_VAL(self);
@@ -1681,7 +1786,7 @@ acl_dump(FTH self)
 FTH
 fth_make_acell(FTH key, FTH value)
 {
-	FArray *ary;
+	FArray         *ary;
 
 	ary = FTH_MALLOC(sizeof(FArray));
 	ary->type = FTH_ARY_ARRAY;
@@ -1718,20 +1823,25 @@ fth_acell_value(FTH cell)
 static ficlInteger
 assoc_index(FTH assoc, FTH key)
 {
-	FTH id, kid;
-	ficlInteger i, beg, end;
+	FTH 		id, kid;
+	ficlInteger 	i, beg, end;
 
 	if (FTH_NIL_P(assoc) || FTH_FALSE_P(assoc))
 		return (-1);
+
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(assoc), assoc, FTH_ARG1, "an array");
+
 	if (FTH_ARRAY_LENGTH(assoc) == 0)
 		return (-1);
+
 	beg = 0;
 	end = FTH_ARRAY_LENGTH(assoc) - 1;
 	id = fth_hash_id(key);
+
 	while (beg <= end) {
 		i = (beg + end) / 2;
 		kid = fth_hash_id(fth_acell_key(FTH_ARRAY_DATA(assoc)[i]));
+
 		if (id == kid)
 			return (i);
 		else if (id < kid)
@@ -1739,6 +1849,7 @@ assoc_index(FTH assoc, FTH key)
 		else
 			beg = i + 1;
 	}
+
 	return (-1);
 }
 
@@ -1749,8 +1860,8 @@ ficl_assoc_p(ficlVm *vm)
 #a( 'a 0 'b 1 'c 2 ) assoc? => #t\n\
 nil                  assoc? => #f\n\
 Return #t if OBJ is an assoc array object, otherwise #f."
-	FTH obj;
-	bool flag;
+	FTH 		obj;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1766,56 +1877,68 @@ ficl_values_to_assoc(ficlVm *vm)
 Return assoc array object with LEN/2 key-value pairs \
 found on parameter stack.  \
 Raise OUT-OF-RANGE exception if LEN < 0 or not even."
-	ficlInteger i, len;
-	FTH assoc, key, val;
+	ficlInteger 	i, len;
+	FTH 		assoc, key, val;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "negative");
+
 	if (len % 2)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "odd");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "too long");
+
 	FTH_STACK_CHECK(vm, len, 1);
 	assoc = fth_make_empty_array();
 	FTH_ASSOC_SET(assoc);
 	len /= 2;
+
 	for (i = 0; i < len; i++) {
 		val = fth_pop_ficl_cell(vm);
 		key = fth_pop_ficl_cell(vm);
 		fth_assoc(assoc, key, val);
 	}
+
 	ficlStackPushFTH(vm->dataStack, assoc);
 }
 
 static FTH
 assoc_insert(FTH assoc, FTH id, FTH val)
 {
-	ficlInteger i, len, alen;
+	ficlInteger 	i, len, alen;
 
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(assoc), assoc, FTH_ARG1, "an array");
+
 	if (!FTH_ARRAY_ASSOC_P(assoc))
 		FTH_ASSOC_SET(assoc);
-	alen = FTH_ARRAY_LENGTH(assoc); 
+
+	alen = FTH_ARRAY_LENGTH(assoc);
+
 	for (i = 0; i < alen; i++)
 		if (id < fth_hash_id(fth_acell_key(FTH_ARRAY_DATA(assoc)[i])))
 			break;
+
 	len = NEW_SEQ_LENGTH(FTH_ARRAY_TOP(assoc) + alen + 1);
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	if (len > FTH_ARRAY_BUF_LENGTH(assoc)) {
-		size_t size;
+		size_t 		size;
 
 		FTH_ARRAY_BUF_LENGTH(assoc) = len;
-		size = sizeof(FTH) * (size_t)len;
+		size = sizeof(FTH) * (size_t) len;
 		FTH_ARRAY_BUF(assoc) = FTH_REALLOC(FTH_ARRAY_BUF(assoc), size);
 		FTH_ARRAY_DATA(assoc) = FTH_ARRAY_BUF(assoc) +
 		    FTH_ARRAY_TOP(assoc);
 	}
 	memmove(FTH_ARRAY_DATA(assoc) + i + 1,
 	    FTH_ARRAY_DATA(assoc) + i,
-	    sizeof(FTH) * (size_t)(FTH_ARRAY_LENGTH(assoc) - i));
+	    sizeof(FTH) * (size_t) (FTH_ARRAY_LENGTH(assoc) - i));
 	FTH_ARRAY_LENGTH(assoc)++;
 	FTH_ARRAY_DATA(assoc)[i] = val;
 	FTH_INSTANCE_CHANGED(assoc);
@@ -1832,9 +1955,10 @@ ass 'b 20 assoc => #a( '( 'a . 10 ) '( 'b . 20 ) )\n\
 Build sorted assoc array.  \
 ASS must be an assoc array or an empty array #().\n\
 See also array-assoc, array-assoc-ref, array-assoc-set!, array-assoc-remove!."
-	FTH val;
+	FTH 		val;
 
 	val = fth_make_acell(key, value);
+
 	if (FTH_NIL_P(assoc) || FTH_FALSE_P(assoc)) {
 		assoc = fth_make_array_var(1, val);
 		FTH_ASSOC_SET(assoc);
@@ -1853,11 +1977,13 @@ ass 'a array-assoc => '( 'a . #( 0 1 ) )\n\
 ass  0 array-assoc => #f\n\
 ass  1 array-assoc => #f\n\
 If KEY matches, return corresponding key-value pair, otherwise #f."
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = assoc_index(assoc, key);
+
 	if (idx >= 0)
 		return (ary_ref(assoc, fth_make_int(idx)));
+
 	return (FTH_FALSE);
 }
 
@@ -1871,12 +1997,14 @@ ass 'a array-assoc-ref => #( 0 1 )\n\
 ass  0 array-assoc-ref => #f\n\
 ass  1 array-assoc-ref => #f\n\
 If KEY matches, return corresponding value, otherwise #f."
-	ficlInteger idx;
-	FTH as;
+	ficlInteger 	idx;
+	FTH 		as;
 
 	idx = assoc_index(assoc, key);
+
 	if (idx >= 0) {
 		as = ary_ref(assoc, fth_make_int(idx));
+
 		if (FTH_ACELL_P(as))
 			return (FTH_ACELL_VAL(as));
 		/* else fall through */
@@ -1895,9 +2023,10 @@ ass  0 10 array-assoc-set! => #a( '( 0 . 10 ) '( 'a . 10 ) )\n\
 ass  1 10 array-assoc-set! => #a( '( 0 . 10 ) '( 1 . 10 ) '( 'a . 10 ) )\n\
 ass => #a( '( 0 . 10 ) '( 1 . 10 ) '( 'a . 10 ) )\n\
 If KEY matches, set key-value pair, otherwise add new pair to ASS."
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = assoc_index(assoc, key);
+
 	if (idx >= 0) {
 		fth_array_set(assoc, idx, fth_make_acell(key, value));
 		return (assoc);
@@ -1915,11 +2044,13 @@ ass  'a  array-assoc-remove! => #a( '( 'd . 10 ) )\n\
 ass   0  array-assoc-remove! => #a( '( 'd . 10 ) )\n\
 ass   1  array-assoc-remove! => #a( '( 'd . 10 ) )\n\
 If KEY matches, remove key-value pair from ASS."
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = assoc_index(assoc, key);
+
 	if (idx >= 0)
 		fth_array_delete(assoc, idx);
+
 	return (assoc);
 }
 
@@ -1997,7 +2128,7 @@ nil        list-length => 0\n\
 5          list-length => -1\n\
 If OBJ is a list (or array), return length of list, \
 if OBJ is nil, return 0 otherwise -1."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2014,14 +2145,16 @@ make_list_instance(FArray *ary)
 FTH
 fth_make_list_var(int len,...)
 {
-	int i;
-	FArray *ary;
-	va_list list;
+	int 		i;
+	FArray         *ary;
+	va_list 	list;
 
-	ary = make_array((ficlInteger)len);
+	ary = make_array((ficlInteger) len);
 	va_start(list, len);
+
 	for (i = 0; i < len; i++)
 		ary->data[i] = va_arg(list, FTH);
+
 	va_end(list);
 	return (make_list_instance(ary));
 }
@@ -2035,12 +2168,14 @@ fth_make_list_len(ficlInteger len)
 FTH
 fth_make_list_with_init(ficlInteger len, FTH init)
 {
-	ficlInteger i;
-	FArray *ary;
+	ficlInteger 	i;
+	FArray         *ary;
 
 	ary = make_array(len);
+
 	for (i = 0; i < ary->length; i++)
 		ary->data[i] = init;
+
 	return (make_list_instance(ary));
 }
 
@@ -2059,7 +2194,7 @@ nil        nil? => #t\n\
 '()        nil? => #t\n\
 0          nil? => #f\n\
 Return #t if OBJ is nil, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2076,8 +2211,8 @@ nil        list? => #t\n\
 0          list? => #f\n\
 Return #t if OBJ is a list (nil or a cons pointer), otherwise #f."
 {
-	FTH obj;
-	bool flag;
+	FTH 		obj;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2095,8 +2230,8 @@ nil        cons? => #f\n\
 0          cons? => #f\n\
 Return #t if OBJ is a cons pointer, otherwise #f."
 {
-	FTH obj;
-	bool flag;
+	FTH 		obj;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2114,8 +2249,8 @@ nil        pair? => #f\n\
 0          pair? => #f\n\
 Return #t if OBJ is a pair (a cons pointer), otherwise #f."
 {
-	FTH obj;
-	bool flag;
+	FTH 		obj;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -2133,7 +2268,7 @@ ficl_make_list(ficlVm *vm)
 Return list of length LEN filled with keyword INITIAL-ELEMENT values.  \
 INITIAL-ELEMENT defaults to nil if not specified.  \
 Raise OUT-OF-RANGE exception if LEN < 0."
-	FTH size, init, ls;
+	FTH 		size, init, ls;
 
 	init = fth_get_optkey(FTH_KEYWORD_INIT, FTH_NIL);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -2150,15 +2285,17 @@ ficl_values_to_list(ficlVm *vm)
 0 1 2   3 >list => '( 0 1 2 )\n\
 Return list object with LEN objects found on parameter stack.  \
 Raise OUT-OF-RANGE exception if LEN < 0."
-	ficlInteger i, len;
-	FTH ls;
+	ficlInteger 	i, len;
+	FTH 		ls;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	len = ficlStackPopInteger(vm->dataStack);
 	ls = fth_make_list_len(len);
 	FTH_STACK_CHECK(vm, len, 1);
+
 	for (i = len - 1; i >= 0; i--)
 		FTH_ARRAY_DATA(ls)[i] = fth_pop_ficl_cell(vm);
+
 	ficlStackPushFTH(vm->dataStack, ls);
 }
 
@@ -2176,8 +2313,10 @@ Return Lisp-like cons pointer with VAL as car and LIST as cdr.\n\
 See also cons2."
 	if (FTH_NIL_P(list))
 		return (fth_make_list_var(1, val));
+
 	if (FTH_CONS_P(list))
 		return (fth_array_unshift(list, val));
+
 	return (fth_make_list_var(2, val, list));
 }
 
@@ -2202,8 +2341,10 @@ VAL2 as cadr and LIST as cddr.\n\
 See also cons."
 	if (FTH_NIL_P(list))
 		return (fth_make_list_var(2, val1, val2));
+
 	if (FTH_CONS_P(list))
 		return (fth_array_unshift(fth_array_unshift(list, val2), val1));
+
 	return (fth_make_list_var(3, val1, val2, list));
 
 }
@@ -2216,6 +2357,7 @@ fth_ ## Name (FTH list)							\
 									\
 	if (fth_list_length(list) > Idx)				\
 		ret = FTH_ARRAY_DATA(list)[Idx];			\
+									\
 	return (ret);							\
 }
 
@@ -2280,7 +2422,7 @@ ficl_print_list(ficlVm *vm)
 #define h_print_list "( lst -- )  print list\n\
 '( 0 1 2 ) .list => '( 0 1 2 )\n\
 Print list object LST to current output."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -2300,8 +2442,8 @@ l1 l2 list= #t\n\
 l1 l3 list= #f\n\
 Return #t if LST1 and LST2 are list objects of same length and content, \
 otherwise #f."
-	FTH obj1, obj2;
-	bool flag;
+	FTH 		obj1, obj2;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -2323,11 +2465,12 @@ ficl_set_car(ficlVm *vm)
        '() 10 set-car! => nil\n\
 Set VAL to car of LST.\n\
 See also set-cdr!."
-	FTH lst, val;
+	FTH 		lst, val;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	val = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
+
 	if (FTH_CONS_P(lst) && FTH_ARRAY_LENGTH(lst) > 0) {
 		fth_array_set(lst, 0L, val);
 		ficlStackPushFTH(vm->dataStack, lst);
@@ -2343,12 +2486,13 @@ ficl_set_cdr(ficlVm *vm)
        '() 10 set-cdr! => nil\n\
 Set VAL to cdr of LST.\n\
 See also set-car!."
-	FTH lst, val, ls;
+	FTH 		lst, val, ls;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	val = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
 		if (FTH_ARRAY_LENGTH(lst) == 1)
 			fth_array_push(lst, val);
@@ -2393,9 +2537,10 @@ lst2 => '( 0 #{ 'foo 10 } 2 )\n\
 Return copy of LST1 with all elements new created \
 in contrary to list->array.\n\
 See also list->array."
-	FTH ls;
+	FTH 		ls;
 
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(list)) {
 		ls = ary_copy(list);
 		FTH_LIST_SET(ls);
@@ -2423,8 +2568,8 @@ ficl_list_ref(ficlVm *vm)
 Return value at position IDX of LST.  \
 Negative IDX counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in LST's range."
-	FTH lst;
-	ficlInteger idx;
+	FTH 		lst;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2455,8 +2600,8 @@ lst => '( 'a 'e 'c )\n\
 Store VAL at position IDX in LST.  \
 Negative IDX counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in LST's range."
-	FTH lst, val;
-	ficlInteger idx;
+	FTH 		lst, val;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2483,9 +2628,10 @@ ls_append_each(FTH value, FTH ls)
 FTH
 fth_list_append(FTH args)
 {
-	FTH ls;
+	FTH 		ls;
 
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(args)) {
 		ls = fth_make_empty_list();
 		ls = fth_array_each(args, ls_append_each, ls);
@@ -2507,24 +2653,29 @@ ficl_list_append(ficlVm *vm)
                            0 list-append => '()\n\
 Return list object with N objects found on parameter stack.  \
 Raise OUT-OF-RANGE exception if N < 0."
-	ficlInteger i, len;
-	FTH ls;
+	ficlInteger 	i, len;
+	FTH 		ls;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	ls = FTH_NIL;
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "negative");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "too long");
+
 	if (len == 0) {
 		fth_push_ficl_cell(vm, ls);
 		return;
 	}
 	FTH_STACK_CHECK(vm, len, 1);
 	ls = fth_make_list_len(len);
+
 	for (i = len - 1; i >= 0; i--)
 		FTH_ARRAY_DATA(ls)[i] = fth_pop_ficl_cell(vm);
+
 	fth_push_ficl_cell(vm, fth_list_append(ls));
 }
 
@@ -2540,9 +2691,10 @@ l1 list-reverse value l2\n\
 l1 => '( 0 1 2 )\n\
 l2 => '( 2 1 0 )\n\
 Return new list with elements reversed."
-	FTH ls;
+	FTH 		ls;
 
 	ls = list;
+
 	if (FTH_CONS_P(list)) {
 		ls = fth_array_reverse(ary_copy(list));
 		FTH_LIST_SET(ls);
@@ -2563,14 +2715,15 @@ Insert VAL to LST1 at position IDX and return new list.  \
 VAL can be a list or any other object.  \
 Negative IDX counts from backward.  \
 Raise OUT-OF-RANGE exception if IDX is not in LST1's range."
-	ficlInteger idx;
-	FTH lst, val, ls;
+	ficlInteger 	idx;
+	FTH 		lst, val, ls;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	val = fth_pop_ficl_cell(vm);
 	idx = ficlStackPopInteger(vm->dataStack);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
 		ls = fth_array_insert(ary_copy(lst), idx, val);
 		FTH_LIST_SET(ls);
@@ -2581,12 +2734,14 @@ Raise OUT-OF-RANGE exception if IDX is not in LST1's range."
 static FTH
 ls_delete_each(FTH value, FTH data)
 {
-	FTH key, ls;
+	FTH 		key, ls;
 
 	key = FTH_ARRAY_DATA(data)[0];
 	ls = FTH_ARRAY_DATA(data)[1];
+
 	if (!fth_object_equal_p(value, key))
 		fth_array_push(ls, value);
+
 	return (data);
 }
 
@@ -2597,12 +2752,13 @@ ficl_list_delete(ficlVm *vm)
 '( 0 0 1 2 ) 0 list-delete => '( 1 2 )\n\
 Return new list without all elements equal KEY.\n\
 See also list-delete!."
-	FTH lst, key, data, ls;
+	FTH 		lst, key, data, ls;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
 		ls = fth_make_empty_list();
 		data = fth_make_array_var(2, key, ls);
@@ -2620,14 +2776,16 @@ ls 1 list-delete! => 'b\n\
 ls => '( 'a 'c )\n\
 Return LST without all elements equal KEY.\n\
 See also list-delete."
-	ficlInteger i, len;
-	FTH lst, key;
+	ficlInteger 	i, len;
+	FTH 		lst, key;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
+
 	if (FTH_CONS_P(lst)) {
-		len = FTH_ARRAY_LENGTH(lst); 
+		len = FTH_ARRAY_LENGTH(lst);
+
 		for (i = 0; i < len; i++)
 			if (fth_object_equal_p(FTH_ARRAY_DATA(lst)[i], key))
 				fth_array_delete(lst, i--);
@@ -2643,24 +2801,29 @@ ficl_list_slice(ficlVm *vm)
 Return new list without COUNT elements from IDX on.  \
 Raise OUT-OF-RANGE exception if IDX is not in LST1's range.\n\
 See also list-slice!."
-	ficlInteger idx, cnt;
-	FTH lst, ls;
+	ficlInteger 	idx, cnt;
+	FTH 		lst, ls;
 
 	cnt = fth_get_optkey_int(FTH_KEYWORD_COUNT, 1L);
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
-		ficlInteger i, end, len;
+		ficlInteger 	i , end, len;
 
 		len = FTH_ARRAY_LENGTH(lst);
+
 		if (idx < 0)
 			idx += len;
+
 		if (idx < 0 || idx >= len)
 			FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 		end = idx + cnt;
 		ls = fth_make_empty_list();
+
 		for (i = 0; i < len; i++)
 			if (i < idx || i >= end)
 				fth_array_push(ls, FTH_ARRAY_DATA(lst)[i]);
@@ -2678,23 +2841,28 @@ ls => '( 0 2 )\n\
 Return LST without COUNT elements from IDX on.  \
 Raise OUT-OF-RANGE exception if IDX is not in LST's range.\n\
 See also list-slice."
-	FTH lst;
-	ficlInteger idx, cnt;
+	FTH 		lst;
+	ficlInteger 	idx, cnt;
 
 	cnt = fth_get_optkey_int(FTH_KEYWORD_COUNT, 1L);
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	lst = fth_pop_ficl_cell(vm);
+
 	if (FTH_CONS_P(lst)) {
-		ficlInteger i, j, end, len;
-		FTH el;
+		ficlInteger 	i, j, end, len;
+		FTH 		el;
 
 		len = FTH_ARRAY_LENGTH(lst);
+
 		if (idx < 0)
 			idx += len;
+
 		if (idx < 0 || idx >= len)
 			FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 		end = idx + cnt;
+
 		for (i = 0, j = 0; i < len; i++) {
 			if (i < idx || i >= end) {
 				el = FTH_ARRAY_DATA(lst)[i];
@@ -2714,13 +2882,15 @@ ficl_list_fill(ficlVm *vm)
 ls 10 list-fill drop\n\
 ls => '( 10 10 10 )\n\
 Set all elements of LST to VAL."
-	FTH lst, val;
+	FTH 		lst, val;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	val = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
+
 	if (FTH_CONS_P(lst))
 		fth_array_fill(lst, val);
+
 	fth_push_ficl_cell(vm, lst);
 }
 
@@ -2732,15 +2902,17 @@ ficl_list_index(ficlVm *vm)
 '( 'a 'b 'c ) 'f list-index => -1\n\
 Return index of KEY in LST or -1 if not found.\n\
 See also list-member?."
-	FTH lst, key;
-	ficlInteger idx;
+	FTH 		lst, key;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
 	lst = fth_pop_ficl_cell(vm);
 	idx = -1;
+
 	if (FTH_CONS_P(lst))
 		idx = fth_array_index(lst, key);
+
 	ficlStackPushInteger(vm->dataStack, idx);
 }
 
@@ -2767,13 +2939,14 @@ ficl_list_head(ficlVm *vm)
 '( 0 1 2 3 ) 2 list-head => '( 0 1 )\n\
 Return first IDX entries of LST1 in a new list or nil.\n\
 See also list-tail and list-pair."
-	ficlInteger idx;
-	FTH lst, ls;
+	ficlInteger 	idx;
+	FTH 		lst, ls;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
 		ls = fth_array_subarray(lst, 0L, idx);
 		FTH_LIST_SET(ls);
@@ -2788,19 +2961,22 @@ ficl_list_tail(ficlVm *vm)
 '( 0 1 2 3 ) 2 list-tail => '( 2 3 )\n\
 Return IDX'th cdr of LST1 up to the last entry in a new list or nil.\n\
 See also list-head and list-pair."
-	ficlInteger idx, len;
-	FTH lst, ls;
+	ficlInteger 	idx, len;
+	FTH 		lst, ls;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst)) {
 		len = FTH_ARRAY_LENGTH(lst);
+
 		if (idx >= 0 && len >= idx) {
-			ficlInteger i, j;
+			ficlInteger 	i , j;
 
 			ls = fth_make_list_len(len - idx);
+
 			for (i = idx, j = 0; i < len; i++, j++)
 				FTH_ARRAY_DATA(ls)[j] = FTH_ARRAY_DATA(lst)[i];
 		} else
@@ -2819,13 +2995,15 @@ ls => '( 0 '( 1 . 2 ) )\n\
 ls last-pair => '( '( 1 . 2 ) )\n\
 Return last pair in LIST.\n\
 See also list-head and list-tail."
-	FTH lst, ls;
+	FTH 		lst, ls;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	lst = fth_pop_ficl_cell(vm);
 	ls = FTH_NIL;
+
 	if (FTH_CONS_P(lst) && FTH_ARRAY_LENGTH(lst) > 0)
 		ls = fth_make_list_var(1, fth_array_ref(lst, -1L));
+
 	fth_push_ficl_cell(vm, ls);
 }
 
@@ -2841,25 +3019,31 @@ ficl_values_to_alist(ficlVm *vm)
 Return assoc list object with LEN/2 key-value pairs \
 found on parameter stack.  \
 Raise OUT-OF-RANGE exception if LEN < 0 or not even."
-	ficlInteger i, len;
-	FTH alist, key, val;
+	ficlInteger 	i, len;
+	FTH 		alist, key, val;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "negative");
+
 	if (len % 2)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "odd");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARGn, len, "too long");
+
 	FTH_STACK_CHECK(vm, len, 1);
 	alist = fth_make_empty_list();
 	len /= 2;
+
 	for (i = 0; i < len; i++) {
 		val = fth_pop_ficl_cell(vm);
 		key = fth_pop_ficl_cell(vm);
 		assoc_insert(alist, fth_hash_id(key), fth_make_acell(key, val));
 	}
+
 	ficlStackPushFTH(vm->dataStack, alist);
 }
 
@@ -2874,15 +3058,17 @@ ass => 'a( '( 'a . 10 ) )\n\
 ass => 'a( '( 'a . 10 ) '( 'b . 20 ) )\n\
 Return new Lisp-like associated list from key-value pair and ALIST.\n\
 See also list-assoc, list-assoc-ref, list-assoc-set!, list-assoc-remove!."
-	FTH ls, val;
+	FTH 		ls, val;
 
 	val = fth_make_acell(key, value);
+
 	if (FTH_NIL_P(alist))
 		ls = fth_make_list_var(1, val);
 	else if (FTH_CONS_P(alist))
 		ls = fth_array_unshift(alist, val);
 	else
 		ls = fth_make_list_var(2, val, alist);
+
 	FTH_ASSOC_SET(ls);
 	return (ls);
 }
@@ -2939,12 +3125,14 @@ ass  0 10 list-assoc-set! => 'a( '( 0 . 10 ) '( 'a . 10 ) )\n\
 ass  1 10 list-assoc-set! => 'a( '( 0 . 10 ) '( 1 . 10 ) '( 'a . 10 ) )\n\
 ass => 'a( '( 0 . 10 ) '( 1 . 10 ) '( 'a . 10 ) )\n\
 If KEY matches, set key-value pair, otherwise add new pair to ALIST."
-	ficlInteger idx;
-	FTH val;
+	ficlInteger 	idx;
+	FTH 		val;
 
 	val = fth_make_acell(key, value);
+
 	if (FTH_CONS_P(alist)) {
 		idx = assoc_index(alist, key);
+
 		if (idx >= 0)
 			fth_array_set(alist, idx, val);
 		else
@@ -3006,11 +3194,13 @@ init_array_type(void)
 void
 init_array(void)
 {
-	fth_set_object_apply(array_tag, (void *)ary_ref, 1, 0, 0);
+	fth_set_object_apply(array_tag, (void *) ary_ref, 1, 0, 0);
+
 	/* struct members */
 	init_ary_length();
 	init_ary_buf_length();
 	init_ary_top();
+
 	/* array */
 	FTH_PRI1("array-length", ficl_array_length, h_array_length);
 	FTH_PRI1("array?", ficl_array_p, h_array_p);
@@ -3051,6 +3241,7 @@ init_array(void)
 	FTH_PROC("array-join", fth_array_join, 2, 0, 0, h_array_join);
 	FTH_PRI1("array-subarray", ficl_array_subarray, h_array_subarray);
 	FTH_VOID_PROC("array-clear", fth_array_clear, 1, 0, 0, h_array_clear);
+
 	/* assoc */
 	FTH_PRI1("assoc?", ficl_assoc_p, h_assoc_p);
 	FTH_PRI1(">assoc", ficl_values_to_assoc, h_values_to_assoc);
@@ -3061,6 +3252,7 @@ init_array(void)
 	    h_array_ass_set);
 	FTH_PROC("array-assoc-remove!", fth_array_assoc_remove, 2, 0, 0, h_aar);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_ARRAY, h_list_of_array_functions);
+
 	/* list */
 	FTH_PRI1("list-length", ficl_list_length, h_list_length);
 	FTH_PRI1("nil?", ficl_nil_p, h_nil_p);
@@ -3100,6 +3292,7 @@ init_array(void)
 	FTH_PRI1("list-head", ficl_list_head, h_list_head);
 	FTH_PRI1("list-tail", ficl_list_tail, h_list_tail);
 	FTH_PRI1("last-pair", ficl_last_pair, h_last_pair);
+
 	/* alist */
 	FTH_PRI1(">alist", ficl_values_to_alist, h_values_to_alist);
 	FTH_PROC("acons", fth_acons, 3, 0, 0, h_list_acons);

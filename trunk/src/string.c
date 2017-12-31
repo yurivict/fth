@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.167 3/1/16
+ * @(#)string.c	1.168 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -35,20 +35,20 @@
 
 /* === STRING === */
 
-static FTH	string_tag;
+static FTH 	string_tag;
 
 typedef struct {
-	ficlInteger	length;	/* actual string length */
-	ficlInteger	buf_length;	/* buffer length (bigger than actual
+	ficlInteger 	length;	/* actual string length */
+	ficlInteger 	buf_length;	/* buffer length (bigger than actual
 					 * string length) */
-	ficlInteger	top;	/* begin of actual string in buffer */
+	ficlInteger 	top;	/* begin of actual string in buffer */
 	char           *data;	/* actual string */
 	char           *buf;	/* entire string buffer */
 } FString;
 
 #define MAKE_STRING_MEMBER(Type, Member) MAKE_MEMBER(FString, str, Type, Member)
 
-/*
+/*-
  * Build words for scrutinizing strings:
  *
  * init_str_length     => str->length
@@ -61,8 +61,7 @@ MAKE_STRING_MEMBER(Integer, top)
 
 #define FTH_STRING_OBJECT(Obj)	FTH_INSTANCE_REF_GEN(Obj, FString)
 #define FTH_STRING_LENGTH(Obj)	FTH_STRING_OBJECT(Obj)->length
-#define FTH_STRING_BUF_LENGTH(Obj)					\
-	FTH_STRING_OBJECT(Obj)->buf_length
+#define FTH_STRING_BUF_LENGTH(Obj)	FTH_STRING_OBJECT(Obj)->buf_length
 #define FTH_STRING_TOP(Obj)	FTH_STRING_OBJECT(Obj)->top
 #define FTH_STRING_DATA(Obj)	FTH_STRING_OBJECT(Obj)->data
 #define FTH_STRING_BUF(Obj)	FTH_STRING_OBJECT(Obj)->buf
@@ -71,68 +70,68 @@ MAKE_STRING_MEMBER(Integer, top)
 #define FTH_STRREG_P(Obj)	(FTH_STRING_P(Obj) || FTH_REGEXP_P(Obj))
 #define FTH_TO_CCHAR(Obj)	((char)(FTH_TO_CHAR(Obj)))
 
-static void	ficl_char_p(ficlVm *vm);
-static void	ficl_cr_string(ficlVm *vm);
-static void	ficl_die(ficlVm *vm);
-static void	ficl_error(ficlVm *vm);
-static void	ficl_error_object(ficlVm *vm);
-static void	ficl_forth_string_to_string(ficlVm *vm);
-static void	ficl_fth_die(FTH fmt, FTH args);
-static void	ficl_fth_error(FTH fmt, FTH args);
-static FTH	ficl_fth_format(FTH fmt, FTH args);
-static void	ficl_fth_print(FTH fmt, FTH args);
-static void	ficl_fth_warning(FTH fmt, FTH args);
-static void	ficl_make_empty_string(ficlVm *vm);
-static void	ficl_make_string(ficlVm *vm);
-static void	ficl_make_string_im(ficlVm *vm);
-static void	ficl_print_debug(ficlVm *vm);
-static void	ficl_print_object(ficlVm *vm);
-static void	ficl_print_stderr(ficlVm *vm);
-static void	ficl_print_stdout(ficlVm *vm);
-static void	ficl_space_string(ficlVm *vm);
-static void	ficl_spaces_string(ficlVm *vm);
-static void	ficl_string_capitalize(ficlVm *vm);
-static void	ficl_string_capitalize_bang(ficlVm *vm);
-static void	ficl_string_chomp(ficlVm *vm);
-static void	ficl_string_chomp_bang(ficlVm *vm);
-static void	ficl_string_delete(ficlVm *vm);
-static void	ficl_string_downcase(ficlVm *vm);
-static void	ficl_string_downcase_bang(ficlVm *vm);
-static void	ficl_string_cmp(ficlVm *vm);
-static void	ficl_string_equal_p(ficlVm *vm);
-static void	ficl_string_eval(ficlVm *vm);
-static void	ficl_string_eval_with_status(ficlVm *vm);
-static void	ficl_string_greater_p(ficlVm *vm);
-static void	ficl_string_immutable_paren(ficlVm *vm);
-static void	ficl_string_insert(ficlVm *vm);
-static void	ficl_string_length(ficlVm *vm);
-static void	ficl_string_less_p(ficlVm *vm);
-static void	ficl_string_member_p(ficlVm *vm);
-static void	ficl_string_not_equal_p(ficlVm *vm);
-static void	ficl_string_p(ficlVm *vm);
-static void	ficl_string_ref(ficlVm *vm);
-static void	ficl_string_replace(ficlVm *vm);
-static void	ficl_string_replace_bang(ficlVm *vm);
-static void	ficl_string_reverse(ficlVm *vm);
-static void	ficl_string_reverse_bang(ficlVm *vm);
-static void	ficl_string_set(ficlVm *vm);
-static void	ficl_string_substring(ficlVm *vm);
-static void	ficl_string_to_forth_string(ficlVm *vm);
-static void	ficl_string_upcase(ficlVm *vm);
-static void	ficl_string_upcase_bang(ficlVm *vm);
-static void	ficl_values_to_string(ficlVm *vm);
-static void	ficl_warning(ficlVm *vm);
-static FTH	make_string_instance(FString *s);
+static void 	ficl_char_p(ficlVm *vm);
+static void 	ficl_cr_string(ficlVm *vm);
+static void 	ficl_die(ficlVm *vm);
+static void 	ficl_error(ficlVm *vm);
+static void 	ficl_error_object(ficlVm *vm);
+static void 	ficl_forth_string_to_string(ficlVm *vm);
+static void 	ficl_fth_die(FTH fmt, FTH args);
+static void 	ficl_fth_error(FTH fmt, FTH args);
+static FTH 	ficl_fth_format(FTH fmt, FTH args);
+static void 	ficl_fth_print(FTH fmt, FTH args);
+static void 	ficl_fth_warning(FTH fmt, FTH args);
+static void 	ficl_make_empty_string(ficlVm *vm);
+static void 	ficl_make_string(ficlVm *vm);
+static void 	ficl_make_string_im(ficlVm *vm);
+static void 	ficl_print_debug(ficlVm *vm);
+static void 	ficl_print_object(ficlVm *vm);
+static void 	ficl_print_stderr(ficlVm *vm);
+static void 	ficl_print_stdout(ficlVm *vm);
+static void 	ficl_space_string(ficlVm *vm);
+static void 	ficl_spaces_string(ficlVm *vm);
+static void 	ficl_string_capitalize(ficlVm *vm);
+static void 	ficl_string_capitalize_bang(ficlVm *vm);
+static void 	ficl_string_chomp(ficlVm *vm);
+static void 	ficl_string_chomp_bang(ficlVm *vm);
+static void 	ficl_string_delete(ficlVm *vm);
+static void 	ficl_string_downcase(ficlVm *vm);
+static void 	ficl_string_downcase_bang(ficlVm *vm);
+static void 	ficl_string_cmp(ficlVm *vm);
+static void 	ficl_string_equal_p(ficlVm *vm);
+static void 	ficl_string_eval(ficlVm *vm);
+static void 	ficl_string_eval_with_status(ficlVm *vm);
+static void 	ficl_string_greater_p(ficlVm *vm);
+static void 	ficl_string_immutable_paren(ficlVm *vm);
+static void 	ficl_string_insert(ficlVm *vm);
+static void 	ficl_string_length(ficlVm *vm);
+static void 	ficl_string_less_p(ficlVm *vm);
+static void 	ficl_string_member_p(ficlVm *vm);
+static void 	ficl_string_not_equal_p(ficlVm *vm);
+static void 	ficl_string_p(ficlVm *vm);
+static void 	ficl_string_ref(ficlVm *vm);
+static void 	ficl_string_replace(ficlVm *vm);
+static void 	ficl_string_replace_bang(ficlVm *vm);
+static void 	ficl_string_reverse(ficlVm *vm);
+static void 	ficl_string_reverse_bang(ficlVm *vm);
+static void 	ficl_string_set(ficlVm *vm);
+static void 	ficl_string_substring(ficlVm *vm);
+static void 	ficl_string_to_forth_string(ficlVm *vm);
+static void 	ficl_string_upcase(ficlVm *vm);
+static void 	ficl_string_upcase_bang(ficlVm *vm);
+static void 	ficl_values_to_string(ficlVm *vm);
+static void 	ficl_warning(ficlVm *vm);
+static FTH 	make_string_instance(FString *s);
 static FString *make_string_len(ficlInteger len);
-static FTH	str_dump(FTH self);
-static FTH	str_equal_p(FTH self, FTH obj);
-static void	str_free(FTH self);
-static FTH	str_inspect(FTH self);
-static FTH	str_length(FTH self);
-static FTH	str_ref(FTH self, FTH fidx);
-static FTH	str_set(FTH self, FTH fidx, FTH value);
-static FTH	str_to_array(FTH self);
-static FTH	str_to_string(FTH self);
+static FTH 	str_dump(FTH self);
+static FTH 	str_equal_p(FTH self, FTH obj);
+static void 	str_free(FTH self);
+static FTH 	str_inspect(FTH self);
+static FTH 	str_length(FTH self);
+static FTH 	str_ref(FTH self, FTH fidx);
+static FTH 	str_set(FTH self, FTH fidx, FTH value);
+static FTH 	str_to_array(FTH self);
+static FTH 	str_to_string(FTH self);
 
 #define h_list_of_string_functions "\
 *** STRING PRIMITIVES ***\n\
@@ -211,9 +210,9 @@ static FTH
 str_inspect(FTH self)
 {
 	return (fth_make_string_format("%s[%ld]: \"%s\"",
-	    FTH_INSTANCE_NAME(self),
-	    FTH_STRING_LENGTH(self),
-	    FTH_STRING_DATA(self)));
+		FTH_INSTANCE_NAME(self),
+		FTH_STRING_LENGTH(self),
+		FTH_STRING_DATA(self)));
 }
 
 static FTH
@@ -231,35 +230,44 @@ str_dump(FTH self)
 static FTH
 str_to_array(FTH self)
 {
-	ficlInteger i;
-	FTH array;
+	ficlInteger 	i;
+	FTH 		array;
 
 	array = fth_make_array_len(FTH_STRING_LENGTH(self));
-	for (i = 0; i < FTH_STRING_LENGTH(self); i++)
-		fth_array_fast_set(array, i,
-		    CHAR_TO_FTH(FTH_STRING_DATA(self)[i]));
+
+	for (i = 0; i < FTH_STRING_LENGTH(self); i++) {
+		FTH 		c;
+
+		c = CHAR_TO_FTH(FTH_STRING_DATA(self)[i]);
+		fth_array_fast_set(array, i, c);
+	}
+
 	return (array);
 }
 
 static FTH
 str_ref(FTH self, FTH fidx)
 {
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = FTH_INT_REF(fidx);
+
 	if (idx < 0 || idx >= FTH_STRING_LENGTH(self))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	return (CHAR_TO_FTH(FTH_STRING_DATA(self)[idx]));
 }
 
 static FTH
 str_set(FTH self, FTH fidx, FTH value)
 {
-	ficlInteger idx;
+	ficlInteger 	idx;
 
 	idx = FTH_INT_REF(fidx);
+
 	if (idx < 0 || idx >= FTH_STRING_LENGTH(self))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	FTH_ASSERT_ARGS(FTH_CHAR_P(value), value, FTH_ARG3, "a char");
 	FTH_STRING_DATA(self)[idx] = FTH_TO_CCHAR(value);
 	FTH_INSTANCE_CHANGED(self);
@@ -269,18 +277,17 @@ str_set(FTH self, FTH fidx, FTH value)
 static FTH
 str_equal_p(FTH self, FTH obj)
 {
-	if (FTH_STRING_LENGTH(self) == FTH_STRING_LENGTH(obj)) {
-		if (FTH_STRING_LENGTH(self) == 0)
-			return (FTH_TRUE);
-		else {
-			char *s, *o;
+	char           *s, *o;
 
-			s = FTH_STRING_DATA(self);
-			o = FTH_STRING_DATA(obj);
-			return (BOOL_TO_FTH(strcmp(s, o) == 0));
-		}
-	}
-	return (FTH_FALSE);
+	if (FTH_STRING_LENGTH(self) != FTH_STRING_LENGTH(obj))
+		return (FTH_FALSE);
+
+	if (FTH_STRING_LENGTH(self) == 0)
+		return (FTH_TRUE);
+
+	s = FTH_STRING_DATA(self);
+	o = FTH_STRING_DATA(obj);
+	return (BOOL_TO_FTH(strcmp(s, o) == 0));
 }
 
 static FTH
@@ -306,7 +313,7 @@ str_free(FTH self)
  * FTH fs = FTH_FALSE;
  * fth_string_ref(fs);				=> NULL
  */
-char *
+char           *
 fth_string_ref(FTH obj)
 {
 	return (FTH_STRING_P(obj) ? FTH_STRING_DATA(obj) : NULL);
@@ -333,7 +340,7 @@ ficl_string_length(ficlVm *vm)
 \"hello\" string-length => 5\n\
 5       string-length => -1\n\
 If STR is a string object, return its length, otherwise -1."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -347,7 +354,7 @@ ficl_string_p(ficlVm *vm)
 \"hello\" string? => #t\n\
 nil     string? => #f\n\
 Return #t if OBJ is a string object, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -362,7 +369,7 @@ ficl_char_p(ficlVm *vm)
 65       char? => #t\n\
 10       char? => #f\n\
 Return #t if OBJ is a character, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -372,15 +379,18 @@ Return #t if OBJ is a character, otherwise #f."
 static FString *
 make_string_len(ficlInteger len)
 {
-	FString *s;
-	ficlInteger buf_len, top_len;
+	FString        *s;
+	ficlInteger 	buf_len, top_len;
 
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "negative");
+
 	top_len = NEW_SEQ_LENGTH(len + 1) / 3;
 	buf_len = NEW_SEQ_LENGTH(len + 1 + top_len);
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	s = FTH_MALLOC(sizeof(FString));
 	s->length = len;
 	s->buf_length = buf_len;
@@ -395,6 +405,7 @@ make_string_instance(FString *s)
 {
 	if (s != NULL)
 		return (fth_make_instance(string_tag, s));
+
 	FTH_SYSTEM_ERROR_ARG_THROW(make_string, FTH_STR_STRING);
 	return (FTH_FALSE);
 }
@@ -412,13 +423,14 @@ make_string_instance(FString *s)
 FTH
 fth_make_string(const char *str)
 {
-	FString *s;
-	size_t len;
+	FString        *s;
+	size_t 		len;
 
 	if (str == NULL || *str == '\0')
 		str = "";
+
 	len = strlen(str);
-	s = make_string_len((ficlInteger)len);
+	s = make_string_len((ficlInteger) len);
 	memmove(s->data, str, len);
 	return (make_string_instance(s));
 }
@@ -434,13 +446,14 @@ fth_make_string(const char *str)
 FTH
 fth_make_string_or_false(const char *str)
 {
-	FString *s;
-	size_t len;
+	FString        *s;
+	size_t 		len;
 
 	if (str == NULL || *str == '\0')
 		return (FTH_FALSE);
+
 	len = strlen(str);
-	s = make_string_len((ficlInteger)len);
+	s = make_string_len((ficlInteger) len);
 	memmove(s->data, str, len);
 	return (make_string_instance(s));
 }
@@ -458,13 +471,14 @@ fth_make_string_or_false(const char *str)
 FTH
 fth_make_string_len(const char *str, ficlInteger len)
 {
-	FString *s;
-	size_t slen, blen;
+	FString        *s;
+	size_t 		slen, blen;
 
 	if (str == NULL || *str == '\0')
 		str = "";
+
 	slen = strlen(str);
-	blen = FICL_MIN((size_t)len, slen);
+	blen = FICL_MIN((size_t) len, slen);
 	s = make_string_len(blen);
 	memmove(s->data, str, blen);
 	s->data[blen] = '\0';
@@ -480,7 +494,7 @@ fth_make_string_len(const char *str, ficlInteger len)
 FTH
 fth_make_empty_string(void)
 {
-	FString *s;
+	FString        *s;
 
 	s = make_string_len(0);
 	s->data[0] = '\0';
@@ -500,13 +514,14 @@ fth_make_empty_string(void)
 FTH
 fth_make_string_format(const char *fmt,...)
 {
-	char *str;
-	va_list ap;
-	FTH fs;
+	char           *str;
+	va_list 	ap;
+	FTH 		fs;
 
 	va_start(ap, fmt);
 	fth_vasprintf(&str, fmt, ap);
 	va_end(ap);
+
 	fs = fth_make_string(str);
 	FTH_FREE(str);
 	return (fs);
@@ -550,8 +565,8 @@ fth_string_sncat(FTH fs, const char *str, ficlInteger len)
 FTH
 fth_string_sformat(FTH fs, const char *fmt,...)
 {
-	FTH s;
-	va_list ap;
+	FTH 		s;
+	va_list 	ap;
 
 	va_start(ap, fmt);
 	s = fth_string_vsformat(fs, fmt, ap);
@@ -565,8 +580,8 @@ fth_string_sformat(FTH fs, const char *fmt,...)
 FTH
 fth_string_vsformat(FTH fs, const char *fmt, va_list ap)
 {
-	char *str;
-	FTH s;
+	char           *str;
+	FTH 		s;
 
 	str = fth_vformat(fmt, ap);
 	s = fth_make_string(str);
@@ -584,10 +599,10 @@ ficl_make_string(ficlVm *vm)
 Return a new string of length LEN filled with INITIAL-ELEMENT characters, \
 default space.  \
 Raise an OUT-OF-RANGE exception if LEN < 0."
-	FTH size;
-	ficlInteger len;
-	int init;
-	FString *s;
+	FTH 		size;
+	ficlInteger 	len;
+	int 		init;
+	FString        *s;
 
 	init = fth_get_optkey_fix(FTH_KEYWORD_INIT, ' ');
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -595,7 +610,7 @@ Raise an OUT-OF-RANGE exception if LEN < 0."
 	FTH_ASSERT_ARGS(FTH_INTEGER_P(size), size, FTH_ARG1, "an integer");
 	len = FTH_INT_REF(size);
 	s = make_string_len(len);
-	memset(s->data, init, (size_t)len);
+	memset(s->data, init, (size_t) len);
 	ficlStackPushFTH(vm->dataStack, make_string_instance(s));
 }
 
@@ -607,21 +622,26 @@ ficl_values_to_string(ficlVm *vm)
 Return new string with LEN objects from stack converted to their \
 string representation.  \
 Raise an OUT-OF-RANGE exception if LEN < 0."
-	ficlInteger i, len;
-	FTH fs, obj;
+	ficlInteger 	i, len;
+	FTH 		fs, obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "negative");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	FTH_STACK_CHECK(vm, len, 1);
 	fs = fth_make_empty_string();
+
 	for (i = 0; i < len; i++) {
 		obj = fth_pop_ficl_cell(vm);
 		fth_string_unshift(fs, fth_object_to_string(obj));
 	}
+
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
@@ -657,20 +677,23 @@ ficl_spaces_string(ficlVm *vm)
 0 $spaces => \"\"\n\
 Return string object of LEN spaces.  \
 Raise an OUT-OF-RANGE exception if LEN < 0."
-	ficlInteger len;
-	FTH fs;
+	ficlInteger 	len;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	len = ficlStackPopInteger(vm->dataStack);
+
 	if (len < 0)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "negative");
+
 	if (len > MAX_SEQ_LENGTH)
 		FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, len, "too long");
+
 	if (len == 0) {
 		ficlStackPushFTH(vm->dataStack, fth_make_empty_string());
 		return;
 	}
-	fs = fth_make_string_format("%*c", (int)len, ' ');
+	fs = fth_make_string_format("%*c", (int) len, ' ');
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
@@ -842,18 +865,17 @@ See also .stdout and .stderr."
  * fth_string_equal_p(s1, s3);			=> 1
  * fth_string_equal_p(s3, s3);			=> 1
  */
-bool
+int
 fth_string_equal_p(FTH obj1, FTH obj2)
 {
-	if (FTH_STRING_P(obj1) && FTH_STRING_P(obj2)) {
-		char *b, *o;
+	char           *b, *o;
 
-		b = FTH_STRING_DATA(obj1);
-		o = FTH_STRING_DATA(obj2);
-		return (strcmp(b, o) == 0);
+	if (!FTH_STRING_P(obj1) || !FTH_STRING_P(obj2))
+		return (0);
 
-	}
-	return (false);
+	b = FTH_STRING_DATA(obj1);
+	o = FTH_STRING_DATA(obj2);
+	return (strcmp(b, o) == 0);
 }
 
 static void
@@ -871,17 +893,21 @@ Return -1 if STR1 is less than STR2, \
 and 0 if STR1 is equal to STR2.  \
 It may be used with sort functions.\n\
 See also string=, string<>, string<, string>."
-	char *s1, *s2;
-	int n;
+	char           *s1, *s2;
+	int 		n;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	s2 = pop_cstring(vm);
 	s1 = pop_cstring(vm);
+
 	if (s1 == NULL)
 		s1 = "";
+
 	if (s2 == NULL)
 		s2 = "";
+
 	n = strcmp(s1, s2);
+
 	if (n < 0)
 		ficlStackPushInteger(vm->dataStack, -1);
 	else if (n > 0)
@@ -902,7 +928,7 @@ s1 s3 string= => #t\n\
 s3 s3 string= => #t\n\
 Return #t if strings are equal, otherwise #f.\n\
 See also string<>, string<, string>, string-cmp."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -921,18 +947,17 @@ See also string<>, string<, string>, string-cmp."
  * fth_string_not_equal_p(s1, s3);		=> 0
  * fth_string_not_equal_p(s3, s3);		=> 0
  */
-bool
+int
 fth_string_not_equal_p(FTH obj1, FTH obj2)
 {
-	if (FTH_STRING_P(obj1) && FTH_STRING_P(obj2)) {
-		char *b, *o;
+	char           *b, *o;
 
-		b = FTH_STRING_DATA(obj1);
-		o = FTH_STRING_DATA(obj2);
-		return (strcmp(b, o) != 0);
+	if (!FTH_STRING_P(obj1) || !FTH_STRING_P(obj2))
+		return (0);
 
-	}
-	return (false);
+	b = FTH_STRING_DATA(obj1);
+	o = FTH_STRING_DATA(obj2);
+	return (strcmp(b, o) != 0);
 }
 
 static void
@@ -947,7 +972,7 @@ s1 s3 string<> => #f\n\
 s3 s3 string<> => #f\n\
 Return #t if strings are not equal, otherwise #f.\n\
 See also string=, string<, string>, string-cmp."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -966,18 +991,17 @@ See also string=, string<, string>, string-cmp."
  * fth_string_less_p(s1, s3);			=> 0
  * fth_string_less_p(s3, s3);			=> 0
  */
-bool
+int
 fth_string_less_p(FTH obj1, FTH obj2)
 {
-	if (FTH_STRING_P(obj1) && FTH_STRING_P(obj2)) {
-		char *b, *o;
+	char           *b, *o;
 
-		b = FTH_STRING_DATA(obj1);
-		o = FTH_STRING_DATA(obj2);
-		return (strcmp(b, o) < 0);
+	if (!FTH_STRING_P(obj1) || !FTH_STRING_P(obj2))
+		return (0);
 
-	}
-	return (false);
+	b = FTH_STRING_DATA(obj1);
+	o = FTH_STRING_DATA(obj2);
+	return (strcmp(b, o) < 0);
 }
 
 static void
@@ -992,7 +1016,7 @@ s1 s3 string< => #f\n\
 s3 s3 string< => #f\n\
 Return #t if STR1 is lexicographically lesser than STR2, otherwise #f.\n\
 See also string=, string<>, string>, string-cmp."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -1011,18 +1035,17 @@ See also string=, string<>, string>, string-cmp."
  * fth_string_greater_p(s1, s3);		=> 0
  * fth_string_greater_p(s3, s3);		=> 0
  */
-bool
+int
 fth_string_greater_p(FTH obj1, FTH obj2)
 {
-	if (FTH_STRING_P(obj1) && FTH_STRING_P(obj2)) {
-		char *b, *o;
+	char           *b, *o;
 
-		b = FTH_STRING_DATA(obj1);
-		o = FTH_STRING_DATA(obj2);
-		return (strcmp(b, o) > 0);
+	if (!FTH_STRING_P(obj1) || !FTH_STRING_P(obj2))
+		return (0);
 
-	}
-	return (false);
+	b = FTH_STRING_DATA(obj1);
+	o = FTH_STRING_DATA(obj2);
+	return (strcmp(b, o) > 0);
 }
 
 static void
@@ -1037,7 +1060,7 @@ s1 s3 string> => #f\n\
 s3 s3 string> => #f\n\
 Return #t if STR1 is lexicographically greater than STR2, otherwise #f.\n\
 See also string=, string<>, string<, string-cmp."
-	FTH obj1, obj2;
+	FTH 		obj1, obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -1089,10 +1112,13 @@ char
 fth_string_c_char_ref(FTH fs, ficlInteger idx)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (idx < 0)
 		idx += FTH_STRING_LENGTH(fs);
+
 	if (idx < 0 || idx >= FTH_STRING_LENGTH(fs))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	return (FTH_STRING_DATA(fs)[idx]);
 }
 
@@ -1103,7 +1129,7 @@ fth_string_c_char_fast_ref(FTH fs, ficlInteger idx)
 	return (FTH_STRING_DATA(fs)[idx]);
 }
 
-/*
+/*-
  * FTH fs = fth_make_string("foo");
  * FTH ch = fth_string_char_ref(fs, 1);		=> 111
  */
@@ -1111,8 +1137,10 @@ FTH
 fth_string_char_ref(FTH fs, ficlInteger idx)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (idx < 0)
 		idx += FTH_STRING_LENGTH(fs);
+
 	return (str_ref(fs, fth_make_int(idx)));
 }
 
@@ -1123,8 +1151,8 @@ ficl_string_ref(ficlVm *vm)
 \"foo\" 1 string-ref => 111\n\
 Return character at position IDX; negative index counts from backward.  \
 Raise an OUT-OF-RANGE exception if index is not in range of string."
-	ficlInteger idx;
-	FTH string;
+	ficlInteger 	idx;
+	FTH 		string;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -1141,10 +1169,13 @@ char
 fth_string_c_char_set(FTH fs, ficlInteger idx, char c)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (idx < 0)
 		idx += FTH_STRING_LENGTH(fs);
+
 	if (idx < 0 || idx >= FTH_STRING_LENGTH(fs))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	FTH_INSTANCE_CHANGED(fs);
 	return (FTH_STRING_DATA(fs)[idx] = c);
 }
@@ -1166,8 +1197,10 @@ FTH
 fth_string_char_set(FTH fs, ficlInteger idx, FTH value)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (idx < 0)
 		idx += FTH_STRING_LENGTH(fs);
+
 	return (str_set(fs, fth_make_int(idx), value));
 }
 
@@ -1180,8 +1213,8 @@ s1 1 <char> e string-set!\n\
 s1 => \"feo\"\n\
 Store character CHAR at index IDX; negative index counts from backward.  \
 Raise an OUT-OF-RANGE exception if index is not in range of string."
-	ficlInteger idx;
-	FTH string, value;
+	ficlInteger 	idx;
+	FTH 		string, value;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -1206,28 +1239,34 @@ s1 => \"foo 10\"\n\
 Append string representation of VALUE to STRING \
 and return changed string object.\n\
 See also string-pop, string-unshift, string-shift."
-	ficlInteger new_buf_len, l, sl, al;
-	size_t st;
-	char *b;
+	ficlInteger 	new_buf_len, l, sl, al;
+	size_t 		st;
+	char           *b;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (!FTH_STRING_P(add))
 		add = fth_object_to_string(add);
+
 	if (FTH_STRING_LENGTH(add) == 0)
 		return (fs);
+
 	sl = FTH_STRING_LENGTH(fs);
 	al = FTH_STRING_LENGTH(add);
 	new_buf_len = FTH_STRING_TOP(fs) + sl + al + 1;
+
 	if (new_buf_len > FTH_STRING_BUF_LENGTH(fs)) {
 		l = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (l > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, l, "too long");
+
 		FTH_STRING_BUF_LENGTH(fs) = l;
-		st = (size_t)l;
+		st = (size_t) l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), st);
 		FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 	}
-	st = (size_t)FTH_STRING_LENGTH(add);
+	st = (size_t) FTH_STRING_LENGTH(add);
 	b = FTH_STRING_DATA(add);
 	memmove(FTH_STRING_DATA(fs) + sl, b, st);
 	FTH_STRING_LENGTH(fs) += al;
@@ -1255,17 +1294,21 @@ s1 string-pop => #f\n\
 Remove and return last character.  \
 If STR is empty, return #f.\n\
 See also string-push, string-unshift, string-shift."
-	ficlInteger l;
-	FTH c = FTH_FALSE;
+	ficlInteger 	l;
+	FTH 		c;
 
+	c = FTH_FALSE;
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (c);
+
 	/* - 1 (length--) + 1 ('\0') */
 	l = NEW_SEQ_LENGTH(FTH_STRING_TOP(fs) + FTH_STRING_LENGTH(fs));
 	FTH_STRING_LENGTH(fs)--;
 	c = CHAR_TO_FTH(FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs)]);
 	FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs)] = '\0';
+
 	if (l < FTH_STRING_BUF_LENGTH(fs)) {
 		FTH_STRING_BUF_LENGTH(fs) = l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), (size_t)l);
@@ -1291,48 +1334,57 @@ s1 => \"10 foo\"\n\
 Prepends string representation of VALUE to STRING \
 and return changed string object.\n\
 See also string-push, string-pop, string-shift."
-	ficlInteger l, new_top, new_len, new_buf_len, al;
-	char *b;
-	size_t st;
+	ficlInteger 	l , new_top, new_len, new_buf_len, al;
+	char           *b;
+	size_t 		st;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (!FTH_STRING_P(add))
 		add = fth_object_to_string(add);
+
 	if (FTH_STRING_LENGTH(add) == 0)
 		return (fs);
+
 	al = FTH_STRING_LENGTH(add);
 	new_top = FTH_STRING_TOP(fs) - al;
 	new_len = FTH_STRING_LENGTH(fs) + al;
 	new_buf_len = new_top + new_len + 1;
+
 	if (new_top < 1) {
 		new_top = FTH_STRING_BUF_LENGTH(fs) / 3;
 		new_buf_len = new_top + new_len + 1;
+
 		if (new_buf_len > FTH_STRING_BUF_LENGTH(fs)) {
 			l = NEW_SEQ_LENGTH(new_buf_len);
+
 			if (l > MAX_SEQ_LENGTH)
 				FTH_OUT_OF_BOUNDS_ERROR(1, l, "too long");
 			FTH_STRING_BUF_LENGTH(fs) = l;
-			st = (size_t)l;
-			FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs),st);
+			st = (size_t) l;
+			FTH_STRING_BUF(fs) =
+			    FTH_REALLOC(FTH_STRING_BUF(fs), st);
 			FTH_STRING_DATA(fs) =
 			    FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 		}
 		b = FTH_STRING_DATA(fs);
-		st = (size_t)FTH_STRING_LENGTH(fs);
+		st = (size_t) FTH_STRING_LENGTH(fs);
 		memmove(FTH_STRING_BUF(fs) + new_top + al, b, st);
 	} else if (new_buf_len > FTH_STRING_BUF_LENGTH(fs)) {
 		l = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (l > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, l, "too long");
+
 		FTH_STRING_BUF_LENGTH(fs) = l;
-		st = (size_t)l;
+		st = (size_t) l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), st);
 		FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 	}
 	FTH_STRING_TOP(fs) = new_top;
 	FTH_STRING_LENGTH(fs) = new_len;
 	b = FTH_STRING_DATA(add);
-	st = (size_t)al;
+	st = (size_t) al;
 	memmove(FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs), b, st);
 	FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 	FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs)] = '\0';
@@ -1359,28 +1411,33 @@ s1 string-shift => #f\n\
 Remove and return first character.  \
 If STR is empty, return #f.\n\
 See also string-push, string-pop, string-unshift."
-	ficlInteger l;
-	size_t st;
-	char *b;
-	FTH c = FTH_FALSE;
+	ficlInteger 	l;
+	size_t 		st;
+	char           *b;
+	FTH 		c;
 
+	c = FTH_FALSE;
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (c);
+
 	b = FTH_STRING_DATA(fs);
 	c = CHAR_TO_FTH(b[0]);
+
 	if ((FTH_STRING_TOP(fs) + 1) > (FTH_STRING_BUF_LENGTH(fs) / 2)) {
 		FTH_STRING_TOP(fs) = FTH_STRING_BUF_LENGTH(fs) / 3;
-		st = (size_t)FTH_STRING_LENGTH(fs);
+		st = (size_t) FTH_STRING_LENGTH(fs);
 		memmove(FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs), b, st);
 	}
 	/* - 1 (length--) + 1 ('\0') */
 	l = NEW_SEQ_LENGTH(FTH_STRING_TOP(fs) + FTH_STRING_LENGTH(fs));
 	FTH_STRING_LENGTH(fs)--;
 	FTH_STRING_TOP(fs)++;
+
 	if (l < FTH_STRING_BUF_LENGTH(fs)) {
 		FTH_STRING_BUF_LENGTH(fs) = l;
-		st = (size_t)l;
+		st = (size_t) l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), st);
 	}
 	FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
@@ -1405,7 +1462,7 @@ s2 => \"bar\"\n\
 s3 => \"foobar\"\n\
 Return new string from STR1+STR2.\n\
 See also string-concat and string-push."
-	char *b1, *b2;
+	char           *b1, *b2;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs1), fs1, FTH_ARG1, "a string");
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs2), fs2, FTH_ARG2, "a string");
@@ -1437,7 +1494,7 @@ s1 => \"foo\"\n\
 s2 => \"oof\"\n\
 Return STR1 reversed as new string object.\n\
 See also string-reverse!."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_string_copy(fth_pop_ficl_cell(vm));
@@ -1453,7 +1510,7 @@ s1 string-reverse! drop\n\
 s1 => \"oof\"\n\
 Return the same string object STR reversed.\n\
 See also string-reverse."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1467,38 +1524,47 @@ See also string-reverse."
 FTH
 fth_string_insert(FTH fs, ficlInteger idx, FTH ins)
 {
-	ficlInteger sl, il, rl, new_buf_len, l;
-	size_t st;
+	ficlInteger 	sl, il, rl, new_buf_len, l;
+	size_t 		st;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	sl = FTH_STRING_LENGTH(fs);
+
 	if (idx < 0)
 		idx += sl;
+
 	if (idx == 0) {
 		fth_string_unshift(fs, ins);
 		return (fs);
 	}
 	if (idx < 0 || idx >= sl)
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	if (!FTH_STRING_P(ins))
 		ins = fth_object_to_string(ins);
+
 	il = FTH_STRING_LENGTH(ins);
+
 	if (il == 0)
 		return (fs);
+
 	rl = sl + il + 1;
 	new_buf_len = FTH_STRING_TOP(fs) + rl;
+
 	if (new_buf_len > FTH_STRING_BUF_LENGTH(fs)) {
 		l = NEW_SEQ_LENGTH(new_buf_len);
+
 		if (l > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, l, "too long");
+
 		FTH_STRING_BUF_LENGTH(fs) = l;
-		st = (size_t)l;
+		st = (size_t) l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), st);
 		FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 	}
-	st = (size_t)(sl - idx);
+	st = (size_t) (sl - idx);
 	memmove(FTH_STRING_DATA(fs) + idx + il, FTH_STRING_DATA(fs) + idx, st);
-	st = (size_t)il;
+	st = (size_t) il;
 	memmove(FTH_STRING_DATA(fs) + idx, FTH_STRING_DATA(ins), st);
 	FTH_STRING_LENGTH(fs) += FTH_STRING_LENGTH(ins);
 	FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs)] = '\0';
@@ -1516,8 +1582,8 @@ s1 => \"f10oo\"\n\
 Insert string representation of VALUE to STRING at position IDX; \
 negative index counts from backward.  \
 Raise an OUT-OF-RANGE exception if index is not in range of string."
-	FTH str, ins;
-	ficlInteger idx;
+	FTH 		str, ins;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	ins = fth_pop_ficl_cell(vm);
@@ -1534,31 +1600,39 @@ Raise an OUT-OF-RANGE exception if index is not in range of string."
 FTH
 fth_string_delete(FTH fs, ficlInteger idx)
 {
-	ficlInteger l;
-	size_t st;
-	FTH c = FTH_FALSE;
+	ficlInteger 	l;
+	size_t 		st;
+	FTH 		c;
 
+	c = FTH_FALSE;
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (c);
+
 	if (idx < 0)
 		idx += FTH_STRING_LENGTH(fs);
+
 	if (idx < 0 || idx >= FTH_STRING_LENGTH(fs))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, idx);
+
 	if (idx == 0)
 		return (fth_string_shift(fs));
+
 	if (idx == (FTH_STRING_LENGTH(fs) - 1))
 		return (fth_string_pop(fs));
+
 	c = CHAR_TO_FTH(FTH_STRING_DATA(fs)[idx]);
 	FTH_STRING_LENGTH(fs)--;
 	l = NEW_SEQ_LENGTH(FTH_STRING_TOP(fs) + FTH_STRING_LENGTH(fs) + 1);
+
 	if (l < FTH_STRING_BUF_LENGTH(fs)) {
 		FTH_STRING_BUF_LENGTH(fs) = l;
-		st = (size_t)l;
+		st = (size_t) l;
 		FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs), st);
 		FTH_STRING_DATA(fs) = FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 	}
-	st = (size_t)(FTH_STRING_LENGTH(fs) - idx);
+	st = (size_t) (FTH_STRING_LENGTH(fs) - idx);
 	memmove(FTH_STRING_DATA(fs) + idx, FTH_STRING_DATA(fs) + idx + 1, st);
 	FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs)] = '\0';
 	FTH_INSTANCE_CHANGED(fs);
@@ -1575,8 +1649,8 @@ s1 => \"fo\"\n\
 Delete and return character at position IDX from STRING; \
 negative index counts from backward.  \
 Raise an OUT-OF-RANGE exception if index is not in range of string."
-	FTH str;
-	ficlInteger idx;
+	FTH 		str;
+	ficlInteger 	idx;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -1597,11 +1671,11 @@ fth_string_fill(FTH fs, FTH fill_char)
 s1 <char> a string-fill drop\n\
 s1 => \"aaa\"\n\
 Fill STRING with CHAR and return changed string object."
-	size_t st;
+	size_t 		st;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	FTH_ASSERT_ARGS(FTH_CHAR_P(fill_char), fill_char, FTH_ARG2, "a char");
-	st = (size_t)FTH_STRING_LENGTH(fs);
+	st = (size_t) FTH_STRING_LENGTH(fs);
 	memset(FTH_STRING_DATA(fs), FTH_TO_CCHAR(fill_char), st);
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
@@ -1625,13 +1699,15 @@ fth_string_index(FTH fs, FTH key)
 \"hello world\" \"k\"   string-index => -1\n\
 Return index of string KEY in STR or -1 if not found.\n\
 See also string-member? and string-find."
-	char *res;
+	char           *res;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	FTH_ASSERT_ARGS(FTH_STRING_P(key), key, FTH_ARG2, "a string");
 	res = strstr(FTH_STRING_DATA(fs), FTH_STRING_DATA(key));
+
 	if (res != NULL)
 		return (fth_make_int(res - FTH_STRING_DATA(fs)));
+
 	return (FTH_ONE_NEG);
 }
 
@@ -1644,7 +1720,7 @@ See also string-member? and string-find."
  * FTH rs = fth_make_string("k");
  * fth_string_member_p(fs, rs);			=> 0
  */
-bool
+int
 fth_string_member_p(FTH fs, FTH key)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
@@ -1661,7 +1737,7 @@ ficl_string_member_p(ficlVm *vm)
 \"hello world\" \"k\"   string-member? => #f\n\
 Return #t if string KEY exist in STR, otherwise #f.\n\
 See also string-index and string-find."
-	FTH str, key;
+	FTH 		str, key;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
@@ -1690,25 +1766,31 @@ fth_string_find(FTH fs, FTH key)
 \"hello world\" /k/   string-find => #f\n\
 Return match if string or regexp KEY exist in STR, otherwise #f.\n\
 See also string-index, string-member? and regexp-match."
-	ficlInteger pos;
+	ficlInteger 	pos;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	FTH_ASSERT_ARGS(FTH_STRREG_P(key), key, FTH_ARG2, "a string or regexp");
+
 	if (FTH_STRING_P(key)) {
-		char *str, *k, *substr;
+		char           *str, *k, *substr;
 
 		str = FTH_STRING_REF(fs);
 		k = FTH_STRING_REF(key);
 		substr = NULL;
+
 		if (str != NULL && k != NULL)
 			substr = strstr(str, k);
+
 		if (substr != NULL)
 			return (fth_make_string(substr));
+
 		return (FTH_FALSE);
 	}
 	pos = fth_regexp_search(key, fs, 0, -1);
+
 	if (pos == -1)
 		return (FTH_FALSE);
+
 	return (fth_string_substring(fs, pos, FTH_STRING_LENGTH(fs)));
 }
 
@@ -1730,30 +1812,36 @@ fth_string_split(FTH fs, FTH reg)
 \"foo bar baz\" nil string-split => #( \"foo\" \"bar\" \"baz\" )\n\
 Split STR using SEP as delimiter and return result as array of strings.  \
 If SEP is not a string or regexp, delimiter is space."
-	FTH result;
-	char *delim, *p, *s, *str;
+	FTH 		result;
+	char           *delim, *p, *s, *str;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fth_make_array_var(1, fs));
+
 	result = fth_make_empty_array();
+
 	if (FTH_REGEXP_P(reg)) {
-		FTH s;
-		char *b;
-		ficlInteger start, range, pos;
+		FTH 		s;
+		char           *b;
+		ficlInteger 	start, range, pos;
 
 		start = 0;
 		range = FTH_STRING_LENGTH(fs);
 		b = FTH_STRING_DATA(fs);
+
 		while ((pos = fth_regexp_search(reg, fs, start, range)) >= 0) {
 			s = fth_make_string_len(b + start, pos - start);
 			fth_array_push(result, s);
+
 			if (fth_array_length(fth_object_to_array(reg)) > 0) {
 				s = fth_object_value_ref(reg, 0L);
 				start = pos + fth_string_length(s);
 			} else
 				start = pos + 1;
 		}
+
 		if ((range - start) >= 0) {
 			s = fth_make_string_len(b + start, range - start);
 			fth_array_push(result, s);
@@ -1762,9 +1850,11 @@ If SEP is not a string or regexp, delimiter is space."
 	}
 	s = str = FTH_STRDUP(FTH_STRING_DATA(fs));
 	delim = FTH_STRING_P(reg) ? FTH_STRING_DATA(reg) : " ";
+
 	while ((p = strsep(&s, delim)) != NULL)
 		if (*p != '\0')
 			fth_array_push(result, fth_make_string(p));
+
 	FTH_FREE(str);
 	return (result);
 }
@@ -1780,29 +1870,35 @@ If SEP is not a string or regexp, delimiter is space."
 FTH
 fth_string_split_2(FTH fs, FTH reg)
 {
-	char *b;
-	ficlInteger start, range, pos, len;
-	FTH result, s;
+	char           *b;
+	ficlInteger 	start, range, pos, len;
+	FTH 		result   , s;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	FTH_ASSERT_ARGS(FTH_STRREG_P(reg), reg, FTH_ARG2, "a string or regexp");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fth_make_array_var(1, fs));
+
 	if (FTH_STRING_P(reg))
 		reg = fth_make_regexp(FTH_STRING_DATA(reg));
+
 	start = 0;
 	range = FTH_STRING_LENGTH(fs);
 	b = FTH_STRING_DATA(fs);
 	result = fth_make_empty_array();
+
 	while ((pos = fth_regexp_search(reg, fs, start, range)) >= 0) {
 		s = fth_object_value_ref(reg, 0L);
 		len = fth_string_length(s);
+
 		if ((pos + len - start) > 0) {
 			s = fth_make_string_len(b + start, pos + len - start);
 			fth_array_push(result, s);
 		}
 		start = pos + 1;
 	}
+
 	if ((range - start) > 0) {
 		s = fth_make_string_len(b + start, range - start);
 		fth_array_push(result, s);
@@ -1819,20 +1915,25 @@ fth_string_split_2(FTH fs, FTH reg)
 FTH
 fth_string_substring(FTH fs, ficlInteger start, ficlInteger end)
 {
-	FTH res;
-	size_t st;
+	FTH 		res;
+	size_t 		st;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (start < 0)
 		start += FTH_STRING_LENGTH(fs);
+
 	if (start < 0 || start >= FTH_STRING_LENGTH(fs))
 		FTH_OUT_OF_BOUNDS(FTH_ARG2, start);
+
 	if (end < 0)
 		end += FTH_STRING_LENGTH(fs);
+
 	if (end < start || end > FTH_STRING_LENGTH(fs))
 		end = FTH_STRING_LENGTH(fs);
+
 	res = fth_make_string_len(FTH_STRING_DATA(fs), end - start);
-	st = (size_t)FTH_STRING_LENGTH(res);
+	st = (size_t) FTH_STRING_LENGTH(res);
 	memmove(FTH_STRING_DATA(res), FTH_STRING_DATA(fs) + start, st);
 	return (res);
 }
@@ -1848,8 +1949,8 @@ Return new string from position START to, but excluding, position END.  \
 If END is not an integer, END will be set to length of STR1; \
 negative index counts from backward.  \
 Raise an OUT-OF-RANGE exception if index is not in range of string."
-	FTH fs, last;
-	ficlInteger beg, end;
+	FTH 		fs, last;
+	ficlInteger 	beg, end;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	last = fth_pop_ficl_cell(vm);
@@ -1869,15 +1970,19 @@ Raise an OUT-OF-RANGE exception if index is not in range of string."
 FTH
 fth_string_upcase(FTH fs)
 {
-	ficlInteger i;
-	char *b;
+	ficlInteger 	i;
+	char           *b;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fs);
+
 	b = FTH_STRING_DATA(fs);
+
 	for (i = 0; i < FTH_STRING_LENGTH(fs); i++)
-		b[i] = (char)toupper((int)b[i]);
+		b[i] = (char) toupper((int) b[i]);
+
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
 }
@@ -1892,7 +1997,7 @@ s1 => \"Foo\"\n\
 s2 => \"FOO\"\n\
 Return new string with all characters uppercase.\n\
 See also string-upcase!, string-downcase, string-capitalize."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_string_copy(fth_pop_ficl_cell(vm));
@@ -1908,7 +2013,7 @@ s1 string-upcase! drop\n\
 s1 => \"FOO\"\n\
 Return STR changed to all characters uppercase.\n\
 See also string-upcase, string-downcase, string-capitalize."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1925,15 +2030,19 @@ See also string-upcase, string-downcase, string-capitalize."
 FTH
 fth_string_downcase(FTH fs)
 {
-	ficlInteger i;
-	char *b;
+	ficlInteger 	i;
+	char           *b;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fs);
+
 	b = FTH_STRING_DATA(fs);
+
 	for (i = 0; i < FTH_STRING_LENGTH(fs); i++)
-		b[i] = (char)tolower((int)b[i]);
+		b[i] = (char) tolower((int) b[i]);
+
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
 }
@@ -1948,7 +2057,7 @@ s1 => \"Foo\"\n\
 s2 => \"foo\"\n\
 Return new string with all characters lowercase.\n\
 See also string-downcase!, string-upcase, string-capitalize."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_string_copy(fth_pop_ficl_cell(vm));
@@ -1964,7 +2073,7 @@ s1 string-downcase! drop\n\
 s1 => \"foo\"\n\
 Return STR changed to all characters lowercase.\n\
 See also string-downcase, string-upcase, string-capitalize."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1982,16 +2091,20 @@ See also string-downcase, string-upcase, string-capitalize."
 FTH
 fth_string_capitalize(FTH fs)
 {
-	ficlInteger i;
-	char *b;
+	ficlInteger 	i;
+	char           *b;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fs);
+
 	b = FTH_STRING_DATA(fs);
-	b[0] = (char)toupper((int)b[0]);
+	b[0] = (char) toupper((int) b[0]);
+
 	for (i = 1; i < FTH_STRING_LENGTH(fs); i++)
-		b[i] = (char)tolower((int)b[i]);
+		b[i] = (char) tolower((int) b[i]);
+
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
 }
@@ -2007,7 +2120,7 @@ s2 => \"Foo\"\n\
 Return new string with first character capitalized and \
 remaining characters in lowercase.\n\
 See also string-capitalize!, string-upcase, string-downcase."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_string_copy(fth_pop_ficl_cell(vm));
@@ -2024,7 +2137,7 @@ s1 => \"Foo\"\n\
 Return STR changed to first character capitalized and \
 remaining characters to lowercase.\n\
 See also string-capitalize, string-upcase, string-downcase."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -2055,24 +2168,29 @@ See also string-capitalize, string-upcase, string-downcase."
 FTH
 fth_string_replace(FTH fs, FTH from, FTH to)
 {
-	char *tmp, *b, *cf, *ct;
-	ficlInteger i, l, lf, lt;
-	size_t st;
+	char           *tmp, *b, *cf, *ct;
+	ficlInteger 	i, l, lf, lt;
+	size_t 		st;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_LENGTH(fs) == 0)
 		return (fs);
+
 	FTH_ASSERT_ARGS(FTH_STRING_P(from), from, FTH_ARG2, "a string");
 	FTH_ASSERT_ARGS(FTH_STRING_P(to), to, FTH_ARG3, "a string");
+
 	if (FTH_STRING_LENGTH(from) == 1 && FTH_STRING_LENGTH(to) == 1) {
-		char f, t;
+		char 		f, t;
 
 		b = FTH_STRING_DATA(fs);
 		f = FTH_STRING_DATA(from)[0];
 		t = FTH_STRING_DATA(to)[0];
+
 		for (i = 0; i < FTH_STRING_LENGTH(fs); i++)
 			if (b[i] == f)
 				b[i] = t;
+
 		FTH_INSTANCE_CHANGED(fs);
 		return (fs);
 	}
@@ -2081,45 +2199,53 @@ fth_string_replace(FTH fs, FTH from, FTH to)
 	lf = FTH_STRING_LENGTH(from);
 	ct = FTH_STRING_DATA(to);
 	lt = FTH_STRING_LENGTH(to);
+
 	if (lt == 0) {
 		while ((tmp = strstr(tmp, cf))) {
 			i = tmp - b;
 			/* delete */
 			FTH_STRING_LENGTH(fs) -= lf;
-			st = (size_t)(FTH_STRING_LENGTH(fs) - i);
+			st = (size_t) (FTH_STRING_LENGTH(fs) - i);
 			memmove(tmp, tmp + lf, st);
 			b[FTH_STRING_LENGTH(fs)] = '\0';
 		}
+
 		FTH_INSTANCE_CHANGED(fs);
 		return (fs);
 	}
 	while ((tmp = strstr(tmp, cf))) {
 		i = tmp - b;
+
 		/* delete */
 		FTH_STRING_LENGTH(fs) -= lf;
-		st = (size_t)(FTH_STRING_LENGTH(fs) - i);
+		st = (size_t) (FTH_STRING_LENGTH(fs) - i);
 		memmove(tmp, tmp + lf, st);
+
 		/* insert */
 		st = FTH_STRING_TOP(fs) + FTH_STRING_LENGTH(fs) + lt + 1;
 		l = NEW_SEQ_LENGTH(st);
+
 		if (l > MAX_SEQ_LENGTH)
 			FTH_OUT_OF_BOUNDS_ERROR(FTH_ARG1, l, "too long");
+
 		if (l > FTH_STRING_BUF_LENGTH(fs)) {
 			FTH_STRING_BUF_LENGTH(fs) = l;
-			st = (size_t)l;
-			FTH_STRING_BUF(fs) = FTH_REALLOC(FTH_STRING_BUF(fs),st);
+			st = (size_t) l;
+			FTH_STRING_BUF(fs) =
+			    FTH_REALLOC(FTH_STRING_BUF(fs), st);
 			FTH_STRING_DATA(fs) =
 			    FTH_STRING_BUF(fs) + FTH_STRING_TOP(fs);
 		}
-		st = (size_t)(FTH_STRING_LENGTH(fs) - i);
+		st = (size_t) (FTH_STRING_LENGTH(fs) - i);
 		memmove(FTH_STRING_DATA(fs) + i + lt, b + i, st);
-		st = (size_t)lt;
+		st = (size_t) lt;
 		memmove(b + i, ct, st);
 		FTH_STRING_LENGTH(fs) += lt;
 		b[FTH_STRING_LENGTH(fs)] = '\0';
 		/* skip over added "to" string */
 		tmp += lt;
 	}
+
 	FTH_INSTANCE_CHANGED(fs);
 	return (fs);
 }
@@ -2139,7 +2265,7 @@ s4 => \"f\"\n\
 Return new string object with string FROM replaced by string TO.  \
 If TO is the empty string, delete the FROM part from STR1.\n\
 See also string-replace!."
-	FTH str, from, to;
+	FTH 		str, from, to;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	to = fth_pop_ficl_cell(vm);
@@ -2164,7 +2290,7 @@ s3 => \"f\"\n\
 Return changed STR with string FROM replaced by string TO.  \
 If TO is the empty string, delete the FROM part from STR.\n\
 See also string-replace."
-	FTH str, from, to;
+	FTH 		str, from, to;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	to = fth_pop_ficl_cell(vm);
@@ -2185,8 +2311,10 @@ FTH
 fth_string_chomp(FTH fs)
 {
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_STRING_DATA(fs)[FTH_STRING_LENGTH(fs) - 1] == '\n')
 		fth_string_pop(fs);
+
 	return (fs);
 }
 
@@ -2200,7 +2328,7 @@ s1 string-chomp => \"foo\"\n\
 s2 string-chomp => \"bar\"\n\
 Return new string object with possible trailing CR removed.\n\
 See also string-chomp!."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_string_copy(fth_pop_ficl_cell(vm));
@@ -2219,7 +2347,7 @@ s1 => \"foo\"\n\
 s2 => \"bar\"\n\
 Return changed STR with possible trailing CR removed.\n\
 See also string-chomp."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -2279,16 +2407,20 @@ S         object-dump    (like Emacs' %S)\n\
 u         unsigned\n\
 xX        hex\n\
 See also fth-format."
-	char *fmt;
+	char           *fmt;
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
+
 	if (FTH_FALSE_P(args) || FTH_NIL_P(args))
 		return (fs);
 	else if (!FTH_ARRAY_P(args))
 		args = fth_make_array_var(1, args);
+
 	fmt = FTH_STRING_REF(fs);
+
 	if (fmt == NULL)
 		return (fth_make_empty_string());
+
 	return (fth_string_vformat(fmt, args));
 }
 
@@ -2327,6 +2459,7 @@ Evaluate STRING; values already on stack can be accessed, \
 resulting values remain on stack.\n\
 See also string-eval-with-status."
 	FTH_STACK_CHECK(vm, 1, 0);
+
 	if (fth_evaluate(vm, pop_cstring(vm)) == FICL_VM_STATUS_USER_EXIT)
 		fth_exit(EXIT_SUCCESS);
 }
@@ -2348,10 +2481,10 @@ OUT_OF_TEXT   Ficl Out of Text\n\
 RESTART       Ficl Restart\n\
 USER_EXIT     Ficl User Exit\n\
 See also string-eval."
-	ficlInteger i;
+	ficlInteger 	i;
 
 	FTH_STACK_CHECK(vm, 1, 1);
-	i = (ficlInteger)fth_evaluate(vm, pop_cstring(vm));
+	i = (ficlInteger) fth_evaluate(vm, pop_cstring(vm));
 	ficlStackPushInteger(vm->dataStack, i);
 }
 
@@ -2377,11 +2510,11 @@ s\" hello\" $>string .string => hello\n\
 Return Forth string ADDR LEN as string object.  \
 Standard words like TYPE and EVALUATE require this kind of string.\n\
 See also string>$."
-	char *str;
-	size_t len;
+	char           *str;
+	size_t 		len;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	len = (size_t)ficlStackPopUnsigned(vm->dataStack);
+	len = (size_t) ficlStackPopUnsigned(vm->dataStack);
 	str = ficlStackPopPointer(vm->dataStack);
 	ficlStackPushFTH(vm->dataStack, fth_make_string_len(str, len));
 }
@@ -2406,18 +2539,19 @@ Parse string CCC delimited by '\"' at compile time and \
 at interpret time return parsed string.  \
 Note the space after the initial $\".  \
 It exist to satisfy fontifying in Emacs forth-mode."
-	char *buf;
-	FTH fs;
+	char           *buf;
+	FTH 		fs;
 
 	buf = parse_input_buffer(vm, "\"");	/* must be freed */
 	fs = fth_make_string(buf);
 	FTH_FREE(buf);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
-		ficlUnsigned u;
+		ficlUnsigned 	u;
 
 		dict = ficlVmGetDictionary(vm);
-		u = (ficlUnsigned)ficlInstructionLiteralParen;
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
 		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, fs);
 		ficlDictionaryAppendPointer(dict, string_immutable_paren);
@@ -2445,11 +2579,13 @@ init_string_type(void)
 void
 init_string(void)
 {
-	fth_set_object_apply(string_tag, (void *)str_ref, 1, 0, 0);
+	fth_set_object_apply(string_tag, (void *) str_ref, 1, 0, 0);
+
 	/* struct members */
 	init_str_length();
 	init_str_buf_length();
 	init_str_top();
+
 	/* string */
 	FTH_PRI1("string-length", ficl_string_length, h_string_length);
 	FTH_PRI1("string?", ficl_string_p, h_string_p);
@@ -2520,12 +2656,15 @@ init_string(void)
 	FTH_PRI1("string>$", ficl_string_to_forth_string, h_string_to_fstring);
 	FTH_PRI1("$>string", ficl_forth_string_to_string, h_fstring_to_string);
 	FTH_PRIM_IM("$\"", ficl_make_string_im, h_make_string_im);
-	fth_define_constant("INNER_EXIT", (FTH)FICL_VM_STATUS_INNER_EXIT, NULL);
-	fth_define_constant("OUT_OF_TEXT", (FTH)FICL_VM_STATUS_OUT_OF_TEXT, "");
-	fth_define_constant("RESTART", (FTH)FICL_VM_STATUS_RESTART, NULL);
-	fth_define_constant("USER_EXIT", (FTH)FICL_VM_STATUS_USER_EXIT, NULL);
-	fth_define_constant("ERROR_EXIT", (FTH)FICL_VM_STATUS_ERROR_EXIT, NULL);
-	fth_define_constant("BREAK", (FTH)FICL_VM_STATUS_BREAK, NULL);
+	fth_define_constant("INNER_EXIT",
+	    (FTH) FICL_VM_STATUS_INNER_EXIT, NULL);
+	fth_define_constant("OUT_OF_TEXT",
+	    (FTH) FICL_VM_STATUS_OUT_OF_TEXT, NULL);
+	fth_define_constant("RESTART", (FTH) FICL_VM_STATUS_RESTART, NULL);
+	fth_define_constant("USER_EXIT", (FTH) FICL_VM_STATUS_USER_EXIT, NULL);
+	fth_define_constant("ERROR_EXIT",
+	    (FTH) FICL_VM_STATUS_ERROR_EXIT, NULL);
+	fth_define_constant("BREAK", (FTH) FICL_VM_STATUS_BREAK, NULL);
 	string_immutable_paren = ficlDictionaryAppendPrimitive(FTH_FICL_DICT(),
 	    "(string-immutable)", ficl_string_immutable_paren,
 	    FICL_WORD_COMPILE_ONLY);

@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.170 12/27/17
+ * @(#)numbers.c	1.171 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -393,7 +393,7 @@ int
 fth_isinf(ficlFloat x)
 {
 #if defined(HAVE_DECL_ISINF)
-	return ((bool) isinf(x));
+	return (isinf(x));
 #else
 	return (0);
 #endif
@@ -1832,12 +1832,15 @@ inf inf? => #t\n\
 Return #t if OBJ is Infinite, otherwise #f.\n\
 See also nan?, inf, nan."
 	FTH 		obj;
-	int 		flag = 0;
+	int 		flag;
 
+	flag = 0;
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
+
 	if (FTH_NUMBER_P(obj))
 		flag = fth_isinf(fth_float_ref(obj));
+
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
@@ -1851,12 +1854,15 @@ nan nan? => #t\n\
 Return #t if OBJ is Not a Number, otherwise #f.\n\
 See also inf?, inf, nan."
 	FTH 		obj;
-	int 		flag = 0;
+	int 		flag;
 
+	flag = 0;
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
+
 	if (FTH_NUMBER_P(obj))
 		flag = fth_isnan(fth_float_ref(obj));
+
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 

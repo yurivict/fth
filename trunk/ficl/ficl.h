@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficl.h	1.95 1/23/14
+ * @(#)ficl.h	1.96 12/31/17
  */
 
 #if !defined (__FICL_H__)
@@ -695,7 +695,7 @@ ficlInteger	ficlStackPopInteger(ficlStack *);
 ficlUnsigned	ficlStackPopUnsigned(ficlStack *);
 ficl2Unsigned	ficlStackPop2Unsigned(ficlStack *);
 ficl2Integer	ficlStackPop2Integer(ficlStack *);
-bool		ficlStackPopBoolean(ficlStack *);
+int		ficlStackPopBoolean(ficlStack *);
 void           *ficlStackPopPointer(ficlStack *);
 FTH		ficlStackPopFTH(ficlStack *);
 ficlFloat	ficlStackPopFloat(ficlStack *);
@@ -705,7 +705,7 @@ void		ficlStackPushInteger(ficlStack *, ficlInteger);
 void		ficlStackPushUnsigned(ficlStack *, ficlUnsigned);
 void		ficlStackPush2Integer(ficlStack *, ficl2Integer);
 void		ficlStackPush2Unsigned(ficlStack *, ficl2Unsigned);
-void		ficlStackPushBoolean(ficlStack *, bool);
+void		ficlStackPushBoolean(ficlStack *, int);
 void		ficlStackPushPointer(ficlStack *, void *);
 void		ficlStackPushFTH(ficlStack *, FTH);
 void		ficlStackPushFloat(ficlStack *, ficlFloat);

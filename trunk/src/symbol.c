@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)symbol.c	1.98 1/12/15
+ * @(#)symbol.c	1.99 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,34 +36,33 @@
 /* === SYMBOL === */
 
 /* symbol */
-static void	ficl_create_symbol(ficlVm *vm);
-static void	ficl_print_symbol(ficlVm *vm);
-static void	ficl_symbol_intern_im(ficlVm *vm);
-static void	ficl_symbol_name(ficlVm *vm);
-static void	ficl_symbol_p(ficlVm *vm);
-static void	ficl_symbol_paren(ficlVm *vm);
-static bool	fth_any_symbol_p(const char *name, int kind);
-static FTH	fth_make_symbol(FTH name);
-static FTH	make_symbol(const char *name,
-		    const char *message, char prefix, int kind);
+static void 	ficl_create_symbol(ficlVm *vm);
+static void 	ficl_print_symbol(ficlVm *vm);
+static void 	ficl_symbol_intern_im(ficlVm *vm);
+static void 	ficl_symbol_name(ficlVm *vm);
+static void 	ficl_symbol_p(ficlVm *vm);
+static void 	ficl_symbol_paren(ficlVm *vm);
+static int 	fth_any_symbol_p(const char *name, int kind);
+static FTH 	fth_make_symbol(FTH name);
+static FTH	make_symbol(const char *n, const char *m, char prefix, int k);
 /* keyword */
-static void	ficl_create_keyword(ficlVm *vm);
-static void	ficl_keyword_intern_im(ficlVm *vm);
-static void	ficl_keyword_name(ficlVm *vm);
-static void	ficl_keyword_p(ficlVm *vm);
-static void	ficl_keyword_paren(ficlVm *vm);
-static void	ficl_print_keyword(ficlVm *vm);
-static FTH	fth_make_keyword(FTH name);
+static void 	ficl_create_keyword(ficlVm *vm);
+static void 	ficl_keyword_intern_im(ficlVm *vm);
+static void 	ficl_keyword_name(ficlVm *vm);
+static void 	ficl_keyword_p(ficlVm *vm);
+static void 	ficl_keyword_paren(ficlVm *vm);
+static void 	ficl_print_keyword(ficlVm *vm);
+static FTH 	fth_make_keyword(FTH name);
 /* exception */
-static void	ficl_create_exception(ficlVm *vm);
-static void	ficl_exception_last_message_ref(ficlVm *vm);
-static void	ficl_exception_last_message_set(ficlVm *vm);
-static void	ficl_exception_message_ref(ficlVm *vm);
-static void	ficl_exception_message_set(ficlVm *vm);
-static void	ficl_exception_name(ficlVm *vm);
-static void	ficl_exception_p(ficlVm *vm);
-static void	ficl_make_exception(ficlVm *vm);
-static void	ficl_print_exception(ficlVm *vm);
+static void 	ficl_create_exception(ficlVm *vm);
+static void 	ficl_exception_last_message_ref(ficlVm *vm);
+static void 	ficl_exception_last_message_set(ficlVm *vm);
+static void 	ficl_exception_message_ref(ficlVm *vm);
+static void 	ficl_exception_message_set(ficlVm *vm);
+static void 	ficl_exception_name(ficlVm *vm);
+static void 	ficl_exception_p(ficlVm *vm);
+static void 	ficl_make_exception(ficlVm *vm);
+static void 	ficl_print_exception(ficlVm *vm);
 
 #define MAKE_REF_AND_EQUAL_P(name, NAME)				\
 char *									\
@@ -72,7 +71,7 @@ fth_ ## name ## _ref(FTH obj)						\
 	return (FTH_ ## NAME ## _P(obj) ?				\
 	    (FICL_WORD_NAME(obj) + 1) : NULL);				\
 }									\
-bool									\
+int									\
 fth_ ## name ## _equal_p(FTH obj1, FTH obj2)				\
 {									\
 	return (FTH_ ## NAME ## _P(obj1) &&				\
@@ -94,21 +93,21 @@ static char* h_ ## name ## _equal_p = "( obj1 obj2 -- f )  compare\n\
 'test :test " #name "= #f\n\
 Return #t if OBJ1 and OBJ2 are " #name "s with identical name, otherwise #f."
 
-/*
+/*-
  * MAKE_REF_AND_EQUAL_P(name, NAME) builds:
  *
- * char *fth_symbol_ref(FTH obj);
- * bool fth_symbol_equal_p(FTH obj1, FTH obj2);
+ * char  *fth_symbol_ref(FTH obj);
+ * int    fth_symbol_equal_p(FTH obj1, FTH obj2);
  * static void ficl_symbol_equal_p(ficlVm *vm);
  * static char *h_symbol_equal_p = "help string";
  *
- * char *fth_keyword_ref(FTH obj);
- * bool fth_keyword_equal_p(FTH obj1, FTH obj2);
+ * char  *fth_keyword_ref(FTH obj);
+ * int    fth_keyword_equal_p(FTH obj1, FTH obj2);
  * static void ficl_keyword_equal_p(ficlVm *vm);
  * static char *h_keyword_equal_p = "help string";
  *
- * char *fth_exception_ref(FTH obj);
- * bool fth_exception_equal_p(FTH obj1, FTH obj2);
+ * char  *fth_exception_ref(FTH obj);
+ * int    fth_exception_equal_p(FTH obj1, FTH obj2);
  * static void ficl_exception_equal_p(ficlVm *vm);
  * static char *h_exception_equal_p = "help string";
  */
@@ -117,34 +116,39 @@ MAKE_REF_AND_EQUAL_P(symbol, SYMBOL);
 MAKE_REF_AND_EQUAL_P(keyword, KEYWORD);
 MAKE_REF_AND_EQUAL_P(exception, EXCEPTION);
 
-char *
+char           *
 fth_string_or_symbol_ref(FTH obj)
 {
 	if (FTH_STRING_P(obj))
 		return (fth_string_ref(obj));
+
 	return (fth_symbol_ref(obj));
 }
 
-bool
+int
 fth_string_or_symbol_p(FTH obj)
 {
 	return (FTH_STRING_P(obj) || FTH_SYMBOL_P(obj));
 }
 
-static bool
+static int
 fth_any_symbol_p(const char *name, int kind)
 {
-	bool flag = false;
+	int 		flag;
+
+	flag = 0;
 
 	if (name != NULL && *name != '\0') {
+
 		if (name[0] == kind)
 			flag = FICL_NAME_DEFINED_P(name);
 		else {
-			char sname[FICL_PAD_SIZE];
+			char 		sname[FICL_PAD_SIZE];
 
 			snprintf(sname, sizeof(sname), "%c%s", kind, name);
 			flag = FICL_NAME_DEFINED_P(sname);
 		}
+
 	}
 	return (flag);
 }
@@ -160,7 +164,7 @@ symbol?             ( obj -- f )"
 
 #define SYMBOL_PREFIX '\''
 
-bool
+int
 fth_symbol_p(const char *name)
 {
 	return (fth_any_symbol_p(name, SYMBOL_PREFIX));
@@ -173,7 +177,7 @@ ficl_symbol_p(ficlVm *vm)
 'test  symbol? => #t\n\
 \"test\" symbol? =? #f\n\
 Return #t if OBJ is a symbol, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -183,24 +187,27 @@ Return #t if OBJ is a symbol, otherwise #f."
 static FTH
 make_symbol(const char *name, const char *message, char prefix, int kind)
 {
-	char *sname;
-	ficlWord *word;
+	char           *sname;
+	ficlWord       *word;
 
 	if (name == NULL || *name == '\0') {
 		FTH_ASSERT_STRING(0);
 		return (FTH_FALSE);
 	}
 	sname = (*name != prefix) ?
-	    fth_format("%c%s", prefix, name) : FTH_STRDUP(name);
+	    fth_format("%c%s", prefix, name) :
+	    FTH_STRDUP(name);
+
 	word = ficlDictionarySetConstant(FTH_FICL_DICT(), sname, 0L);
 	FTH_FREE(sname);
+
 	if (word != NULL) {
 		word->kind = kind;
 		CELL_VOIDP_SET(word->param, word);
 		if (kind == FW_EXCEPTION && message != NULL)
-			fth_word_property_set((FTH)word,
+			fth_word_property_set((FTH) word,
 			    FTH_SYMBOL_MESSAGE, fth_make_string(message));
-		return ((FTH)word);
+		return ((FTH) word);
 	}
 	FTH_SYSTEM_ERROR_ARG_THROW(make_symbol, FTH_STR_SYMBOL);
 	return (FTH_FALSE);
@@ -250,10 +257,11 @@ ficl_print_symbol(ficlVm *vm)
 #define h_print_symbol "( sym -- )  print symbol\n\
 'test .symbol => test\n\
 Print symbol SYM to current output."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (FTH_SYMBOL_P(obj))
 		fth_print(fth_symbol_ref(obj));
 	else
@@ -266,7 +274,7 @@ ficl_symbol_name(ficlVm *vm)
 #define h_symbol_name "( sym -- name )  return symbol name\n\
 'test symbol-name => \"test\"\n\
 Return name of symbol SYM."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -296,12 +304,14 @@ Predefined is:\n\
 : ' postpone symbol-intern ; immediate\n\
 See also create-symbol and make-symbol."
 	ficlVmGetWordToPad(vm);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned 	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned)ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, fth_make_string(vm->pad));
 		ficlDictionaryAppendPointer(dict, symbol_paren);
 	} else
@@ -321,7 +331,7 @@ make-keyword        ( name -- kw )"
 
 #define KEYWORD_PREFIX ':'
 
-bool
+int
 fth_keyword_p(const char *name)
 {
 	return (fth_any_symbol_p(name, KEYWORD_PREFIX));
@@ -334,7 +344,7 @@ ficl_keyword_p(ficlVm *vm)
 :test  keyword? => #t\n\
 \"test\" keyword? => #f\n\
 Return #t if OBJ is a keyword, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -383,10 +393,11 @@ ficl_print_keyword(ficlVm *vm)
 #define h_print_keyword "( kw -- )  print keyword\n\
 :test .keyword => test\n\
 Print keyword KW to current output."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (FTH_KEYWORD_P(obj))
 		fth_print(fth_keyword_ref(obj));
 	else
@@ -399,7 +410,7 @@ ficl_keyword_name(ficlVm *vm)
 #define h_keyword_name "( kw -- name )  return keyword name\n\
 :test keyword-name => \"test\"\n\
 Return name of keyword KW."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -428,12 +439,14 @@ Predefined is:\n\
 : : postpone keyword-intern ; immediate\n\
 See also create-keyword and make-keyword."
 	ficlVmGetWordToPad(vm);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
+		ficlUnsigned	u;
 
 		dict = ficlVmGetDictionary(vm);
-		ficlDictionaryAppendUnsigned(dict,
-		    (ficlUnsigned)ficlInstructionLiteralParen);
+		u = (ficlUnsigned) ficlInstructionLiteralParen;
+		ficlDictionaryAppendUnsigned(dict, u);
 		ficlDictionaryAppendFTH(dict, fth_make_string(vm->pad));
 		ficlDictionaryAppendPointer(dict, keyword_paren);
 	} else
@@ -447,12 +460,14 @@ fth_symbol_or_exception_ref(FTH obj)
 {
 	if (FTH_SYMBOL_P(obj))
 		return (fth_symbol_to_exception(obj));
+
 	if (FTH_EXCEPTION_P(obj))
 		return (obj);
+
 	return (FTH_FALSE);
 }
 
-bool
+int
 fth_symbol_or_exception_p(FTH obj)
 {
 	return (FTH_SYMBOL_P(obj) || FTH_EXCEPTION_P(obj));
@@ -481,23 +496,25 @@ ficl_exception_p(ficlVm *vm)
 'test symbol->exception exception? => #t\n\
 \"test\" exception? => #f\n\
 Return #t if OBJ is an exception, otherwise #f."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
 	ficlStackPushBoolean(vm->dataStack, FTH_EXCEPTION_P(obj));
 }
 
-static FTH exception_list;
+static FTH 	exception_list;
 
 FTH
 fth_make_exception(const char *name, const char *message)
 {
-	FTH ex;
+	FTH 		ex;
 
 	ex = make_symbol(name, message, SYMBOL_PREFIX, FW_EXCEPTION);
+
 	if (!fth_array_member_p(exception_list, ex))
 		fth_array_push(exception_list, ex);
+
 	return (ex);
 }
 
@@ -538,15 +555,15 @@ ficl_make_exception(ficlVm *vm)
 Return exception named NAME with message MSG, MSG can be #f.  \
 The exception has a symbol name, that means it has prefix ' before NAME.\n\
 See also create-exception."
-	char *name;
-	FTH msg;
+	char           *name;
+	FTH 		msg, ex;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	/* msg may be a string or #f */
 	msg = fth_pop_ficl_cell(vm);
 	name = pop_cstring(vm);
-	ficlStackPushFTH(vm->dataStack,
-	    fth_make_exception(name, fth_string_ref(msg)));
+	ex = fth_make_exception(name, fth_string_ref(msg));
+	ficlStackPushFTH(vm->dataStack, ex);
 }
 
 FTH
@@ -558,10 +575,11 @@ fth_symbol_to_exception(FTH symbol)
 'test exception? => #t\n\
 'test symbol? => #f\n\
 Return symbol SYM as exception."
-	ficlWord *sym;
+	ficlWord       *sym;
 
 	if (FTH_EXCEPTION_P(symbol))
 		return (symbol);
+
 	if (!FTH_SYMBOL_P(symbol)) {
 		FTH_ASSERT_ARGS(FTH_SYMBOL_P(symbol), symbol, FTH_ARG1,
 		    "an exception or symbol");
@@ -569,10 +587,12 @@ Return symbol SYM as exception."
 		return (FTH_FALSE);
 	}
 	sym = FICL_WORD_REF(fth_symbol(FICL_WORD_NAME(symbol)));
+
 	if (sym == NULL)
 		return (FTH_FALSE);
+
 	sym->kind = FW_EXCEPTION;
-	return ((FTH)sym);
+	return ((FTH) sym);
 }
 
 static void
@@ -581,10 +601,11 @@ ficl_print_exception(ficlVm *vm)
 #define h_print_exception "( ex -- )  print exception\n\
 'test .exception => test\n\
 Print exception EX to current output."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (FTH_EXCEPTION_P(obj))
 		fth_print(fth_exception_ref(obj));
 	else
@@ -597,7 +618,7 @@ ficl_exception_name(ficlVm *vm)
 #define h_exception_name "( ex -- name )  return exception name\n\
 'test exception-name => \"test\"\n\
 Return name of exception EX."
-	FTH obj;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = ficlStackPopFTH(vm->dataStack);
@@ -619,9 +640,12 @@ ficl_exception_message_ref(ficlVm *vm)
 'test exception-message-ref => \"test's special message\"\n\
 Return message of exception EX.\n\
 See also exception-message-set!."
+	FTH 		msg;
+
 	FTH_STACK_CHECK(vm, 1, 1);
-	fth_push_ficl_cell(vm,
-	    fth_exception_message_ref(ficlStackPopFTH(vm->dataStack)));
+	/* msg may be a string or #f */
+	msg = fth_exception_message_ref(ficlStackPopFTH(vm->dataStack));
+	fth_push_ficl_cell(vm, msg);
 }
 
 void
@@ -638,7 +662,7 @@ ficl_exception_message_set(ficlVm *vm)
 'test #f                    exception-message-set!\n\
 Set MSG, a string or #f, to exception EX.  \
 See also exception-message-ref."
-	FTH exc, msg;
+	FTH 		exc, msg;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	/* msg may be a string or #f */
@@ -651,11 +675,13 @@ See also exception-message-ref."
 FTH
 fth_exception_last_message_ref(FTH exc)
 {
-	FTH msg;
+	FTH 		msg;
 
 	msg = fth_word_property_ref(exc, FTH_SYMBOL_LAST_MESSAGE);
+
 	if (FTH_FALSE_P(msg))
 		msg = fth_word_property_ref(exc, FTH_SYMBOL_MESSAGE);
+
 	return (msg);
 }
 
@@ -670,9 +696,12 @@ Return last message of exception EX.  \
 Last message was set after an exception was thrown \
 with e.g. fth-throw or fth-raise.\n\
 See also exception-last-message-set!."
+	FTH 		msg;
+
 	FTH_STACK_CHECK(vm, 1, 1);
-	fth_push_ficl_cell(vm,
-	    fth_exception_last_message_ref(ficlStackPopFTH(vm->dataStack)));
+	/* msg may be a string or #f */
+	msg = fth_exception_last_message_ref(ficlStackPopFTH(vm->dataStack));
+	fth_push_ficl_cell(vm, msg);
 }
 
 void
@@ -691,7 +720,7 @@ Set MSG, a string or #f, as last message of exception EX.  \
 This will be set automatically after an exception was thrown \
 with e.g. fth-throw or fth-raise.\n\
 See also exception-last-message-ref."
-	FTH exc, msg;
+	FTH 		exc, msg;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	/* msg may be a string or #f */
@@ -700,8 +729,8 @@ See also exception-last-message-ref."
 	fth_exception_last_message_set(exc, msg);
 }
 
-static FTH	ans_exc_list[FICL_VM_STATUS_LAST_ANS];
-static FTH	ficl_exc_list[FICL_VM_STATUS_LAST_FICL];
+static FTH 	ans_exc_list[FICL_VM_STATUS_LAST_ANS];
+static FTH 	ficl_exc_list[FICL_VM_STATUS_LAST_FICL];
 
 FTH
 ficl_ans_real_exc(int exc)
@@ -709,6 +738,7 @@ ficl_ans_real_exc(int exc)
 	if (exc <= FICL_VM_STATUS_ABORT &&
 	    exc > FICL_VM_STATUS_LAST_ERROR)
 		return (ans_exc_list[-exc]);
+
 	if (exc <= FICL_VM_STATUS_INNER_EXIT &&
 	    exc > FICL_VM_STATUS_LAST_FICL_ERROR) {
 		exc += FICL_VM_STATUS_OFFSET;
@@ -737,6 +767,7 @@ init_symbol(void)
 	symbol_paren = ficlDictionaryAppendPrimitive(FTH_FICL_DICT(),
 	    "(symbol)", ficl_symbol_paren, FICL_WORD_DEFAULT);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_SYMBOL, h_list_of_symbol_functions);
+
 	/* keyword */
 	FTH_KEYWORD_CLOSE;
 	FTH_KEYWORD_COMMAND;
@@ -772,6 +803,7 @@ init_symbol(void)
 	keyword_paren = ficlDictionaryAppendPrimitive(FTH_FICL_DICT(),
 	    "(keyword)", ficl_keyword_paren, FICL_WORD_DEFAULT);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_KEYWORD, h_list_of_keyword_functions);
+
 	/* exceptions */
 	exception_list = fth_make_empty_array();
 	fth_define_variable("*exception-list*", exception_list,
@@ -796,9 +828,10 @@ init_symbol(void)
 	fth_make_exception(STR_WRONG_NUMBER_OF_ARGS,
 	    "wrong number of arguments");
 	fth_make_exception(STR_WRONG_TYPE_ARG, "wrong argument type");
+
 	{
-		char *n, *m;
-		int i, j;
+		char           *n, *m;
+		int 		i, j;
 
 		ans_exc_list[0] = FTH_FALSE;
 		/* ANS Exceptions. */
@@ -816,6 +849,7 @@ init_symbol(void)
 			ficl_exc_list[i] = fth_make_exception(n, m);
 		}
 	}
+
 	FTH_PRI1("exception?", ficl_exception_p, h_exception_p);
 	FTH_PRI1("exception=", ficl_exception_equal_p, h_exception_equal_p);
 	FTH_PRI1("create-exception", ficl_create_exception,

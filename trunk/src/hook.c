@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hook.c	1.83 9/13/13
+ * @(#)hook.c	1.84 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -42,7 +42,7 @@ typedef struct {
 	simple_array   *data;	/* array of hook functions */
 	int		req;	/* required arguments */
 	int		opt;	/* optional arguments */
-	bool		rest;	/* rest arguments */
+	int		rest;	/* rest arguments */
 } FHook;
 
 #define FTH_HOOK_OBJECT(Obj)	FTH_INSTANCE_REF_GEN(Obj, FHook)
@@ -72,8 +72,7 @@ static FTH	hk_length(FTH self);
 static FTH	hk_ref(FTH self, FTH idx);
 static FTH	hk_to_array(FTH self);
 static FTH	hk_to_string(FTH self);
-static FTH	make_hook(const char *name, int req, int opt, bool rest,
-		    const char *doc);
+static FTH	make_hook(const char *, int, int, int, const char *);
 
 #define h_list_of_hook_functions "\
 *** HOOK PRIMITIVES ***\n\
@@ -176,7 +175,7 @@ hk_ref(FTH self, FTH idx)
 static FTH
 hk_equal_p(FTH self, FTH obj)
 {
-	bool flag;
+	int flag;
 
 	flag = FTH_HOOK_REQ(self) == FTH_HOOK_REQ(obj) &&
 	    FTH_HOOK_OPT(self) == FTH_HOOK_OPT(obj) &&
@@ -223,7 +222,7 @@ Return #t if OBJ is a hook object, otherwise #f."
 }
 
 static FTH
-make_hook(const char *name, int req, int opt, bool rest, const char *doc)
+make_hook(const char *name, int req, int opt, int rest, const char *doc)
 {
 	FHook *hk;
 	FTH hook;
@@ -243,7 +242,7 @@ make_hook(const char *name, int req, int opt, bool rest, const char *doc)
 }
 
 FTH
-fth_make_hook_with_arity(const char *name, int req, int opt, bool rest,
+fth_make_hook_with_arity(const char *name, int req, int opt, int rest,
     const char *doc)
 {
 	return (make_hook(name, req, opt, rest, doc));
@@ -257,7 +256,7 @@ fth_make_hook_with_arity(const char *name, int req, int opt, bool rest,
 FTH
 fth_make_hook(const char *name, int arity, const char *doc)
 {
-	return (make_hook(name, arity, 0, false, doc));
+	return (make_hook(name, arity, 0, 0, doc));
 }
 
 static int	simple_hook_number = 0;
@@ -273,7 +272,7 @@ fth_make_simple_hook(int arity)
 	FTH hk;
 
 	name = fth_format("simple-%02d-hook", simple_hook_number++);
-	hk = make_hook(name, arity, 0, false, NULL);
+	hk = make_hook(name, arity, 0, 0, NULL);
 	FTH_FREE(name);
 	return (hk);
 }
@@ -293,15 +292,14 @@ ARITY can be an integer or an array of length 3, #( req opt rest ).\n\
 See also make-hook."
 	FTH arity;
 	char *help;
-	int req, opt;
-	bool rest;
+	int req, opt, rest;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	ficlVmGetWordToPad(vm);
 	help = pop_cstring(vm);
 	arity = fth_pop_ficl_cell(vm);
 	opt = 0;
-	rest = false;
+	rest = 0;
 	if (fth_array_length(arity) == 3) {
 		req = FIX_TO_INT32(fth_array_fast_ref(arity, 0L));
 		opt = FIX_TO_INT32(fth_array_fast_ref(arity, 1L));
@@ -325,13 +323,12 @@ ARITY can be an integer or an array of length 3, #( req opt rest ).\n\
 See also create-hook."
 	FTH arity;
 	char *name;
-	int req, opt;
-	bool rest;
+	int req, opt, rest;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	arity = fth_pop_ficl_cell(vm);
 	opt = 0;
-	rest = false;
+	rest = 0;
 	if (fth_array_length(arity) == 3) {
 		req = FIX_TO_INT32(fth_array_fast_ref(arity, 0L));
 		opt = FIX_TO_INT32(fth_array_fast_ref(arity, 1L));
@@ -357,12 +354,12 @@ Print hook object HK to current output."
 	fth_print(fth_string_ref(hk_inspect(hook)));
 }
 
-bool
+int
 fth_hook_equal_p(FTH obj1, FTH obj2)
 {
 	if (FTH_HOOK_P(obj1) && FTH_HOOK_P(obj2))
 		return (FTH_TO_BOOL(hk_equal_p(obj1, obj2)));
-	return (false);
+	return (0);
 }
 
 static void
@@ -438,7 +435,7 @@ Return name of OBJ as string if hook object, otherwise #f."
 	if (FTH_HOOK_P(hook))
 		push_cstring(vm, FTH_HOOK_NAME(hook));
 	else
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 /*
@@ -455,11 +452,14 @@ hk1 prc add-hook!\n\
 hk1 hook-names => #( \"+\" )\n\
 Add hook procedure PROC-OR-XT to HOOK.  \
 Raise BAD-ARITY exception if PROC-OR-XT's arity doesn't match HOOK's arity."
-	FTH proc;
+	FTH 		proc;
 
 	FTH_ASSERT_ARGS(FTH_HOOK_P(hook), hook, FTH_ARG1, "a hook");
 	proc = proc_from_proc_or_xt(proc_or_xt,
-	    FTH_HOOK_REQ(hook), FTH_HOOK_OPT(hook), FTH_HOOK_REST(hook));
+	    FTH_HOOK_REQ(hook),
+	    FTH_HOOK_OPT(hook),
+	    FTH_HOOK_REST(hook));
+
 	if (!FTH_PROC_P(proc)) {
 		FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG2,
 		    "a proc or xt");
@@ -469,12 +469,15 @@ Raise BAD-ARITY exception if PROC-OR-XT's arity doesn't match HOOK's arity."
 	if (FTH_HOOK_REQ(hook) == FICL_WORD_REQ(proc) &&
 	    FTH_HOOK_OPT(hook) == FICL_WORD_OPT(proc) &&
 	    FTH_HOOK_REST(hook) == FICL_WORD_REST(proc))
-		simple_array_push(FTH_HOOK_DATA(hook), (void *)proc);
+		simple_array_push(FTH_HOOK_DATA(hook), (void *) proc);
 	else
 		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG2, proc,
-		    FTH_HOOK_REQ(hook), FTH_HOOK_OPT(hook),
-		    FTH_HOOK_REST(hook), FICL_WORD_REQ(proc),
-		    FICL_WORD_OPT(proc), FICL_WORD_REST(proc));
+		    FTH_HOOK_REQ(hook),
+		    FTH_HOOK_OPT(hook),
+		    FTH_HOOK_REST(hook),
+		    FICL_WORD_REQ(proc),
+		    FICL_WORD_OPT(proc),
+		    FICL_WORD_REST(proc));
 }
 
 FTH
@@ -504,7 +507,7 @@ PROC-OR-NAME can be a string, an xt or a proc."
 	return ((FTH)simple_array_delete(FTH_HOOK_DATA(hook), word));
 }
 
-bool
+int
 fth_hook_member_p(FTH hook, FTH proc_or_name)
 {
 	char *name;
@@ -517,10 +520,10 @@ fth_hook_member_p(FTH hook, FTH proc_or_name)
 	}
 	name = fth_string_ref(proc_or_name);
 	if (name == NULL)
-		return (false);
+		return (0);
 	word = FICL_WORD_NAME_REF(name);
 	if (word == NULL)
-		return (false);
+		return (0);
 	return (simple_array_member_p(FTH_HOOK_DATA(hook), word));
 }
 
@@ -535,7 +538,7 @@ hook <'> + hook-member? => #t\n\
 Return #t if procedure PROC-OR-NAME exist in HOOK, otherwise #f.  \
 PROC-OR-NAME can be a string, an xt or a proc."
 	FTH hook, proc_or_name;
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	proc_or_name = fth_pop_ficl_cell(vm);
@@ -547,12 +550,12 @@ PROC-OR-NAME can be a string, an xt or a proc."
 /*
  * Return true if no hook procedure exist in HOOK, otherwise false.
  */
-bool
+int
 fth_hook_empty_p(FTH hook)
 {
 	if (FTH_HOOK_P(hook))
 		return (FTH_HOOK_LENGTH(hook) == 0);
-	return (true);
+	return (1);
 }
 
 static void
@@ -566,7 +569,7 @@ hk1 <'> + remove-hook! => +\n\
 hk1 hook-empty? => #t\n\
 Return #t if no hook procedure exist in HOOK, otherwise #f."
 	FTH hook;
-	bool flag;
+	int flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	hook = ficlStackPopFTH(vm->dataStack);
@@ -592,7 +595,7 @@ fth_run_hook(FTH hook, int len,...)
 
 	FTH_ASSERT_ARGS(FTH_HOOK_P(hook), hook, FTH_ARG1, "a hook");
 	if (FTH_HOOK_REQ(hook) > len)
-		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, false,
+		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, 0,
 		    FTH_HOOK_REQ(hook),
 		    FTH_HOOK_OPT(hook),
 		    FTH_HOOK_REST(hook));
@@ -622,7 +625,7 @@ fth_run_hook_again(FTH hook, int len,...)
 
 	FTH_ASSERT_ARGS(FTH_HOOK_P(hook), hook, FTH_ARG1, "a hook");
 	if (FTH_HOOK_REQ(hook) > len)
-		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, false,
+		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, 0,
 		    FTH_HOOK_REQ(hook),
 		    FTH_HOOK_OPT(hook),
 		    FTH_HOOK_REST(hook));
@@ -652,7 +655,7 @@ fth_run_hook_bool(FTH hook, int len,...)
 
 	FTH_ASSERT_ARGS(FTH_HOOK_P(hook), hook, FTH_ARG1, "a hook");
 	if (FTH_HOOK_REQ(hook) > len)
-		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, false,
+		FTH_BAD_ARITY_ERROR_ARGS(FTH_ARG1, hook, len, 0, 0,
 		    FTH_HOOK_REQ(hook),
 		    FTH_HOOK_OPT(hook),
 		    FTH_HOOK_REST(hook));

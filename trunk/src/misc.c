@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.712 12/30/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.714 12/31/17";
 #endif /* not lint */
 
-#define FTH_DATE		"2017/12/30"
+#define FTH_DATE		"2017/12/31"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -75,7 +75,7 @@ const char libfth_sccsid[] = "@(#)misc.c	1.712 12/30/17";
 #define FTH_FS_LIB_PATH		FTH_SHARE_PATH "/fth-lib"
 #define FTH_SITE_FTH_PATH	FTH_SHARE_PATH "/site-fth"
 
-static bool 	apropos(ficlWord *word, FTH data);
+static int 	apropos(ficlWord *word, FTH data);
 static FTH 	at_exit_each(FTH proc, FTH name);
 static void 	ficl_add_feature(ficlVm *vm);
 static void 	ficl_add_load_lib_path(ficlVm *vm);
@@ -153,7 +153,7 @@ static void 	ficl_values_end(ficlVm *vm);
 static void 	ficl_version(ficlVm *vm);
 static void 	ficl_wait(ficlVm *vm);
 static void 	ficl_waitpid(ficlVm *vm);
-static bool 	find_in_wordlist(ficlWord *word, FTH data);
+static int 	find_in_wordlist(ficlWord *word, FTH data);
 static void 	forth_pre_init(void);
 static RETSIGTYPE fth_toplevel_handler(int sig);
 static void 	handler_exec(int sig);
@@ -201,14 +201,14 @@ typedef void    (*sig_t) (int sig);
 #endif
 
 /* required in object.c */
-bool 		fth_signal_caught_p;
+int 		fth_signal_caught_p;
 
 #if !defined(_WIN32)
 static void
 set_and_show_signal_backtrace(int kind)
 {
 	fth_set_backtrace(FTH_SIGNAL_CAUGHT);
-	fth_show_backtrace(true);
+	fth_show_backtrace(1);
 
 	switch (kind) {
 	case EXIT_SUCCESS:
@@ -254,7 +254,7 @@ signal_check(int sig)
 #endif
 		break;
 	default:
-		fth_signal_caught_p = true;
+		fth_signal_caught_p = 1;
 		fth_errorf("#<%s: %s>\n", func, strsignal(sig));
 		set_and_show_signal_backtrace(EXIT_ABORT);
 		/*
@@ -263,7 +263,7 @@ signal_check(int sig)
 		return;
 		break;
 	}
-	fth_signal_caught_p = false;
+	fth_signal_caught_p = 0;
 	signal(sig, cb);
 }
 
@@ -297,13 +297,13 @@ fth_make_ficl(unsigned int dict_size, unsigned int stack_size,
 		fth_last_exception = 0L;
 		fth_current_file = 0L;
 		fth_current_line = -1;
-		fth_print_p = false;
-		fth_eval_p = false;
-		fth_hit_error_p = false;
-		fth_true_repl_p = true;
-		fth_die_on_signal_p = false;
-		fth_interactive_p = false;
-		fth_signal_caught_p = false;
+		fth_print_p = 0;
+		fth_eval_p = 0;
+		fth_hit_error_p = 0;
+		fth_true_repl_p = 1;
+		fth_die_on_signal_p = 0;
+		fth_interactive_p = 0;
+		fth_signal_caught_p = 0;
 		ficlSystemInformationInitialize(&fsi);
 		fsi.context = NULL;
 		fsi.dictionarySize = dict_size;
@@ -391,6 +391,7 @@ bl_inspect(FTH self)
 	FTH 		fs;
 
 	fs = fth_make_string(FTH_INSTANCE_NAME(self));
+
 	switch (FTH_INT_OBJECT(self)) {
 	case BOOLEAN_FALSE:
 		return (fth_string_sformat(fs, ": %S", b_istr_false));
@@ -437,15 +438,17 @@ init_boolean_type(void)
 	boolean_tag = make_object_type(FTH_STR_BOOLEAN, FTH_BOOLEAN_T);
 	fth_set_object_inspect(boolean_tag, bl_inspect);
 	fth_set_object_to_string(boolean_tag, bl_to_string);
+
 	/*
-	 * Boolean object type.
+	 * Boolean object type (#t, #f)
 	 */
 	FTH_FALSE = fth_make_instance(boolean_tag, NULL);
 	FTH_INT_OBJECT_SET(FTH_FALSE, BOOLEAN_FALSE);
 	FTH_TRUE = fth_make_instance(boolean_tag, NULL);
 	FTH_INT_OBJECT_SET(FTH_TRUE, BOOLEAN_TRUE);
+
 	/*
-	 * Nil object type.
+	 * Nil object type (nil, undef)
 	 */
 	nil_tag = make_object_type(FTH_STR_NIL, FTH_NIL_T);
 	fth_set_object_inspect(nil_tag, bl_inspect);
@@ -454,6 +457,7 @@ init_boolean_type(void)
 	FTH_INT_OBJECT_SET(FTH_NIL, BOOLEAN_NIL);
 	FTH_UNDEF = fth_make_instance(nil_tag, NULL);
 	FTH_INT_OBJECT_SET(FTH_UNDEF, BOOLEAN_UNDEF);
+
 	/*
 	 * #f, #t, nil, undef
 	 */
@@ -504,19 +508,23 @@ forth_pre_init(void)
 
 		/* Set path for Forth script files: */
 		libs = fth_getenv(FTH_ENV_FTHPATH, NULL);
+
 		if (libs != NULL)
 			while ((pname = strsep(&libs, FTH_PATH_SEPARATOR)))
 				if (pname[0] != '\0')
 					fth_add_load_path(pname);
+
 		fth_add_load_path(FTH_FS_LIB_PATH);
 		fth_add_load_path(FTH_SITE_FTH_PATH);
 
 		/* Set path for C dynamic so libraries: */
 		libs = fth_getenv(FTH_ENV_LIBPATH, NULL);
+
 		if (libs != NULL)
 			while ((pname = strsep(&libs, FTH_PATH_SEPARATOR)))
 				if (pname[0] != '\0')
 					fth_add_load_lib_path(pname);
+
 		fth_add_load_lib_path(FTH_SO_LIB_PATH);
 	}
 
@@ -628,17 +636,25 @@ forth_init_before_load(void)
 	return_size = FICL_DEFAULT_RETURN_SIZE;
 	locals_size = FICL_MAX_LOCALS;
 	env = fth_getenv(FTH_ENV_DICTIONARY_SIZE, NULL);
+
 	if (env != NULL)
 		dict_size = (unsigned int) strtol(env, NULL, 10);
+
 	env = fth_getenv(FTH_ENV_STACK_SIZE, NULL);
+
 	if (env != NULL)
 		stack_size = (unsigned int) strtol(env, NULL, 10);
+
 	env = fth_getenv(FTH_ENV_RETURN_SIZE, NULL);
+
 	if (env != NULL)
 		return_size = (unsigned int) strtol(env, NULL, 10);
+
 	env = fth_getenv(FTH_ENV_LOCALS_SIZE, NULL);
+
 	if (env != NULL)
 		locals_size = (unsigned int) strtol(env, NULL, 10);
+
 	fth_make_ficl(dict_size, stack_size, return_size, locals_size);
 	forth_pre_init();
 }
@@ -646,9 +662,7 @@ forth_init_before_load(void)
 /*-
  * Init libfth.so.
  *
- * This function must be called before any libfth.so action can take
- * place.
- *
+ * This function must be called before any libfth.so action.
  * Used for example in snd.c and xen.c (snd(1)).
  */
 void
@@ -689,9 +703,11 @@ fth_catch_exec(ficlWord *word)
 
 	if (word == NULL)
 		return (FTH_OKAY);
+
 	gc_push(word);
 	status = ficlVmExecuteXT(FTH_FICL_VM(), word);
 	gc_pop();
+
 	switch (status) {
 	case FICL_VM_STATUS_INNER_EXIT:
 	case FICL_VM_STATUS_OUT_OF_TEXT:
@@ -723,6 +739,7 @@ fth_catch_eval(const char *buffer)
 
 	if (buffer == NULL)
 		return (FTH_OKAY);
+
 	vm = FTH_FICL_VM();
 	id = vm->sourceId;
 	CELL_INT_SET(&vm->sourceId, -1);
@@ -733,6 +750,7 @@ fth_catch_eval(const char *buffer)
 	gc_pop();
 	FTH_FREE(buf);
 	vm->sourceId = id;
+
 	switch (status) {
 	case FICL_VM_STATUS_INNER_EXIT:
 	case FICL_VM_STATUS_OUT_OF_TEXT:
@@ -777,17 +795,21 @@ fth_eval(const char *buffer)
 
 	if (buffer == NULL)
 		return (FTH_UNDEF);
+
 	old_line = fth_current_line;
 	old_file = fth_current_file;
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
-	fth_eval_p = true;
+	fth_eval_p = 1;
 	fth_current_file = eval_string;
 	fth_current_line = ++lineno;
+
 	if (fth_catch_eval(buffer) == FTH_BYE)
 		fth_exit(EXIT_SUCCESS);
+
 	vm = FTH_FICL_VM();
 	new_depth = FTH_STACK_DEPTH(vm) - depth;
+
 	switch (new_depth) {
 	case 0:
 		val = FTH_UNDEF;
@@ -801,9 +823,10 @@ fth_eval(const char *buffer)
 			fth_array_set(val, i, fth_pop_ficl_cell(vm));
 		break;
 	}
+
 	fth_current_file = old_file;
 	fth_current_line = old_line;
-	fth_eval_p = false;
+	fth_eval_p = 0;
 	return (val);
 }
 
@@ -839,7 +862,7 @@ See also provided? and *features*."
 /*
  * Test if feature NAME exists in environment word list.
  */
-bool
+int
 fth_provided_p(const char *name)
 {
 	if (fth_strlen(name) > 0) {
@@ -848,7 +871,7 @@ fth_provided_p(const char *name)
 		FICL_STRING_SET_FROM_CSTRING(s, name);
 		return (ficlDictionaryLookup(FTH_FICL_ENV(), s) != NULL);
 	}
-	return (false);
+	return (0);
 }
 
 static void
@@ -861,13 +884,14 @@ Return #t if OBJ, a string or symbol, exists in *features* list, \
 otherwise #f.\n\
 See also add-feature and *features*."
 	FTH 		obj;
+	int		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
 	FTH_ASSERT_ARGS(fth_string_or_symbol_p(obj), obj, FTH_ARG1,
 	    "a string or a symbol");
-	ficlStackPushBoolean(vm->dataStack,
-	    fth_provided_p(fth_string_or_symbol_ref(obj)));
+	flag = fth_provided_p(fth_string_or_symbol_ref(obj));
+	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
 static void
@@ -890,6 +914,7 @@ See also add-feature and provided?."
 		for (word = hash->table[i]; word != NULL; word = word->link)
 			fth_array_push(features,
 			    fth_make_string(FICL_WORD_NAME(word)));
+
 	ficlStackPushFTH(vm->dataStack, features);
 }
 
@@ -902,6 +927,7 @@ fth_basename(const char *path)
 
 	if (path == NULL)
 		return ("");
+
 	return ((base = strrchr(path, '/')) ? ++base : (char *) path);
 }
 
@@ -919,9 +945,12 @@ fth_basename(const char *path)
 									\
 		s = (char *)Path;					\
 		len -= 1;						\
+									\
 		if (s[len] == '/')					\
 			s[len] = '\0';					\
+									\
 		fs = fth_make_string(s);				\
+									\
 		if (!fth_array_member_p(Lp, fs))			\
 			fth_array_ ## Kind(Lp, fs);			\
 	}								\
@@ -1047,7 +1076,9 @@ load_file(const char *name, const char *caller)
 
 	if (name == NULL)
 		return (FTH_FALSE);
+
 	fname = fth_make_string(name);
+
 	if (!fth_hook_empty_p(before_load_hook)) {
 		ret = fth_run_hook_bool(before_load_hook, 1, fname);
 		if (FTH_FALSE_P(ret))
@@ -1062,11 +1093,13 @@ load_file(const char *name, const char *caller)
 	fth_current_file = fname;
 	CELL_VOIDP_SET(&vm->sourceId, name);
 	fth_add_loaded_files(name);
+
 	for (i = 0; i < len; i++) {
 		fth_current_line = i + 1;
 		FICL_STRING_SET_FROM_CSTRING(s,
 		    fth_string_ref(fth_array_fast_ref(content, i)));
 		status = ficlVmExecuteString(vm, s);
+
 		switch (status) {
 		case FICL_VM_STATUS_INNER_EXIT:
 		case FICL_VM_STATUS_OUT_OF_TEXT:
@@ -1094,11 +1127,14 @@ load_file(const char *name, const char *caller)
 			break;
 		}
 	}
+
 	CELL_INT_SET(&vm->sourceId, -1);
 	FICL_STRING_SET_FROM_CSTRING(s, "");
 	ficlVmExecuteString(vm, s);
+
 	if (!fth_hook_empty_p(after_load_hook))
 		fth_run_hook(after_load_hook, 1, fname);
+
 	FINISH_LOAD();
 	return (FTH_TRUE);
 }
@@ -1137,9 +1173,12 @@ fth_load_file(const char *name)
 
 	if (name == NULL)
 		return (FTH_TRUE);
+
 	func = RUNNING_WORD();
+
 	if (fth_file_exists_p(name))
 		return (load_file(name, func));
+
 	/*
 	 * If first char is a dot ('.') or slash ('/') or NAME contains a dot
 	 * ('name.fs'), the name is complete, otherwise add file extension
@@ -1148,10 +1187,13 @@ fth_load_file(const char *name)
 	tname = misc_scratch;
 	size = sizeof(misc_scratch);
 	fth_strcpy(tname, size, name);
+
 	if (*name != '.' && *name != '/' && !strchr(name, '.'))
 		fth_strcat(tname, size, "." FTH_FILE_EXTENSION);
+
 	if (fth_file_exists_p(tname))
 		return (load_file(tname, func));
+
 	/*
 	 * If not found, try every path from load_path with NAME and probably
 	 * added file extension to find source file in Fth's environment.
@@ -1159,19 +1201,26 @@ fth_load_file(const char *name)
 	alen = fth_array_length(load_path);
 	fname = misc_scratch_02;
 	fth_strcpy(fname, size, tname);
+
 	for (i = 0; i < alen; i++) {
 		fs = fth_array_fast_ref(load_path, i);
 		slen = fth_string_length(fs);
+
 		if (slen <= 0)
 			continue;
+
 		path = fth_string_ref(fs);
 		fth_strcpy(tname, size, path);
+
 		if (path[slen - 1] != '/')
 			fth_strcat(tname, size, "/");
+
 		fth_strcat(tname, size, fname);
+
 		if (fth_file_exists_p(tname))
 			return (load_file(tname, func));
 	}
+
 	fth_throw(FTH_NO_SUCH_FILE, "%s: \"%s\" not found", func, name);
 	/* NOTREACHED */
 	return (FTH_TRUE);
@@ -1228,19 +1277,25 @@ fth_require_file(const char *name)
 
 	if (name == NULL)
 		return (FTH_TRUE);
+
 	fs = fth_make_string(name);
+
 	if (fth_array_member_p(loaded_files, fs))
 		return (FTH_TRUE);
+
 	/*
 	 * If first char is a dot ('.') or slash ('/') or 'name' contains a
 	 * dot, the name is complete, otherwise, add file extension '.fs'.
 	 */
 	if (*name != '.' && *name != '/' && !strchr(name, '.'))
 		fth_string_scat(fs, "." FTH_FILE_EXTENSION);
+
 	if (fth_array_member_p(loaded_files, fs))
 		return (FTH_TRUE);
+
 	if (FTH_STRING_P(fth_find_file(fs)))
 		return (FTH_TRUE);
+
 	return (fth_load_file(name));
 }
 
@@ -1289,6 +1344,7 @@ fth_load_init_file(const char *init_file)
 	if (init_file == NULL) {
 		/* ... and no environment variable was set ... */
 		init_file = fth_getenv(FTH_ENV_INIT_FILE, NULL);
+
 		if (init_file == NULL) {
 			char           *home, *file;
 			size_t 		size;
@@ -1304,6 +1360,7 @@ fth_load_init_file(const char *init_file)
 	}
 	if (fth_file_exists_p(init_file))
 		return (load_file(init_file, RUNNING_WORD()));
+
 	/* If no file exists, do nothing and pretend all is okay. */
 	return (FTH_TRUE);
 }
@@ -1350,9 +1407,12 @@ See also include and require."
 	fs = fth_pop_ficl_cell(vm);
 	FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 	str = fth_string_ref(fs);
+
 	if (str == NULL)
 		return;
+
 	file = str;
+
 	if (fth_file_exists_p(file)) {
 		load_file(file, RUNNING_WORD_VM(vm));
 		return;
@@ -1361,21 +1421,26 @@ See also include and require."
 	size = sizeof(misc_scratch);
 	fth_strcpy(file, size, "./");
 	fth_strcat(file, size, str);
+
 	if (fth_file_exists_p(file)) {
 		load_file(file, RUNNING_WORD_VM(vm));
 		return;
 	}
 	home = fth_getenv("HOME", "/tmp");
+
 	if (home == NULL)
 		return;
+
 	fth_strcpy(file, size, home);
 	fth_strcat(file, size, "/");
 	fth_strcat(file, size, str);
+
 	if (fth_file_exists_p(file))
 		load_file(file, RUNNING_WORD_VM(vm));
 }
 
 #if defined(HAVE_DLOPEN)
+
 /*-
  * load_lib(name, func, caller)
  *
@@ -1398,18 +1463,21 @@ load_lib(const char *name, const char *func, const char *caller)
 	ficlCell 	old_source_id;
 
 	handle = (void *) dlopen(name, RTLD_LAZY | RTLD_GLOBAL);
+
 	if (handle == NULL) {
 		fth_throw(FTH_SO_FILE_ERROR, "%s: %s", caller, dlerror());
 		/* NOTREACHED */
 		return (FTH_FALSE);
 	}
 	fname = fth_make_string(name);
+
 	if (!fth_hook_empty_p(before_load_hook) &&
 	    FTH_FALSE_P(fth_run_hook_bool(before_load_hook, 1, fname))) {
 		dlclose(handle);
 		return (FTH_FALSE);
 	}
 	init_fnc = (void (*) (void)) dlsym(handle, func);
+
 	if (init_fnc == NULL) {
 		dlclose(handle);
 		fth_throw(FTH_SO_FILE_ERROR, "%s: %s", caller, dlerror());
@@ -1426,8 +1494,10 @@ load_lib(const char *name, const char *func, const char *caller)
 	fth_add_loaded_files(name);
 	/* Calling Init_dbm() etc. */
 	(*init_fnc) ();
+
 	if (!fth_hook_empty_p(after_load_hook))
 		fth_run_hook(after_load_hook, 1, fname);
+
 	FINISH_LOAD();
 	return (FTH_TRUE);
 }
@@ -1467,34 +1537,46 @@ fth_dl_load(const char *name, const char *func)
 	size = sizeof(misc_scratch);
 	caller = RUNNING_WORD();
 	fth_strcpy(tname, size, name);
+
 	if (strstr(name, ".so") == NULL)
 		fth_strcat(tname, size, ".so");
+
 	if (fth_array_member_p(loaded_files, fth_make_string(tname)))
 		return (FTH_TRUE);
+
 	if (fth_file_exists_p(tname))
 		return (load_lib(tname, func, caller));
+
 	alen = fth_array_length(load_lib_path);
+
 	for (i = 0; i < alen; i++) {
 		fs = fth_array_fast_ref(load_lib_path, i);
 		slen = fth_string_length(fs);
+
 		if (slen <= 0)
 			continue;
+
 		path = fth_string_ref(fs);
 		fth_strcpy(fname, size, path);
+
 		if (path[slen - 1] != '/')
 			fth_strcat(fname, size, "/");
+
 		fth_strcat(fname, size, tname);
+
 		if (fth_array_member_p(loaded_files, fth_make_string(fname)))
 			return (FTH_TRUE);
+
 		if (fth_file_exists_p(fname))
 			return (load_lib(fname, func, caller));
 	}
+
 	fth_throw(FTH_NO_SUCH_FILE, "%s: \"%s\" not found", caller, name);
 	/* NOTREACHED */
 	return (FTH_TRUE);
 }
 
-#else	/* !HAVE_DLOPEN */
+#else		/* !HAVE_DLOPEN */
 
 /* ARGSUSED */
 FTH
@@ -1505,7 +1587,8 @@ fth_dl_load(const char *name, const char *func)
 	FTH_NOT_IMPLEMENTED_ERROR(dlopen);
 	return (FTH_FALSE);
 }
-#endif	/* HAVE_DLOPEN */
+
+#endif		/* HAVE_DLOPEN */
 
 static void
 ficl_dl_load(ficlVm *vm)
@@ -1552,8 +1635,10 @@ See also install and file-install."
 	FTH_ASSERT_ARGS(FTH_STRING_P(fname), fname, FTH_ARG1, "a string");
 	lname = fth_string_ref(fname);
 	slen = fth_string_length(fname);
+
 	if (lname == NULL)
 		return;
+
 	if (!fth_file_exists_p(lname)) {
 		fth_warning("%s: file \"%s\" does not exist, nothing done",
 		    RUNNING_WORD(), lname);
@@ -1579,24 +1664,34 @@ See also install and file-install."
 	alen = fth_array_length(path_array);
 	tname = misc_scratch;
 	size = sizeof(misc_scratch);
+
 	for (i = 0; i < alen; i++) {
 		fs = fth_array_fast_ref(path_array, i);
 		slen = fth_string_length(fs);
+
 		if (slen <= 0)
 			continue;
+
 		pname = fth_string_ref(fs);
+
 		if (*pname == '.' || !fth_file_writable_p(pname))
 			continue;
+
 		fth_strcpy(tname, size, pname);
+
 		if (pname[slen - 1] != '/')
 			fth_strcat(tname, size, "/");
+
 		fth_strcat(tname, size, fth_basename(lname));
+
 		if (fth_file_install(lname, tname, mode))
 			if (FTH_TO_BOOL(fth_variable_ref("*fth-verbose*")))
 				fth_printf("\\ %s --> %04o %s\n",
 				    lname, mode, tname);
+
 		return;
 	}
+
 	fth_warning("%s: no path found for \"%s\", nothing done",
 	    RUNNING_WORD(), lname);
 }
@@ -1630,13 +1725,16 @@ fth_find_file(FTH name)
 
 	FTH_ASSERT_ARGS(FTH_STRING_P(name), name, FTH_ARG1, "a string");
 	alen = fth_array_length(load_path);
+
 	for (i = 0; i < alen; i++) {
 		fp = fth_array_fast_ref(load_path, i);
 		fn = fth_make_string_format("%S/%S", fp, name);
 		fs = fth_array_find(loaded_files, fn);
+
 		if (FTH_STRING_P(fs))
 			return (fs);
 	}
+
 	return (FTH_FALSE);
 }
 
@@ -1661,15 +1759,18 @@ fth_parse_word(void)
 	vm = FTH_FICL_VM();
 	ficlVmGetWordToPad(vm);
 	w = FICL_WORD_NAME_REF(vm->pad);
+
 	if (w != NULL)
 		return (w->name);
+
 	if (fth_strlen(vm->pad) > 0)
 		return (vm->pad);
+
 	return (NULL);
 }
 
 FTH
-fth_wordlist_each(bool (*func) (ficlWord *word, FTH data), FTH data)
+fth_wordlist_each(int (*func) (ficlWord *word, FTH data), FTH data)
 {
 	FTH 		ret;
 	ficlDictionary *dict;
@@ -1691,10 +1792,11 @@ fth_wordlist_each(bool (*func) (ficlWord *word, FTH data), FTH data)
 					if ((*func) (word, data))
 						fth_array_push(ret,
 						    FTH_WORD_NAME(word));
+
 	return (fth_array_uniq(ret));
 }
 
-static bool
+static int
 find_in_wordlist(ficlWord *word, FTH data)
 {
 	char           *text = (char *) data;
@@ -1711,12 +1813,12 @@ fth_find_in_wordlist(const char *text)
 	return (fth_make_empty_array());
 }
 
-static bool
+static int
 apropos(ficlWord *word, FTH data)
 {
 	if (word->length > 0)
 		return (fth_regexp_match(data, FTH_WORD_NAME(word)) >= 0);
-	return (false);
+	return (0);
 }
 
 FTH
@@ -1766,7 +1868,7 @@ of the catched exception; \
 if ARG is a proc or xt, this will be executed instead of simply returned.  \
 The stack effect must be ( retval -- val ).\n\
 See also fth-throw and fth-raise."
-	FTH 		prc      , obj;
+	FTH 		prc, obj;
 	volatile FTH 	arg;
 	jmp_buf 	jmp_env;
 	ficlWord       *volatile word;
@@ -1779,8 +1881,9 @@ See also fth-throw and fth-raise."
 	arg = fth_pop_ficl_cell(vm);
 	obj = fth_pop_ficl_cell(vm);
 	prc = fth_pop_ficl_cell(vm);
+
 	if (FTH_FALSE_P(prc)) {
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 		return;
 	}
 	FTH_ASSERT_ARGS(FICL_WORD_P(prc), prc, FTH_ARG1, "a proc or an xt");
@@ -1792,8 +1895,9 @@ See also fth-throw and fth-raise."
 	memcpy((void *) &data_stack_copy, vm->dataStack, sizeof(ficlStack));
 	memcpy((void *) &return_stack_copy, vm->returnStack, sizeof(ficlStack));
 	vm->exceptionHandler = &jmp_env;
-	vm->fth_catch_p = true;
+	vm->fth_catch_p = 1;
 	result = FTH_FALSE;
+
 	switch (setjmp(jmp_env)) {
 	case 0:
 		ficlVmPushIP(vm, &(vm->callback.system->exitInnerWord));
@@ -1803,7 +1907,7 @@ See also fth-throw and fth-raise."
 	case FICL_VM_STATUS_INNER_EXIT:	/* okay => return #f */
 		ficlVmPopIP(vm);
 		vm->exceptionHandler = vm_copy.exceptionHandler;
-		vm->fth_catch_p = false;
+		vm->fth_catch_p = 0;
 		result = FTH_FALSE;
 		break;
 	default:		/* exception */
@@ -1813,22 +1917,27 @@ See also fth-throw and fth-raise."
 		memcpy(vm->returnStack, (void *) &return_stack_copy,
 		    sizeof(ficlStack));
 		vm->exceptionHandler = vm_copy.exceptionHandler;
-		vm->fth_catch_p = false;
+		vm->fth_catch_p = 0;
+
 		if (FTH_TRUE_P(exc)) {
-			FTH 		ex;
+			FTH 		ex, fs;
 
 			ex = fth_variable_ref("*last-exception*");
-			rval = FTH_LIST_2(ex,
-			    fth_exception_last_message_ref(ex));
-		} else
-			rval = FTH_LIST_2(exc,
-			    fth_exception_last_message_ref(exc));
+			fs = fth_exception_last_message_ref(ex);
+			rval = FTH_LIST_2(ex, fs);
+		} else {
+			FTH 		fs;
+
+			fs = fth_exception_last_message_ref(exc);
+			rval = FTH_LIST_2(exc, fs);
+		}
 		if (FTH_TRUE_P(exc) ||
 		    fth_exception_equal_p(fth_car(rval), exc)) {
 			if (FICL_WORD_P(arg)) {
 				FTH 		a;
 
-				a = proc_from_proc_or_xt(arg, 1, 0, false);
+				a = proc_from_proc_or_xt(arg, 1, 0, 0);
+
 				if (FTH_PROC_P(a))
 					result = fth_proc_call(a,
 					    RUNNING_WORD_VM(vm), 1, rval);
@@ -1844,6 +1953,7 @@ See also fth-throw and fth-raise."
 		}
 		break;
 	}
+
 	fth_push_ficl_cell(vm, result);
 }
 
@@ -1901,12 +2011,14 @@ See also fth-throw and fth-catch."
 	args = fth_pop_ficl_cell(vm);
 	fmt = fth_pop_ficl_cell(vm);
 	exc = fth_pop_ficl_cell(vm);
+
 	if (FTH_NOT_FALSE_P(exc)) {
 		/* Set to calling word. */
 		vm->runningWord = vm->runningWord->current_word;
 		fth_throw(exc, "%S", fth_string_format(fmt, args));
 		/* NOTREACHED */
 	}
+
 	/*
 	 * #f #f #f fth-raise: status-error with last exception info
 	 */
@@ -1914,6 +2026,7 @@ See also fth-throw and fth-catch."
 		FTH 		fs;
 
 		fs = fth_exception_last_message_ref(fth_last_exception);
+
 		if (FTH_FALSE_P(fs)) {
 			char           *s;
 
@@ -1923,7 +2036,7 @@ See also fth-throw and fth-catch."
 			fth_errorf("#<%S>\n", fs);
 	} else
 		fth_errorf("#<no last exception found>\n");
-	fth_show_backtrace(false);
+	fth_show_backtrace(0);
 	errno = 0;
 	fth_reset_loop_and_depth();
 	ficlVmReset(vm);
@@ -1956,8 +2069,10 @@ See also reset-time."
 	FTH_STACK_CHECK(vm, 0, 1);
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
+
 	if (gettimeofday(&tv, NULL) == -1)
 		FTH_SYSTEM_ERROR_THROW(gettimeofday);
+
 	f = (double) tv.tv_sec - (double) fth_timeval_tv.tv_sec;
 	f += ((double) tv.tv_usec - (double) fth_timeval_tv.tv_usec) * 1e-6;
 	ficlStackPushFloat(vm->dataStack, f);
@@ -2236,41 +2351,49 @@ time->string and current-time."
 	len = fth_array_length(array);
 	if (len > TM_SEC) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_SEC);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_sec = FIX_TO_INT32(el);
 	}
 	if (len > TM_MIN) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_MIN);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_min = FIX_TO_INT32(el);
 	}
 	if (len > TM_HOUR) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_HOUR);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_hour = FIX_TO_INT32(el);
 	}
 	if (len > TM_MDAY) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_MDAY);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_mday = FIX_TO_INT32(el);
 	}
 	if (len > TM_MON) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_MON);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_mon = FIX_TO_INT32(el);
 	}
 	if (len > TM_YEAR) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_YEAR);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_year = FIX_TO_INT32(el);
 	}
 	if (len > TM_WDAY) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_WDAY);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_wday = FIX_TO_INT32(el);
 	}
 	if (len > TM_YDAY) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_YDAY);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_yday = FIX_TO_INT32(el);
 	}
@@ -2281,6 +2404,7 @@ time->string and current-time."
 #if defined(HAVE_STRUCT_TM_TM_GMTOFF)
 	if (len > TM_GMTOFF) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_GMTOFF);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_gmtoff = (long) fth_long_long_ref(el);
 	}
@@ -2288,6 +2412,7 @@ time->string and current-time."
 #if defined(HAVE_STRUCT_TM_TM_ZONE)
 	if (len > TM_ZONE) {
 		el = fth_array_fast_ref(array, (ficlInteger) TM_ZONE);
+
 		if (FTH_NOT_FALSE_P(el))
 			tm.tm_zone = fth_string_ref(el);
 	}
@@ -2308,10 +2433,11 @@ See also putenv and environ."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	val = fth_getenv(pop_cstring(vm), NULL);
+
 	if (val != NULL)
 		push_cstring(vm, val);
 	else
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 static void
@@ -2348,18 +2474,14 @@ See also getenv and putenv."
 
 	env = environ;
 	vals = fth_make_hash();
+
 	for (; *env; env++) {
 		sep = strchr(*env, '=') - *env;
 		fth_hash_set(vals,
 		    fth_make_string_len(*env, sep),
 		    fth_make_string(*env + sep + 1));
-		/*
-		 * FIXME
-		fth_assoc(vals,
-		    fth_make_string_len(*env, sep),
-		    fth_make_string(*env + sep + 1));
-		 */
 	}
+
 	ficlStackPushFTH(vm->dataStack, vals);
 }
 
@@ -2472,6 +2594,7 @@ or the effective UID is that of the super user.\n\
 See setuid(2) for more information.\n\
 See also seteuid, setgid and setegid."
 	FTH_STACK_CHECK(vm, 1, 0);
+
 	if (setuid((uid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setuid);
 }
@@ -2490,6 +2613,7 @@ or the effective UID is that of the super user.\n\
 See seteuid(2) for more information.\n\
 See also setuid, setgid and setegid."
 	FTH_STACK_CHECK(vm, 1, 0);
+
 	if (seteuid((uid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(seteuid);
 }
@@ -2508,6 +2632,7 @@ or the effective UID is that of the super user.\n\
 See setgid(2) for more information.\n\
 See also setegid, setuid and seteuid."
 	FTH_STACK_CHECK(vm, 1, 0);
+
 	if (setgid((gid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setgid);
 }
@@ -2526,6 +2651,7 @@ or the effective UID is that of the super user.\n\
 See setegid(2) for more information.\n\
 See also setgid, setuid and seteuid."
 	FTH_STACK_CHECK(vm, 1, 0);
+
 	if (setegid((gid_t) ficlStackPopInteger(vm->dataStack)) == -1)
 		FTH_SYSTEM_ERROR_THROW(setegid);
 }
@@ -2556,6 +2682,7 @@ ficl_signal_handler(ficlVm *vm)
 	sig = (int) ficlStackPopInteger(vm->dataStack);
 	func = (sig_t) fth_word_property_ref((FTH) vm->runningWord,
 	    FTH_SIGNAL_HANDLER);
+
 	if (func && func != SIG_DFL && func != SIG_IGN && func != SIG_ERR)
 		(*func) (sig);
 }
@@ -2618,6 +2745,7 @@ See kill(2) for more information."
 	FTH_STACK_CHECK(vm, 2, 0);
 	sig = (int) ficlStackPopInteger(vm->dataStack);
 	pid = (pid_t) ficlStackPopInteger(vm->dataStack);
+
 	if (kill(pid, sig) == -1)
 		FTH_SYSTEM_ERROR_THROW(kill);
 }
@@ -2631,12 +2759,14 @@ wait => 1234\n\
 Wait for child process and return its process ID.  \
 Set global read only variable exit-status to wait status.\n\
 See wait(2) for more information."
-	pid_t 		pid = 0;
-	int 		status = 0;
+	pid_t 		pid;
+	int 		status;
 
 	FTH_STACK_CHECK(vm, 0, 1);
+	pid = status = 0;
 #if defined(HAVE_WAIT)
 	pid = wait(&status);
+
 	if (pid == -1)
 		FTH_SYSTEM_ERROR_THROW(wait);
 #endif
@@ -2684,9 +2814,10 @@ See also exec."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	proc_or_xt = fth_pop_ficl_cell(vm);
-	proc = proc_from_proc_or_xt(proc_or_xt, 0, 0, false);
+	proc = proc_from_proc_or_xt(proc_or_xt, 0, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG1, "a proc");
 	pid = fork();
+
 	if (pid == -1)
 		FTH_SYSTEM_ERROR_THROW(fork);
 
@@ -2718,6 +2849,7 @@ See also fork."
 	cmd = fth_pop_ficl_cell(vm);
 	FTH_ASSERT_ARGS(FTH_STRING_P(cmd) || FTH_ARRAY_P(cmd),
 	    cmd, FTH_ARG1, "a string or an array of strings");
+
 	/* cmd == string: execute shell expansion */
 	if (FTH_STRING_P(cmd)) {
 		char           *shell;
@@ -2731,6 +2863,7 @@ See also fork."
 		ficlInteger 	argc;
 
 		argc = fth_array_length(cmd);
+
 		if (argc > 0) {
 			ficlInteger 	i;
 			int 		status;
@@ -2782,6 +2915,7 @@ Return name of current host.\n\
 See gethostname(3) for more information."
 #if defined(HAVE_GETHOSTNAME)
 	FTH_STACK_CHECK(vm, 0, 1);
+
 	if (gethostname(vm->pad, (size_t) FICL_PAD_SIZE) == -1)
 		FTH_SYSTEM_ERROR_THROW(gethostname);
 	push_cstring(vm, vm->pad);
@@ -2838,19 +2972,22 @@ See getservbyname(3) for more information."
 	service = pop_cstring(vm);
 #if defined(HAVE_GETSERVBYNAME)
 	se = getservbyname(service, NULL);
+
 	if (se == NULL) {
 		if (errno != 0) {
 			FTH_SYSTEM_ERROR_ARG_THROW(getservbyname, service);
 			/* NOTREACHED */
 			return;
 		}
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 		return;
 	}
 	aliases = fth_make_empty_array();
 	s_aliases = se->s_aliases;
+
 	while (*s_aliases)
 		fth_array_push(aliases, fth_make_string(*s_aliases++));
+
 	res = FTH_LIST_4(fth_make_string(se->s_name),
 	    aliases,
 	    INT_TO_FIX(ntohs((uint16_t) se->s_port)),
@@ -2879,19 +3016,22 @@ See getservbyport(3) for more information."
 	port = (uint16_t) ficlStackPopInteger(vm->dataStack);
 #if defined(HAVE_GETSERVBYPORT)
 	se = getservbyport((int) htons(port), NULL);
+
 	if (se == NULL) {
 		if (errno != 0) {
 			FTH_SYSTEM_ERROR_THROW(getservbyport);
 			/* NOTREACHED */
 			return;
 		}
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 		return;
 	}
 	aliases = fth_make_empty_array();
 	s_aliases = se->s_aliases;
+
 	while (*s_aliases)
 		fth_array_push(aliases, fth_make_string(*s_aliases++));
+
 	res = FTH_LIST_4(fth_make_string(se->s_name),
 	    aliases,
 	    INT_TO_FIX(ntohs((uint16_t) se->s_port)),
@@ -3012,20 +3152,26 @@ See getopt(3) for more information."
 	FTH_STACK_CHECK(vm, 2, 1);
 	options = pop_cstring(vm);
 	args = fth_pop_ficl_cell(vm);
+
 	/* prepare argv */
 	argc = (int) fth_array_length(args);
 	argc = FICL_MIN(GETOPT_MAX_ARGS - 1, argc);
+
 	for (i = 0; i < argc; i++)
 		argv[i] = fth_string_ref(fth_array_fast_ref(args, i));
+
 	argv[i] = NULL;
 	opterr = FTH_NOT_FALSE_P(fth_variable_ref("opterr"));
 	optind = FIX_TO_INT32(fth_variable_ref("optind"));
+
 	if (optind < 1)
 		optind = 1;
+
 	c = getopt(argc, argv, options);
+
 	if (c == -1) {
 		optind = 1;	/* reset getopt for further use */
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 	} else {
 		fth_variable_set("optind", INT_TO_FIX(optind));
 		fth_variable_set("optopt",
@@ -3079,15 +3225,19 @@ See getopt_long(3) for more information."
 	argc = FICL_MIN(GETOPT_MAX_ARGS - 1, argc);
 	optc = (int) fth_array_length(long_args);
 	optc = FICL_MIN(GETOPT_MAX_ARGS - 1, optc);
+
 	/* prepare argv */
 	for (i = 0; i < argc; i++)
 		argv[i] = fth_string_ref(fth_array_fast_ref(args, i));
+
 	argv[i] = NULL;
+
 	/* prepare opts */
 	for (i = 0; i < optc; i++) {
 		FTH 		opt;
 
 		opt = fth_array_fast_ref(long_args, i);
+
 		if (fth_array_length(opt) == 3) {
 			opts[i].name =
 			    fth_string_ref(fth_array_fast_ref(opt, 0L));
@@ -3097,21 +3247,25 @@ See getopt_long(3) for more information."
 			opts[i].val =
 			    FIX_TO_INT32(fth_array_fast_ref(opt, 2L));
 		} else
-			FTH_ASSERT_ARGS(false, opt, FTH_ARG3,
+			FTH_ASSERT_ARGS(0, opt, FTH_ARG3,
 			    "an array of length 3");
 	}
+
 	opts[i].name = 0;
 	opts[i].has_arg = 0;
 	opts[i].flag = 0;
 	opts[i].val = 0;
 	opterr = FTH_NOT_FALSE_P(fth_variable_ref("opterr"));
 	optind = FIX_TO_INT32(fth_variable_ref("optind"));
+
 	if (optind < 1)
 		optind = 1;
+
 	c = getopt_long(argc, argv, options, opts, NULL);
+
 	if (c == -1) {
 		optind = 1;	/* reset getopt for further use */
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 	} else {
 		fth_variable_set("optind", INT_TO_FIX(optind));
 		fth_variable_set("optopt",
@@ -3137,8 +3291,8 @@ char           *
 fth_version(void)
 {
 	if (strncmp("unknown", FTH_TARGET_VENDOR, 7L) == 0)
-		return (FTH_PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET_CPU
-		    "-" FTH_TARGET_OS "]");
+		return (FTH_PACKAGE_VERSION
+		    " (" FTH_DATE ") [" FTH_TARGET_CPU "-" FTH_TARGET_OS "]");
 	return (FTH_PACKAGE_VERSION " (" FTH_DATE ") [" FTH_TARGET "]");
 }
 
@@ -3285,8 +3439,10 @@ run_at_exit(void)
 		signal(fth_signals[i], SIG_DFL);
 #endif
 	rw = (FTH) RUNNING_WORD();
+
 	if (fth_array_length(fth_at_exit_procs) > 0)
 		fth_array_each(fth_at_exit_procs, at_exit_each, rw);
+
 	fth_reset_loop_and_depth();
 	simple_array_free(depth_array);
 	simple_array_free(loop_array);
@@ -3312,8 +3468,9 @@ See atexit(3) for more information."
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	proc_or_xt = fth_pop_ficl_cell(vm);
-	proc = proc_from_proc_or_xt(proc_or_xt, 0, 0, false);
+	proc = proc_from_proc_or_xt(proc_or_xt, 0, 0, 0);
 	FTH_ASSERT_ARGS(FTH_PROC_P(proc), proc, FTH_ARG1, "a proc");
+
 	if (fth_array_length(fth_at_exit_procs) > 0)
 		fth_array_push(fth_at_exit_procs, proc);
 	else
@@ -3361,6 +3518,7 @@ fth_reset_loop_and_depth(void)
 
 	for (i = 0; i < depth_array->length; i++)
 		simple_array_free(simple_array_pop(depth_array));
+
 	simple_array_clear(depth_array);
 	simple_array_clear(loop_array);
 }
@@ -3398,6 +3556,7 @@ fth_begin_values_to_obj(ficlVm *vm, char *name, FTH args)
 	ficlWord       *to_obj;
 
 	to_obj = FICL_WORD_NAME_REF(name);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
 		ficlUnsigned 	up;
@@ -3441,12 +3600,15 @@ ficl_values_end(ficlVm *vm)
 	int 		len;
 
 	len = simple_array_length(depth_array);
+
 	if (len <= 0)
 		FTH_BAD_SYNTAX_ERROR("orphaned closing paren found");
+
 	to_obj = FICL_WORD_REF(simple_array_ref(simple_array_ref(depth_array,
 		    len - 1), 1));
 	args = (FTH) simple_array_ref(simple_array_ref(depth_array,
 		len - 1), 2);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
 		ficlUnsigned 	up;
@@ -3457,6 +3619,7 @@ ficl_values_end(ficlVm *vm)
 		ficlDictionaryAppendInteger(dict, (ficlInteger) FICL_TRUE);
 		ficlDictionaryAppendPointer(dict, loop_until);
 		ficlDictionaryAppendPointer(dict, set_end_paren);
+
 		/* >dbm needs an argument, the filename */
 		if (FTH_NOT_FALSE_P(args)) {
 			up = (ficlUnsigned) ficlInstructionLiteralParen;
@@ -3473,9 +3636,11 @@ ficl_values_end(ficlVm *vm)
 		depth = FTH_STACK_DEPTH(vm) - od;
 		simple_array_free(ary);
 		ficlStackPushInteger(vm->dataStack, depth);
+
 		/* >dbm needs an argument, the filename */
 		if (FTH_NOT_FALSE_P(args))
 			fth_push_ficl_cell(vm, args);
+
 		ficlVmExecuteXT(vm, to_obj);
 	}
 }
@@ -3548,12 +3713,13 @@ See also (set-each-loop), (reset-each), (store) and source file fth.fs."
 	FTH_STACK_CHECK(vm, 1, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
 	len = simple_array_length(loop_array);
+
 	if (len > 0)
 		fth_push_ficl_cell(vm,
 		    fth_object_value_ref((FTH) simple_array_ref(loop_array,
 			    len - 1), idx));
 	else
-		ficlStackPushBoolean(vm->dataStack, false);
+		ficlStackPushBoolean(vm->dataStack, 0);
 }
 
 static void
@@ -3571,6 +3737,7 @@ See also (set-map-loop), (reset-map), (fetch) and source file fth.fs."
 	idx = ficlStackPopInteger(vm->dataStack);
 	value = fth_pop_ficl_cell(vm);
 	len = simple_array_length(loop_array);
+
 	if (len > 0)
 		fth_object_value_set((FTH) simple_array_ref(loop_array,
 			len - 1), idx, value);
@@ -3585,8 +3752,10 @@ forth_init(void)
 	INIT_ASSERT(FTH_FICL_VAR());
 	dict = FTH_FICL_DICT();
 	FTH_FICL_VM()->runningWord = NULL;
+
 	if (atexit(run_at_exit) == -1)
 		FTH_SYSTEM_ERROR_THROW(atexit);
+
 	/* Load Ficl source files. */
 	{
 		char           *sf[] = {

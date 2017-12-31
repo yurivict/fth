@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.h	1.122 2/15/16
+ * @(#)utils.h	1.123 12/31/17
  */
 
 #if !defined(_UTILS_H_)
@@ -62,7 +62,7 @@
 
 /* proc.c */
 #define fth_make_proc_from_vfunc(Name, Func, Req, Opt, Rest)		\
-	fth_make_proc_from_func(Name, (FTH (*)())Func, true, Req, Opt, Rest)
+	fth_make_proc_from_func(Name, (FTH (*)())Func, 1, Req, Opt, Rest)
 
 #define FTH_SET_CONSTANT(Name)						\
 	fth_define_constant(#Name, (FTH)(Name), NULL)
@@ -100,7 +100,7 @@ cb_ ## Name ## _ ## Member(ficlVm *vm)					\
 		ficlStackPush ## Type(vm->dataStack,			\
 		    FTH_INSTANCE_REF_GEN(obj, Object)->Member);		\
 	else								\
-		ficlStackPushBoolean(vm->dataStack, false);		\
+		ficlStackPushBoolean(vm->dataStack, 0);			\
 }									\
 static void								\
 init_ ## Name ## _ ## Member(void)					\
@@ -136,10 +136,10 @@ typedef struct {
 #endif
 
 #if !defined(HAVE_STRUCT_SOCKADDR_UN) || defined(_WIN32)
-#define HAVE_SOCKET		false
+#define HAVE_SOCKET		0
 #define FTH_DEFAULT_ADDRFAM	0
 #else				/* !_WIN32 */
-#define HAVE_SOCKET		true
+#define HAVE_SOCKET		1	
 #if defined(AF_INET)
 #define FTH_DEFAULT_ADDRFAM	AF_INET
 #else
@@ -164,21 +164,21 @@ typedef enum {
 } io_t;
 
 typedef struct {
-	io_t		type;
-	FTH		name;
-	FTH		filename;
-	FTH		buffer;
-	int		fam;
+	io_t 		type;
+	FTH 		name;
+	FTH 		filename;
+	FTH 		buffer;
+	int 		fam;
 	void           *data;
-	ficl2Integer	length;
-	bool		input_p;
-	bool		output_p;
-	bool		closed_p;
+	ficl2Integer 	length;
+	int 		input_p;
+	int 		output_p;
+	int 		closed_p;
 	int             (*read_char) (void *ptr);
 	void            (*write_char) (void *ptr, int c);
 	char           *(*read_line) (void *ptr);
 	void            (*write_line) (void *ptr, const char *line);
-	bool            (*eof_p) (void *ptr);
+	int             (*eof_p) (void *ptr);
 	ficl2Integer    (*tell) (void *ptr);
 	ficl2Integer    (*seek) (void *ptr, ficl2Integer pos, int whence);
 	void            (*flush) (void *ptr);
@@ -282,7 +282,7 @@ FTH		make_io_base(int fam);
 /* misc.c */
 void		forth_init(void);
 void		forth_init_before_load(void);
-extern bool	fth_signal_caught_p;
+extern int	fth_signal_caught_p;
 #if !defined(_WIN32)
 extern sigjmp_buf fth_sig_toplevel;
 void		signal_check(int sig);
@@ -308,7 +308,7 @@ void		gc_push   (ficlWord *word);
 void		gc_pop    (void);
 void		gc_loop_reset(void);
 void		fth_set_backtrace(FTH exception);
-void		fth_show_backtrace(bool verbose);
+void		fth_show_backtrace(int verbose);
 
 /* port.c */
 FTH		io_keyword_args_ref(int fam);
@@ -334,14 +334,14 @@ FTH		ficl_ans_real_exc(int exc);
 simple_array   *make_simple_array(int incr);
 simple_array   *make_simple_array_var(int len,...);
 int		simple_array_length(simple_array *ary);
-bool		simple_array_equal_p(simple_array *ary1, simple_array *ary2);
+int		simple_array_equal_p(simple_array *ary1, simple_array *ary2);
 void           *simple_array_ref(simple_array *ary, int i);
 void		simple_array_set(simple_array *ary, int i, void *obj);
 void		simple_array_push(simple_array *ary, void *obj);
 void           *simple_array_pop(simple_array *ary);
 int		simple_array_index(simple_array *ary, void *obj);
 int		simple_array_rindex(simple_array *ary, void *obj);
-bool		simple_array_member_p(simple_array *ary, void *obj);
+int		simple_array_member_p(simple_array *ary, void *obj);
 void           *simple_array_delete(simple_array *ary, void *obj);
 void           *simple_array_rdelete(simple_array *ary, void *obj);
 simple_array   *simple_array_reverse(simple_array *ary);

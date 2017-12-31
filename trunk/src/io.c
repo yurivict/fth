@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.161 12/26/17
+ * @(#)io.c	1.162 12/31/17
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -50,8 +50,7 @@ static FTH 	io_tag;
 #define IO_INPUT_P(Obj)		(IO_NOT_CLOSED_P(Obj) && FTH_IO_INPUT_P(Obj))
 #define IO_OUTPUT_P(Obj)	(IO_NOT_CLOSED_P(Obj) && FTH_IO_OUTPUT_P(Obj))
 
-#define IO_FILE_ERROR(Func)						\
-	FTH_ANY_ERROR_THROW(FTH_FILE_IO_ERROR, Func)
+#define IO_FILE_ERROR(Func)	FTH_ANY_ERROR_THROW(FTH_FILE_IO_ERROR, Func)
 #define IO_FILE_ERROR_ARG(Func, Desc)					\
 	FTH_ANY_ERROR_ARG_THROW(FTH_FILE_IO_ERROR, Func, Desc)
 
@@ -61,12 +60,9 @@ static FTH 	io_tag;
 
 /* --- STRING IO --- */
 
-#define FTH_IO_STRING_LENGTH(Obj)					\
-	fth_string_length((FTH)(Obj))
-#define FTH_IO_STRING_INDEX_REF(Obj)					\
-	FTH_INSTANCE_REF(Obj)->cycle
-#define FTH_IO_STRING_INDEX_SET(Obj, Idx)				\
-	FTH_INSTANCE_REF(Obj)->cycle = (Idx)
+#define FTH_IO_STRING_LENGTH(Obj)	fth_string_length((FTH)(Obj))
+#define FTH_IO_STRING_INDEX_REF(Obj)	FTH_INSTANCE_REF(Obj)->cycle
+#define FTH_IO_STRING_INDEX_SET(Obj, Idx) FTH_INSTANCE_REF(Obj)->cycle = (Idx)
 
 #define IO_STRING_REF(line)						\
 	((fth_string_length(line) > 0) ? fth_string_ref(line) : "")
@@ -154,7 +150,7 @@ static void 	ficl_socket(ficlVm *vm);
 static void 	ficl_version_control(ficlVm *vm);
 static void 	ficl_writelines(ficlVm *vm);
 static void 	file_close(void *ptr);
-static bool 	file_eof_p(void *ptr);
+static int 	file_eof_p(void *ptr);
 static void 	file_flush(void *ptr);
 static int 	file_number(char *name);
 static int 	file_read_char(void *ptr);
@@ -166,7 +162,7 @@ static void 	file_version_rename(char *name);
 static void 	file_write_char(void *ptr, int c);
 static void 	file_write_line(void *ptr, const char *line);
 static void 	generic_close(void *ptr);
-static bool 	generic_eof_p(void *ptr);
+static int 	generic_eof_p(void *ptr);
 static void 	generic_flush(void *ptr);
 static int 	generic_read_char(void *ptr);
 static char    *generic_read_line(void *ptr);
@@ -187,12 +183,12 @@ static FTH 	io_to_string(FTH self);
 static FTH 	make_file_io(FILE *fp, const char *name, int fam);
 static FTH 	make_socket_io(const char *host, int port, int domain, int fd);
 static void 	pipe_close(void *ptr);
-static bool 	seek_constant_p(int whence);
+static int 	seek_constant_p(int whence);
 static int 	socket_accept(int domain, int fd);
 static int 	socket_bind(const char *host, int port, int domain, int fd);
 static void 	socket_close(void *ptr);
 static int 	socket_connect(const char *host, int port, int domain, int fd);
-static bool 	socket_eof_p(void *ptr);
+static int 	socket_eof_p(void *ptr);
 static int 	socket_open(int domain, int type);
 static int 	socket_read_char(void *ptr);
 static char    *socket_read_line(void *ptr);
@@ -202,7 +198,7 @@ static ficl2Integer socket_tell(void *ptr);
 static void 	socket_unlink(const char *host);
 static void 	socket_write_char(void *ptr, int c);
 static void 	socket_write_line(void *ptr, const char *line);
-static bool 	string_eof_p(void *ptr);
+static int 	string_eof_p(void *ptr);
 static int 	string_read_char(void *ptr);
 static char    *string_read_line(void *ptr);
 static void 	string_rewind_and_close(void *ptr);
@@ -300,19 +296,25 @@ io_inspect(FTH self)
 	FTH 		fs;
 
 	fs = fth_make_string(FTH_INSTANCE_NAME(self));
+
 	if (fth_io_pos_ref(self) >= 0)
 		fth_string_sformat(fs, "[%lld]", fth_io_pos_ref(self));
+
 	if (FTH_STRING_P(FTH_IO_FILENAME(self)))
 		fth_string_sformat(fs, ": \"%S\",", FTH_IO_FILENAME(self));
+
 	fth_string_sformat(fs, " %S", FTH_IO_NAME(self));
+
 	if (FTH_IO_INPUT_P(self)) {
 		fth_string_sformat(fs, "-input");
 		if (FTH_IO_OUTPUT_P(self))
 			fth_string_sformat(fs, "/output");
 	} else if (FTH_IO_OUTPUT_P(self))
 		fth_string_sformat(fs, "-output");
+
 	if (FTH_IO_CLOSED_P(self))
 		fth_string_sformat(fs, " closed");
+
 	return (fs);
 }
 
@@ -333,10 +335,12 @@ io_to_array(FTH self)
 
 	if (FTH_ARRAY_P(FTH_IO_BUFFER(self)))
 		return (FTH_IO_BUFFER(self));
+
 	if (FTH_IO_TYPE(self) == FTH_IO_STRING)
 		ary = fth_string_split_2((FTH) FTH_IO_DATA(self), string_cr);
 	else
 		ary = fth_io_readlines(self);
+
 	FTH_IO_BUFFER(self) = ary;
 	return (FTH_IO_BUFFER(self));
 }
@@ -351,13 +355,12 @@ io_ref(FTH self, FTH idx)
 static FTH
 io_equal_p(FTH self, FTH obj)
 {
-	bool 		flag;
+	int 		f;
 
-	flag = fth_string_equal_p(FTH_IO_FILENAME(self),
-	    FTH_IO_FILENAME(obj)) &&
+	f = fth_string_equal_p(FTH_IO_FILENAME(self), FTH_IO_FILENAME(obj)) &&
 	    FTH_IO_FAM(self) == FTH_IO_FAM(obj) &&
 	    fth_io_pos_ref(self) == fth_io_pos_ref(obj);
-	return (BOOL_TO_FTH(flag));
+	return (BOOL_TO_FTH(f));
 }
 
 static FTH
@@ -379,6 +382,7 @@ io_free(FTH self)
 {
 	if (!FTH_IO_CLOSED_P(self))
 		FTH_IO_CLOSE(self);
+
 	switch (FTH_IO_TYPE(self)) {
 	case FTH_IO_SOCKET:
 	case FTH_IO_PORT:
@@ -390,6 +394,7 @@ io_free(FTH self)
 	default:
 		break;
 	}
+
 	FTH_FREE(FTH_IO_OBJECT(self));
 }
 
@@ -402,6 +407,7 @@ fam_to_mode(int fam)
 	int 		i;
 
 	i = 0;
+
 	switch (fam) {
 	case FICL_FAM_READ:
 		mode[i++] = 'r';
@@ -425,6 +431,7 @@ fam_to_mode(int fam)
 		fth_warning(WARN_STR, RUNNING_WORD());
 		break;
 	}
+
 	mode[i] = '\0';
 	return (mode);
 }
@@ -464,11 +471,11 @@ generic_write_line(void *ptr, const char *line)
 }
 
 /* ARGSUSED */
-static bool
+static int
 generic_eof_p(void *ptr)
 {
 	(void) ptr;
-	return (false);
+	return (0);
 }
 
 /* ARGSUSED */
@@ -525,7 +532,7 @@ make_io_base(int fam)
 	io->length = 0;
 	io->input_p = (fam & FICL_FAM_READ);
 	io->output_p = (fam & (FICL_FAM_WRITE | FICL_FAM_APPEND));
-	io->closed_p = false;
+	io->closed_p = 0;
 	io->read_char = generic_read_char;
 	io->write_char = generic_write_char;
 	io->read_line = generic_read_line;
@@ -544,13 +551,16 @@ make_io_base(int fam)
 static int
 file_read_char(void *ptr)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
 	int 		c;
 
+	fp = (FILE *) ptr;
 	c = fgetc(fp);
+
 	if (c == EOF) {
 		if (feof(fp))
 			return (EOF);
+
 		if (ferror(fp)) {
 			clearerr(fp);
 			IO_FILE_ERROR(fgetc);
@@ -562,7 +572,9 @@ file_read_char(void *ptr)
 static void
 file_write_char(void *ptr, int c)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
+
+	fp = (FILE *) ptr;
 
 	if (fputc(c, fp) == EOF)
 		if (ferror(fp)) {
@@ -576,15 +588,18 @@ static char 	io_scratch[BUFSIZ];
 static char    *
 file_read_line(void *ptr)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
 	char           *p;
 
+	fp = (FILE *) ptr;
 	p = fgets(io_scratch, (int) sizeof(io_scratch), fp);
+
 	if (p != NULL)
 		return (p);
 	else {
 		if (feof(fp))
 			return (NULL);
+
 		if (ferror(fp)) {
 			clearerr(fp);
 			IO_FILE_ERROR(fgets);
@@ -597,7 +612,9 @@ file_read_line(void *ptr)
 static void
 file_write_line(void *ptr, const char *line)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
+
+	fp = (FILE *) ptr;
 
 	if (fputs(line, fp) == EOF)
 		if (ferror(fp)) {
@@ -606,17 +623,18 @@ file_write_line(void *ptr, const char *line)
 		}
 }
 
-static bool
+static int
 file_eof_p(void *ptr)
 {
-	return ((bool) feof((FILE *) ptr));
+	return (feof((FILE *) ptr));
 }
 
 static ficl2Integer
 file_tell(void *ptr)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
 
+	fp = (FILE *) ptr;
 	fflush(fp);
 	return ((ficl2Integer) lseek(fileno(fp), (off_t) 0, SEEK_CUR));
 }
@@ -624,8 +642,9 @@ file_tell(void *ptr)
 static ficl2Integer
 file_seek(void *ptr, ficl2Integer pos, int whence)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
 
+	fp = (FILE *) ptr;
 	fflush(fp);
 	return ((ficl2Integer) lseek(fileno(fp), (off_t) pos, whence));
 }
@@ -639,8 +658,9 @@ file_flush(void *ptr)
 static void
 file_rewind(void *ptr)
 {
-	FILE           *fp = (FILE *) ptr;
+	FILE           *fp;
 
+	fp = (FILE *) ptr;
 	fflush(fp);
 	rewind(fp);
 }
@@ -658,8 +678,10 @@ make_file_io(FILE *fp, const char *name, int fam)
 	FTH 		io;
 
 	mode = fam_to_mode(fam);
+
 	if (fp == NULL) {
 		fp = fopen(name, mode);
+
 		if (fp == NULL) {
 			IO_FILE_ERROR_ARG(fopen, name);
 			/* NOTREACHED */
@@ -704,6 +726,7 @@ fth_io_popen(FTH cmd, int fam)
 	    cmd, FTH_ARG1, "a string or an array of strings");
 	io = make_io_base(fam);
 	name = NULL;
+
 	if (FTH_STRING_P(cmd)) {
 		name = fth_string_ref(cmd);
 		FTH_IO_FILENAME(io) = cmd;
@@ -712,12 +735,13 @@ fth_io_popen(FTH cmd, int fam)
 		FTH_IO_FILENAME(io) = fth_array_ref(cmd, 0L);
 	}
 	if (name == NULL) {
-		FTH_ASSERT_ARGS(false, cmd, FTH_ARG1,
+		FTH_ASSERT_ARGS(0, cmd, FTH_ARG1,
 		    "a string or an array of strings");
 		/* NOTREACHED */
 		return (FTH_FALSE);
 	}
 	fp = popen(name, fam_to_mode(fam));
+
 	if (fp == NULL) {
 		IO_FILE_ERROR_ARG(popen, name);
 		/* NOTREACHED */
@@ -746,6 +770,7 @@ string_read_char(void *ptr)
 
 	c = EOF;
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
+
 	if (idx < FTH_IO_STRING_LENGTH(ptr)) {
 		c = fth_string_c_char_fast_ref((FTH) ptr, idx++);
 		FTH_IO_STRING_INDEX_SET(ptr, idx);
@@ -759,6 +784,7 @@ string_write_char(void *ptr, int c)
 	ficlInteger 	idx;
 
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
+
 	if (idx >= FTH_IO_STRING_LENGTH(ptr) - 1) {
 		FTH 		fs;
 
@@ -766,6 +792,7 @@ string_write_char(void *ptr, int c)
 		fth_string_push((FTH) ptr, fs);
 	} else
 		fth_string_c_char_fast_set((FTH) ptr, idx, (char) c);
+
 	FTH_IO_STRING_INDEX_SET(ptr, ++idx);
 }
 
@@ -778,10 +805,13 @@ string_read_line(void *ptr)
 
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
 	len = FTH_IO_STRING_LENGTH(ptr);
+
 	if (idx >= len)
 		return (NULL);
+
 	line = io_scratch;
 	size = sizeof(io_scratch);
+
 	for (i = 0; i < size && idx < len; i++, idx++) {
 		char 		c;
 
@@ -793,6 +823,7 @@ string_read_line(void *ptr)
 			break;
 		}
 	}
+
 	FTH_IO_STRING_INDEX_SET(ptr, idx);
 	line[i] = '\0';
 	return (line);
@@ -806,15 +837,18 @@ string_write_line(void *ptr, const char *line)
 
 	if (line == NULL)
 		return;
+
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
 	len = FTH_IO_STRING_LENGTH(ptr);
 	size = fth_strlen(line);
+
 	if (idx >= len - 1) {
 		fth_string_push((FTH) ptr, fth_make_string(line));
 		idx += size;
 	} else {
 		for (i = 0; i < size && idx < len; i++, idx++)
 			fth_string_c_char_fast_set((FTH) ptr, idx, line[i]);
+
 		if (i < size) {
 			fth_string_push((FTH) ptr, fth_make_string(line + i));
 			idx += (size - i);
@@ -823,7 +857,7 @@ string_write_line(void *ptr, const char *line)
 	FTH_IO_STRING_INDEX_SET(ptr, idx);
 }
 
-static bool
+static int
 string_eof_p(void *ptr)
 {
 	return (FTH_IO_STRING_INDEX_REF(ptr) >= FTH_IO_STRING_LENGTH(ptr));
@@ -841,6 +875,7 @@ string_seek(void *ptr, ficl2Integer dpos, int whence)
 	ficlInteger 	pos, end;
 
 	pos = (ficlInteger) dpos;
+
 	switch (whence) {
 	case SEEK_SET:
 		FTH_IO_STRING_INDEX_SET(ptr, pos);
@@ -859,6 +894,7 @@ string_seek(void *ptr, ficl2Integer dpos, int whence)
 		FTH_IO_STRING_INDEX_SET(ptr, end);
 		break;
 	}
+
 	return ((ficl2Integer) FTH_IO_STRING_INDEX_REF(ptr));
 }
 
@@ -875,6 +911,7 @@ fth_io_sopen(FTH string, int fam)
 
 	if (!FTH_STRING_P(string))
 		string = fth_make_empty_string();
+
 	io = make_io_base(fam);
 	FTH_IO_TYPE(io) = FTH_IO_STRING;
 	FTH_IO_NAME(io) = fth_make_string("string");
@@ -889,10 +926,12 @@ fth_io_sopen(FTH string, int fam)
 	FTH_IO_OBJECT(io)->seek = string_seek;
 	FTH_IO_OBJECT(io)->rewind = string_rewind_and_close;
 	FTH_IO_OBJECT(io)->close = string_rewind_and_close;
+
 	if ((fam & FICL_FAM_APPEND) || (fam & FICL_FAM_WRITE))
 		FTH_IO_SEEK(io, 0L, SEEK_END);
 	else
 		FTH_IO_SEEK(io, 0L, SEEK_SET);
+
 	return (io);
 }
 
@@ -902,8 +941,10 @@ fth_io_length(FTH io)
 	ficl2Integer 	io_len, pos;
 
 	IO_ASSERT_IO(io);
+
 	if (!FTH_INSTANCE_CHANGED_P(io))
 		return (FTH_IO_LENGTH(io));
+
 	switch (FTH_IO_TYPE(io)) {
 	case FTH_IO_FILE:
 		if (fth_io_fileno(io) < 3)
@@ -926,6 +967,7 @@ fth_io_length(FTH io)
 		io_len = FTH_IO_TELL(io);
 		break;
 	}
+
 	return (FTH_IO_LENGTH(io) = io_len);
 }
 
@@ -981,8 +1023,10 @@ fth_io_to_string(FTH io)
 io io->string => \"...\"\n\
 Return content of IO object as string if possible."
 	IO_ASSERT_IO(io);
+
 	if (FTH_IO_TYPE(io) == FTH_IO_STRING)
 		return (fth_string_copy((FTH) FTH_IO_DATA(io)));
+
 	return (fth_array_join(fth_object_to_array(io), string_empty));
 }
 
@@ -1001,7 +1045,7 @@ Return #t if OBJ is an IO object, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, FTH_IO_P(obj));
 }
 
-bool
+int
 fth_io_input_p(FTH obj)
 {
 	return (IO_INPUT_P(obj));
@@ -1023,7 +1067,7 @@ Return #t if OBJ is an input IO object, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, IO_INPUT_P(io));
 }
 
-bool
+int
 fth_io_output_p(FTH obj)
 {
 	return (IO_OUTPUT_P(obj));
@@ -1045,7 +1089,7 @@ Return #t if OBJ is an output IO object, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, IO_OUTPUT_P(io));
 }
 
-bool
+int
 fth_io_closed_p(FTH obj)
 {
 	return (FTH_IO_P(obj) && FTH_IO_CLOSED_P(obj));
@@ -1081,21 +1125,27 @@ file_number(char *name)
 
 	if (name == NULL)
 		return (0);
+
 	dir = fth_file_dirname(name);
 	files = fth_file_match_dir(dir, version_number_string);
 	flen = (size_t) fth_array_length(files);
 	bname = fth_basename(name);
 	blen = fth_strlen(bname);
+
 	if (flen <= 0 || blen <= 0)
 		return (0);
+
 	numb = 0;
 	len = (ficlInteger) flen;
 	path = fth_format("%S/%.*s", dir, (int) blen, bname);
 	plen = fth_strlen(path);
+
 	for (i = 0; i < len; i++) {
 		s = fth_string_ref(fth_array_ref(files, i));
+
 		if (s != NULL && (strncmp(s, path, plen) == 0)) {
 			x = (int) strtol(s + plen + 2, NULL, 10);
+
 			if (++x > numb)
 				numb = x;
 		}
@@ -1113,8 +1163,10 @@ file_version_rename(char *name)
 	if (FTH_TRUE_P(version_control)) {
 		/* numbered backups */
 		numb = file_number(name);
+
 		if (numb == 0)
 			numb++;
+
 		new_name = fth_format("%s.~%d~", name, numb);
 		fth_file_rename(name, new_name);
 		FTH_FREE(new_name);
@@ -1123,10 +1175,12 @@ file_version_rename(char *name)
 	if (FTH_NIL_P(version_control)) {
 		/* numbered/simple backups */
 		numb = file_number(name);
+
 		if (numb > 0)
 			new_name = fth_format("%s.~%d~", name, numb);
 		else
 			new_name = fth_format("%s~", name);
+
 		fth_file_rename(name, new_name);
 		FTH_FREE(new_name);
 		return;
@@ -1180,6 +1234,7 @@ undef => no backups"
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	val = fth_pop_ficl_cell(vm);
+
 	if (FTH_BOOLEAN_P(val) || FTH_NIL_TYPE_P(val))
 		version_control = val;
 	else
@@ -1304,9 +1359,11 @@ See also io-open and io-open-write."
 	fs = fth_pop_ficl_cell(vm);
 	IO_ASSERT_STRING(fs, FTH_ARG1);
 	name = IO_STRING_REF(fs);
+
 	if (!fth_file_exists_p(name))
 		fth_throw(FTH_NO_SUCH_FILE, "%s: \"%s\" doesn't exist",
 		    RUNNING_WORD(), name);
+
 	ficlStackPushFTH(vm->dataStack, fth_io_open(name, FICL_FAM_READ));
 }
 
@@ -1362,6 +1419,7 @@ See freopen(3) for more information."
 	fname = ficlStackPopFTH(vm->dataStack);
 	io = ficlStackPopFTH(vm->dataStack);
 	IO_ASSERT_IO(io);
+
 	if (FTH_IO_TYPE(io) != FTH_IO_FILE) {
 		ficlStackPushFTH(vm->dataStack, io);
 		return;
@@ -1370,13 +1428,16 @@ See freopen(3) for more information."
 		name = fth_string_ref(fname);
 	else
 		name = IO_STRING_REF(FTH_IO_FILENAME(io));
+
 	if (FTH_BOUND_P(ffam))
 		fam = FIX_TO_INT32(ffam);
 	else
 		fam = FTH_IO_FAM(io);
+
 	fp = freopen(name, fam_to_mode(fam), FTH_IO_DATA(io));
 	/* The original file pointer is already closed by freopen. */
-	FTH_IO_CLOSED_P(io) = true;
+	FTH_IO_CLOSED_P(io) = 1;
+
 	if (fp == NULL) {
 		IO_FILE_ERROR_ARG(freopen, name);
 		/* NOTREACHED */
@@ -1403,6 +1464,7 @@ See fdopen(3) for more information."
 	FTH_STACK_CHECK(vm, 1, 1);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	fp = fdopen(fd, fam_to_mode(fam));
+
 	if (fp == NULL) {
 		IO_FILE_ERROR(fdopen);
 		/* NOTREACHED */
@@ -1553,6 +1615,7 @@ socket_read_char(void *ptr)
 
 	msg[0] = '\0';
 	len = recv(FTH_IO_SOCKET_FD(ptr), msg, 1L, 0);
+
 	if (len == -1) {
 		IO_SOCKET_ERROR(recv);
 		/* NOTREACHED */
@@ -1560,6 +1623,7 @@ socket_read_char(void *ptr)
 	}
 	if (len == 1)
 		return ((int) msg[0]);
+
 	return (-1);
 }
 
@@ -1570,6 +1634,7 @@ socket_write_char(void *ptr, int c)
 
 	msg[0] = (char) c;
 	msg[1] = '\0';
+
 	if (send(FTH_IO_SOCKET_FD(ptr), msg, 1L, 0) == -1)
 		IO_SOCKET_ERROR(send);
 }
@@ -1585,6 +1650,7 @@ socket_read_line(void *ptr)
 	line = io_scratch;
 	size = sizeof(io_scratch);
 	len = recvfrom(FTH_IO_SOCKET_FD(ptr), line, size, 0, NULL, &slen);
+
 	if (len == -1) {
 		IO_SOCKET_ERROR(recvfrom);
 		/* NOTREACHED */
@@ -1604,7 +1670,7 @@ socket_write_line(void *ptr, const char *line)
 		IO_SOCKET_ERROR(send);
 }
 
-static bool
+static int
 socket_eof_p(void *ptr)
 {
 	int 		fd;
@@ -1612,13 +1678,18 @@ socket_eof_p(void *ptr)
 
 	fd = FTH_IO_SOCKET_FD(ptr);
 	cur = lseek(fd, (off_t) 0, SEEK_CUR);
+
 	if (cur == -1)
 		IO_SOCKET_ERROR(lseek);
+
 	end = lseek(fd, (off_t) 0, SEEK_END);
+
 	if (end == -1)
 		IO_SOCKET_ERROR(lseek);
+
 	if (lseek(fd, cur, SEEK_SET) == -1)
 		IO_SOCKET_ERROR(lseek);
+
 	return (cur == end);
 }
 
@@ -1736,6 +1807,7 @@ socket_bind(const char *host, int port, int domain, int fd)
 
 	if (host == NULL)
 		return (-1);
+
 	socket_unlink(host);
 	IO_SOCKADDR(addr, host, port, domain, len);
 	return (bind(fd, addr, len));
@@ -1754,6 +1826,7 @@ socket_accept(int domain, int fd)
 		addr = (struct sockaddr *) & sun;
 	else
 		addr = (struct sockaddr *) & sin;
+
 	return (accept(fd, addr, &len));
 }
 
@@ -1765,6 +1838,7 @@ socket_connect(const char *host, int port, int domain, int fd)
 
 	if (host == NULL)
 		return (-1);
+
 	IO_SOCKADDR(addr, host, port, domain, len);
 	return (connect(fd, addr, len));
 }
@@ -1774,8 +1848,10 @@ socket_open(int domain, int type)
 {
 	if (domain < AF_UNSPEC || domain > AF_MAX)
 		domain = FTH_DEFAULT_ADDRFAM;
+
 	if (type < SOCK_STREAM || type > SOCK_SEQPACKET)
 		type = SOCK_DGRAM;
+
 	return (socket(domain, type, 0));
 }
 
@@ -1787,6 +1863,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 
 	if (fd == -1) {
 		fd = socket_open(domain, SOCK_STREAM);
+
 		if (fd == -1) {
 			IO_SOCKET_ERROR_ARG(socket, host);
 			/* NOTREACHED */
@@ -1819,7 +1896,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 	return (io);
 }
 
-#else				/* !HAVE_SOCKET */
+#else		/* !HAVE_SOCKET */
 
 static FTH
 make_socket_io(const char *host, int port, int domain, int fd)
@@ -1833,7 +1910,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 	return (io);
 }
 
-#endif				/* HAVE_SOCKET */
+#endif		/* HAVE_SOCKET */
 
 FTH
 fth_io_nopen(const char *host, int port, int domain)
@@ -1934,6 +2011,7 @@ See socket(2) for more information."
 	type = (int) ficlStackPopInteger(vm->dataStack);
 	domain = (int) ficlStackPopInteger(vm->dataStack);
 	fd = socket_open(domain, type);
+
 	if (fd == -1) {
 		IO_SOCKET_ERROR(socket);
 		/* NOTREACHED */
@@ -1968,6 +2046,7 @@ See bind(2) for more information."
 	fs = fth_pop_ficl_cell(vm);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fs);
+
 	if (socket_bind(host, port, domain, fd) == -1) {
 		close(fd);
 		IO_SOCKET_ERROR_ARG(bind, host);
@@ -1991,6 +2070,7 @@ See listen(2) for more information."
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
+
 	if (listen(fd, -1) == -1)
 		IO_SOCKET_ERROR(listen);
 }
@@ -2012,6 +2092,7 @@ See shutdown(2) for more information."
 	FTH_STACK_CHECK(vm, 2, 0);
 	how = (int) ficlStackPopInteger(vm->dataStack);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
+
 	if (shutdown(fd, how) == -1)
 		IO_SOCKET_ERROR(shutdown);
 }
@@ -2041,6 +2122,7 @@ See accept(2) for more information."
 	fs = fth_pop_ficl_cell(vm);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	nd = socket_accept(domain, fd);
+
 	if (nd == -1) {
 		close(fd);
 		IO_SOCKET_ERROR(accept);
@@ -2076,6 +2158,7 @@ See connet(2) for more information."
 	fs = fth_pop_ficl_cell(vm);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fs);
+
 	if (socket_connect(host, port, domain, fd) == -1) {
 		close(fd);
 		IO_SOCKET_ERROR_ARG(connect, host);
@@ -2108,6 +2191,7 @@ See send(2) for more information."
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	size = (size_t) fth_string_length(msg);
 	text = IO_STRING_REF(msg);
+
 	if (send(fd, text, size, flags) == -1)
 		IO_SOCKET_ERROR_ARG(send, text);
 }
@@ -2130,6 +2214,7 @@ See recv(2) for more information."
 	flags = (int) ficlStackPopInteger(vm->dataStack);
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	len = recv(fd, vm->pad, sizeof(vm->pad), flags);
+
 	if (len == -1) {
 		IO_SOCKET_ERROR(recv);
 		/* NOTREACHED */
@@ -2170,6 +2255,7 @@ See sendto(2) for more information."
 	host = IO_STRING_REF(fhost);
 	msg = IO_STRING_REF(fmsg);
 	IO_SOCKADDR(addr, host, port, domain, len);
+
 	if (sendto(fd, msg, fth_strlen(msg), flags, addr, len) == -1)
 		IO_SOCKET_ERROR_ARG(sendto, host);
 }
@@ -2202,6 +2288,7 @@ See recvfrom(2) for more information."
 	fd = (int) ficlStackPopInteger(vm->dataStack);
 	host = IO_STRING_REF(fhost);
 	IO_SOCKADDR(addr, host, port, domain, len);
+
 	if (recvfrom(fd, vm->pad, sizeof(vm->pad), flags, addr, &len) == -1) {
 		IO_SOCKET_ERROR_ARG(recvfrom, host);
 		/* NOTREACHED */
@@ -2222,6 +2309,7 @@ fth_set_exit_status(int status)
 		fth_exit_status = (int) WEXITSTATUS(status);
 	else
 		fth_exit_status = -1;
+
 	return (fth_exit_status);
 }
 
@@ -2244,7 +2332,8 @@ fth_io_close(FTH io)
 	if (FTH_NOT_FALSE_P(io) && FTH_IO_P(io)) {
 		if (!FTH_IO_CLOSED_P(io))
 			FTH_IO_CLOSE(io);
-		FTH_IO_CLOSED_P(io) = true;
+
+		FTH_IO_CLOSED_P(io) = 1;
 		return;
 	}
 	IO_ASSERT_IO(io);
@@ -2276,12 +2365,13 @@ Print IO object to current output."
 	fth_print(fth_string_ref(io_to_string(io)));
 }
 
-bool
+int
 fth_io_equal_p(FTH obj1, FTH obj2)
 {
-	if (FTH_IO_P(obj1) && FTH_IO_P(obj2))
-		return (FTH_TO_BOOL(io_equal_p(obj1, obj2)));
-	return (false);
+	if (!FTH_IO_P(obj1) || !FTH_IO_P(obj2))
+		return (0);
+
+	return (FTH_TO_BOOL(io_equal_p(obj1, obj2)));
 }
 
 static void
@@ -2378,8 +2468,10 @@ See also io-getc."
 	char           *line;
 
 	line = fth_io_read(io);
+
 	if (line == NULL)
 		return (FTH_FALSE);
+
 	return (fth_make_string(line));
 }
 
@@ -2457,8 +2549,10 @@ See also io-getc, io-read."
 	array = fth_make_empty_array();
 	pos = FTH_IO_TELL(io);
 	FTH_IO_REWIND(io);
+
 	while ((line = FTH_IO_READ_LINE(io)) != NULL)
 		fth_array_push(array, fth_make_string(line));
+
 	FTH_IO_SEEK(io, pos, SEEK_SET);
 	return (array);
 }
@@ -2481,15 +2575,17 @@ See also io-putc, io-write, io-write-format."
 	pos = FTH_IO_TELL(io);
 	FTH_IO_REWIND(io);
 	len = fth_array_length(array);
+
 	for (i = 0; i < len; i++) {
 		fs = fth_array_fast_ref(array, i);
 		FTH_IO_WRITE_LINE(io, IO_STRING_REF(fs));
 	}
+
 	FTH_INSTANCE_CHANGED(io);
 	FTH_IO_SEEK(io, pos, SEEK_SET);
 }
 
-bool
+int
 fth_io_eof_p(FTH io)
 {
 	IO_ASSERT_IO(io);
@@ -2507,7 +2603,7 @@ io io-eof? => #t\n\
 io io-close\n\
 Return #t if EOF is reached, otherwise #f."
 	FTH 		io;
-	bool 		flag;
+	int		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	io = fth_pop_ficl_cell(vm);
@@ -2540,6 +2636,7 @@ int
 fth_io_fileno(FTH io)
 {
 	IO_ASSERT_IO(io);
+
 	switch (FTH_IO_TYPE(io)) {
 	case FTH_IO_FILE:
 	case FTH_IO_PIPE:
@@ -2554,17 +2651,17 @@ fth_io_fileno(FTH io)
 	}
 }
 
-static bool
+static int
 seek_constant_p(int whence)
 {
 	switch (whence) {
 	case SEEK_SET:
 	case SEEK_CUR:
 	case SEEK_END:
-		return (true);
+		return (1);
 		break;
 	}
-	return (false);
+	return (0);
 }
 
 static void
@@ -2753,6 +2850,7 @@ fth_set_io_stdin(FTH io)
 
 	if (!IO_INPUT_P(io))
 		return (FTH_FALSE);
+
 	old_io = FTH_FICL_VM()->callback.port_in;
 	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_in = io;
@@ -2769,6 +2867,7 @@ fth_set_io_stdout(FTH io)
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
+
 	old_io = FTH_FICL_VM()->callback.port_out;
 	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_out = io;
@@ -2785,6 +2884,7 @@ fth_set_io_stderr(FTH io)
 
 	if (!IO_OUTPUT_P(io))
 		return (FTH_FALSE);
+
 	old_io = FTH_FICL_VM()->callback.port_err;
 	fd = fileno((FILE *) FTH_IO_DATA(io));
 	FTH_FICL_VM()->callback.port_err = io;
@@ -2889,6 +2989,7 @@ init_io(void)
 	char           *vc;
 
 	vc = fth_getenv("VERSION_CONTROL", NULL);
+
 	if (vc != NULL) {
 		if ((strncmp(vc, "t", 1L) == 0) ||
 		    (strncmp(vc, "numbered", 8L) == 0))
