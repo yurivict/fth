@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.219 12/31/17
+ * @(#)fth.h	1.220 1/1/18
  */
 
 #if !defined(_FTH_H_)
@@ -79,7 +79,7 @@
 /* from ruby/ruby.h */
 #if defined(__STDC__)
 #include <limits.h>
-#else		/* !__STDC__ */
+#else				/* !__STDC__ */
 #if !defined(LONG_MAX)
 #if defined(HAVE_LIMITS_H)
 #include <limits.h>
@@ -91,7 +91,7 @@
 #define LONG_MAX		0x7fffffffffffffffL
 #endif
 #endif
-#endif		/* !LONG_MAX */
+#endif				/* !LONG_MAX */
 #if !defined(LONG_MIN)
 #define LONG_MIN		(-LONG_MAX - 1)
 #endif
@@ -101,8 +101,8 @@
 #else
 #define ULONG_MAX		0x7fffffffffffffffUL
 #endif
-#endif		/* !ULONG_MAX */
-#endif		/* __STDC__ */
+#endif				/* !ULONG_MAX */
+#endif				/* __STDC__ */
 
 #if defined(HAVE_LONG_LONG)
 #if !defined(LLONG_MAX)
@@ -114,9 +114,9 @@
 #else
 /* assuming 64bit (2's complement) long long */
 #define LLONG_MAX		0x7fffffffffffffffLL
-#endif		/* _I64_MAX */
-#endif		/* LONG_LONG_MAX */
-#endif		/* !LLONG_MAX */
+#endif				/* _I64_MAX */
+#endif				/* LONG_LONG_MAX */
+#endif				/* !LLONG_MAX */
 #if !defined(LLONG_MIN)
 #if defined(LONG_LONG_MIN)
 #define LLONG_MIN		LONG_LONG_MIN
@@ -125,13 +125,13 @@
 #define LLONG_MIN		_I64_MIN
 #else
 #define LLONG_MIN		(-LLONG_MAX - 1)
-#endif		/* _I64_MIN */
-#endif		/* LONG_LONG_MIN */
-#endif		/* !LLONG_MIN */
+#endif				/* _I64_MIN */
+#endif				/* LONG_LONG_MIN */
+#endif				/* !LLONG_MIN */
 #if !defined(ULLONG_MAX)
 #define ULLONG_MAX		0xffffffffffffffffULL
 #endif
-#endif		/* HAVE_LONG_LONG */
+#endif				/* HAVE_LONG_LONG */
 
 #if (FTH_SIZEOF_LONG_LONG == FTH_SIZEOF_VOID_P)
 #define FIXNUM_MAX		(LLONG_MAX >> 1L)
@@ -204,20 +204,20 @@ enum {
 typedef struct {
 	ficlSystem     *system;
 	ficlVm         *vm;
-	FTH		current_file;
-	ficlInteger	current_line;
-	int		print_length;
-	FTH		last_exception;
-	FTH		_false;
-	FTH		_true;
-	FTH		_nil;
-	FTH		_undef;
-	int		print_p;
-	int		eval_p;
-	int		hit_error_p;
-	int		true_repl_p;
-	int		die_on_signal_p;
-	int		interactive_p;
+	FTH 		current_file;
+	ficlInteger 	current_line;
+	int 		print_length;
+	FTH 		last_exception;
+	FTH 		_false;
+	FTH 		_true;
+	FTH 		_nil;
+	FTH 		_undef;
+	int 		print_p;
+	int 		eval_p;
+	int 		hit_error_p;
+	int 		true_repl_p;
+	int 		die_on_signal_p;
+	int 		interactive_p;
 } Ficl;
 
 /* defined in misc.c */
@@ -466,578 +466,581 @@ __BEGIN_DECLS
 
 /* === array.c === */
 /* array */
-FTH		fth_array_append(FTH array1, FTH array2);
-void		fth_array_clear(FTH array);
-FTH		fth_array_compact(FTH array);
-FTH		fth_array_copy(FTH array);
-FTH		fth_array_delete(FTH array, ficlInteger index);
-FTH		fth_array_delete_key(FTH array, FTH key);
+FTH		fth_array_append(FTH, FTH);
+void		fth_array_clear(FTH);
+FTH		fth_array_compact(FTH);
+FTH		fth_array_copy(FTH);
+FTH		fth_array_delete(FTH, ficlInteger);
+FTH		fth_array_delete_key(FTH, FTH);
 FTH		fth_array_each(FTH, FTH (*) (FTH, FTH), FTH);
-FTH		fth_array_each_with_index(FTH,FTH(*)(FTH,FTH,ficlInteger),FTH);
-int		fth_array_equal_p(FTH obj1, FTH obj2);
-FTH		fth_array_fill(FTH array, FTH value);
-FTH		fth_array_find(FTH array, FTH key);
-ficlInteger	fth_array_index(FTH array, FTH key);
-FTH		fth_array_insert(FTH array, ficlInteger index, FTH value);
-FTH		fth_array_join(FTH array, FTH sep);
-ficlInteger	fth_array_length(FTH obj);
+FTH		fth_array_each_with_index(FTH,
+		    FTH (*) (FTH, FTH, ficlInteger), FTH);
+int		fth_array_equal_p(FTH, FTH);
+FTH		fth_array_fill(FTH, FTH);
+FTH		fth_array_find(FTH, FTH);
+ficlInteger	fth_array_index(FTH, FTH);
+FTH		fth_array_insert(FTH, ficlInteger, FTH);
+FTH		fth_array_join(FTH, FTH);
+ficlInteger	fth_array_length(FTH);
 FTH		fth_array_map(FTH, FTH (*) (FTH, FTH), FTH);
-int		fth_array_member_p(FTH array, FTH key);
-FTH		fth_array_pop(FTH array);
-FTH		fth_array_push(FTH array, FTH value);
-FTH		fth_array_ref(FTH array, ficlInteger index);
-FTH		fth_array_reject(FTH array, FTH proc_or_xt, FTH args);
-FTH		fth_array_reverse(FTH array);
-FTH		fth_array_set(FTH array, ficlInteger index, FTH value);
-FTH		fth_array_shift(FTH array);
-FTH		fth_array_sort(FTH array, FTH proc_or_xt);
+int		fth_array_member_p(FTH, FTH);
+FTH		fth_array_pop(FTH);
+FTH		fth_array_push(FTH, FTH);
+FTH		fth_array_ref(FTH, ficlInteger);
+FTH		fth_array_reject(FTH, FTH, FTH);
+FTH		fth_array_reverse(FTH);
+FTH		fth_array_set(FTH, ficlInteger, FTH);
+FTH		fth_array_shift(FTH);
+FTH		fth_array_sort(FTH, FTH);
 FTH		fth_array_subarray(FTH, ficlInteger, ficlInteger);
-FTH		fth_array_to_array(FTH array);
-FTH		fth_array_to_list(FTH list);
-FTH		fth_array_uniq(FTH array);
-FTH		fth_array_unshift(FTH array, FTH value);
-FTH		fth_make_array_len(ficlInteger len);
-FTH		fth_make_array_var(int len,...);
-FTH		fth_make_array_with_init(ficlInteger len, FTH init);
+FTH		fth_array_to_array(FTH);
+FTH		fth_array_to_list(FTH);
+FTH		fth_array_uniq(FTH);
+FTH		fth_array_unshift(FTH, FTH);
+FTH		fth_make_array_len(ficlInteger);
+FTH		fth_make_array_var(int,...);
+FTH		fth_make_array_with_init(ficlInteger, FTH);
 FTH		fth_make_empty_array(void);
 /* assoc */
-FTH		fth_acell_key(FTH cell);
-FTH		fth_acell_value(FTH cell);
+FTH		fth_acell_key(FTH);
+FTH		fth_acell_value(FTH);
 /* returns => #( key value ) */
-FTH		fth_array_assoc(FTH assoc, FTH key);
+FTH		fth_array_assoc(FTH, FTH);
 /* returns => value */
-FTH		fth_array_assoc_ref(FTH assoc, FTH key);
-FTH		fth_array_assoc_remove(FTH assoc, FTH key);
-FTH		fth_array_assoc_set(FTH assoc, FTH key, FTH value);
-FTH		fth_assoc  (FTH assoc, FTH key, FTH value);
-FTH		fth_make_acell(FTH key, FTH value);
+FTH		fth_array_assoc_ref(FTH, FTH);
+FTH		fth_array_assoc_remove(FTH, FTH);
+FTH		fth_array_assoc_set(FTH, FTH, FTH);
+FTH		fth_assoc(FTH, FTH, FTH);
+FTH		fth_make_acell(FTH, FTH);
 /* list */
-FTH		fth_acons  (FTH key, FTH value, FTH alist);
-FTH		fth_cadddr (FTH list);
-FTH		fth_caddr  (FTH list);
-FTH		fth_cadr   (FTH list);
-FTH		fth_car    (FTH list);
-FTH		fth_cddr   (FTH list);
-FTH		fth_cdr    (FTH list);
-FTH		fth_cons   (FTH value, FTH list);
-FTH		fth_cons_2 (FTH obj1, FTH obj2, FTH list);
-FTH		fth_list_append(FTH args);
+FTH		fth_acons(FTH, FTH, FTH);
+FTH		fth_cadddr(FTH);
+FTH		fth_caddr(FTH);
+FTH		fth_cadr(FTH);
+FTH		fth_car(FTH);
+FTH		fth_cddr(FTH);
+FTH		fth_cdr(FTH);
+FTH		fth_cons(FTH, FTH);
+FTH		fth_cons_2(FTH, FTH, FTH);
+FTH		fth_list_append(FTH);
 /* returns => '( key value ) */
-FTH		fth_list_assoc(FTH alist, FTH key);
+FTH		fth_list_assoc(FTH, FTH);
 /* returns => value */
-FTH		fth_list_assoc_ref(FTH alist, FTH key);
-FTH		fth_list_assoc_remove(FTH alist, FTH key);
-FTH		fth_list_assoc_set(FTH alist, FTH key, FTH value);
-FTH		fth_list_copy(FTH list);
-ficlInteger	fth_list_length(FTH obj);
-FTH		fth_list_member_p(FTH list, FTH key);
-FTH		fth_list_ref(FTH list, ficlInteger index);
-FTH		fth_list_reverse(FTH list);
-FTH		fth_list_set(FTH list, ficlInteger index, FTH value);
-FTH		fth_list_to_array(FTH list);
+FTH		fth_list_assoc_ref(FTH, FTH);
+FTH		fth_list_assoc_remove(FTH, FTH);
+FTH		fth_list_assoc_set(FTH, FTH, FTH);
+FTH		fth_list_copy(FTH);
+ficlInteger	fth_list_length(FTH);
+FTH		fth_list_member_p(FTH, FTH);
+FTH		fth_list_ref(FTH, ficlInteger);
+FTH		fth_list_reverse(FTH);
+FTH		fth_list_set(FTH, ficlInteger, FTH);
+FTH		fth_list_to_array(FTH);
 FTH		fth_make_empty_list(void);
-FTH		fth_make_list_len(ficlInteger len);
-FTH		fth_make_list_var(int len,...);
-FTH		fth_make_list_with_init(ficlInteger len, FTH init);
+FTH		fth_make_list_len(ficlInteger);
+FTH		fth_make_list_var(int,...);
+FTH		fth_make_list_with_init(ficlInteger, FTH);
 
 /* === file.c === */
 /* general file functions */
-FTH		fth_file_atime(const char *name);
-FTH		fth_file_basename(const char *name, const char *ext);
-void		fth_file_chmod(const char *name, mode_t mode);
-void		fth_file_copy(const char *src, const char *dst);
-FTH		fth_file_ctime(const char *name);
-void		fth_file_delete(const char *name);
-FTH		fth_file_dirname(const char *name);
-int		fth_file_install(const char *src, const char *dst, mode_t mode);
-FTH		fth_file_length(const char *name);
-FTH		fth_file_match_dir(FTH string, FTH regexp);
-void		fth_file_mkdir(const char *name, mode_t mode);
-void		fth_file_mkfifo(const char *name, mode_t mode);
-FTH		fth_file_mtime(const char *name);
-FTH		fth_file_realpath(const char *name);
-void		fth_file_rename(const char *src, const char *dst);
-void		fth_file_rmdir(const char *name);
-FTH		fth_file_split(const char *name);
-void		fth_file_symlink(const char *src, const char *dst);
+FTH		fth_file_atime(const char *);
+FTH		fth_file_basename(const char *, const char *);
+void		fth_file_chmod(const char *, mode_t);
+void		fth_file_copy(const char *, const char *);
+FTH		fth_file_ctime(const char *);
+void		fth_file_delete(const char *);
+FTH		fth_file_dirname(const char *);
+int		fth_file_install(const char *, const char *, mode_t);
+FTH		fth_file_length(const char *);
+FTH		fth_file_match_dir(FTH, FTH);
+void		fth_file_mkdir(const char *, mode_t);
+void		fth_file_mkfifo(const char *, mode_t);
+FTH		fth_file_mtime(const char *);
+FTH		fth_file_realpath(const char *);
+void		fth_file_rename(const char *, const char *);
+void		fth_file_rmdir(const char *);
+FTH		fth_file_split(const char *);
+void		fth_file_symlink(const char *, const char *);
 /* file test */
-int		fth_file_block_p(const char *name);
-int		fth_file_character_p(const char *name);
-int		fth_file_directory_p(const char *name);
-int		fth_file_executable_p(const char *name);
-int		fth_file_exists_p(const char *name);
-int		fth_file_fifo_p(const char *name);
-int		fth_file_grpowned_p(const char *name);
-int		fth_file_owned_p(const char *name);
-int		fth_file_readable_p(const char *name);
-int		fth_file_setgid_p(const char *name);
-int		fth_file_setuid_p(const char *name);
-int		fth_file_socket_p(const char *name);
-int		fth_file_sticky_p(const char *name);
-int		fth_file_symlink_p(const char *name);
-int		fth_file_writable_p(const char *name);
-int		fth_file_zero_p(const char *name);
+int		fth_file_block_p(const char *);
+int		fth_file_character_p(const char *);
+int		fth_file_directory_p(const char *);
+int		fth_file_executable_p(const char *);
+int		fth_file_exists_p(const char *);
+int		fth_file_fifo_p(const char *);
+int		fth_file_grpowned_p(const char *);
+int		fth_file_owned_p(const char *);
+int		fth_file_readable_p(const char *);
+int		fth_file_setgid_p(const char *);
+int		fth_file_setuid_p(const char *);
+int		fth_file_socket_p(const char *);
+int		fth_file_sticky_p(const char *);
+int		fth_file_symlink_p(const char *);
+int		fth_file_writable_p(const char *);
+int		fth_file_zero_p(const char *);
 
 /* === hash.c === */
 /* hash */
-void		fth_hash_clear(FTH hash);
-FTH		fth_hash_copy(FTH hash);
-FTH		fth_hash_delete(FTH hash, FTH key);
+void		fth_hash_clear(FTH);
+FTH		fth_hash_copy(FTH);
+FTH		fth_hash_delete(FTH, FTH);
 FTH		fth_hash_each(FTH, FTH (*) (FTH, FTH, FTH), FTH);
-int		fth_hash_equal_p(FTH obj1, FTH obj2);
-FTH		fth_hash_find(FTH hash, FTH key);
-FTH		fth_hash_keys(FTH hash);
+int		fth_hash_equal_p(FTH, FTH);
+FTH		fth_hash_find(FTH, FTH);
+FTH		fth_hash_keys(FTH);
 FTH		fth_hash_map(FTH, FTH (*) (FTH, FTH, FTH), FTH);
-int		fth_hash_member_p(FTH hash, FTH key);
-FTH		fth_hash_ref(FTH hash, FTH key);
-void		fth_hash_set(FTH hash, FTH key, FTH value);
-FTH		fth_hash_to_array(FTH hash);
-FTH		fth_hash_values(FTH hash);
+int		fth_hash_member_p(FTH, FTH);
+FTH		fth_hash_ref(FTH, FTH);
+void		fth_hash_set(FTH, FTH, FTH);
+FTH		fth_hash_to_array(FTH);
+FTH		fth_hash_values(FTH);
 FTH		fth_make_hash(void);
-FTH		fth_make_hash_len(int hashsize);
+FTH		fth_make_hash_len(int);
 /* properties */
-FTH		fth_hash_id(FTH obj);
-FTH		fth_object_id(FTH obj);
-FTH		fth_object_properties(FTH obj);
-FTH		fth_object_property_ref(FTH obj, FTH key);
-void		fth_object_property_set(FTH obj, FTH key, FTH value);
-FTH		fth_properties(FTH obj);
-FTH		fth_property_ref(FTH obj, FTH key);
-void		fth_property_set(FTH obj, FTH key, FTH value);
-FTH		fth_word_properties(FTH obj);
-FTH		fth_word_property_ref(FTH obj, FTH key);
-void		fth_word_property_set(FTH obj, FTH key, FTH value);
+FTH		fth_hash_id(FTH);
+FTH		fth_object_id(FTH);
+FTH		fth_object_properties(FTH);
+FTH		fth_object_property_ref(FTH, FTH);
+void		fth_object_property_set(FTH, FTH, FTH);
+FTH		fth_properties(FTH);
+FTH		fth_property_ref(FTH, FTH);
+void		fth_property_set(FTH, FTH, FTH);
+FTH		fth_word_properties(FTH);
+FTH		fth_word_property_ref(FTH, FTH);
+void		fth_word_property_set(FTH, FTH, FTH);
 
 /* === hook.c === */
 /* hook */
-void		fth_add_hook(FTH hook, FTH proc);
-FTH		fth_hook_apply(FTH hook, FTH args, const char *caller);
-int		fth_hook_arity(FTH hook);
-void		fth_hook_clear(FTH hook);
-int		fth_hook_empty_p(FTH hook);
-int		fth_hook_equal_p(FTH obj1, FTH obj2);
-int		fth_hook_member_p(FTH hook, FTH name);
-FTH		fth_hook_names(FTH hook);
-FTH		fth_hook_to_array(FTH hook);
-FTH		fth_make_hook(const char *name, int arity, const char *doc);
-FTH		fth_make_hook_with_arity(const char *, int, int, int, const char *);
-FTH		fth_make_simple_hook(int arity);
-FTH		fth_remove_hook(FTH hook, FTH name);
-FTH		fth_run_hook(FTH hook, int len,...);
-FTH		fth_run_hook_again(FTH hook, int len,...);
-FTH		fth_run_hook_bool(FTH hook, int len,...);
+void		fth_add_hook(FTH, FTH);
+FTH		fth_hook_apply(FTH, FTH, const char *);
+int		fth_hook_arity(FTH);
+void		fth_hook_clear(FTH);
+int		fth_hook_empty_p(FTH);
+int		fth_hook_equal_p(FTH, FTH);
+int		fth_hook_member_p(FTH, FTH);
+FTH		fth_hook_names(FTH);
+FTH		fth_hook_to_array(FTH);
+FTH		fth_make_hook(const char *, int, const char *);
+FTH		fth_make_hook_with_arity(const char *,
+		    int, int, int, const char *);
+FTH		fth_make_simple_hook(int);
+FTH		fth_remove_hook(FTH, FTH);
+FTH		fth_run_hook(FTH, int,...);
+FTH		fth_run_hook_again(FTH, int,...);
+FTH		fth_run_hook_bool(FTH, int,...);
 
 /* === io.c === */
 /* io */
-void		fth_io_close(FTH io);
-int		fth_io_closed_p(FTH obj);
-int		fth_io_eof_p(FTH io);
-int		fth_io_equal_p(FTH obj1, FTH obj2);
-char           *fth_io_filename(FTH io);
-int		fth_io_fileno(FTH io);
-void		fth_io_flush(FTH io);
-int		fth_io_getc(FTH io);
-int		fth_io_input_p(FTH obj);
-ficl2Integer	fth_io_length(FTH obj);
-int		fth_io_mode(FTH io);
-FTH		fth_io_nopen(const char *host, int port, int type);
-FTH		fth_io_open(const char *name, int fam);
-int		fth_io_output_p(FTH obj);
-FTH		fth_io_popen(FTH cmd, int fam);
-ficl2Integer	fth_io_pos_ref(FTH io);
-void		fth_io_pos_set(FTH io, ficl2Integer pos);
-void           *fth_io_ptr(FTH io);
-void		fth_io_putc(FTH io, int c);
-char           *fth_io_read(FTH io);
-FTH		fth_io_read_line(FTH io);
-FTH		fth_io_readlines(FTH io);
-void		fth_io_rewind(FTH io);
-FTH		fth_io_sopen(FTH string, int fam);
-FTH		fth_io_to_string(FTH io);
-void		fth_io_write(FTH io, const char *line);
-void		fth_io_write_and_flush(FTH io, const char *line);
-void		fth_io_write_format(FTH io, FTH fmt, FTH args);
-void		fth_io_writelines(FTH io, FTH array);
-FTH		fth_readlines(const char *name);
-int		fth_set_exit_status(int status);
-FTH		fth_set_io_stderr(FTH io);
-FTH		fth_set_io_stdin(FTH io);
-FTH		fth_set_io_stdout(FTH io);
-void		fth_writelines(const char *name, FTH array);
+void		fth_io_close(FTH);
+int		fth_io_closed_p(FTH);
+int		fth_io_eof_p(FTH);
+int		fth_io_equal_p(FTH, FTH);
+char           *fth_io_filename(FTH);
+int		fth_io_fileno(FTH);
+void		fth_io_flush(FTH);
+int		fth_io_getc(FTH);
+int		fth_io_input_p(FTH);
+ficl2Integer	fth_io_length(FTH);
+int		fth_io_mode(FTH);
+FTH		fth_io_nopen(const char *, int, int);
+FTH		fth_io_open(const char *, int);
+int		fth_io_output_p(FTH);
+FTH		fth_io_popen(FTH, int);
+ficl2Integer	fth_io_pos_ref(FTH);
+void		fth_io_pos_set(FTH, ficl2Integer);
+void           *fth_io_ptr(FTH);
+void		fth_io_putc(FTH, int);
+char           *fth_io_read(FTH);
+FTH		fth_io_read_line(FTH);
+FTH		fth_io_readlines(FTH);
+void		fth_io_rewind(FTH);
+FTH		fth_io_sopen(FTH, int);
+FTH		fth_io_to_string(FTH);
+void		fth_io_write(FTH, const char *);
+void		fth_io_write_and_flush(FTH, const char *);
+void		fth_io_write_format(FTH, FTH, FTH);
+void		fth_io_writelines(FTH, FTH);
+FTH		fth_readlines(const char *);
+int		fth_set_exit_status(int);
+FTH		fth_set_io_stderr(FTH);
+FTH		fth_set_io_stdin(FTH);
+FTH		fth_set_io_stdout(FTH);
+void		fth_writelines(const char *, FTH);
 
 /* === misc.c === */
-void		fth_exit  (int n);
+void		fth_exit  (int);
 void		fth_make_ficl(unsigned, unsigned, unsigned, unsigned);
 void		fth_reset (void);
 /* eval */
-void		fth_add_feature(const char *name);
-int		fth_catch_eval(const char *buffer);
-int		fth_catch_exec(ficlWord *word);
-FTH		fth_eval   (const char *buffer);
-void		fth_init  (void);
-int		fth_provided_p(const char *name);
+void		fth_add_feature(const char *);
+int		fth_catch_eval(const char *);
+int		fth_catch_exec(ficlWord *);
+FTH		fth_eval(const char *);
+void		fth_init(void);
+int		fth_provided_p(const char *);
 /* load */
-void		fth_add_load_lib_path(const char *path);
-void		fth_add_load_path(const char *path);
-void		fth_add_loaded_files(const char *file);
-char           *fth_basename(const char *path);
-FTH		fth_dl_load(const char *lib, const char *func);
-FTH		fth_find_file(FTH name);
+void		fth_add_load_lib_path(const char *);
+void		fth_add_load_path(const char *);
+void		fth_add_loaded_files(const char *);
+char           *fth_basename(const char *);
+FTH		fth_dl_load(const char *, const char *);
+FTH		fth_find_file(FTH);
 void		fth_install(void);	/* parse word */
-void		fth_install_file(FTH fname);
-FTH		fth_load_file(const char *name);
+void		fth_install_file(FTH);
+FTH		fth_load_file(const char *);
 FTH		fth_load_global_init_file(void);
-FTH		fth_load_init_file(const char *init_file);
-FTH		fth_require_file(const char *name);
-void		fth_unshift_load_lib_path(const char *path);
-void		fth_unshift_load_path(const char *path);
+FTH		fth_load_init_file(const char *);
+FTH		fth_require_file(const char *);
+void		fth_unshift_load_lib_path(const char *);
+void		fth_unshift_load_path(const char *);
 /* words */
-FTH		fth_apropos(FTH regexp);
-void		fth_begin_values_to_obj(ficlVm *vm, char *name, FTH args);
-FTH		fth_find_in_wordlist(const char *name);
+FTH		fth_apropos(FTH);
+void		fth_begin_values_to_obj(ficlVm *, char *, FTH);
+FTH		fth_find_in_wordlist(const char *);
 char           *fth_parse_word(void);
 char           *fth_short_version(void);
 char           *fth_version(void);
-FTH		fth_word_ref(const char *name);
+FTH		fth_word_ref(const char *);
 FTH		fth_wordlist_each(int (*) (ficlWord *, FTH), FTH);
 
 /* === numbers.c === */
-int		fth_char_p(FTH obj);
-int		fth_exact_p(FTH obj);
-int		fth_fixnum_p(FTH obj);
-int		fth_integer_p(FTH obj);
-int		fth_number_p(FTH obj);
-int		fth_ullong_p(FTH obj);
-int		fth_unsigned_p(FTH obj);
+int		fth_char_p(FTH);
+int		fth_exact_p(FTH);
+int		fth_fixnum_p(FTH);
+int		fth_integer_p(FTH);
+int		fth_number_p(FTH);
+int		fth_ullong_p(FTH);
+int		fth_unsigned_p(FTH);
 #if HAVE_COMPLEX
-ficlComplex	fth_complex_ref(FTH x);
+ficlComplex	fth_complex_ref(FTH);
 #endif
-ficlFloat	fth_float_ref(FTH x);
-ficlFloat	fth_float_ref_or_else(FTH x, ficlFloat fallback);
-ficlInteger	fth_integer_ref(FTH x);
-ficlInteger	fth_int_ref(FTH x);
-ficlInteger	fth_int_ref_or_else(FTH x, ficlInteger fallback);
-int		fth_isinf (ficlFloat f);
-int		fth_isnan (ficlFloat f);
-FTH		fth_llong_copy(FTH obj);
-ficl2Integer	fth_long_long_ref(FTH x);
-FTH		fth_make_int(ficlInteger n);
-FTH		fth_make_llong(ficl2Integer d);
-FTH		fth_make_long_long(ficl2Integer d);
-ficlFloat	fth_real_ref(FTH x);
-FTH		fth_make_ullong(ficl2Unsigned ud);
-FTH		fth_make_ulong_long(ficl2Unsigned ud);
-FTH		fth_make_unsigned(ficlUnsigned u);
-ficl2Unsigned	fth_ulong_long_ref(FTH x);
-ficlUnsigned	fth_unsigned_ref(FTH x);
+ficlFloat	fth_float_ref(FTH);
+ficlFloat	fth_float_ref_or_else(FTH, ficlFloat);
+ficlInteger	fth_integer_ref(FTH);
+ficlInteger	fth_int_ref(FTH);
+ficlInteger	fth_int_ref_or_else(FTH, ficlInteger);
+int		fth_isinf (ficlFloat);
+int		fth_isnan (ficlFloat);
+FTH		fth_llong_copy(FTH);
+ficl2Integer	fth_long_long_ref(FTH);
+FTH		fth_make_int(ficlInteger);
+FTH		fth_make_llong(ficl2Integer);
+FTH		fth_make_long_long(ficl2Integer);
+ficlFloat	fth_real_ref(FTH);
+FTH		fth_make_ullong(ficl2Unsigned);
+FTH		fth_make_ulong_long(ficl2Unsigned);
+FTH		fth_make_unsigned(ficlUnsigned);
+ficl2Unsigned	fth_ulong_long_ref(FTH);
+ficlUnsigned	fth_unsigned_ref(FTH);
 /* random */
-ficlFloat	fth_frandom(ficlFloat f);	/* -f...f */
-ficlFloat	fth_random(ficlFloat f);	/* 0...f */
-void		fth_srand (ficlUnsigned u);
+ficlFloat	fth_frandom(ficlFloat);	/* -f...f */
+ficlFloat	fth_random(ficlFloat);	/* 0...f */
+void		fth_srand (ficlUnsigned);
 /* float */
-FTH		fth_float_copy(FTH x);
-FTH		fth_make_float(ficlFloat f);
+FTH		fth_float_copy(FTH);
+FTH		fth_make_float(ficlFloat);
 #if HAVE_COMPLEX
 /* complex */
-ficlComplex	ficlStackPopComplex(ficlStack *stack);
-void		ficlStackPushComplex(ficlStack *stack, ficlComplex cp);
-FTH		fth_make_complex(ficlComplex z);
-FTH		fth_make_polar(ficlFloat real, ficlFloat theta);
-FTH		fth_make_rectangular(ficlFloat real, ficlFloat image);
-#endif		/* HAVE_COMPLEX */
+ficlComplex 	ficlStackPopComplex(ficlStack *);
+void 		ficlStackPushComplex(ficlStack *, ficlComplex);
+FTH 		fth_make_complex(ficlComplex);
+FTH 		fth_make_polar(ficlFloat, ficlFloat);
+FTH 		fth_make_rectangular(ficlFloat, ficlFloat);
+#endif				/* HAVE_COMPLEX */
 #if HAVE_BN
-FTH		fth_make_bignum(ficlBignum bn);
-FTH		fth_make_big(FTH m);
-#endif		/* HAVE_BN */
+FTH 		fth_make_bignum(ficlBignum);
+FTH 		fth_make_big(FTH);
+#endif				/* HAVE_BN */
 /* ratio */
-FTH		fth_exact_to_inexact(FTH x);
-FTH		fth_inexact_to_exact(FTH x);
-FTH		fth_denominator(FTH x);
-FTH		fth_numerator(FTH x);
+FTH		fth_exact_to_inexact(FTH);
+FTH		fth_inexact_to_exact(FTH);
+FTH		fth_denominator(FTH);
+FTH		fth_numerator(FTH);
 #if HAVE_BN
-FTH		fth_make_ratio(FTH num, FTH den);
-FTH		fth_make_ratio_from_float(ficlFloat f);
-FTH		fth_make_ratio_from_int(ficlInteger num, ficlInteger den);
-FTH		fth_make_rational(ficlRatio r);
-FTH		fth_ratio_floor(FTH x);
-FTH		fth_rationalize(FTH x, FTH err);
-#endif		/* HAVE_BN */
-FTH		fth_number_add(FTH x, FTH y);
-FTH		fth_number_div(FTH x, FTH y);
-int		fth_number_equal_p(FTH x, FTH y);
-int		fth_number_less_p(FTH x, FTH y);
-FTH		fth_number_mul(FTH x, FTH y);
-FTH		fth_number_sub(FTH x, FTH y);
+FTH 		fth_make_ratio(FTH, FTH);
+FTH 		fth_make_ratio_from_float(ficlFloat);
+FTH 		fth_make_ratio_from_int(ficlInteger, ficlInteger);
+FTH 		fth_make_rational(ficlRatio);
+FTH 		fth_ratio_floor(FTH);
+FTH 		fth_rationalize(FTH, FTH);
+#endif				/* HAVE_BN */
+FTH		fth_number_add(FTH, FTH);
+FTH		fth_number_div(FTH, FTH);
+int		fth_number_equal_p(FTH, FTH);
+int		fth_number_less_p(FTH, FTH);
+FTH		fth_number_mul(FTH, FTH);
+FTH		fth_number_sub(FTH, FTH);
 
 /* === object.c === */
 /* gc */
-void		fth_gc_mark(FTH obj);
-FTH		fth_gc_off (void);
-FTH		fth_gc_on  (void);
-FTH		fth_gc_permanent(FTH obj);
-FTH		fth_gc_protect(FTH obj);
-FTH		fth_gc_protect_set(FTH out, FTH in);
-void		fth_gc_unmark(FTH obj);
-FTH		fth_gc_unprotect(FTH obj);
+void		fth_gc_mark(FTH);
+FTH		fth_gc_off(void);
+FTH		fth_gc_on(void);
+FTH		fth_gc_permanent(FTH);
+FTH		fth_gc_protect(FTH);
+FTH		fth_gc_protect_set(FTH, FTH);
+void		fth_gc_unmark(FTH);
+FTH		fth_gc_unprotect(FTH);
 /* object */
-FTH		fth_make_object_type(const char *name);
-FTH		fth_make_object_type_from(const char *name, FTH base);
-int		fth_object_type_p(FTH obj);
+FTH		fth_make_object_type(const char *);
+FTH		fth_make_object_type_from(const char *, FTH);
+int		fth_object_type_p(FTH);
 /* instance */
-int		fth_instance_flag_p(FTH obj, int flags);
-int		fth_instance_p(FTH obj);
-void           *fth_instance_ref_gen(FTH obj);
-int		fth_instance_type_p(FTH obj, fobj_t type);
-FTH		fth_make_instance(FTH obj, void *gen);
-int		fth_object_is_instance_of(FTH obj, FTH type);
+int		fth_instance_flag_p(FTH, int);
+int		fth_instance_p(FTH);
+void           *fth_instance_ref_gen(FTH);
+int		fth_instance_type_p(FTH, fobj_t);
+FTH		fth_make_instance(FTH, void *);
+int		fth_object_is_instance_of(FTH, FTH);
 /* object set functions */
 /* NOSTRICT */
 FTH		fth_set_object_apply(FTH, void *, int, int, int);
-FTH		fth_set_object_copy(FTH obj, FTH (*copy) (FTH obj));
-FTH		fth_set_object_dump(FTH obj, FTH (*dump) (FTH obj));
+FTH		fth_set_object_copy(FTH, FTH (*) (FTH));
+FTH		fth_set_object_dump(FTH, FTH (*) (FTH));
 FTH		fth_set_object_equal_p(FTH, FTH (*) (FTH, FTH));
-FTH		fth_set_object_free(FTH obj, void (*free) (FTH obj));
-FTH		fth_set_object_inspect(FTH obj, FTH (*inspect) (FTH obj));
-FTH		fth_set_object_length(FTH obj, FTH (*length) (FTH obj));
-FTH		fth_set_object_mark(FTH obj, void (*mark) (FTH obj));
-FTH		fth_set_object_to_array(FTH obj, FTH (*to_array) (FTH obj));
+FTH		fth_set_object_free(FTH, void (*) (FTH));
+FTH		fth_set_object_inspect(FTH, FTH (*) (FTH));
+FTH		fth_set_object_length(FTH, FTH (*) (FTH));
+FTH		fth_set_object_mark(FTH, void (*) (FTH));
+FTH		fth_set_object_to_array(FTH, FTH (*) (FTH));
 FTH		fth_set_object_to_string(FTH, FTH (*) (FTH));
 FTH		fth_set_object_value_ref(FTH, FTH (*) (FTH, FTH));
 FTH		fth_set_object_value_set(FTH, FTH (*) (FTH, FTH, FTH));
 /* object functions */
-FTH		fth_object_apply(FTH obj, FTH args);
-FTH		fth_object_copy(FTH obj);
-FTH		fth_object_dump(FTH obj);
-int		fth_object_empty_p(FTH obj);
-int		fth_object_equal_p(FTH obj1, FTH obj2);
-FTH		fth_object_find(FTH obj, FTH key);
-FTH		fth_object_index(FTH obj, FTH key);
-FTH		fth_object_inspect(FTH obj);
-ficlInteger	fth_object_length(FTH obj);
-int		fth_object_member_p(FTH obj, FTH key);
-char           *fth_object_name(FTH obj);
-int		fth_object_range_p(FTH obj, ficlInteger index);
-FTH		fth_object_sort(FTH obj, FTH proc);
-FTH		fth_object_to_array(FTH obj);
-FTH		fth_object_to_string(FTH obj);
+FTH		fth_object_apply(FTH, FTH);
+FTH		fth_object_copy(FTH);
+FTH		fth_object_dump(FTH);
+int		fth_object_empty_p(FTH);
+int		fth_object_equal_p(FTH, FTH);
+FTH		fth_object_find(FTH, FTH);
+FTH		fth_object_index(FTH, FTH);
+FTH		fth_object_inspect(FTH);
+ficlInteger	fth_object_length(FTH);
+int		fth_object_member_p(FTH, FTH);
+char           *fth_object_name(FTH);
+int		fth_object_range_p(FTH, ficlInteger);
+FTH		fth_object_sort(FTH, FTH);
+FTH		fth_object_to_array(FTH);
+FTH		fth_object_to_string(FTH);
 /* Wrap String object type to "string". */
-FTH		fth_object_to_string_2(FTH obj);
-FTH		fth_object_value_ref(FTH obj, ficlInteger index);
-FTH		fth_object_value_set(FTH obj, ficlInteger index, FTH value);
-char           *fth_to_c_dump(FTH obj);
-char           *fth_to_c_inspect(FTH obj);
-char           *fth_to_c_string(FTH obj);
+FTH		fth_object_to_string_2(FTH);
+FTH		fth_object_value_ref(FTH, ficlInteger);
+FTH		fth_object_value_set(FTH, ficlInteger, FTH);
+char           *fth_to_c_dump(FTH);
+char           *fth_to_c_inspect(FTH);
+char           *fth_to_c_string(FTH);
 /* Wrap String object type to "string". */
-char           *fth_to_c_string_2(FTH obj);
+char           *fth_to_c_string_2(FTH);
 /* cycle */
-ficlInteger	fth_cycle_next(FTH obj);
-ficlInteger	fth_cycle_pos_0(FTH obj);
-ficlInteger	fth_cycle_pos_ref(FTH obj);
-ficlInteger	fth_cycle_pos_set(FTH obj, ficlInteger index);
-FTH		fth_object_cycle_ref(FTH obj);
-FTH		fth_object_cycle_set(FTH obj, FTH value);
+ficlInteger	fth_cycle_next(FTH);
+ficlInteger	fth_cycle_pos_0(FTH);
+ficlInteger	fth_cycle_pos_ref(FTH);
+ficlInteger	fth_cycle_pos_set(FTH, ficlInteger);
+FTH		fth_object_cycle_ref(FTH);
+FTH		fth_object_cycle_set(FTH, FTH);
 /* stack access */
-FTH		ficl_to_fth(FTH obj);
-FTH		fth_pop_ficl_cell(ficlVm *vm);
-void		fth_push_ficl_cell(ficlVm *vm, FTH obj);
-FTH		fth_to_ficl(FTH obj);
+FTH		ficl_to_fth(FTH);
+FTH		fth_pop_ficl_cell(ficlVm *);
+void		fth_push_ficl_cell(ficlVm *, FTH);
+FTH		fth_to_ficl(FTH);
 
 /* === port.c === */
 /* port */
-void		fth_port_close(FTH port);
-void		fth_port_display(FTH port, FTH obj);
-void		fth_port_flush(FTH port);
-int		fth_port_getc(FTH port);
-char           *fth_port_gets(FTH port);
-void		fth_port_putc(FTH port, int c);
-void		fth_port_puts(FTH port, const char *str);
-out_cb		fth_set_error_cb(out_cb cb);
-out_cb		fth_set_print_and_error_cb(out_cb cb);
+void		fth_port_close(FTH);
+void		fth_port_display(FTH, FTH);
+void		fth_port_flush(FTH);
+int		fth_port_getc(FTH);
+char           *fth_port_gets(FTH);
+void		fth_port_putc(FTH, int);
+void		fth_port_puts(FTH, const char *);
+out_cb		fth_set_error_cb(out_cb);
+out_cb		fth_set_print_and_error_cb(out_cb);
 /* output callbacks */
-/* void (*out_cb)(ficlVm *vm, char *msg); */
-out_cb		fth_set_print_cb(out_cb cb);
+/* void (*)(ficlVm *, char *); */
+out_cb		fth_set_print_cb(out_cb);
 /* input callback */
-/* char *(*in_cb)(ficlVm *vm); */
-in_cb		fth_set_read_cb(in_cb cb);
-FTH		fth_port_to_string(FTH port);
+/* char *(*)(ficlVm *); */
+in_cb		fth_set_read_cb(in_cb);
+FTH		fth_port_to_string(FTH);
 
 /* === printf.c === */
-int		fth_asprintf(char **result, const char *fmt,...);
-int		fth_debug  (const char *fmt,...);
-int		fth_error  (const char *str);
-int		fth_errorf (const char *fmt,...);
-char           *fth_format(const char *fmt,...);
-int		fth_fprintf(FILE * fp, const char *fmt,...);
-int		fth_ioprintf(FTH io, const char *fmt,...);
-int		fth_port_printf(FTH port, const char *fmt,...);
-int		fth_port_vprintf(FTH port, const char *fmt, va_list ap);
-int		fth_print  (const char *str);
-int		fth_printf (const char *fmt,...);
-int		fth_snprintf(char *buffer, size_t size, const char *fmt,...);
-int		fth_sprintf(char *buffer, const char *fmt,...);
-FTH		fth_string_vformat(const char *fmt, FTH args);
-int		fth_vasprintf(char **result, const char *fmt, va_list ap);
-int		fth_verrorf(const char *fmt, va_list ap);
-char           *fth_vformat(const char *fmt, va_list ap);
-int		fth_vfprintf(FILE * fp, const char *fmt, va_list ap);
-int		fth_vioprintf(FTH io, const char *fmt, va_list ap);
-int		fth_vprintf(const char *fmt, va_list ap);
+int		fth_asprintf(char **, const char *,...);
+int		fth_debug(const char *,...);
+int		fth_error(const char *);
+int		fth_errorf(const char *,...);
+char           *fth_format(const char *,...);
+int		fth_fprintf(FILE *, const char *,...);
+int		fth_ioprintf(FTH, const char *,...);
+int		fth_port_printf(FTH, const char *,...);
+int		fth_port_vprintf(FTH, const char *, va_list);
+int		fth_print(const char *);
+int		fth_printf(const char *,...);
+int		fth_snprintf(char *, size_t, const char *,...);
+int		fth_sprintf(char *, const char *,...);
+FTH		fth_string_vformat(const char *, FTH);
+int		fth_vasprintf(char **, const char *, va_list);
+int		fth_verrorf(const char *, va_list);
+char           *fth_vformat(const char *, va_list);
+int		fth_vfprintf(FILE *, const char *, va_list);
+int		fth_vioprintf(FTH, const char *, va_list);
+int		fth_vprintf(const char *, va_list);
 int		fth_vsnprintf(char *, size_t, const char *, va_list);
-int		fth_vsprintf(char *buffer, const char *fmt, va_list ap);
-int		fth_warning(const char *fmt,...);
+int		fth_vsprintf(char *, const char *, va_list);
+int		fth_warning(const char *,...);
 
 /* === proc.c === */
-int		fth_word_defined_p(FTH obj);
-int		fth_word_type_p(FTH obj, int type);
+int		fth_word_defined_p(FTH);
+int		fth_word_type_p(FTH, int);
 /* proc */
-ficlWord       *fth_define_procedure(const char *, FTH (*) (), int, int, int, const char *);
-ficlWord       *fth_define_void_procedure(const char *, void (*) (), int, int, int, const char *);
-FTH		fth_documentation_ref(FTH obj);
-void		fth_documentation_set(FTH obj, FTH doc);
-FTH		fth_get_optarg(ficlInteger req, FTH def);
-FTH		fth_get_optkey(FTH key, FTH def);
-ficl2Integer	fth_get_optkey_2int(FTH key, ficl2Integer def);
-ficlInteger	fth_get_optkey_int(FTH key, ficlInteger def);
-int		fth_get_optkey_fix(FTH key, int def);
-char           *fth_get_optkey_str(FTH key, char *def);
-FTH		fth_make_proc(ficlWord *word, int req, int opt, int rest);
-FTH		fth_make_proc_from_func(const char *, FTH (*) (), int, int, int, int);
-FTH		fth_proc_apply(FTH proc, FTH args, const char *caller);
-int		fth_proc_arity(FTH proc);
-FTH		fth_proc_call(FTH proc, const char *caller, int len,...);
-char           *fth_proc_name(FTH obj);
-FTH		fth_proc_source_ref(FTH proc);
-void		fth_proc_source_set(FTH proc, FTH source);
-ficlWord       *fth_proc_to_xt(FTH proc);
-FTH		fth_source_file(FTH obj);
-FTH		fth_source_line(FTH obj);
-FTH		fth_source_ref(FTH obj);
-void		fth_source_set(FTH obj, FTH source);
-ficlWord       *fth_word_doc_set(ficlWord *word, const char *str);
-FTH		fth_xt_apply(const char *name, FTH args, const char *caller);
-FTH		fth_xt_call(const char *name, const char *caller, int len,...);
-FTH		proc_from_proc_or_xt(FTH proc_or_xt,
-		    int req, int opt, int rest);
+ficlWord       *fth_define_procedure(const char *,
+		    FTH (*) (), int, int, int, const char *);
+ficlWord       *fth_define_void_procedure(const char *,
+		    void (*) (), int, int, int, const char *);
+FTH		fth_documentation_ref(FTH);
+void		fth_documentation_set(FTH, FTH);
+FTH		fth_get_optarg(ficlInteger, FTH);
+FTH		fth_get_optkey(FTH, FTH);
+ficl2Integer	fth_get_optkey_2int(FTH, ficl2Integer);
+ficlInteger	fth_get_optkey_int(FTH, ficlInteger);
+int		fth_get_optkey_fix(FTH, int);
+char           *fth_get_optkey_str(FTH, char *);
+FTH		fth_make_proc(ficlWord *, int, int, int);
+FTH		fth_make_proc_from_func(const char *,
+		    FTH (*) (), int, int, int, int);
+FTH		fth_proc_apply(FTH, FTH, const char *);
+int		fth_proc_arity(FTH);
+FTH		fth_proc_call(FTH, const char *, int,...);
+char           *fth_proc_name(FTH);
+FTH		fth_proc_source_ref(FTH);
+void		fth_proc_source_set(FTH, FTH);
+ficlWord       *fth_proc_to_xt(FTH);
+FTH		fth_source_file(FTH);
+FTH		fth_source_line(FTH);
+FTH		fth_source_ref(FTH);
+void		fth_source_set(FTH, FTH);
+ficlWord       *fth_word_doc_set(ficlWord *, const char *);
+FTH		fth_xt_apply(const char *, FTH, const char *);
+FTH		fth_xt_call(const char *, const char *, int,...);
+FTH		proc_from_proc_or_xt(FTH, int, int, int);
 /* define, variable */
-FTH		fth_define (const char *name, FTH value);
+FTH		fth_define (const char *, FTH);
 FTH		fth_define_constant(const char *, FTH, const char *);
 FTH		fth_define_variable(const char *, FTH, const char *);
-int		fth_defined_p(const char *name);
-void		fth_trace_var(FTH obj, FTH proc_or_xt);
-FTH		fth_trace_var_execute(ficlWord *word);
-void		fth_untrace_var(FTH obj);
-FTH		fth_var_ref(FTH obj);
-FTH		fth_var_set(FTH obj, FTH value);
-FTH		fth_variable_ref(const char *name);
-FTH		fth_variable_set(const char *name, FTH value);
+int		fth_defined_p(const char *);
+void		fth_trace_var(FTH, FTH);
+FTH		fth_trace_var_execute(ficlWord *);
+void		fth_untrace_var(FTH);
+FTH		fth_var_ref(FTH);
+FTH		fth_var_set(FTH, FTH);
+FTH		fth_variable_ref(const char *);
+FTH		fth_variable_set(const char *, FTH);
 
 /* === regexp.c === */
 /* regexp */
-FTH		fth_make_regexp(const char *str);
-int		fth_regexp_find(const char *reg, const char *str);
-ficlInteger	fth_regexp_match(FTH regexp, FTH string);
-FTH		fth_regexp_replace(FTH regexp, FTH string, FTH replace);
+FTH		fth_make_regexp(const char *);
+int		fth_regexp_find(const char *, const char *);
+ficlInteger	fth_regexp_match(FTH, FTH);
+FTH		fth_regexp_replace(FTH, FTH, FTH);
 ficlInteger	fth_regexp_search(FTH, FTH, ficlInteger, ficlInteger);
-FTH		fth_regexp_var_ref(ficlInteger index);
+FTH		fth_regexp_var_ref(ficlInteger);
 
 /* === string.c === */
 /* string */
-
 FTH		fth_make_empty_string(void);
-FTH		fth_make_string(const char *str);
-FTH		fth_make_string_format(const char *fmt,...);
-FTH		fth_make_string_len(const char *str, ficlInteger len);
-FTH		fth_make_string_or_false(const char *str);
-FTH		fth_string_append(FTH string1, FTH string2);
-FTH		fth_string_capitalize(FTH string);
-FTH		fth_string_char_ref(FTH string, ficlInteger index);
-FTH		fth_string_char_set(FTH string, ficlInteger index, FTH value);
-FTH		fth_string_chomp(FTH string);
-FTH		fth_string_copy(FTH string);
-char		fth_string_c_char_ref(FTH string, ficlInteger index);
-char		fth_string_c_char_set(FTH string, ficlInteger index, char c);
-FTH		fth_string_delete(FTH string, ficlInteger index);
-FTH		fth_string_downcase(FTH string);
-int		fth_string_equal_p(FTH obj1, FTH obj2);
-int		fth_string_eval(FTH string);
-FTH		fth_string_fill(FTH string, FTH fill_char);
-FTH		fth_string_find(FTH string, FTH key);
-FTH		fth_string_format(FTH string, FTH args_list);
-int		fth_string_greater_p(FTH obj1, FTH obj2);
-FTH		fth_string_index(FTH string, FTH key);
-FTH		fth_string_insert(FTH string, ficlInteger index, FTH value);
-ficlInteger	fth_string_length(FTH string);
-int		fth_string_less_p(FTH obj1, FTH obj2);
-int		fth_string_member_p(FTH string, FTH key);
-int		fth_string_not_equal_p(FTH obj1, FTH obj2);
-FTH		fth_string_pop(FTH string);
-FTH		fth_string_push(FTH string, FTH add_str);
-char           *fth_string_ref(FTH string);
-FTH		fth_string_replace(FTH string, FTH from, FTH to);
-FTH		fth_string_reverse(FTH string);
-FTH		fth_string_scat(FTH string, const char *str);
-FTH		fth_string_sformat(FTH string, const char *fmt,...);
-FTH		fth_string_shift(FTH string);
-FTH		fth_string_sncat(FTH string, const char *str, ficlInteger len);
-FTH		fth_string_split(FTH string, FTH sep_str);
-FTH		fth_string_substring(FTH string, ficlInteger start, ficlInteger end);
-FTH		fth_string_to_array(FTH string);
-FTH		fth_string_unshift(FTH string, FTH add_str);
-FTH		fth_string_upcase(FTH string);
-FTH		fth_string_vsformat(FTH string, const char *fmt, va_list ap);
+FTH		fth_make_string(const char *);
+FTH		fth_make_string_format(const char *,...);
+FTH		fth_make_string_len(const char *, ficlInteger);
+FTH		fth_make_string_or_false(const char *);
+FTH		fth_string_append(FTH, FTH);
+FTH		fth_string_capitalize(FTH);
+FTH		fth_string_char_ref(FTH, ficlInteger);
+FTH		fth_string_char_set(FTH, ficlInteger, FTH);
+FTH		fth_string_chomp(FTH);
+FTH		fth_string_copy(FTH);
+char		fth_string_c_char_ref(FTH, ficlInteger);
+char		fth_string_c_char_set(FTH, ficlInteger, char);
+FTH		fth_string_delete(FTH, ficlInteger);
+FTH		fth_string_downcase(FTH);
+int		fth_string_equal_p(FTH, FTH);
+int		fth_string_eval(FTH);
+FTH		fth_string_fill(FTH, FTH);
+FTH		fth_string_find(FTH, FTH);
+FTH		fth_string_format(FTH, FTH);
+int		fth_string_greater_p(FTH, FTH);
+FTH		fth_string_index(FTH, FTH);
+FTH		fth_string_insert(FTH, ficlInteger, FTH);
+ficlInteger	fth_string_length(FTH);
+int		fth_string_less_p(FTH, FTH);
+int		fth_string_member_p(FTH, FTH);
+int		fth_string_not_equal_p(FTH, FTH);
+FTH		fth_string_pop(FTH);
+FTH		fth_string_push(FTH, FTH);
+char           *fth_string_ref(FTH);
+FTH		fth_string_replace(FTH, FTH, FTH);
+FTH		fth_string_reverse(FTH);
+FTH		fth_string_scat(FTH, const char *);
+FTH		fth_string_sformat(FTH, const char *,...);
+FTH		fth_string_shift(FTH);
+FTH		fth_string_sncat(FTH, const char *, ficlInteger);
+FTH		fth_string_split(FTH, FTH);
+FTH		fth_string_substring(FTH, ficlInteger, ficlInteger);
+FTH		fth_string_to_array(FTH);
+FTH		fth_string_unshift(FTH, FTH);
+FTH		fth_string_upcase(FTH);
+FTH		fth_string_vsformat(FTH, const char *, va_list);
 
 /* === symbol.c === */
 /* symbol */
-int		fth_string_or_symbol_p(FTH obj);
-char           *fth_string_or_symbol_ref(FTH obj);
-FTH		fth_symbol (const char *name);
-int		fth_symbol_equal_p(FTH obj1, FTH obj2);
-int		fth_symbol_p(const char *name);
-char           *fth_symbol_ref(FTH obj);
+int		fth_string_or_symbol_p(FTH);
+char           *fth_string_or_symbol_ref(FTH);
+FTH		fth_symbol (const char *);
+int		fth_symbol_equal_p(FTH, FTH);
+int		fth_symbol_p(const char *);
+char           *fth_symbol_ref(FTH);
 /* keyword */
-FTH		fth_keyword(const char *name);
-int		fth_keyword_equal_p(FTH obj1, FTH obj2);
-int		fth_keyword_p(const char *name);
-char           *fth_keyword_ref(FTH obj);
+FTH		fth_keyword(const char *);
+int		fth_keyword_equal_p(FTH, FTH);
+int		fth_keyword_p(const char *);
+char           *fth_keyword_ref(FTH);
 /* exception */
-FTH		fth_exception(const char *name);
-int		fth_exception_equal_p(FTH obj1, FTH obj2);
-FTH		fth_exception_last_message_ref(FTH exc);
-void		fth_exception_last_message_set(FTH exc, FTH msg);
-FTH		fth_exception_message_ref(FTH exc);
-void		fth_exception_message_set(FTH exc, FTH msg);
-char           *fth_exception_ref(FTH obj);
-FTH		fth_make_exception(const char *name, const char *message);
-int		fth_symbol_or_exception_p(FTH obj);
-FTH		fth_symbol_or_exception_ref(FTH obj);
-FTH		fth_symbol_to_exception(FTH obj);
+FTH		fth_exception(const char *);
+int		fth_exception_equal_p(FTH, FTH);
+FTH		fth_exception_last_message_ref(FTH);
+void		fth_exception_last_message_set(FTH, FTH);
+FTH		fth_exception_message_ref(FTH);
+void		fth_exception_message_set(FTH, FTH);
+char           *fth_exception_ref(FTH);
+FTH		fth_make_exception(const char *, const char *);
+int		fth_symbol_or_exception_p(FTH);
+FTH		fth_symbol_or_exception_ref(FTH);
+FTH		fth_symbol_to_exception(FTH);
 
 /* === utils.c === */
-void           *fth_calloc(size_t size, size_t eltsize);
-int		fth_evaluate(ficlVm *vm, const char *buffer);
-int		fth_execute_xt(ficlVm *vm, ficlWord *word);
-void		fth_free  (void *p);
-char           *fth_getenv(const char *name, char *def);
-void           *fth_malloc(size_t size);
-void           *fth_realloc(void *p, size_t size);
-void		fth_repl  (int argc, char **argv);
-char	       *fth_strcat(char *d, size_t size, const char *s);
-char	       *fth_strcpy(char *d, size_t size, const char *s);
-char           *fth_strdup(const char *s);
-char           *fth_strerror(int n);
-size_t		fth_strlen(const char *s);
-char	       *fth_strncat(char *d, size_t size, const char *s, size_t count);
-char	       *fth_strncpy(char *d, size_t size, const char *s, size_t count);
-void		fth_throw (FTH exc, const char *fmt,...);
-void		fth_throw_error(FTH exc, FTH args);
-void		fth_throw_list(FTH exc, FTH args);
-char	       *pop_cstring(ficlVm *vm);
-void		push_cstring(ficlVm *vm, char *s);
-FTH		fth_set_argv(int from, int to, char **argv);
+void           *fth_calloc(size_t, size_t);
+int		fth_evaluate(ficlVm *, const char *);
+int		fth_execute_xt(ficlVm *, ficlWord *);
+void		fth_free(void *);
+char           *fth_getenv(const char *, char *);
+void           *fth_malloc(size_t);
+void           *fth_realloc(void *, size_t);
+void		fth_repl(int, char **);
+char	       *fth_strcat(char *, size_t, const char *);
+char	       *fth_strcpy(char *, size_t, const char *);
+char           *fth_strdup(const char *);
+char           *fth_strerror(int);
+size_t		fth_strlen(const char *);
+char	       *fth_strncat(char *, size_t, const char *, size_t);
+char	       *fth_strncpy(char *, size_t, const char *, size_t);
+void		fth_throw (FTH, const char *,...);
+void		fth_throw_error(FTH, FTH);
+void		fth_throw_list(FTH, FTH);
+char	       *pop_cstring(ficlVm *);
+void		push_cstring(ficlVm *, char *);
+FTH		fth_set_argv(int, int, char **);
 
 __END_DECLS
 
-#endif		/* _FTH_H_ */
+#endif				/* _FTH_H_ */
 
 /*
  * fth.h ends here

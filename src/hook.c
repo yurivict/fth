@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hook.c	1.84 12/31/17
+ * @(#)hook.c	1.85 1/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -53,25 +53,25 @@ typedef struct {
 #define FTH_HOOK_REST(Obj)	FTH_HOOK_OBJECT(Obj)->rest
 #define FTH_HOOK_LENGTH(Obj)	simple_array_length(FTH_HOOK_DATA(Obj))
 
-static void	ficl_create_hook(ficlVm *vm);
-static void	ficl_hook_apply(ficlVm *vm);
-static void	ficl_hook_arity(ficlVm *vm);
-static void	ficl_hook_empty_p(ficlVm *vm);
-static void	ficl_hook_equal_p(ficlVm *vm);
-static void	ficl_hook_member_p(ficlVm *vm);
-static void	ficl_hook_name(ficlVm *vm);
-static void	ficl_hook_p(ficlVm *vm);
-static void	ficl_make_hook(ficlVm *vm);
-static void	ficl_print_hook(ficlVm *vm);
-static FTH	hk_apply(FTH self, FTH args);
-static FTH	hk_dump(FTH self);
-static FTH	hk_equal_p(FTH self, FTH obj);
-static void	hk_free(FTH self);
-static FTH	hk_inspect(FTH self);
-static FTH	hk_length(FTH self);
-static FTH	hk_ref(FTH self, FTH idx);
-static FTH	hk_to_array(FTH self);
-static FTH	hk_to_string(FTH self);
+static void	ficl_create_hook(ficlVm *);
+static void	ficl_hook_apply(ficlVm *);
+static void	ficl_hook_arity(ficlVm *);
+static void	ficl_hook_empty_p(ficlVm *);
+static void	ficl_hook_equal_p(ficlVm *);
+static void	ficl_hook_member_p(ficlVm *);
+static void	ficl_hook_name(ficlVm *);
+static void	ficl_hook_p(ficlVm *);
+static void	ficl_make_hook(ficlVm *);
+static void	ficl_print_hook(ficlVm *);
+static FTH	hk_apply(FTH, FTH);
+static FTH	hk_dump(FTH);
+static FTH	hk_equal_p(FTH, FTH);
+static void	hk_free(FTH);
+static FTH	hk_inspect(FTH);
+static FTH	hk_length(FTH);
+static FTH	hk_ref(FTH, FTH);
+static FTH	hk_to_array(FTH);
+static FTH	hk_to_string(FTH);
 static FTH	make_hook(const char *, int, int, int, const char *);
 
 #define h_list_of_hook_functions "\

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)array.c	1.143 12/31/17
+ * @(#)array.c	1.144 1/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -50,7 +50,7 @@ typedef struct {
 
 #define MAKE_ARRAY_MEMBER(Type, Member)	MAKE_MEMBER(FArray, ary, Type, Member)
 
-/*
+/*-
  * Build words for scrutinizing arrays:
  *
  * init_ary_length     => ary->length
@@ -83,98 +83,98 @@ MAKE_ARRAY_MEMBER(Integer, top)
 /*
  * Array
  */
-static FTH 	ary_compact_each(FTH value, FTH new);
-static FTH 	ary_copy(FTH self);
-static FTH 	ary_dump(FTH self);
-static FTH 	ary_dump_each(FTH value, FTH data);
-static FTH 	ary_equal_p(FTH self, FTH obj);
-static void 	ary_free(FTH self);
-static FTH 	ary_inspect(FTH self);
-static FTH 	ary_inspect_each(FTH value, FTH data);
-static FTH 	ary_length(FTH self);
-static void 	ary_mark(FTH self);
-static FTH 	ary_ref(FTH self, FTH fidx);
-static FTH 	ary_set(FTH self, FTH fidx, FTH value);
-static FTH 	ary_to_array(FTH self);
-static FTH 	ary_to_string(FTH self);
-static FTH 	ary_uniq_each(FTH value, FTH new);
+static FTH 	ary_compact_each(FTH, FTH);
+static FTH 	ary_copy(FTH);
+static FTH 	ary_dump(FTH);
+static FTH 	ary_dump_each(FTH, FTH);
+static FTH 	ary_equal_p(FTH, FTH);
+static void 	ary_free(FTH);
+static FTH 	ary_inspect(FTH);
+static FTH 	ary_inspect_each(FTH, FTH);
+static FTH 	ary_length(FTH);
+static void 	ary_mark(FTH);
+static FTH 	ary_ref(FTH, FTH);
+static FTH 	ary_set(FTH, FTH, FTH);
+static FTH 	ary_to_array(FTH);
+static FTH 	ary_to_string(FTH);
+static FTH 	ary_uniq_each(FTH, FTH);
 #if defined(HAVE_QSORT)
-static int 	cmpit(const void *a, const void *b);
+static int 	cmpit(const void *, const void *);
 #endif
-static void 	ficl_array_compact(ficlVm *vm);
-static void 	ficl_array_copy(ficlVm *vm);
-static void 	ficl_array_delete(ficlVm *vm);
-static void 	ficl_array_equal_p(ficlVm *vm);
-static void 	ficl_array_index(ficlVm *vm);
-static void 	ficl_array_insert(ficlVm *vm);
-static void 	ficl_array_insert_bang(ficlVm *vm);
-static void 	ficl_array_length(ficlVm *vm);
-static void 	ficl_array_member_p(ficlVm *vm);
-static void 	ficl_array_p(ficlVm *vm);
-static void 	ficl_array_ref(ficlVm *vm);
-static void 	ficl_array_reject(ficlVm *vm);
-static void 	ficl_array_reverse(ficlVm *vm);
-static void 	ficl_array_set(ficlVm *vm);
-static void 	ficl_array_sort(ficlVm *vm);
-static void 	ficl_array_subarray(ficlVm *vm);
-static void 	ficl_array_uniq(ficlVm *vm);
-static void 	ficl_make_array(ficlVm *vm);
-static void 	ficl_make_empty_array(ficlVm *vm);
-static void 	ficl_print_array(ficlVm *vm);
-static void 	ficl_values_to_array(ficlVm *vm);
-static FArray  *make_array(ficlInteger len);
-static FTH 	make_array_instance(FArray *ary);
+static void 	ficl_array_compact(ficlVm *);
+static void 	ficl_array_copy(ficlVm *);
+static void 	ficl_array_delete(ficlVm *);
+static void 	ficl_array_equal_p(ficlVm *);
+static void 	ficl_array_index(ficlVm *);
+static void 	ficl_array_insert(ficlVm *);
+static void 	ficl_array_insert_bang(ficlVm *);
+static void 	ficl_array_length(ficlVm *);
+static void 	ficl_array_member_p(ficlVm *);
+static void 	ficl_array_p(ficlVm *);
+static void 	ficl_array_ref(ficlVm *);
+static void 	ficl_array_reject(ficlVm *);
+static void 	ficl_array_reverse(ficlVm *);
+static void 	ficl_array_set(ficlVm *);
+static void 	ficl_array_sort(ficlVm *);
+static void 	ficl_array_subarray(ficlVm *);
+static void 	ficl_array_uniq(ficlVm *);
+static void 	ficl_make_array(ficlVm *);
+static void 	ficl_make_empty_array(ficlVm *);
+static void 	ficl_print_array(ficlVm *);
+static void 	ficl_values_to_array(ficlVm *);
+static FArray  *make_array(ficlInteger);
+static FTH 	make_array_instance(FArray *);
 
 /*
  * Acell
  */
-static FTH 	acl_dump(FTH self);
-static FTH 	acl_inspect(FTH self);
-static FTH 	acl_to_string(FTH self);
+static FTH 	acl_dump(FTH);
+static FTH 	acl_inspect(FTH);
+static FTH 	acl_to_string(FTH);
 
 /*
  * Assoc
  */
-static FTH 	assoc_insert(FTH assoc, FTH id, FTH val);
-static void 	ficl_assoc_p(ficlVm *vm);
-static void 	ficl_values_to_assoc(ficlVm *vm);
-static ficlInteger assoc_index(FTH assoc, FTH key);
+static FTH 	assoc_insert(FTH, FTH, FTH);
+static void 	ficl_assoc_p(ficlVm *);
+static void 	ficl_values_to_assoc(ficlVm *);
+static ficlInteger assoc_index(FTH, FTH);
 
 /*
  * List
  */
-static void 	ficl_cons_p(ficlVm *vm);
-static void 	ficl_last_pair(ficlVm *vm);
-static void 	ficl_list_append(ficlVm *vm);
-static void 	ficl_list_delete(ficlVm *vm);
-static void 	ficl_list_delete_bang(ficlVm *vm);
-static void 	ficl_list_equal_p(ficlVm *vm);
-static void 	ficl_list_fill(ficlVm *vm);
-static void 	ficl_list_head(ficlVm *vm);
-static void 	ficl_list_index(ficlVm *vm);
-static void 	ficl_list_insert(ficlVm *vm);
-static void 	ficl_list_length(ficlVm *vm);
-static void 	ficl_list_p(ficlVm *vm);
-static void 	ficl_list_ref(ficlVm *vm);
-static void 	ficl_list_set(ficlVm *vm);
-static void 	ficl_list_slice(ficlVm *vm);
-static void 	ficl_list_slice_bang(ficlVm *vm);
-static void 	ficl_list_tail(ficlVm *vm);
-static void 	ficl_make_list(ficlVm *vm);
-static void 	ficl_nil_p(ficlVm *vm);
-static void 	ficl_pair_p(ficlVm *vm);
-static void 	ficl_print_list(ficlVm *vm);
-static void 	ficl_set_car(ficlVm *vm);
-static void 	ficl_set_cdr(ficlVm *vm);
-static void 	ficl_values_to_list(ficlVm *vm);
-static FTH 	ls_append_each(FTH value, FTH ls);
-static FTH 	ls_delete_each(FTH value, FTH data);
-static FTH 	make_list_instance(FArray *ary);
+static void 	ficl_cons_p(ficlVm *);
+static void 	ficl_last_pair(ficlVm *);
+static void 	ficl_list_append(ficlVm *);
+static void 	ficl_list_delete(ficlVm *);
+static void 	ficl_list_delete_bang(ficlVm *);
+static void 	ficl_list_equal_p(ficlVm *);
+static void 	ficl_list_fill(ficlVm *);
+static void 	ficl_list_head(ficlVm *);
+static void 	ficl_list_index(ficlVm *);
+static void 	ficl_list_insert(ficlVm *);
+static void 	ficl_list_length(ficlVm *);
+static void 	ficl_list_p(ficlVm *);
+static void 	ficl_list_ref(ficlVm *);
+static void 	ficl_list_set(ficlVm *);
+static void 	ficl_list_slice(ficlVm *);
+static void 	ficl_list_slice_bang(ficlVm *);
+static void 	ficl_list_tail(ficlVm *);
+static void 	ficl_make_list(ficlVm *);
+static void 	ficl_nil_p(ficlVm *);
+static void 	ficl_pair_p(ficlVm *);
+static void 	ficl_print_list(ficlVm *);
+static void 	ficl_set_car(ficlVm *);
+static void 	ficl_set_cdr(ficlVm *);
+static void 	ficl_values_to_list(ficlVm *);
+static FTH 	ls_append_each(FTH, FTH);
+static FTH 	ls_delete_each(FTH, FTH);
+static FTH 	make_list_instance(FArray *);
 
 /*
  * Alist
  */
-static void 	ficl_values_to_alist(ficlVm *vm);
+static void 	ficl_values_to_alist(ficlVm *);
 
 #define h_list_of_array_functions "\
 *** ARRAY PRIMITIVES ***\n\
@@ -1560,7 +1560,7 @@ cmpit(const void *a, const void *b)
 	return (FIX_TO_INT32(r));
 }
 
-#endif	/* HAVE_QSORT */
+#endif				/* HAVE_QSORT */
 
 FTH
 fth_array_sort(FTH array, FTH proc_or_xt)

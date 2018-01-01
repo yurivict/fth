@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)file.c	1.87 12/31/17
+ * @(#)file.c	1.89 1/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -43,38 +43,38 @@
 #include <arpa/inet.h>
 #endif
 
-static void	ficl_close_pipe(ficlVm *vm);
-static void	ficl_file_atime(ficlVm *vm);
-static void	ficl_file_basename(ficlVm *vm);
-static void	ficl_file_chdir(ficlVm *vm);
-static void	ficl_file_chmod(ficlVm *vm);
-static void	ficl_file_chroot(ficlVm *vm);
-static void	ficl_file_copy(ficlVm *vm);
-static void	ficl_file_ctime(ficlVm *vm);
-static void	ficl_file_delete(ficlVm *vm);
-static void	ficl_file_dir(ficlVm *vm);
-static void	ficl_file_dirname(ficlVm *vm);
-static void	ficl_file_eval(ficlVm *vm);
-static void	ficl_file_exists_p(ficlVm *vm);
-static void	ficl_file_fullpath(ficlVm *vm);
-static void	ficl_file_install(ficlVm *vm);
-static void	ficl_file_length(ficlVm *vm);
-static void	ficl_file_mkdir(ficlVm *vm);
-static void	ficl_file_mkfifo(ficlVm *vm);
-static void	ficl_file_mtime(ficlVm *vm);
-static void	ficl_file_pwd(ficlVm *vm);
-static void	ficl_file_realpath(ficlVm *vm);
-static void	ficl_file_rename(ficlVm *vm);
-static void	ficl_file_rmdir(ficlVm *vm);
-static void	ficl_file_shell(ficlVm *vm);
-static void	ficl_file_split(ficlVm *vm);
-static void	ficl_file_symlink(ficlVm *vm);
-static void	ficl_file_system(ficlVm *vm);
-static void	ficl_file_touch(ficlVm *vm);
-static void	ficl_file_truncate(ficlVm *vm);
-static void	ficl_file_zero_p(ficlVm *vm);
-static void	ficl_open_pipe(ficlVm *vm);
-static mode_t	fth_stat(const char *name, struct stat *buf);
+static void 	ficl_close_pipe(ficlVm *);
+static void 	ficl_file_atime(ficlVm *);
+static void 	ficl_file_basename(ficlVm *);
+static void 	ficl_file_chdir(ficlVm *);
+static void 	ficl_file_chmod(ficlVm *);
+static void 	ficl_file_chroot(ficlVm *);
+static void 	ficl_file_copy(ficlVm *);
+static void 	ficl_file_ctime(ficlVm *);
+static void 	ficl_file_delete(ficlVm *);
+static void 	ficl_file_dir(ficlVm *);
+static void 	ficl_file_dirname(ficlVm *);
+static void 	ficl_file_eval(ficlVm *);
+static void 	ficl_file_exists_p(ficlVm *);
+static void 	ficl_file_fullpath(ficlVm *);
+static void 	ficl_file_install(ficlVm *);
+static void 	ficl_file_length(ficlVm *);
+static void 	ficl_file_mkdir(ficlVm *);
+static void 	ficl_file_mkfifo(ficlVm *);
+static void 	ficl_file_mtime(ficlVm *);
+static void 	ficl_file_pwd(ficlVm *);
+static void 	ficl_file_realpath(ficlVm *);
+static void 	ficl_file_rename(ficlVm *);
+static void 	ficl_file_rmdir(ficlVm *);
+static void 	ficl_file_shell(ficlVm *);
+static void 	ficl_file_split(ficlVm *);
+static void 	ficl_file_symlink(ficlVm *);
+static void 	ficl_file_system(ficlVm *);
+static void 	ficl_file_touch(ficlVm *);
+static void 	ficl_file_truncate(ficlVm *);
+static void 	ficl_file_zero_p(ficlVm *);
+static void 	ficl_open_pipe(ficlVm *);
+static mode_t 	fth_stat(const char *, struct stat *);
 
 /* === FILE === */
 
@@ -164,10 +164,11 @@ ficl_file_delete(ficlVm *vm)
 \"main.c\" file-delete\n\
 If file NAME exist, delete it, otherwise do nothing (see unlink(2)).  \
 "  h_system_error_info("unlink(2)")
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -194,12 +195,13 @@ ficl_file_chmod(ficlVm *vm)
 \"main.csh\" 0o755 file-chmod\n\
 Change access mode of file NAME to MODE (see chmod(2)).  \
 " h_mode_info "  " h_system_error_and_not_implemented_info("chmod(2)")
-	FTH fs;
-	mode_t mode;
+	FTH 		fs;
+	mode_t 		mode;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	mode = (mode_t)ficlStackPopInteger(vm->dataStack);
+	mode = (mode_t) ficlStackPopInteger(vm->dataStack);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -230,12 +232,13 @@ ficl_file_mkdir(ficlVm *vm)
 \"test-src\" 0o755 file-mkdir\n\
 Create directory named NAME with access mode MODE (see mkdir(2)).  \
 " h_mode_info "  " h_system_error_and_not_implemented_info("mkdir(2)")
-	FTH fs;
-	mode_t mode;
+	FTH 		fs;
+	mode_t 		mode;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	mode = (mode_t)ficlStackPopInteger(vm->dataStack);
+	mode = (mode_t) ficlStackPopInteger(vm->dataStack);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -262,10 +265,11 @@ ficl_file_rmdir(ficlVm *vm)
 \"test-src\" file-rmdir\n\
 Remove empty directory NAME (see rmdir(2)).  \
 " h_system_error_and_not_implemented_info("rmdir(2)")
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -292,12 +296,13 @@ ficl_file_mkfifo(ficlVm *vm)
 \"test-fifo\" 0o644 file-mkfifo\n\
 Create fifo named NAME with access mode MODE (see mkfifo(2)).  \
 " h_mode_info "  " h_system_error_and_not_implemented_info("mkfifo(2)")
-	FTH fs;
-	mode_t mode;
+	FTH 		fs;
+	mode_t 		mode;
 
 	FTH_STACK_CHECK(vm, 2, 0);
-	mode = (mode_t)ficlStackPopInteger(vm->dataStack);
+	mode = (mode_t) ficlStackPopInteger(vm->dataStack);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -306,15 +311,15 @@ Create fifo named NAME with access mode MODE (see mkfifo(2)).  \
 	fth_file_mkfifo(fth_string_ref(fs), mode);
 }
 
-static char	file_scratch[MAXPATHLEN];
+static char 	file_scratch[MAXPATHLEN];
 
 void
 fth_file_symlink(const char *src, const char *dst)
 {
 #if defined(HAVE_SYMLINK)
 	if (symlink(src, dst) == -1) {
-		char *buf;
-		size_t size;
+		char           *buf;
+		size_t 		size;
 
 		buf = file_scratch;
 		size = sizeof(file_scratch);
@@ -324,7 +329,7 @@ fth_file_symlink(const char *src, const char *dst)
 		FTH_SYSTEM_ERROR_ARG_THROW(symlink, buf);
 	}
 #else
-	 FTH_NOT_IMPLEMENTED_ERROR(symlink);
+	FTH_NOT_IMPLEMENTED_ERROR(symlink);
 #endif
 }
 
@@ -332,14 +337,15 @@ static void
 ficl_file_symlink(ficlVm *vm)
 {
 #define h_file_symlink "( src dst -- )  create symlink\n\
-\"/usr/local/bin/gm4\" \"/home/mike/bin/m4\" file-symlink\n\
+\"/usr/bin/clang\" \"/home/mike/bin/cc\" file-symlink\n\
 Create symlink from SRC named DST (see symlink(2)).  \
 " h_system_error_and_not_implemented_info("symlink(2)")
-	FTH s, d;
+	FTH 		s, d;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	d = ficlStackPopFTH(vm->dataStack);
 	s = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(s) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(s), s, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -358,8 +364,8 @@ fth_file_rename(const char *src, const char *dst)
 {
 #if defined(HAVE_RENAME)
 	if (rename(src, dst) == -1) {
-		char *buf;
-		size_t size;
+		char           *buf;
+		size_t 		size;
 
 		buf = file_scratch;
 		size = sizeof(file_scratch);
@@ -369,7 +375,7 @@ fth_file_rename(const char *src, const char *dst)
 		FTH_SYSTEM_ERROR_ARG_THROW(rename, buf);
 	}
 #else
-	fth_copy_file(src, dst);
+			fth_copy_file (src, dst);
 	fth_file_delete(src);
 #endif
 }
@@ -381,11 +387,12 @@ ficl_file_rename(ficlVm *vm)
 \"fth\" \"test-fth\" file-rename\n\
 Rename SRC to DST (see rename(2)).  \
 " h_system_error_info("rename(2)")
-	FTH s, d;
+	FTH 		s, d;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	d = ficlStackPopFTH(vm->dataStack);
 	s = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(s) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(s), s, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -402,18 +409,19 @@ Rename SRC to DST (see rename(2)).  \
 void
 fth_file_copy(const char *src, const char *dst)
 {
-	FILE *fpsrc, *fpdst;
-	int c;
+	FILE           *fpsrc, *fpdst;
+	int 		c;
 
 	fpsrc = fopen(src, "r");
+
 	if (fpsrc == NULL) {
 		FTH_SYSTEM_ERROR_ARG_THROW(fopen, src);
 		/* NOTREACHED */
 		return;
 	}
 	if (fth_file_directory_p(dst)) {
-		char *buf;
-		size_t size;
+		char           *buf;
+		size_t 		size;
 
 		buf = file_scratch;
 		size = sizeof(file_scratch);
@@ -423,6 +431,7 @@ fth_file_copy(const char *src, const char *dst)
 		fpdst = fopen(buf, "w");
 	} else
 		fpdst = fopen(dst, "w");
+
 	if (fpdst == NULL) {
 		FTH_SYSTEM_ERROR_ARG_THROW(fopen, dst);
 		/* NOTREACHED */
@@ -430,6 +439,7 @@ fth_file_copy(const char *src, const char *dst)
 	}
 	while ((c = fgetc(fpsrc)) != EOF)
 		fputc(c, fpdst);
+
 	fclose(fpsrc);
 	fclose(fpdst);
 }
@@ -442,11 +452,12 @@ ficl_file_copy(ficlVm *vm)
 Copy file SRC to DST.  \
 If DST is a directory, copy SRC to DST/SRC.  \
 Raise SYSTEM-ERROR exception if fopen(3) fails on any of the two files."
-	FTH s, d;
+	FTH 		s, d;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	d = ficlStackPopFTH(vm->dataStack);
 	s = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(s) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(s), s, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -463,23 +474,25 @@ Raise SYSTEM-ERROR exception if fopen(3) fails on any of the two files."
 int
 fth_file_install(const char *src, const char *dst, mode_t mode)
 {
-	struct stat st_src, st_dst;
-	char *buf;
-	size_t size;
+	struct stat 	st_src, st_dst;
+	char           *buf;
+	size_t 		size;
 
 	if (src == NULL || dst == NULL)
 		return (0);
+
 	buf = file_scratch;
 	size = sizeof(file_scratch);
 	fth_strcpy(buf, size, dst);
+
 	if (fth_file_directory_p(dst)) {
 		fth_strcat(buf, size, "/");
 		fth_strcat(buf, size, src);
 	}
 	if (!fth_file_exists_p(buf) ||
 	    (fth_stat(src, &st_src) != 0 &&
-	     fth_stat(buf, &st_dst) != 0 &&
-	     st_src.st_mtime > st_dst.st_mtime)) {
+		fth_stat(buf, &st_dst) != 0 &&
+		st_src.st_mtime > st_dst.st_mtime)) {
 		fth_file_copy(src, buf);
 		fth_file_chmod(buf, mode);
 		return (1);
@@ -503,14 +516,15 @@ Install SRC to DST with access mode MODE \
 if DST doesn't exist or if modification time of SRC is greater than DST's.  \
 If DST is a directory, install SRC to DST/SRC.  \
 Return #t if SRC could be installed, otherwise #f.  " h_mode_info
-	FTH s, d;
-	mode_t mode;
-	int flag;
+	FTH 		s, d;
+	mode_t 		mode;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 3, 1);
-	mode = (mode_t)ficlStackPopInteger(vm->dataStack);
+	mode = (mode_t) ficlStackPopInteger(vm->dataStack);
 	d = ficlStackPopFTH(vm->dataStack);
 	s = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(s) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(s), s, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -528,8 +542,8 @@ Return #t if SRC could be installed, otherwise #f.  " h_mode_info
 FTH
 fth_file_split(const char *name)
 {
-	FTH dir, file;
-	char *idx;
+	FTH 		dir, file;
+	char           *idx;
 
 	if (name == NULL) {
 		dir = fth_make_empty_string();
@@ -537,6 +551,7 @@ fth_file_split(const char *name)
 		return (FTH_LIST_2(dir, file));
 	}
 	idx = strrchr(name, '/');
+
 	if (idx == NULL) {
 		dir = fth_make_empty_string();
 		file = fth_make_string(name);
@@ -553,10 +568,11 @@ ficl_file_split(ficlVm *vm)
 #define h_file_split "( name -- #( path file ) )  split to dir/basename\n\
 \"/home/mike/cage.snd\" file-split => #( \"/home/mike\" \"cage.snd\" )\n\
 Split file NAME in dirname and basename and return result in array."
-	FTH fs, res;
+	FTH 		fs, res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -569,22 +585,27 @@ Split file NAME in dirname and basename and return result in array."
 FTH
 fth_file_basename(const char *name, const char *ext)
 {
-	char *base;
-	size_t len;
+	char           *base;
+	size_t 		len;
 
 	if (name == NULL)
 		return (fth_make_empty_string());
+
 	base = strrchr(name, '/');
+
 	if (base == NULL)
-		base = (char *)name;
+		base = (char *) name;
 	else
 		base++;
+
 	if (ext != NULL)
-		len = (size_t)(strstr(base, ext) - base);
+		len = (size_t) (strstr(base, ext) - base);
 	else
-		len = (size_t)(strchr(base, '.') - base);
+		len = (size_t) (strchr(base, '.') - base);
+
 	if (len < strlen(base))
-		return (fth_make_string_len(base, (ficlInteger)len));
+		return (fth_make_string_len(base, (ficlInteger) len));
+
 	return (fth_make_string(base));
 }
 
@@ -602,18 +623,20 @@ If EXT is #f, return filename without path name.  \
 If EXT is NIL or UNDEF, discard the part \
 from the last dot to the end of basename NAME.  \
 If EXT is a string or a regexp, discard found EXT from basename NAME."
-	FTH ext, fs, result;
-	char *name;
+	FTH 		ext, fs, result;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	ext = ficlStackPopFTH(vm->dataStack);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
 		return;
 	}
 	name = fth_string_ref(fs);
+
 	if (FTH_FALSE_P(ext))
 		result = fth_make_string(fth_basename(name));
 	else if (FTH_NIL_P(ext) || FTH_UNDEF_P(ext))
@@ -621,17 +644,20 @@ If EXT is a string or a regexp, discard found EXT from basename NAME."
 	else if (fth_string_length(ext) > 0)
 		result = fth_file_basename(name, fth_string_ref(ext));
 	else if (FTH_REGEXP_P(ext)) {
-		char *base;
-		ficlInteger len;
-		FTH fbase;
+		char           *base;
+		ficlInteger 	len;
+		FTH 		fbase;
 
 		base = strrchr(name, '/');
+
 		if (base == NULL)
-			base = (char *)name;
+			base = (char *) name;
 		else
 			base++;
+
 		fbase = fth_make_string(base);
 		len = fth_regexp_search(ext, fbase, 0L, -1L);
+
 		if (len > 0)
 			result = fth_make_string_len(base, len);
 		else
@@ -648,13 +674,16 @@ If EXT is a string or a regexp, discard found EXT from basename NAME."
 FTH
 fth_file_dirname(const char *name)
 {
-	char *base;
+	char           *base;
 
 	if (name == NULL)
 		return (fth_make_empty_string());
+
 	base = strrchr(name, '/');
+
 	if (base != NULL)
 		return (fth_make_string_len(name, base - name));
+
 	return (fth_make_string("./"));
 }
 
@@ -664,7 +693,7 @@ ficl_file_dirname(ficlVm *vm)
 #define h_file_dirname "( name -- dirname )  return dirname\n\
 \"/home/mike/cage.snd\" file-dirname => \"/home/mike\"\n\
 Return directory part of file NAME."
-	FTH fs, res;
+	FTH 		fs, res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
@@ -680,11 +709,12 @@ ficl_file_fullpath(ficlVm *vm)
 Return current working directory prepended to file NAME.  \
 If name starts with a slash, return NAME unchanged.  \
 "  h_system_error_info("getcwd(3)")
-	FTH fs, res;
-	char *name;
+	FTH 		fs, res;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -692,10 +722,12 @@ If name starts with a slash, return NAME unchanged.  \
 	}
 	name = fth_string_ref(fs);
 	res = fs;
+
 	if (*name != '/') {
-		char *path;
+		char           *path;
 
 		path = file_scratch;
+
 		if (getcwd(path, sizeof(file_scratch)) == NULL) {
 			FTH_SYSTEM_ERROR_ARG_THROW(getcwd, path);
 			/* NOTREACHED */
@@ -706,24 +738,27 @@ If name starts with a slash, return NAME unchanged.  \
 	ficlStackPushFTH(vm->dataStack, res);
 }
 
-static char	file_scratch_02[MAXPATHLEN];
+static char 	file_scratch_02[MAXPATHLEN];
 
 FTH
 fth_file_realpath(const char *name)
 {
-	char *resolved, *path;
-	size_t size;
+	char           *resolved, *path;
+	size_t 		size;
 
 	if (name == NULL)
 		return (fth_make_empty_string());
+
 	/* replace '~' at the beginning with $HOME */
 	path = file_scratch;
 	size = sizeof(file_scratch);
+
 	if (strlen(name) > 0 && *name == '~') {
 		fth_strcpy(path, size, fth_getenv("HOME", "/tmp"));
 		fth_strcat(path, size, name + 1);
 	} else
 		fth_strcpy(path, size, name);
+
 	resolved = file_scratch_02;
 #if defined(HAVE_REALPATH)
 	if (realpath(path, resolved) == NULL)
@@ -747,7 +782,7 @@ of environment variable $HOME.  \
 If realpath(3) function exists , return resolved path, \
 otherwise return PATH with '~' replacement.  \
 "  h_system_error_info("realpath(3)")
-	FTH res, fs;
+	FTH 		res, fs;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
@@ -762,10 +797,11 @@ ficl_file_pwd(ficlVm *vm)
 file-pwd => \"/home/mike/src\"\n\
 Return current working directory (see getcwd(3)).  \
 "  h_system_error_info("getcwd(3)")
-	char *path;
+	char           *path;
 
 	FTH_STACK_CHECK(vm, 0, 1);
 	path = file_scratch;
+
 	if (getcwd(path, sizeof(file_scratch)) == NULL) {
 		FTH_SYSTEM_ERROR_ARG_THROW(getcwd, path);
 		/* NOTREACHED */
@@ -784,8 +820,8 @@ if in a repl, print result to current standard output.  \
 If PATH is NIL, change working directory to $HOME.  \
 PATH may contain `~' as an abbreviation for home directory (see chdir(2)).  \
 " h_system_error_and_not_implemented_info("chdir(2)")
-	char *path;
-	FTH dir;
+	char           *path;
+	FTH 		dir;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	dir = fth_pop_ficl_cell(vm);
@@ -794,8 +830,10 @@ PATH may contain `~' as an abbreviation for home directory (see chdir(2)).  \
 		path = fth_getenv("HOME", "/tmp");
 	else
 		path = fth_string_ref(fth_file_realpath(fth_string_ref(dir)));
+
 	if (chdir(path) == -1)
 		FTH_SYSTEM_ERROR_ARG_THROW(chdir, path);
+
 	if (CELL_INT_REF(&FTH_FICL_VM()->sourceId) == -1)
 		fth_print(path);
 #else
@@ -810,15 +848,15 @@ ficl_file_truncate(ficlVm *vm)
 \"big-test.file\" 1024 file-truncate\n\
 Truncate or extend file NAME to SIZE bytes (see truncate(2)).  \
 " h_system_error_and_not_implemented_info("truncate(2)")
-	char *path;
-	ficl2Unsigned size;
+	char           *path;
+	ficl2Unsigned 	size;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	size = ficlStackPop2Unsigned(vm->dataStack);
 	path = pop_cstring(vm);
 #if defined(HAVE_TRUNCATE)
 	if (path != NULL)
-		if (truncate(path, (off_t)size) == -1)
+		if (truncate(path, (off_t) size) == -1)
 			FTH_SYSTEM_ERROR_ARG_THROW(truncate, path);
 #else
 	FTH_NOT_IMPLEMENTED_ERROR(truncate);
@@ -834,7 +872,7 @@ Change root directory to PATH and, \
 if in a repl, print result to current standard output.  \
 This function is restricted to the super-user (see chroot(2)).  \
 " h_system_error_and_not_implemented_info("chroot(2)")
-	char *path;
+	char           *path;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	path = pop_cstring(vm);
@@ -842,6 +880,7 @@ This function is restricted to the super-user (see chroot(2)).  \
 	if (path != NULL) {
 		if (chroot(path) == -1)
 			FTH_SYSTEM_ERROR_ARG_THROW(chroot, path);
+
 		if (CELL_INT_REF(&vm->sourceId) == -1)
 			fth_print(path);
 	}
@@ -862,10 +901,11 @@ must be on stack (INCLUDE is a parseword).  \
 With file-eval one can load files from within word definitions.  \
 Raise LOAD-ERROR exception if file-eval fails.\n\
 See also include and require."
-	FTH fs;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -884,15 +924,17 @@ and collect string output as long as pipe is open.  \
 Afterwards close pipe, set read-only variable EXIT-STATUS \
 and return collected string (with trailing CR).\n\
 See also file-system and exit-status."
-	FTH cmd, io, fs;
-	char *line;
+	FTH 		cmd, io, fs;
+	char           *line;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	cmd = fth_pop_ficl_cell(vm);
 	io = fth_io_popen(cmd, FICL_FAM_READ);
 	fs = fth_make_empty_string();
+
 	while ((line = fth_io_read(io)) != NULL)
 		fth_string_scat(fs, line);
+
 	fth_io_close(io);
 	ficlStackPushFTH(vm->dataStack, fs);
 }
@@ -906,11 +948,12 @@ Execute CMD as a shell command.  \
 Set read-only variable EXIT-STATUS and return #t for success, #f otherwise.  \
 In the latter case you can check EXIT-STATUS.\n\
 See also file-shell and exit-status."
-	FTH fs;
-	int flag;
+	FTH 		fs;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = ficlStackPopFTH(vm->dataStack);
+
 	if (fth_string_length(fs) <= 0) {
 		FTH_ASSERT_ARGS(FTH_STRING_P(fs), fs, FTH_ARG1, "a string");
 		/* NOTREACHED */
@@ -933,18 +976,19 @@ line-buffer max-line FP read-line throw drop line-buffer swap type\n\
 FP close-pipe throw\n\
 Forth-like word.\n\
 See also close-pipe, open-file, close-file."
-	ficlInteger fam;
-	size_t len;
-	char *mode, *cmd, *str;
-	FILE *fp;
+	ficlInteger 	fam;
+	size_t 		len;
+	char           *mode, *cmd, *str;
+	FILE           *fp;
 
 	FTH_STACK_CHECK(vm, 3, 2);
 	fam = ficlStackPopInteger(vm->dataStack);
-	len = (size_t)ficlStackPopUnsigned(vm->dataStack);
+	len = (size_t) ficlStackPopUnsigned(vm->dataStack);
 	str = ficlStackPopPointer(vm->dataStack);
+
 	if (len == 0) {
 		ficlStackPushPointer(vm->dataStack, NULL);
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)EINVAL);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) EINVAL);
 		return;
 	}
 	switch (FICL_FAM_OPEN_MODE(fam)) {
@@ -956,19 +1000,21 @@ See also close-pipe, open-file, close-file."
 		break;
 	default:
 		ficlStackPushPointer(vm->dataStack, NULL);
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)EINVAL);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) EINVAL);
 		return;
 		break;
 	}
+
 	cmd = FTH_CALLOC(len + 1, sizeof(char));
 	strncpy(cmd, str, len);
 	fp = popen(cmd, mode);
+
 	if (fp == NULL) {
 		perror("popen");
 		ficlStackPushPointer(vm->dataStack, NULL);
-		ficlStackPushInteger(vm->dataStack, (ficlInteger)errno);
+		ficlStackPushInteger(vm->dataStack, (ficlInteger) errno);
 	} else {
-		ficlFile *ff;
+		ficlFile       *ff;
 
 		ff = FTH_MALLOC(sizeof(ficlFile));
 		ff->f = fp;
@@ -989,14 +1035,14 @@ line-buffer max-line FP read-line throw drop line-buffer swap type\n\
 FP close-pipe throw\n\
 Forth-like word.\n\
 See also open-pipe, open-file, close-file."
-	ficlFile *ff;
-	int stat;
+	ficlFile       *ff;
+	int 		stat;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	ff = (ficlFile *) ficlStackPopPointer(vm->dataStack);
 	stat = fth_set_exit_status(pclose(ff->f));
 	FTH_FREE(ff);
-	ficlStackPushInteger(vm->dataStack, (ficlInteger)stat);
+	ficlStackPushInteger(vm->dataStack, (ficlInteger) stat);
 }
 
 /* === File Test Functions === */
@@ -1016,8 +1062,8 @@ static char* h_file_ ## Name ## _p =					\
 \"abc\" file-" #Name "? => #t|#f\n\
 Return #t if NAME " Desc ", otherwise #f (see test(1) option -" #Opt ")."
 
-static mode_t
-fth_stat(const char *name, struct stat *buf)
+static 		mode_t
+fth_stat(const char *name, struct stat * buf)
 {
 	buf->st_mode = 0;
 #if defined(HAVE_LSTAT)
@@ -1032,7 +1078,7 @@ fth_stat(const char *name, struct stat *buf)
 int
 fth_file_block_p(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISBLK(fth_stat(name, &buf)));
 }
@@ -1042,7 +1088,7 @@ MAKE_FILE_TEST_WORD(block, b, "is a block special file");
 int
 fth_file_character_p(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISCHR(fth_stat(name, &buf)));
 }
@@ -1052,7 +1098,7 @@ MAKE_FILE_TEST_WORD(character, c, "is a character special file");
 int
 fth_file_directory_p(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISDIR(fth_stat(name, &buf)));
 }
@@ -1062,13 +1108,15 @@ MAKE_FILE_TEST_WORD(directory, d, "is a directory");
 int
 fth_file_exists_p(const char *name)
 {
-	int flag;
-	int old_errno;
+	int 		flag;
+	int 		old_errno;
 
 	flag = 0;
 	old_errno = errno;
+
 	if (name != NULL && *name != '\0' && FTH_ACCESS_P(name, F_OK))
 		flag = 1;
+
 	errno = old_errno;
 	return (flag);
 }
@@ -1079,7 +1127,7 @@ ficl_file_exists_p(ficlVm *vm)
 #define h_file_exists_p "( name -- f )  test if file exists\n\
 \"abc\" file-exists? => #t|#f\n\
 Return #t if NAME is an existing file, otherwise #f."
-	int flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	flag = fth_file_exists_p(pop_cstring(vm));
@@ -1089,7 +1137,7 @@ Return #t if NAME is an existing file, otherwise #f."
 int
 fth_file_fifo_p(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISFIFO(fth_stat(name, &buf)));
 }
@@ -1102,7 +1150,7 @@ fth_file_symlink_p(const char *name)
 #if defined(_WIN32)
 	return (0);
 #else
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISLNK(fth_stat(name, &buf)));
 #endif
@@ -1116,7 +1164,7 @@ fth_file_socket_p(const char *name)
 #if !defined(HAVE_SYS_SOCKET_H)
 	return (0);
 #else
-	struct stat buf;
+	struct stat 	buf;
 
 	return (S_ISSOCK(fth_stat(name, &buf)));
 #endif
@@ -1128,7 +1176,7 @@ int
 fth_file_executable_p(const char *name)
 {
 #if defined(HAVE_GETEUID) && defined(HAVE_GETEGID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf)) {
 #if defined(S_IXUSR)
@@ -1153,7 +1201,7 @@ int
 fth_file_readable_p(const char *name)
 {
 #if defined(HAVE_GETEUID) && defined(HAVE_GETEGID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf)) {
 #if defined(S_IRUSR)
@@ -1177,10 +1225,8 @@ MAKE_FILE_TEST_WORD(readable, r, "is a readable file");
 int
 fth_file_writable_p(const char *name)
 {
-#if !defined(HAVE_GETEUID) || !defined(HAVE_GETEGID)
-	return (0);
-#else				/* !HAVE_GETEUID */
-	struct stat buf;
+#if defined(HAVE_GETEUID) && defined(HAVE_GETEGID)
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf)) {
 #if defined(S_IWUSR)
@@ -1195,7 +1241,7 @@ fth_file_writable_p(const char *name)
 		return (buf.st_mode & S_IWOTH);
 #endif
 	}
-#endif				/* !HAVE_GETEUID */
+#endif				/* HAVE_GETEUID */
 	return (0);
 }
 
@@ -1205,7 +1251,7 @@ int
 fth_file_owned_p(const char *name)
 {
 #if defined(HAVE_GETEUID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_uid == geteuid());
@@ -1219,7 +1265,7 @@ int
 fth_file_grpowned_p(const char *name)
 {
 #if defined(HAVE_GETEUID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_gid == geteuid());
@@ -1233,7 +1279,7 @@ int
 fth_file_setuid_p(const char *name)
 {
 #if defined(S_ISUID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_mode & S_ISUID);
@@ -1247,7 +1293,7 @@ int
 fth_file_setgid_p(const char *name)
 {
 #if defined(S_ISGID)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_mode & S_ISGID);
@@ -1261,7 +1307,7 @@ int
 fth_file_sticky_p(const char *name)
 {
 #if defined(S_ISVTX)
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_mode & S_ISVTX);
@@ -1274,7 +1320,7 @@ MAKE_FILE_TEST_WORD(sticky, k, "has set sticky bit");
 int
 fth_file_zero_p(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
 		return (buf.st_size == 0);
@@ -1287,7 +1333,7 @@ ficl_file_zero_p(ficlVm *vm)
 #define h_file_zero_p "( name -- f )  test if file length is zero\n\
 \"abc\" file-zero?\n\
 Return #t if file NAME length is zero, otherwise #f."
-	int flag;
+	int 		flag;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	flag = fth_file_zero_p(pop_cstring(vm));
@@ -1297,10 +1343,10 @@ Return #t if file NAME length is zero, otherwise #f."
 FTH
 fth_file_length(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
-		return (fth_make_long_long((ficl2Integer)buf.st_size));
+		return (fth_make_long_long((ficl2Integer) buf.st_size));
 	return (FTH_FALSE);
 }
 
@@ -1310,7 +1356,7 @@ ficl_file_length(ficlVm *vm)
 #define h_file_length "( name -- len )  return file length\n\
 \"abc\" file-length => 1024\n\
 If NAME is a file, return its length in bytes, otherwise #f."
-	FTH res;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	res = fth_file_length(pop_cstring(vm));
@@ -1320,10 +1366,10 @@ If NAME is a file, return its length in bytes, otherwise #f."
 FTH
 fth_file_atime(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
-		return (fth_make_long_long((ficl2Integer)buf.st_atime));
+		return (fth_make_long_long((ficl2Integer) buf.st_atime));
 	return (FTH_FALSE);
 }
 
@@ -1335,7 +1381,7 @@ ficl_file_atime(ficlVm *vm)
 If NAME is a file, return its last access time, otherwise #f.  \
 One can convert the number in a readable string with time->string.\n\
 See also file-ctime, file-mtime and time->string."
-	FTH res;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	res = fth_file_atime(pop_cstring(vm));
@@ -1345,10 +1391,10 @@ See also file-ctime, file-mtime and time->string."
 FTH
 fth_file_ctime(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
-		return (fth_make_long_long((ficl2Integer)buf.st_ctime));
+		return (fth_make_long_long((ficl2Integer) buf.st_ctime));
 	return (FTH_FALSE);
 }
 
@@ -1360,7 +1406,7 @@ ficl_file_ctime(ficlVm *vm)
 If NAME is a file, return its status change time, otherwise #f.  \
 One can convert the number in a readable string with time->string.\n\
 See also file-atime, file-mtime and time->string."
-	FTH res;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	res = fth_file_ctime(pop_cstring(vm));
@@ -1370,10 +1416,10 @@ See also file-atime, file-mtime and time->string."
 FTH
 fth_file_mtime(const char *name)
 {
-	struct stat buf;
+	struct stat 	buf;
 
 	if (fth_stat(name, &buf))
-		return (fth_make_long_long((ficl2Integer)buf.st_mtime));
+		return (fth_make_long_long((ficl2Integer) buf.st_mtime));
 	return (FTH_FALSE);
 }
 
@@ -1385,7 +1431,7 @@ ficl_file_mtime(ficlVm *vm)
 If NAME is a file, return its last modification time, otherwise #f.  \
 One can convert the number in a readable string with time->string.\n\
 See also file-atime, file-ctime and time->string."
-	FTH res;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	res = fth_file_mtime(pop_cstring(vm));
@@ -1410,20 +1456,24 @@ ficl_file_touch(ficlVm *vm)
 Change modification time of NAME to TIME.  \
 If TIME is nil, use current time.  \
 " h_system_error_info("utimes(2)")
-	FTH tm;
-	char *name;
+	FTH 		tm;
+	char           *name;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	tm = fth_pop_ficl_cell(vm);
 	name = pop_cstring(vm);
+
 	if (name == NULL)
 		return;
+
 	if (!fth_file_exists_p(name)) {
-		FILE *fp;
+		FILE           *fp;
 
 		fp = fopen(name, "w");
+
 		if (fp == NULL)
 			FTH_SYSTEM_ERROR_ARG_THROW(fopen, name);
+
 		fclose(fp);
 	}
 #if defined(HAVE_UTIMES)
@@ -1434,10 +1484,10 @@ If TIME is nil, use current time.  \
 		 * tv[0]: access time
 		 * tv[1]: modification time
 		 */
-
-		tv[0].tv_sec = (time_t)fth_ulong_long_ref(tm);
+		tv[0].tv_sec = (time_t) fth_ulong_long_ref(tm);
 		tv[0].tv_usec = 0;
 		tv[1] = tv[0];
+
 		if (utimes(name, tv) == -1)
 			FTH_SYSTEM_ERROR_ARG_THROW(utimes, name);
 	} else if (utimes(name, NULL) == -1)	/* use current time */
@@ -1458,7 +1508,7 @@ ficl_file_dir(ficlVm *vm)
 \".\" file-dir => #( \"./xdef\" \"./xdef.bak\" ... )\n\
 Return an array of all filenames found in DIR.  \
 " h_system_error_info("opendir(3)")
-	FTH dir, res;
+	FTH 		dir, res;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	dir = ficlStackPopFTH(vm->dataStack);
@@ -1475,20 +1525,25 @@ fth_file_match_dir(FTH string, FTH regexp)
 Return an array of filenames in DIR matching regexp REG.  \
 " h_system_error_info("opendir(3)")
 #if defined(HAVE_OPENDIR)
-	FTH array, fs;
-	DIR *dir;
-	char *path, *npath;
-	struct dirent *d;
-	size_t len, flen;
+	FTH 		array, fs;
+	DIR            *dir;
+	char           *path, *npath;
+	struct dirent  *d;
+	size_t 		len, flen;
 
 	array = fth_make_empty_array();
+
 	if (!FTH_STRING_P(string))
 		return (array);
-	len = (size_t)fth_string_length(string);
+
+	len = (size_t) fth_string_length(string);
 	path = fth_string_ref(string);
+
 	if (len > 1 && path[len - 1] == '/')
 		path[len - 1] = '\0';
+
 	dir = opendir(path);
+
 	if (dir == NULL) {
 		FTH_SYSTEM_ERROR_ARG_THROW(opendir, path);
 		/* NOTREACHED */
@@ -1496,6 +1551,7 @@ Return an array of filenames in DIR matching regexp REG.  \
 	}
 	if (FTH_STRING_P(regexp))
 		regexp = fth_make_regexp(fth_string_ref(regexp));
+
 	while ((d = readdir(dir)) != NULL) {
 		npath = (len == 1 && path[0] == '/') ? "" : path;
 #if defined(HAVE_STRUCT_DIRENT_D_NAMLEN)
@@ -1513,21 +1569,26 @@ Return an array of filenames in DIR matching regexp REG.  \
 		if (flen == 1 &&
 		    d->d_name[0] == '.')
 			continue;
+
 		if (flen == 2 &&
 		    d->d_name[0] == '.' &&
 		    d->d_name[1] == '.')
 			continue;
+
 		fs = fth_make_string(d->d_name);
+
 		if (fth_regexp_search(regexp, fs, 0L, -1L) >= 0) {
-			FTH s;
+			FTH 		s;
 
 			s = fth_make_string_format("%s/%.*s",
 			    npath, flen, d->d_name);
 			fth_array_push(array, s);
 		}
 	}
+
 	if (closedir(dir) == -1)
 		FTH_SYSTEM_ERROR_ARG_THROW(closedir, path);
+
 	return (array);
 #else				/* !HAVE_OPENDIR */
 	return (fth_make_empty_array());
@@ -1563,6 +1624,7 @@ init_file(void)
 	FTH_PRI1("file-system", ficl_file_system, h_file_system);
 	FTH_PRI1("open-pipe", ficl_open_pipe, h_open_pipe);
 	FTH_PRI1("close-pipe", ficl_close_pipe, h_close_pipe);
+
 	/* file test */
 	FTH_PRI1("file-block?", ficl_file_block_p, h_file_block_p);
 	FTH_PRI1("file-character?", ficl_file_character_p, h_file_character_p);

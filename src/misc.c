@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	1.714 12/31/17";
+const char libfth_sccsid[] = "@(#)misc.c	1.717 1/1/18";
 #endif /* not lint */
 
-#define FTH_DATE		"2017/12/31"
+#define FTH_DATE		"2018/01/01"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -75,94 +75,94 @@ const char libfth_sccsid[] = "@(#)misc.c	1.714 12/31/17";
 #define FTH_FS_LIB_PATH		FTH_SHARE_PATH "/fth-lib"
 #define FTH_SITE_FTH_PATH	FTH_SHARE_PATH "/site-fth"
 
-static int 	apropos(ficlWord *word, FTH data);
-static FTH 	at_exit_each(FTH proc, FTH name);
-static void 	ficl_add_feature(ficlVm *vm);
-static void 	ficl_add_load_lib_path(ficlVm *vm);
-static void 	ficl_add_load_path(ficlVm *vm);
-static void 	ficl_at_exit(ficlVm *vm);
-static void 	ficl_catch(ficlVm *vm);
-static void 	ficl_config_cflags(ficlVm *vm);
-static void 	ficl_config_libs(ficlVm *vm);
-static void 	ficl_config_prefix(ficlVm *vm);
-static void 	ficl_configure_args(ficlVm *vm);
-static void 	ficl_current_time(ficlVm *vm);
-static void 	ficl_date(ficlVm *vm);
-static void 	ficl_dl_load(ficlVm *vm);
-static void 	ficl_dot_cflags(ficlVm *vm);
-static void 	ficl_dot_libs(ficlVm *vm);
-static void 	ficl_dot_lversion(ficlVm *vm);
-static void 	ficl_dot_prefix(ficlVm *vm);
-static void 	ficl_dot_version(ficlVm *vm);
-static void 	ficl_environ(ficlVm *vm);
-static void 	ficl_exec(ficlVm *vm);
-static void 	ficl_exit(ficlVm *vm);
-static void 	ficl_features(ficlVm *vm);
-static void 	ficl_fetch_paren(ficlVm *vm);
-static void 	ficl_fork(ficlVm *vm);
-static void 	ficl_getegid(ficlVm *vm);
-static void 	ficl_getenv(ficlVm *vm);
-static void 	ficl_geteuid(ficlVm *vm);
-static void 	ficl_getgid(ficlVm *vm);
-static void 	ficl_gethostname(ficlVm *vm);
-static void 	ficl_getlogin(ficlVm *vm);
-static void 	ficl_getopt(ficlVm *vm);
-static void 	ficl_getopt_long(ficlVm *vm);
-static void 	ficl_getpid(ficlVm *vm);
-static void 	ficl_getppid(ficlVm *vm);
-static void 	ficl_getservbyname(ficlVm *vm);
-static void 	ficl_getservbyport(ficlVm *vm);
-static void 	ficl_getuid(ficlVm *vm);
-static void 	ficl_gmtime(ficlVm *vm);
-static void 	ficl_include_file(ficlVm *vm);
-static void 	ficl_kill(ficlVm *vm);
-static void 	ficl_load_init_file(ficlVm *vm);
-static void 	ficl_localtime(ficlVm *vm);
-static void 	ficl_mktime(ficlVm *vm);
-static void 	ficl_provided_p(ficlVm *vm);
-static void 	ficl_putenv(ficlVm *vm);
-static void 	ficl_raise(ficlVm *vm);
-static void 	ficl_require_file(ficlVm *vm);
-static void 	ficl_reset_each_paren(ficlVm *vm);
-static void 	ficl_reset_map_paren(ficlVm *vm);
-static void 	ficl_set_begin_paren(ficlVm *vm);
-static void 	ficl_set_each_loop_paren(ficlVm *vm);
-static void 	ficl_set_end_paren(ficlVm *vm);
-static void 	ficl_set_map_loop_paren(ficlVm *vm);
-static void 	ficl_setegid(ficlVm *vm);
-static void 	ficl_seteuid(ficlVm *vm);
-static void 	ficl_setgid(ficlVm *vm);
-static void 	ficl_sethostname(ficlVm *vm);
-static void 	ficl_setuid(ficlVm *vm);
-static void 	ficl_show_memory(ficlVm *vm);
-static void 	ficl_signal(ficlVm *vm);
-static void 	ficl_signal_handler(ficlVm *vm);
-static void 	ficl_sleep(ficlVm *vm);
-static void 	ficl_stack_reset(ficlVm *vm);
-static void 	ficl_store_paren(ficlVm *vm);
-static void 	ficl_strftime(ficlVm *vm);
-static void 	ficl_strptime(ficlVm *vm);
-static void 	ficl_throw(ficlVm *vm);
-static void 	ficl_time(ficlVm *vm);
-static void 	ficl_time_reset(ficlVm *vm);
-static void 	ficl_time_to_string(ficlVm *vm);
-static void 	ficl_unshift_load_lib_path(ficlVm *vm);
-static void 	ficl_unshift_load_path(ficlVm *vm);
-static void 	ficl_utime(ficlVm *vm);
-static void 	ficl_values_end(ficlVm *vm);
-static void 	ficl_version(ficlVm *vm);
-static void 	ficl_wait(ficlVm *vm);
-static void 	ficl_waitpid(ficlVm *vm);
-static int 	find_in_wordlist(ficlWord *word, FTH data);
+static int 	apropos(ficlWord *, FTH);
+static FTH 	at_exit_each(FTH, FTH);
+static void 	ficl_add_feature(ficlVm *);
+static void 	ficl_add_load_lib_path(ficlVm *);
+static void 	ficl_add_load_path(ficlVm *);
+static void 	ficl_at_exit(ficlVm *);
+static void 	ficl_catch(ficlVm *);
+static void 	ficl_config_cflags(ficlVm *);
+static void 	ficl_config_libs(ficlVm *);
+static void 	ficl_config_prefix(ficlVm *);
+static void 	ficl_configure_args(ficlVm *);
+static void 	ficl_current_time(ficlVm *);
+static void 	ficl_date(ficlVm *);
+static void 	ficl_dl_load(ficlVm *);
+static void 	ficl_dot_cflags(ficlVm *);
+static void 	ficl_dot_libs(ficlVm *);
+static void 	ficl_dot_lversion(ficlVm *);
+static void 	ficl_dot_prefix(ficlVm *);
+static void 	ficl_dot_version(ficlVm *);
+static void 	ficl_environ(ficlVm *);
+static void 	ficl_exec(ficlVm *);
+static void 	ficl_exit(ficlVm *);
+static void 	ficl_features(ficlVm *);
+static void 	ficl_fetch_paren(ficlVm *);
+static void 	ficl_fork(ficlVm *);
+static void 	ficl_getegid(ficlVm *);
+static void 	ficl_getenv(ficlVm *);
+static void 	ficl_geteuid(ficlVm *);
+static void 	ficl_getgid(ficlVm *);
+static void 	ficl_gethostname(ficlVm *);
+static void 	ficl_getlogin(ficlVm *);
+static void 	ficl_getopt(ficlVm *);
+static void 	ficl_getopt_long(ficlVm *);
+static void 	ficl_getpid(ficlVm *);
+static void 	ficl_getppid(ficlVm *);
+static void 	ficl_getservbyname(ficlVm *);
+static void 	ficl_getservbyport(ficlVm *);
+static void 	ficl_getuid(ficlVm *);
+static void 	ficl_gmtime(ficlVm *);
+static void 	ficl_include_file(ficlVm *);
+static void 	ficl_kill(ficlVm *);
+static void 	ficl_load_init_file(ficlVm *);
+static void 	ficl_localtime(ficlVm *);
+static void 	ficl_mktime(ficlVm *);
+static void 	ficl_provided_p(ficlVm *);
+static void 	ficl_putenv(ficlVm *);
+static void 	ficl_raise(ficlVm *);
+static void 	ficl_require_file(ficlVm *);
+static void 	ficl_reset_each_paren(ficlVm *);
+static void 	ficl_reset_map_paren(ficlVm *);
+static void 	ficl_set_begin_paren(ficlVm *);
+static void 	ficl_set_each_loop_paren(ficlVm *);
+static void 	ficl_set_end_paren(ficlVm *);
+static void 	ficl_set_map_loop_paren(ficlVm *);
+static void 	ficl_setegid(ficlVm *);
+static void 	ficl_seteuid(ficlVm *);
+static void 	ficl_setgid(ficlVm *);
+static void 	ficl_sethostname(ficlVm *);
+static void 	ficl_setuid(ficlVm *);
+static void 	ficl_show_memory(ficlVm *);
+static void 	ficl_signal(ficlVm *);
+static void 	ficl_signal_handler(ficlVm *);
+static void 	ficl_sleep(ficlVm *);
+static void 	ficl_stack_reset(ficlVm *);
+static void 	ficl_store_paren(ficlVm *);
+static void 	ficl_strftime(ficlVm *);
+static void 	ficl_strptime(ficlVm *);
+static void 	ficl_throw(ficlVm *);
+static void 	ficl_time(ficlVm *);
+static void 	ficl_time_reset(ficlVm *);
+static void 	ficl_time_to_string(ficlVm *);
+static void 	ficl_unshift_load_lib_path(ficlVm *);
+static void 	ficl_unshift_load_path(ficlVm *);
+static void 	ficl_utime(ficlVm *);
+static void 	ficl_values_end(ficlVm *);
+static void 	ficl_version(ficlVm *);
+static void 	ficl_wait(ficlVm *);
+static void 	ficl_waitpid(ficlVm *);
+static int 	find_in_wordlist(ficlWord *, FTH);
 static void 	forth_pre_init(void);
-static RETSIGTYPE fth_toplevel_handler(int sig);
+static RETSIGTYPE fth_toplevel_handler(int);
 static void 	handler_exec(int sig);
-static FTH 	load_file(const char *name, const char *caller);
+static FTH 	load_file(const char *, const char *);
 #if defined(HAVE_DLOPEN)
-static FTH	load_lib(const char *name, const char *f, const char *caller);
+static FTH	load_lib(const char *, const char *, const char *);
 #endif
 static void 	run_at_exit(void);
-static void 	set_and_show_signal_backtrace(int kind);
+static void 	set_and_show_signal_backtrace(int);
 
 /* global ficl variable; access via FTH_FICL_VAR() etc (fth.h) */
 Ficl           *fth_ficl = NULL;
@@ -183,7 +183,6 @@ fth_toplevel_handler(int sig)
 {
 	siglongjmp(fth_sig_toplevel, sig);
 }
-
 #endif
 
 #if !defined(HAVE_SIG_T)
@@ -271,7 +270,7 @@ signal_check(int sig)
 static int 	fth_signals[] = {
 	SIGINT, SIGQUIT, SIGILL, SIGSEGV, SIGBUS, SIGFPE, SIGUSR1
 };
-#endif		/* !_WIN32 */
+#endif				/* !_WIN32 */
 
 #define INIT_ASSERT(Cond)						\
 	if (!(Cond)) {							\
@@ -932,8 +931,8 @@ fth_basename(const char *path)
 }
 
 /*
- * Add PATH with array-function KIND to load-path LP removing a
- * trailing slash if any.
+ * Add PATH with array-function KIND to load-path LP removing a trailing
+ * slash if any.
  */
 #define ADD_TO_LOAD_PATH(Lp, Kind, Path)				\
 	ssize_t		len;						\
@@ -956,8 +955,8 @@ fth_basename(const char *path)
 	}								\
 
 /*
- * Push PATH at the end of global array variable *load-path* if not
- * already there.
+ * Push PATH at the end of global array variable *load-path* if not already
+ * there.
  */
 void
 fth_add_load_path(const char *path)
@@ -966,8 +965,8 @@ fth_add_load_path(const char *path)
 }
 
 /*
- * Prepend PATH to the beginning of global array variable *load-path*
- * if not already there.
+ * Prepend PATH to the beginning of global array variable *load-path* if not
+ * already there.
  */
 void
 fth_unshift_load_path(const char *path)
@@ -976,8 +975,8 @@ fth_unshift_load_path(const char *path)
 }
 
 /*
- * Push PATH at the end of global array variable *load-lib-path* if
- * not already there.
+ * Push PATH at the end of global array variable *load-lib-path* if not
+ * already there.
  */
 void
 fth_add_load_lib_path(const char *path)
@@ -986,8 +985,8 @@ fth_add_load_lib_path(const char *path)
 }
 
 /*
- * Prepend PATH to the beginning of global array variable *load-lib-path*
- * if not already there.
+ * Prepend PATH to the beginning of global array variable *load-lib-path* if
+ * not already there.
  */
 void
 fth_unshift_load_lib_path(const char *path)
@@ -1576,7 +1575,7 @@ fth_dl_load(const char *name, const char *func)
 	return (FTH_TRUE);
 }
 
-#else		/* !HAVE_DLOPEN */
+#else				/* !HAVE_DLOPEN */
 
 /* ARGSUSED */
 FTH
@@ -1588,7 +1587,7 @@ fth_dl_load(const char *name, const char *func)
 	return (FTH_FALSE);
 }
 
-#endif		/* HAVE_DLOPEN */
+#endif				/* HAVE_DLOPEN */
 
 static void
 ficl_dl_load(ficlVm *vm)
@@ -1712,7 +1711,7 @@ See also install-file and file-install."
 	ficlVmGetWordToPad(FTH_FICL_VM());
 	fth_install_file(fth_make_string(FTH_FICL_VM()->pad));
 }
-#endif		/* !_WIN32 */
+#endif				/* !_WIN32 */
 
 /*
  * Return full path of NAME or #f.
@@ -2091,7 +2090,7 @@ See also time."
 	if (gettimeofday(&fth_timeval_tv, NULL) == -1)
 		FTH_SYSTEM_ERROR_THROW(gettimeofday);
 }
-#endif		/* HAVE_GETTIMEOFDAY */
+#endif				/* HAVE_GETTIMEOFDAY */
 
 static void
 ficl_utime(ficlVm *vm)
@@ -2102,29 +2101,30 @@ Return user and system time as ficlFloats.  \
 Raise NOT-IMPLEMENTED exception if times(3) is not available.\n\
 See times(3) for more information."
 	double 		hertz;
+
 #if defined(HAVE_TIMES) && defined(HAVE_STRUCT_TMS)
 	struct tms 	buf;
 
 #if defined(HAVE_SYSCONF) && defined(HAVE_DECL__SC_CLK_TCK)
 	hertz = (double) sysconf(_SC_CLK_TCK);
-#else		/* !HAVE_SYSCONF */
+#else				/* !HAVE_SYSCONF */
 #if !defined(HZ)
 #if defined(CLK_TCK)
 #define HZ CLK_TCK
-#else		/* !CLK_TCK */
+#else				/* !CLK_TCK */
 #define HZ 60
-#endif		/* CLK_TCK */
-#endif		/* !HZ */
+#endif				/* CLK_TCK */
+#endif				/* !HZ */
 	hertz = (double) HZ;
-#endif		/* HAVE_SYSCONF */
+#endif				/* HAVE_SYSCONF */
 	if (hertz < 0.0)
 		FTH_SYSTEM_ERROR_THROW(sysconf);
 	times(&buf);
 	ficlStackPushFloat(vm->dataStack, (double) buf.tms_utime / hertz);
 	ficlStackPushFloat(vm->dataStack, (double) buf.tms_stime / hertz);
-#else		/* !HAVE_TIMES */
+#else				/* !HAVE_TIMES */
 	FTH_NOT_IMPLEMENTED_ERROR(times);
-#endif		/* HAVE_TIMES */
+#endif				/* HAVE_TIMES */
 }
 
 static void
