@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.135 12/31/17
+ * @(#)fth-lib.h	1.136 1/1/18
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -34,7 +34,7 @@
 #define DEFAULT_SEQ_LENGTH	128
 #define NEW_SEQ_LENGTH(Len) 						\
 	((((Len) / DEFAULT_SEQ_LENGTH) + 1) * DEFAULT_SEQ_LENGTH)
-/*
+/*-
  * 1 cells 20 lshift
  * 1 cells 8 = (64bit addr): 0x800000
  * 1 cells 4 = (32bit addr): 0x400000
@@ -274,82 +274,82 @@ enum {
 /* Trigonometric functions.  */
 
 #if !defined(HAVE_CSIN)
-ficlComplex	csin(ficlComplex z);
+ficlComplex	csin(ficlComplex);
 #endif
 #if !defined(HAVE_CCOS)
-ficlComplex	ccos(ficlComplex z);
+ficlComplex	ccos(ficlComplex);
 #endif
 #if !defined(HAVE_CTAN)
-ficlComplex	ctan(ficlComplex z);
+ficlComplex	ctan(ficlComplex);
 #endif
 #if !defined(HAVE_CASIN)
-ficlComplex	casin(ficlComplex z);
+ficlComplex	casin(ficlComplex);
 #endif
 #if !defined(HAVE_CACOS)
-ficlComplex	cacos(ficlComplex z);
+ficlComplex	cacos(ficlComplex);
 #endif
 #if !defined(HAVE_CATAN)
-ficlComplex	catan(ficlComplex z);
+ficlComplex	catan(ficlComplex);
 #endif
 #if !defined(HAVE_CATAN2)
-ficlComplex	catan2(ficlComplex z, ficlComplex x);
+ficlComplex	catan2(ficlComplex, ficlComplex);
 #endif
 
 /* Hyperbolic functions.  */
 
 #if !defined(HAVE_CSINH)
-ficlComplex	csinh(ficlComplex z);
+ficlComplex	csinh(ficlComplex);
 #endif
 #if !defined(HAVE_CCOSH)
-ficlComplex	ccosh(ficlComplex z);
+ficlComplex	ccosh(ficlComplex);
 #endif
 #if !defined(HAVE_CTANH)
-ficlComplex	ctanh(ficlComplex z);
+ficlComplex	ctanh(ficlComplex);
 #endif
 #if !defined(HAVE_CASINH)
-ficlComplex	casinh(ficlComplex z);
+ficlComplex	casinh(ficlComplex);
 #endif
 #if !defined(HAVE_CACOSH)
-ficlComplex	cacosh(ficlComplex z);
+ficlComplex	cacosh(ficlComplex);
 #endif
 #if !defined(HAVE_CATANH)
-ficlComplex	catanh(ficlComplex z);
+ficlComplex	catanh(ficlComplex);
 #endif
 
 /* Exponential and logarithmic functions.  */
 
 #if !defined(HAVE_CEXP)
-ficlComplex	cexp(ficlComplex z);
+ficlComplex	cexp(ficlComplex);
 #endif
 #if !defined(HAVE_CLOG)
-ficlComplex	clog(ficlComplex z);
+ficlComplex	clog(ficlComplex);
 #endif
 #if !defined(HAVE_CLOG10)
-ficlComplex	clog10(ficlComplex z);
+ficlComplex	clog10(ficlComplex);
 #endif
 
 /* Power functions.  */
 
 #if !defined(HAVE_CPOW)
-ficlComplex	cpow(ficlComplex x, ficlComplex y);
+ficlComplex	cpow(ficlComplex, ficlComplex);
 #endif
 #if !defined(HAVE_CSQRT)
-ficlComplex	csqrt(ficlComplex z);
+ficlComplex	csqrt(ficlComplex);
 #endif
 
 /* Absolute value and conjugates.  */
 
 #if !defined(HAVE_CABS)
-ficlFloat	cabs  (ficlComplex z);
+ficlFloat	cabs  (ficlComplex);
 #endif
 #if !defined(HAVE_CABS2)
-ficlFloat	cabs2 (ficlComplex z);
+ficlFloat	cabs2 (ficlComplex);
 #endif
 #if !defined(HAVE_CARG)
-ficlFloat	carg  (ficlComplex z);
+ficlFloat	carg  (ficlComplex);
 #endif
 #if !defined(HAVE_CONJ)
-ficlComplex	conj(ficlComplex z);
+ficlComplex	conj(ficlComplex);
 #endif
 #endif				/* HAVE_COMPLEX */
 

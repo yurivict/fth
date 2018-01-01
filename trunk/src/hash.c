@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	1.90 12/31/17
+ * @(#)hash.c	1.91 1/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -59,35 +59,35 @@ typedef struct {
 	((unsigned int)(fth_hash_id(Key) %				\
 	    (unsigned int)FTH_HASH_HASH_SIZE(Hash)))
 
-static void	ficl_hash_each(ficlVm *vm);
-static void	ficl_hash_equal_p(ficlVm *vm);
-static void	ficl_hash_map(ficlVm *vm);
-static void	ficl_hash_member_p(ficlVm *vm);
-static void	ficl_hash_p(ficlVm *vm);
-static void	ficl_hash_print(ficlVm *vm);
-static void	ficl_make_hash_with_len(ficlVm *vm);
-static void	ficl_values_to_hash(ficlVm *vm);
-static FTH	hs_copy(FTH self);
-static FTH	hs_dump(FTH self);
-static FTH	hs_dump_each(FTH key, FTH value, FTH data);
-static FTH	hs_each(FTH key, FTH value, FTH data);
-static FTH	hs_equal_p(FTH self, FTH obj);
-static void	hs_free(FTH self);
-static FTH	hs_inspect(FTH self);
-static FTH	hs_inspect_each(FTH key, FTH value, FTH data);
-static FTH	hs_keys_each(FTH key, FTH value, FTH obj);
-static FTH	hs_length(FTH self);
-static FTH	hs_map(FTH key, FTH value, FTH data);
-static void	hs_mark(FTH self);
-static FTH	hs_mark_each(FTH key, FTH value, FTH data);
-static FTH	hs_ref(FTH self, FTH idx);
-static FTH	hs_set(FTH self, FTH idx, FTH value);
-static FTH	hs_to_array(FTH self);
-static FTH	hs_to_array_each(FTH key, FTH value, FTH data);
-static FTH	hs_to_string(FTH self);
-static FTH	hs_values_each(FTH key, FTH value, FTH obj);
-static FItem   *make_item(FItem *next, FTH key, FTH value);
-static FHash   *make_hash(int hashsize);
+static void	ficl_hash_each(ficlVm *);
+static void	ficl_hash_equal_p(ficlVm *);
+static void	ficl_hash_map(ficlVm *);
+static void	ficl_hash_member_p(ficlVm *);
+static void	ficl_hash_p(ficlVm *);
+static void	ficl_hash_print(ficlVm *);
+static void	ficl_make_hash_with_len(ficlVm *);
+static void	ficl_values_to_hash(ficlVm *);
+static FTH	hs_copy(FTH);
+static FTH	hs_dump(FTH);
+static FTH	hs_dump_each(FTH, FTH, FTH);
+static FTH	hs_each(FTH, FTH, FTH);
+static FTH	hs_equal_p(FTH, FTH);
+static void	hs_free(FTH);
+static FTH	hs_inspect(FTH);
+static FTH	hs_inspect_each(FTH, FTH, FTH);
+static FTH	hs_keys_each(FTH, FTH, FTH);
+static FTH	hs_length(FTH);
+static FTH	hs_map(FTH, FTH, FTH);
+static void	hs_mark(FTH);
+static FTH	hs_mark_each(FTH, FTH, FTH);
+static FTH	hs_ref(FTH, FTH);
+static FTH	hs_set(FTH, FTH, FTH);
+static FTH	hs_to_array(FTH);
+static FTH	hs_to_array_each(FTH, FTH, FTH);
+static FTH	hs_to_string(FTH);
+static FTH	hs_values_each(FTH, FTH, FTH);
+static FItem   *make_item(FItem *, FTH, FTH);
+static FHash   *make_hash(int);
 
 #define h_list_of_hash_functions "\
 *** HASH PRIMITIVES ***\n\

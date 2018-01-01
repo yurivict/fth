@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.117 12/31/17";
+const char fth_sccsid[] = "@(#)fth.c	1.119 1/1/18";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,7 +36,7 @@ const char fth_sccsid[] = "@(#)fth.c	1.117 12/31/17";
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2017 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2018 Michael Scholz"
 
 static FTH 	eval_with_error_exit(void *, int);
 static void 	repl_in_place(char *, FTH, ficlWord *, int, int, int);
@@ -51,10 +51,11 @@ enum {
 static ficlWord *
 source_to_word(const char *buffer)
 {
-	ficlWord       *word = NULL;
+	ficlWord       *word;
 	char           *bstr;
 	int 		status;
 
+	word = NULL;
 	bstr = fth_format("lambda: ( ?? -- ?? ) %s ;", buffer);
 	status = fth_catch_eval(bstr);
 	FTH_FREE(bstr);
@@ -124,6 +125,7 @@ eval_with_error_exit(void *p, int kind)
 			break;
 		default:
 			val = fth_make_array_len(new_depth);
+
 			for (i = 0; i < new_depth; i++)
 				fth_array_set(val, i, fth_pop_ficl_cell(vm));
 			break;
@@ -259,7 +261,11 @@ main(int argc, char **argv)
 	llp_len = 0;		/* -C path */
 	die = 0;		/* -D */
 	/*
-	 * stay_in_repl: -1 not set 0 -e || -s 1 -E || -r
+	 * stay_in_repl:	-1 not set
+	 *			0 -e (eval)
+	 *			0 -s (script)
+	 *			1 -E (eval-and-stay)
+	 *			1 -r (ficl-repl)
 	 */
 	stay_in_repl = -1;	/* -Er 1 || -es 0 */
 	bufs_len = 0;		/* -Ee pattern */
@@ -281,9 +287,9 @@ main(int argc, char **argv)
 	script = NULL;		/* -s file */
 
 	/*-
-	 * verbose: -1 not set --> true in interactive repl
-	 *           0 -q quiet
-	 *           1 -v verbose
+	 * verbose:		-1 not set --> true in interactive repl
+	 *			0 -q quiet
+	 *			1 -v verbose
 	 */
 	verbose = -1;		/* -v 1 || -q 0 */
 	opterr = 1;		/* show getopt's error message */
@@ -440,7 +446,6 @@ main(int argc, char **argv)
 			fth_dl_load(name, fnc);
 		}
 	}
-
 	/*
 	 * Run script and exit.
 	 */
@@ -453,7 +458,6 @@ main(int argc, char **argv)
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
-
 	/*
 	 * In-place or implicit-loop action and exit.
 	 */
@@ -473,7 +477,6 @@ main(int argc, char **argv)
 			/* NOTREACHED */
 			return (EXIT_FAILURE);
 		}
-
 		/*
 		 * If multiple -e, eval all but last.
 		 */
@@ -493,7 +496,6 @@ main(int argc, char **argv)
 			    auto_split, loop_print, line_end);
 			fth_exit(EXIT_SUCCESS);
 		}
-
 		/*
 		 * ... or process all remaining files in order.
 		 */
@@ -520,7 +522,6 @@ main(int argc, char **argv)
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
-
 	/*
 	 * Load remaining args as fth source files.
 	 */
@@ -543,16 +544,16 @@ main(int argc, char **argv)
 			char           *buf;
 
 			buf = fth_scratch;
+
 			while (fgets(buf, BUFSIZ, stdin) != NULL)
 				eval_with_error_exit(buf, REPL_INTERPRET);
+
 			fth_exit(EXIT_SUCCESS);
 		} else {
 			ret = fth_load_file(argv[i]);
 
-			if (FTH_STRING_P(ret)) {
-				exit_value++;
+			if (FTH_STRING_P(ret))
 				fth_throw(FTH_LOAD_ERROR, "%S", ret);
-			}
 		}
 	}
 
@@ -561,10 +562,10 @@ main(int argc, char **argv)
 	 */
 	if (exit_value != EXIT_SUCCESS || fth_hit_error_p) {
 		exit_value = EXIT_FAILURE;
+
 		if (die)
 			fth_exit(exit_value);
 	}
-
 	/*
 	 * Eval strings from command line.
 	 */
@@ -580,7 +581,6 @@ main(int argc, char **argv)
 		 */
 		eval_with_error_exit(source_to_word(buffers[i]), REPL_COMPILE);
 	}
-
 	/*
 	 * Adjust stay_in_repl if not set.
 	 */
@@ -604,7 +604,6 @@ main(int argc, char **argv)
 			fth_printf("\\ %s %s\n",
 			    FTH_PACKAGE_NAME, fth_version());
 		}
-
 		/*
 		 * Load init files if not -Q.
 		 */

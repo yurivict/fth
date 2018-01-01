@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	1.162 12/31/17
+ * @(#)io.c	1.163 1/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -92,120 +92,120 @@ typedef struct {
 #define FTH_IO_SOCKET_FD(Obj)	SOCKET_REF(Obj)->fd
 #define FTH_IO_SOCKET_HOST(Obj)	SOCKET_REF(Obj)->host
 
-static char    *fam_to_mode(int fam);
-static void 	ficl_accept(ficlVm *vm);
-static void 	ficl_bind(ficlVm *vm);
-static void 	ficl_connect(ficlVm *vm);
-static void 	ficl_exit_status(ficlVm *vm);
-static void 	ficl_io_close(ficlVm *vm);
-static void 	ficl_io_closed_p(ficlVm *vm);
-static void 	ficl_io_eof_p(ficlVm *vm);
-static void 	ficl_io_equal_p(ficlVm *vm);
-static void 	ficl_io_fdopen(ficlVm *vm);
-static void 	ficl_io_filename(ficlVm *vm);
-static void 	ficl_io_fileno(ficlVm *vm);
-static void 	ficl_io_flush(ficlVm *vm);
-static void 	ficl_io_getc(ficlVm *vm);
-static void 	ficl_io_input_p(ficlVm *vm);
-static void 	ficl_io_mode(ficlVm *vm);
-static void 	ficl_io_nopen(ficlVm *vm);
-static void 	ficl_io_open(ficlVm *vm);
-static void 	ficl_io_open_file(ficlVm *vm);
-static void 	ficl_io_open_input_file(ficlVm *vm);
-static void 	ficl_io_open_output_file(ficlVm *vm);
-static void 	ficl_io_open_read(ficlVm *vm);
-static void 	ficl_io_open_write(ficlVm *vm);
-static void 	ficl_io_output_p(ficlVm *vm);
-static void 	ficl_io_p(ficlVm *vm);
-static void 	ficl_io_popen(ficlVm *vm);
-static void 	ficl_io_popen_read(ficlVm *vm);
-static void 	ficl_io_popen_write(ficlVm *vm);
-static void 	ficl_io_pos_ref(ficlVm *vm);
-static void 	ficl_io_pos_set(ficlVm *vm);
-static void 	ficl_io_putc(ficlVm *vm);
-static void 	ficl_io_reopen(ficlVm *vm);
-static void 	ficl_io_rewind(ficlVm *vm);
-static void 	ficl_io_seek(ficlVm *vm);
-static void 	ficl_io_sopen(ficlVm *vm);
-static void 	ficl_io_sopen_read(ficlVm *vm);
-static void 	ficl_io_sopen_write(ficlVm *vm);
-static void 	ficl_io_stderr(ficlVm *vm);
-static void 	ficl_io_stdin(ficlVm *vm);
-static void 	ficl_io_stdout(ficlVm *vm);
-static void 	ficl_io_write(ficlVm *vm);
-static void 	ficl_io_write_format(ficlVm *vm);
-static void 	ficl_listen(ficlVm *vm);
-static void 	ficl_print_io(ficlVm *vm);
-static void 	ficl_readlines(ficlVm *vm);
-static void 	ficl_recv(ficlVm *vm);
-static void 	ficl_recvfrom(ficlVm *vm);
-static void 	ficl_send(ficlVm *vm);
-static void 	ficl_sendto(ficlVm *vm);
-static void 	ficl_set_io_stderr(ficlVm *vm);
-static void 	ficl_set_io_stdin(ficlVm *vm);
-static void 	ficl_set_io_stdout(ficlVm *vm);
-static void 	ficl_set_version_control(ficlVm *vm);
-static void 	ficl_shutdown(ficlVm *vm);
-static void 	ficl_socket(ficlVm *vm);
-static void 	ficl_version_control(ficlVm *vm);
-static void 	ficl_writelines(ficlVm *vm);
-static void 	file_close(void *ptr);
-static int 	file_eof_p(void *ptr);
-static void 	file_flush(void *ptr);
-static int 	file_number(char *name);
-static int 	file_read_char(void *ptr);
-static char    *file_read_line(void *ptr);
-static void 	file_rewind(void *ptr);
-static ficl2Integer file_seek(void *ptr, ficl2Integer pos, int whence);
-static ficl2Integer file_tell(void *ptr);
-static void 	file_version_rename(char *name);
-static void 	file_write_char(void *ptr, int c);
-static void 	file_write_line(void *ptr, const char *line);
-static void 	generic_close(void *ptr);
-static int 	generic_eof_p(void *ptr);
-static void 	generic_flush(void *ptr);
-static int 	generic_read_char(void *ptr);
-static char    *generic_read_line(void *ptr);
-static void 	generic_rewind(void *ptr);
-static ficl2Integer generic_seek(void *ptr, ficl2Integer pos, int whence);
-static ficl2Integer generic_tell(void *ptr);
-static void 	generic_write_char(void *ptr, int c);
-static void 	generic_write_line(void *ptr, const char *line);
-static FTH 	io_equal_p(FTH self, FTH obj);
-static void 	io_free(FTH self);
-static void 	io_if_exists(char *name, FTH exists, int fam);
-static FTH 	io_inspect(FTH self);
-static FTH 	io_length(FTH self);
-static void 	io_mark(FTH self);
-static FTH 	io_ref(FTH self, FTH idx);
-static FTH 	io_to_array(FTH self);
-static FTH 	io_to_string(FTH self);
-static FTH 	make_file_io(FILE *fp, const char *name, int fam);
-static FTH 	make_socket_io(const char *host, int port, int domain, int fd);
-static void 	pipe_close(void *ptr);
-static int 	seek_constant_p(int whence);
-static int 	socket_accept(int domain, int fd);
-static int 	socket_bind(const char *host, int port, int domain, int fd);
-static void 	socket_close(void *ptr);
-static int 	socket_connect(const char *host, int port, int domain, int fd);
-static int 	socket_eof_p(void *ptr);
-static int 	socket_open(int domain, int type);
-static int 	socket_read_char(void *ptr);
-static char    *socket_read_line(void *ptr);
-static void 	socket_rewind(void *ptr);
-static ficl2Integer socket_seek(void *ptr, ficl2Integer pos, int whence);
-static ficl2Integer socket_tell(void *ptr);
-static void 	socket_unlink(const char *host);
-static void 	socket_write_char(void *ptr, int c);
-static void 	socket_write_line(void *ptr, const char *line);
-static int 	string_eof_p(void *ptr);
-static int 	string_read_char(void *ptr);
-static char    *string_read_line(void *ptr);
-static void 	string_rewind_and_close(void *ptr);
-static ficl2Integer string_seek(void *ptr, ficl2Integer dpos, int whence);
-static ficl2Integer string_tell(void *ptr);
-static void 	string_write_char(void *ptr, int c);
-static void 	string_write_line(void *ptr, const char *line);
+static char    *fam_to_mode(int);
+static void 	ficl_accept(ficlVm *);
+static void 	ficl_bind(ficlVm *);
+static void 	ficl_connect(ficlVm *);
+static void 	ficl_exit_status(ficlVm *);
+static void 	ficl_io_close(ficlVm *);
+static void 	ficl_io_closed_p(ficlVm *);
+static void 	ficl_io_eof_p(ficlVm *);
+static void 	ficl_io_equal_p(ficlVm *);
+static void 	ficl_io_fdopen(ficlVm *);
+static void 	ficl_io_filename(ficlVm *);
+static void 	ficl_io_fileno(ficlVm *);
+static void 	ficl_io_flush(ficlVm *);
+static void 	ficl_io_getc(ficlVm *);
+static void 	ficl_io_input_p(ficlVm *);
+static void 	ficl_io_mode(ficlVm *);
+static void 	ficl_io_nopen(ficlVm *);
+static void 	ficl_io_open(ficlVm *);
+static void 	ficl_io_open_file(ficlVm *);
+static void 	ficl_io_open_input_file(ficlVm *);
+static void 	ficl_io_open_output_file(ficlVm *);
+static void 	ficl_io_open_read(ficlVm *);
+static void 	ficl_io_open_write(ficlVm *);
+static void 	ficl_io_output_p(ficlVm *);
+static void 	ficl_io_p(ficlVm *);
+static void 	ficl_io_popen(ficlVm *);
+static void 	ficl_io_popen_read(ficlVm *);
+static void 	ficl_io_popen_write(ficlVm *);
+static void 	ficl_io_pos_ref(ficlVm *);
+static void 	ficl_io_pos_set(ficlVm *);
+static void 	ficl_io_putc(ficlVm *);
+static void 	ficl_io_reopen(ficlVm *);
+static void 	ficl_io_rewind(ficlVm *);
+static void 	ficl_io_seek(ficlVm *);
+static void 	ficl_io_sopen(ficlVm *);
+static void 	ficl_io_sopen_read(ficlVm *);
+static void 	ficl_io_sopen_write(ficlVm *);
+static void 	ficl_io_stderr(ficlVm *);
+static void 	ficl_io_stdin(ficlVm *);
+static void 	ficl_io_stdout(ficlVm *);
+static void 	ficl_io_write(ficlVm *);
+static void 	ficl_io_write_format(ficlVm *);
+static void 	ficl_listen(ficlVm *);
+static void 	ficl_print_io(ficlVm *);
+static void 	ficl_readlines(ficlVm *);
+static void 	ficl_recv(ficlVm *);
+static void 	ficl_recvfrom(ficlVm *);
+static void 	ficl_send(ficlVm *);
+static void 	ficl_sendto(ficlVm *);
+static void 	ficl_set_io_stderr(ficlVm *);
+static void 	ficl_set_io_stdin(ficlVm *);
+static void 	ficl_set_io_stdout(ficlVm *);
+static void 	ficl_set_version_control(ficlVm *);
+static void 	ficl_shutdown(ficlVm *);
+static void 	ficl_socket(ficlVm *);
+static void 	ficl_version_control(ficlVm *);
+static void 	ficl_writelines(ficlVm *);
+static void 	file_close(void *);
+static int 	file_eof_p(void *);
+static void 	file_flush(void *);
+static int 	file_number(char *);
+static int 	file_read_char(void *);
+static char    *file_read_line(void *);
+static void 	file_rewind(void *);
+static ficl2Integer file_seek(void *, ficl2Integer, int);
+static ficl2Integer file_tell(void *);
+static void 	file_version_rename(char *);
+static void 	file_write_char(void *, int);
+static void 	file_write_line(void *, const char *);
+static void 	generic_close(void *);
+static int 	generic_eof_p(void *);
+static void 	generic_flush(void *);
+static int 	generic_read_char(void *);
+static char    *generic_read_line(void *);
+static void 	generic_rewind(void *);
+static ficl2Integer generic_seek(void *, ficl2Integer, int);
+static ficl2Integer generic_tell(void *);
+static void 	generic_write_char(void *, int);
+static void 	generic_write_line(void *, const char *);
+static FTH 	io_equal_p(FTH, FTH);
+static void 	io_free(FTH);
+static void 	io_if_exists(char *, FTH, int);
+static FTH 	io_inspect(FTH);
+static FTH 	io_length(FTH);
+static void 	io_mark(FTH);
+static FTH 	io_ref(FTH, FTH);
+static FTH 	io_to_array(FTH);
+static FTH 	io_to_string(FTH);
+static FTH 	make_file_io(FILE *, const char *, int);
+static FTH 	make_socket_io(const char *, int, int, int);
+static void 	pipe_close(void *);
+static int 	seek_constant_p(int);
+static int 	socket_accept(int, int);
+static int 	socket_bind(const char *, int, int, int);
+static void 	socket_close(void *);
+static int 	socket_connect(const char *, int, int, int);
+static int 	socket_eof_p(void *);
+static int 	socket_open(int, int);
+static int 	socket_read_char(void *);
+static char    *socket_read_line(void *);
+static void 	socket_rewind(void *);
+static ficl2Integer socket_seek(void *, ficl2Integer, int);
+static ficl2Integer socket_tell(void *);
+static void 	socket_unlink(const char *);
+static void 	socket_write_char(void *, int);
+static void 	socket_write_line(void *, const char *);
+static int 	string_eof_p(void *);
+static int 	string_read_char(void *);
+static char    *string_read_line(void *);
+static void 	string_rewind_and_close(void *);
+static ficl2Integer string_seek(void *, ficl2Integer, int);
+static ficl2Integer string_tell(void *);
+static void 	string_write_char(void *, int);
+static void 	string_write_line(void *, const char *);
 
 #define h_list_of_io_functions "\
 *** IO and FILE PRIMITIVES ***\n\
@@ -1797,7 +1797,7 @@ socket_close(void *ptr)
 	}								\
 } while (0)
 
-#endif		/* HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
+#endif				/* HAVE_STRUCT_SOCKADDR_UN_SUN_LEN */
 
 static int
 socket_bind(const char *host, int port, int domain, int fd)
@@ -1910,7 +1910,7 @@ make_socket_io(const char *host, int port, int domain, int fd)
 	return (io);
 }
 
-#endif		/* HAVE_SOCKET */
+#endif				/* HAVE_SOCKET */
 
 FTH
 fth_io_nopen(const char *host, int port, int domain)
@@ -2989,6 +2989,7 @@ init_io(void)
 	char           *vc;
 
 	vc = fth_getenv("VERSION_CONTROL", NULL);
+	version_control = FTH_UNDEF;
 
 	if (vc != NULL) {
 		if ((strncmp(vc, "t", 1L) == 0) ||
@@ -3002,8 +3003,7 @@ init_io(void)
 			version_control = FTH_FALSE;
 		else		/* "off" || "none" || any */
 			version_control = FTH_UNDEF;
-	} else
-		version_control = FTH_UNDEF;
+	}
 
 	fth_set_object_apply(io_tag, (void *) fth_io_read_line, 0, 0, 0);
 	version_number_string = fth_gc_permanent(fth_make_string("~[0-9]+~$"));
