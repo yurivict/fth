@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	1.136 1/1/18
+ * @(#)fth-lib.h	2.1 1/2/18
  */
 
 #if !defined(_FTH_LIB_H_)

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	1.173 12/31/17
+ * @(#)proc.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -52,61 +52,60 @@
 
 static char 	proc_scratch[FICL_PAD_SIZE];
 
-static void 	ficl_proc_p(ficlVm *vm);
-static void 	ficl_thunk_p(ficlVm *vm);
-static void 	ficl_word_p(ficlVm *vm);
-static void 	ficl_xt_p(ficlVm *vm);
+static void 	ficl_proc_p(ficlVm *);
+static void 	ficl_thunk_p(ficlVm *);
+static void 	ficl_word_p(ficlVm *);
+static void 	ficl_xt_p(ficlVm *);
 
-static FTH	execute_proc(ficlVm *vm, ficlWord *word, int depth,
-    const char *caller);
-static void 	ficl_args_keys_paren_co(ficlVm *vm);
-static void 	ficl_args_optional_paren_co(ficlVm *vm);
-static void 	ficl_begin_definition(ficlVm *vm);
-static void 	ficl_constant(ficlVm *vm);
-static void 	ficl_defined_p(ficlVm *vm);
-static void 	ficl_doc_quote_co_im(ficlVm *vm);
-static void 	ficl_empty_extended_args_co_im(ficlVm *vm);
-static void 	ficl_extended_args_co_im(ficlVm *vm);
-static void 	ficl_filename_im(ficlVm *vm);
-static void 	ficl_get_func_name_co_im(ficlVm *vm);
-static void 	ficl_get_help(ficlVm *vm);
-static void 	ficl_get_optarg(ficlVm *vm);
-static void 	ficl_get_optargs(ficlVm *vm);
-static void 	ficl_get_optkey(ficlVm *vm);
-static void 	ficl_get_optkeys(ficlVm *vm);
-static void 	ficl_help_add(ficlVm *vm);
-static void 	ficl_help_ref(ficlVm *vm);
-static void 	ficl_help_set(ficlVm *vm);
-static void 	ficl_lambda_definition(ficlVm *vm);
-static void 	ficl_latestxt(ficlVm *vm);
-static void 	ficl_latestxt_co_im(ficlVm *vm);
-static void 	ficl_lineno_im(ficlVm *vm);
-static void 	ficl_local_variables_co_im(ficlVm *vm);
-static void 	ficl_local_variables_paren_co(ficlVm *vm);
-static void 	ficl_make_proc(ficlVm *vm);
-static void 	ficl_print_proc(ficlVm *vm);
-static void 	ficl_proc_apply(ficlVm *vm);
-static void 	ficl_proc_arity(ficlVm *vm);
-static void 	ficl_proc_create_co(ficlVm *vm);
-static void 	ficl_proc_name(ficlVm *vm);
-static void 	ficl_proc_to_xt(ficlVm *vm);
-static void 	ficl_see(ficlVm *vm);
-static void 	ficl_set_bang_im(ficlVm *vm);
-static void 	ficl_set_execute(ficlVm *vm);
-static void 	ficl_set_xt(ficlVm *vm);
-static void 	ficl_tick_set_im(ficlVm *vm);
-static void 	ficl_value(ficlVm *vm);
-static void 	ficl_word_create_co(ficlVm *vm);
-static FTH 	ficl_word_to_source(ficlDictionary *dict, ficlCell *cell);
-static void 	ficl_xt_to_name(ficlVm *vm);
-static void 	ficl_xt_to_origin(ficlVm *vm);
-static char    *get_help(FTH obj, char *name);
-static ficlString get_string_from_tib(ficlVm *vm, int pos);
-static char    *help_formatted(char *str, int line_length);
-static FTH 	local_vars_cb(FTH key, FTH value, FTH data);
-static ficlWord *make_procedure(const char *name, void *func, int void_p,
-    int req, int opt, int rest, const char *doc);
-static void 	word_documentation(ficlVm *vm, ficlWord *word);
+static FTH	execute_proc(ficlVm *, ficlWord *, int, const char *);
+static void 	ficl_args_keys_paren_co(ficlVm *);
+static void 	ficl_args_optional_paren_co(ficlVm *);
+static void 	ficl_begin_definition(ficlVm *);
+static void 	ficl_constant(ficlVm *);
+static void 	ficl_defined_p(ficlVm *);
+static void 	ficl_doc_quote_co_im(ficlVm *);
+static void 	ficl_empty_extended_args_co_im(ficlVm *);
+static void 	ficl_extended_args_co_im(ficlVm *);
+static void 	ficl_filename_im(ficlVm *);
+static void 	ficl_get_func_name_co_im(ficlVm *);
+static void 	ficl_get_help(ficlVm *);
+static void 	ficl_get_optarg(ficlVm *);
+static void 	ficl_get_optargs(ficlVm *);
+static void 	ficl_get_optkey(ficlVm *);
+static void 	ficl_get_optkeys(ficlVm *);
+static void 	ficl_help_add(ficlVm *);
+static void 	ficl_help_ref(ficlVm *);
+static void 	ficl_help_set(ficlVm *);
+static void 	ficl_lambda_definition(ficlVm *);
+static void 	ficl_latestxt(ficlVm *);
+static void 	ficl_latestxt_co_im(ficlVm *);
+static void 	ficl_lineno_im(ficlVm *);
+static void 	ficl_local_variables_co_im(ficlVm *);
+static void 	ficl_local_variables_paren_co(ficlVm *);
+static void 	ficl_make_proc(ficlVm *);
+static void 	ficl_print_proc(ficlVm *);
+static void 	ficl_proc_apply(ficlVm *);
+static void 	ficl_proc_arity(ficlVm *);
+static void 	ficl_proc_create_co(ficlVm *);
+static void 	ficl_proc_name(ficlVm *);
+static void 	ficl_proc_to_xt(ficlVm *);
+static void 	ficl_see(ficlVm *);
+static void 	ficl_set_bang_im(ficlVm *);
+static void 	ficl_set_execute(ficlVm *);
+static void 	ficl_set_xt(ficlVm *);
+static void 	ficl_tick_set_im(ficlVm *);
+static void 	ficl_value(ficlVm *);
+static void 	ficl_word_create_co(ficlVm *);
+static FTH 	ficl_word_to_source(ficlDictionary *, ficlCell *);
+static void 	ficl_xt_to_name(ficlVm *);
+static void 	ficl_xt_to_origin(ficlVm *);
+static char    *get_help(FTH, char *);
+static ficlString get_string_from_tib(ficlVm *, int);
+static char    *help_formatted(char *, int);
+static FTH 	local_vars_cb(FTH, FTH, FTH);
+static ficlWord *make_procedure(const char *,
+		    void *, int, int, int, int, const char *);
+static void 	word_documentation(ficlVm *, ficlWord *);
 
 /* === PROC === */
 
@@ -231,7 +230,7 @@ See also proc?, xt?, word?."
 	flag = FTH_PROC_P(obj) &&
 	    FICL_WORD_REQ(obj) == 0 &&
 	    FICL_WORD_OPT(obj) == 0 &&
-	    !FICL_WORD_REST(obj);
+	    FICL_WORD_REST(obj) == 0;
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
@@ -287,12 +286,15 @@ make_procedure(const char *name, void *func, int void_p,
 	word->rest = rest;
 	word->argc = req + opt + rest;
 	word->kind = FW_PROC;
+
 	if (void_p)
 		word->vfunc = (void (*) ()) func;
 	else
 		word->func = (FTH (*) ()) func;
+
 	if (doc != NULL && FTH_FALSE_P(FICL_WORD_DOC(word)))
 		fth_word_doc_set(word, doc);
+
 	return (word);
 }
 
@@ -366,12 +368,14 @@ ARITY can be an integer or an array of length 3, #( req opt rest )."
 	word = ficlStackPopPointer(vm->dataStack);
 	opt = 0;
 	rest = 0;
+
 	if (fth_array_length(arity) == 3) {
 		req = FIX_TO_INT32(fth_array_ref(arity, 0L));
 		opt = FIX_TO_INT32(fth_array_ref(arity, 1L));
 		rest = FTH_TO_BOOL(fth_array_ref(arity, 2L));
 	} else
 		req = FIX_TO_INT32(arity);
+
 	prc = fth_make_proc(word, req, opt, rest);
 	ficlStackPushFTH(vm->dataStack, prc);
 }
@@ -386,6 +390,7 @@ Print proc object PRC to current output."
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	proc = ficlStackPopFTH(vm->dataStack);
+
 	if (FTH_PROC_P(proc))
 		fth_printf("#<proc %s: %d/%d/%s>",
 		    FICL_WORD_NAME(proc),
@@ -420,6 +425,7 @@ or #f if not a proc object."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	proc = ficlStackPopPointer(vm->dataStack);
+
 	if (FTH_PROC_P(proc)) {
 		FTH 		ary;
 
@@ -437,6 +443,7 @@ or #f if not a proc object."
  */
 static char 	proc_not_a_word[] = "not-a-proc";
 static char 	proc_no_name[] = "noname";
+
 char           *
 fth_proc_name(FTH obj)
 {
@@ -459,6 +466,7 @@ Return name of proc object PRC if found, otherwise an empty string."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	proc = ficlStackPopPointer(vm->dataStack);
+
 	if (FICL_WORD_P(proc)) {
 		if (FICL_WORD_REF(proc)->length > 0)
 			fs = FTH_WORD_NAME(proc);
@@ -520,6 +528,7 @@ Return the actual word (the execution token xt) of PRC."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	proc = ficlStackPopPointer(vm->dataStack);
+
 	if (FICL_WORD_P(proc))
 		ficlStackPushPointer(vm->dataStack, FICL_WORD_REF(proc));
 	else
@@ -536,6 +545,7 @@ execute_proc(ficlVm *vm, ficlWord *word, int depth, const char *caller)
 
 	s = caller != NULL ? (char *) caller : "execute_proc";
 	status = fth_execute_xt(vm, word);
+
 	switch (status) {
 	case FICL_VM_STATUS_ERROR_EXIT:
 	case FICL_VM_STATUS_ABORT:
@@ -548,17 +558,24 @@ execute_proc(ficlVm *vm, ficlWord *word, int depth, const char *caller)
 			ficlVmThrowException(vm, status,
 			    "%s: can't execute word %p", s, word);
 		break;
+	default:
+		break;
 	}
+
 	/* collect values from stack */
 	if (FTH_STACK_DEPTH(vm) > depth) {
 		/* One entry: return single value. */
 		new_depth = FTH_STACK_DEPTH(vm) - depth;
+
 		if (new_depth == 1)
 			return (fth_pop_ficl_cell(vm));
+
 		/* More than one entries: -> return array with values.  */
 		ret = fth_make_array_len(new_depth);
+
 		for (i = 0; i < new_depth; i++)
 			fth_array_fast_set(ret, i, fth_pop_ficl_cell(vm));
+
 		return (ret);
 	}
 	/* If nothing added to stack (no return value), return #f. */
@@ -597,16 +614,20 @@ fth_xt_call(const char *name, const char *caller, int len,...)
 
 	if (name == NULL || *name == '\0')
 		return (FTH_FALSE);
-	s.text = (char *) name;
-	s.length = strlen(name);
+
+	FICL_STRING_SET_FROM_CSTRING(s, name);
 	xt = ficlDictionaryLookup(FTH_FICL_DICT(), s);
+
 	if (xt == NULL)
 		return (FTH_FALSE);
+
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
 	va_start(list, len);
+
 	for (i = 0; i < len; i++)
 		fth_push_ficl_cell(vm, va_arg(list, FTH));
+
 	va_end(list);
 	return (execute_proc(vm, xt, depth, caller));
 }
@@ -643,18 +664,24 @@ fth_xt_apply(const char *name, FTH args, const char *caller)
 
 	if (name == NULL || *name == '\0')
 		return (FTH_FALSE);
-	s.text = (char *) name;
-	s.length = strlen(name);
+
+	FICL_STRING_SET_FROM_CSTRING(s, name);
 	xt = ficlDictionaryLookup(FTH_FICL_DICT(), s);
+
 	if (xt == NULL)
 		return (FTH_FALSE);
+
 	len = 0;
+
 	if (FTH_ARRAY_P(args))
 		len = (int) fth_array_length(args);
+
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
+
 	for (i = 0; i < len; i++)
 		fth_push_ficl_cell(vm, fth_array_fast_ref(args, i));
+
 	return (execute_proc(vm, xt, depth, caller));
 }
 
@@ -726,7 +753,7 @@ fth_proc_call(FTH proc, const char *caller, int len,...)
 FTH
 fth_proc_apply(FTH proc, FTH args, const char *caller)
 {
-	int 		depth    , len;
+	int 		depth, len;
 	ficlInteger 	i;
 	ficlVm         *vm;
 
@@ -771,8 +798,10 @@ raise BAD-ARITY exception."
 	FTH_STACK_CHECK(vm, 2, 1);
 	args = fth_pop_ficl_cell(vm);
 	proc_or_xt = ficlStackPopFTH(vm->dataStack);
+
 	if (!FTH_ARRAY_P(args))
 		args = fth_make_array_var(1, args);
+
 	if (FTH_PROC_P(proc_or_xt))
 		proc = proc_or_xt;
 	else if (FTH_WORD_P(proc_or_xt))
@@ -780,6 +809,7 @@ raise BAD-ARITY exception."
 		    (int) fth_array_length(args), 0, 0);
 	else
 		proc = FTH_FALSE;
+
 	fth_push_ficl_cell(vm, fth_proc_apply(proc, args, RUNNING_WORD_VM(vm)));
 }
 
@@ -797,8 +827,10 @@ See also set!, set-xt and set-execute."
 	s = ficlVmGetWord(vm);
 	snprintf(vm->pad, sizeof(vm->pad), "set-%.*s", (int) s.length, s.text);
 	set_word = FICL_WORD_NAME_REF(vm->pad);
+
 	if (set_word == NULL)
 		set_word = FICL_WORD_REF(FTH_FALSE);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
 		ficlUnsigned	u;
@@ -828,6 +860,7 @@ See also <'set>, set-xt and set-execute."
 	s = ficlVmGetWord(vm);
 	snprintf(vm->pad, sizeof(vm->pad), "set-%.*s", (int) s.length, s.text);
 	word = FICL_WORD_NAME_REF(vm->pad);
+
 	if (word == NULL) {
 		fth_throw(FTH_UNDEFINED, "%s: %s not found",
 		    RUNNING_WORD_VM(vm), vm->pad);
@@ -852,6 +885,7 @@ See also <'set>, set! and set-execute."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (!FICL_WORD_P(obj)) {
 		FTH_ASSERT_ARGS(FICL_WORD_P(obj), obj, FTH_ARG1,
 		    "a proc or xt");
@@ -861,8 +895,10 @@ See also <'set>, set! and set-execute."
 	word = FICL_WORD_REF(obj);
 	snprintf(vm->pad, sizeof(vm->pad), "set-%s", word->name);
 	set_word = FICL_WORD_NAME_REF(vm->pad);
+
 	if (set_word == NULL)
 		set_word = FICL_WORD_REF(FTH_FALSE);
+
 	if (vm->state == FICL_VM_STATE_COMPILE) {
 		ficlDictionary *dict;
 		ficlUnsigned	u;
@@ -889,6 +925,7 @@ See also <'set>, set! and set-xt."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (!FICL_WORD_P(obj)) {
 		FTH_ASSERT_ARGS(FICL_WORD_P(obj), obj, FTH_ARG1,
 		    "a proc or xt");
@@ -898,6 +935,7 @@ See also <'set>, set! and set-xt."
 	word = FICL_WORD_REF(obj);
 	snprintf(vm->pad, sizeof(vm->pad), "set-%s", word->name);
 	set_word = FICL_WORD_NAME_REF(vm->pad);
+
 	if (set_word == NULL) {
 		fth_throw(FTH_UNDEFINED, "%s: %s not found",
 		    RUNNING_WORD_VM(vm), vm->pad);
@@ -921,10 +959,12 @@ Return name of XT if found, otherwise an empty string."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	word = ficlStackPopPointer(vm->dataStack);
+
 	if (FICL_WORD_DEFINED_P(word))
 		fs = FTH_WORD_NAME(word);
 	else
 		fs = fth_make_empty_string();
+
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
@@ -944,8 +984,10 @@ return an empty string."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	word = ficlStackPopPointer(vm->dataStack);
+
 	if (FICL_WORD_DEFINED_P(word)) {
 		fs = FTH_WORD_NAME(word);
+
 		if (FICL_WORD_PRIMITIVE_P(word))
 			fth_string_sformat(fs, ":primitive");
 		else
@@ -953,6 +995,7 @@ return an empty string."
 			    FICL_WORD_FILE(word), FICL_WORD_LINE(word));
 	} else
 		fs = fth_make_empty_string();
+
 	ficlStackPushFTH(vm->dataStack, fs);
 }
 
@@ -969,33 +1012,41 @@ help_formatted(char *str, int line_length)
 
 	if (str == NULL)
 		return (NULL);
+
 	size = strlen(str) * 2;
 	buffer = FTH_CALLOC(size, sizeof(char));
 	pstr = str;
 	len = 0L;
 	line_len = (size_t) line_length;
+
 	while (pstr != NULL && *pstr != '\0') {
 		pw = proc_scratch;
+
 		while (*pstr != '\0' && !isspace((int) *pstr)) {
 			*pw++ = *pstr++;
 			len++;
 		}
+
 		while (*pstr != '\n' && isspace((int) *pstr)) {
 			*pw++ = *pstr++;
 			len++;
 		}
+
 		*pw = '\0';
+
 		if (len >= line_len) {
 			len = strlen(proc_scratch);
 			fth_strcat(buffer, size, "\n");
 		}
 		fth_strcat(buffer, size, proc_scratch);
+
 		if (*pstr == '\n') {
 			len = 0L;
 			pstr++;
 			fth_strcat(buffer, size, "\n");
 		}
 	}
+
 	return (buffer);
 }
 
@@ -1010,22 +1061,29 @@ get_help(FTH obj, char *name)
 	size_t 		len;
 
 	fs = fth_documentation_ref(obj);
+
 	/* symbol? */
 	if (!FTH_STRING_P(fs) && fth_symbol_p(name))
 		fs = fth_documentation_ref(fth_symbol(name));
+
 	buf = fth_string_ref(fs);
+
 	if (buf == NULL)
 		return (FTH_STRDUP("no documentation available"));
+
 	if (name == NULL)
 		return (help_formatted(buf, MAX_LINE_LENGTH));
-	/*
+
+	/*-
 	 * "play-sound ..."
 	 * "(make-oscil ..."
 	 * name is already in buf
 	 */
 	len = strlen(name);
+
 	if (strncmp(name, buf, len) == 0 || strncmp(name, buf + 1, len) == 0)
 		return (help_formatted(buf, MAX_LINE_LENGTH));
+
 	/*
 	 * FTH_PRI1|PROC ...
 	 */
@@ -1050,10 +1108,12 @@ See also help-set!, help-add! and help-ref."
 
 	ficlVmGetWordToPad(vm);
 	word = FICL_WORD_NAME_REF(vm->pad);
+
 	if (word == NULL)
 		help = get_help(fth_make_string(vm->pad), vm->pad);
 	else
 		help = get_help((FTH) word, vm->pad);
+
 	/* help == NULL is no issue here! */
 	push_cstring(vm, help);
 	FTH_FREE(help);
@@ -1076,10 +1136,12 @@ See also help-set!, help-add! and help."
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = ficlStackPopFTH(vm->dataStack);
+
 	if (FICL_WORD_DEFINED_P(obj))
 		help = get_help(obj, FICL_WORD_NAME(obj));
 	else
 		help = get_help(obj, fth_string_or_symbol_ref(obj));
+
 	/* help == NULL is no issue here! */
 	push_cstring(vm, help);
 	FTH_FREE(help);
@@ -1117,6 +1179,7 @@ See also help, help-ref, help-set!."
 	str = fth_pop_ficl_cell(vm);
 	obj = fth_pop_ficl_cell(vm);
 	help = fth_documentation_ref(obj);
+
 	if (FTH_STRING_P(help))
 		fth_string_sformat(help, "\n%S", str);
 	else
@@ -1134,17 +1197,20 @@ fth_documentation_ref(FTH obj)
 <'> make-array documentation-ref => \"make-array  ( len ...\"\n\
 Return documentation string of OBJ (Forth word, object or topic) or #f.  \
 See also documentation-set!."
+	if (FICL_WORD_DEFINED_P(obj))
+		return (fth_word_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
+
 	if (FTH_STRING_P(obj)) {
 		ficlWord       *word;
 
 		word = FICL_WORD_NAME_REF(fth_string_ref(obj));
+
 		if (word != NULL)
 			return (fth_word_property_ref((FTH) word,
 				FTH_SYMBOL_DOCUMENTATION));
+
 		return (fth_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
 	}
-	if (FICL_WORD_DEFINED_P(obj))
-		return (fth_word_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
 	return (fth_object_property_ref(obj, FTH_SYMBOL_DOCUMENTATION));
 }
 
@@ -1260,14 +1326,18 @@ word_documentation(ficlVm *vm, ficlWord *word)
 
 	idx = ficlVmGetTibIndex(vm);
 	s = ficlVmGetWord0(vm);
+
 	/*
 	 * Reset the terminal input index.  We need only the length of the
 	 * next word.
 	 */
 	ficlVmSetTibIndex(vm, idx);
+
 	if (s.length <= 0)
 		return;
+
 	name = word->length > 0 ? word->name : "noname";
+
 	if (s.text[0] == '(') {
 		s1 = ficlVmParseString(vm, ')');
 		doc = fth_format("%s  %.*s)", name, (int) s1.length, s1.text);
@@ -1276,6 +1346,7 @@ word_documentation(ficlVm *vm, ficlWord *word)
 		doc = fth_format("%s  %.*s", name, (int) s1.length, s1.text);
 	} else
 		doc = fth_format("%s", name);
+
 	fth_word_doc_set(word, doc);
 	FTH_FREE(doc);
 }
@@ -1291,10 +1362,13 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 	ficlWord       *word;
 	ficlWordKind 	kind;
 	ficlCell 	c;
+	ficlCountedString *counted;
 
 	fs = fth_make_empty_string();
+
 	for (; CELL_INT_REF(cell) != ficlInstructionSemiParen; cell++) {
 		word = CELL_VOIDP_REF(cell);
+
 		if (CELL_INT_REF(cell) == ficl_word_location) {
 			cell += 3;
 			continue;
@@ -1305,6 +1379,7 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 			    ficl_to_fth(CELL_FTH_REF(cell)));
 			continue;
 		}
+
 		switch ((kind = ficlWordClassify(word))) {
 		case FICL_WORDKIND_INSTRUCTION:
 			fth_string_sformat(fs, "%s",
@@ -1321,6 +1396,7 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 			break;
 		case FICL_WORDKIND_LITERAL:
 			c = *++cell;
+
 			if (ficlDictionaryIsAWord(dict, CELL_VOIDP_REF(&c)) &&
 			    (CELL_INT_REF(&c) >= ficlInstructionLast))
 				fth_string_sformat(fs, "%s",
@@ -1330,27 +1406,19 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 				    ficl_to_fth(CELL_FTH_REF(&c)));
 			break;
 		case FICL_WORDKIND_STRING_LITERAL:
-			{
-				ficlCountedString *counted;
-
-				counted = (ficlCountedString *) (void *) ++cell;
-				cell = (ficlCell *) ficlAlignPointer(
-				    counted->text + counted->length + 1) - 1;
-				fth_string_sformat(fs, "s\" %.*s\"",
-				    counted->length, counted->text);
-				break;
-			}
+			counted = (ficlCountedString *) (void *) ++cell;
+			cell = (ficlCell *) ficlAlignPointer(counted->text +
+			    counted->length + 1) - 1;
+			fth_string_sformat(fs, "s\" %.*s\"",
+			    counted->length, counted->text);
+			break;
 		case FICL_WORDKIND_CSTRING_LITERAL:
-			{
-				ficlCountedString *counted;
-
-				counted = (ficlCountedString *) (void *) ++cell;
-				cell = (ficlCell *) ficlAlignPointer(
-				    counted->text + counted->length + 1) - 1;
-				fth_string_sformat(fs, "c\" %.*s\"",
-				    counted->length, counted->text);
-				break;
-			}
+			counted = (ficlCountedString *) (void *) ++cell;
+			cell = (ficlCell *) ficlAlignPointer(counted->text +
+			    counted->length + 1) - 1;
+			fth_string_sformat(fs, "c\" %.*s\"",
+			    counted->length, counted->text);
+			break;
 		case FICL_WORDKIND_BRANCH0:
 		case FICL_WORDKIND_BRANCH:
 		case FICL_WORDKIND_QDO:
@@ -1370,8 +1438,10 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 				    ficl_to_fth(CELL_FTH_REF(cell)));
 			break;
 		}
+
 		fth_string_sformat(fs, " ");
 	}
+
 	return (fth_string_sformat(fs, ";"));
 }
 
@@ -1387,12 +1457,14 @@ fth_word_to_source(ficlWord *word)
 
 	fs = fth_make_empty_string();
 	dict = FTH_FICL_DICT();
+
 	switch (ficlWordClassify(word)) {
 	case FICL_WORDKIND_COLON:
 		if (strncmp(FICL_WORD_NAME(word), "lambda", 6L) == 0)
 			fth_string_sformat(fs, "lambda: ");
 		else
 			fth_string_sformat(fs, ": %s ", FICL_WORD_NAME(word));
+
 		fth_string_sformat(fs, "%S",
 		    ficl_word_to_source(dict, word->param));
 		break;
@@ -1418,10 +1490,13 @@ fth_word_to_source(ficlWord *word)
 		    FICL_WORD_NAME(word));
 		break;
 	}
+
 	if (word->flags & FICL_WORD_IMMEDIATE)
 		fth_string_sformat(fs, " immediate");
+
 	if (word->flags & FICL_WORD_COMPILE_ONLY)
 		fth_string_sformat(fs, " compile-only");
+
 	return (fs);
 }
 
@@ -1564,10 +1639,12 @@ only be used in word definitions."
 	ndoc = parse_input_buffer(vm, "\"");	/* must be freed */
 	smudge = ficlVmGetDictionary(vm)->smudge;
 	odoc = FICL_WORD_DOC(smudge);
+
 	if (FTH_FALSE_P(odoc))
 		fth_word_doc_set(smudge, ndoc);
 	else
 		fth_string_sformat(odoc, "  %s", ndoc);
+
 	FTH_FREE(ndoc);
 }
 
@@ -1580,8 +1657,10 @@ fth_get_optkey(FTH key, FTH def)
 
 	vm = FTH_FICL_VM();
 	depth = FTH_STACK_DEPTH(vm);
+
 	for (i = 1; i < depth; i++) {
 		tmp = STACK_FTH_INDEX_REF(vm->dataStack, i);
+
 		if (FTH_KEYWORD_P(tmp) && tmp == key) {
 			/* key */
 			ficlStackRoll(vm->dataStack, i);
@@ -1614,8 +1693,10 @@ fth_get_optkey_int(FTH key, ficlInteger def)
 ficl2Integer
 fth_get_optkey_2int(FTH key, ficl2Integer def)
 {
-	return (fth_long_long_ref(fth_get_optkey(key,
-		    fth_make_long_long(def))));
+	FTH		di;
+
+	di = fth_make_long_long(def);
+	return (fth_long_long_ref(fth_get_optkey(key, di)));
 }
 
 char           *
@@ -1647,8 +1728,10 @@ See also <{, get-optarg, get-optkeys, get-optargs."
 	ficlStackRoll(vm->dataStack, 1);	/* swap */
 	key = fth_pop_ficl_cell(vm);
 	depth = FTH_STACK_DEPTH(vm);
+
 	for (i = 2; i < depth; i++) {
 		tmp = STACK_FTH_INDEX_REF(vm->dataStack, i);
+
 		if (FTH_KEYWORD_P(tmp) && tmp == key) {
 			/* key */
 			ficlStackRoll(vm->dataStack, i);
@@ -1656,12 +1739,14 @@ See also <{, get-optarg, get-optkeys, get-optargs."
 			ficlStackDrop(vm->dataStack, 1);
 			/* value on top of stack */
 			ficlStackRoll(vm->dataStack, i - 1);
+
 			/*
 			 * If user specified undef, drop that and use default
 			 * value.
 			 */
 			if (!FTH_UNDEF_P(STACK_FTH_INDEX_REF(vm->dataStack, 0)))
 				ficlStackRoll(vm->dataStack, 1);
+
 			ficlStackDrop(vm->dataStack, 1);
 			break;
 		}
@@ -1675,6 +1760,7 @@ fth_get_optarg(ficlInteger req, FTH def)
 	FTH 		val;
 
 	vm = FTH_FICL_VM();
+
 	if (FTH_STACK_DEPTH(vm) > req) {
 		val = fth_pop_ficl_cell(vm);
 		return (FTH_UNDEF_P(val) ? def : val);
@@ -1706,6 +1792,7 @@ See also <{, get-optkey, get-optkeys, get-optargs."
 	FTH_STACK_CHECK(vm, 2, 1);
 	ficlStackRoll(vm->dataStack, 1);	/* swap */
 	req = ficlStackPopInteger(vm->dataStack);
+
 	if (FTH_STACK_DEPTH(vm) - 1 > req) {
 		/* If user specified undef, drop that and use default value. */
 		if (FTH_UNDEF_P(STACK_FTH_INDEX_REF(vm->dataStack, 1)))
@@ -1736,13 +1823,15 @@ See also <{, get-optkey, get-optarg, get-optargs."
 	FTH_STACK_CHECK(vm, 2, 0);
 	req = ficlStackPopInteger(vm->dataStack);
 	array = fth_pop_ficl_cell(vm);
-
 	len = fth_array_length(array);
+
 	if (len == 0)
 		return;
+
 	FTH_ASSERT_ARGS(!(len % 2), array, FTH_ARG1, "an array (key/value)");
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(array), array, FTH_ARG1, "an array");
 	FTH_STACK_CHECK(vm, req, len);
+
 	for (i = 0; i < len; i += 2) {
 		FTH 		key, val, tmp;
 		int 		j, depth;
@@ -1751,19 +1840,24 @@ See also <{, get-optkey, get-optarg, get-optargs."
 		val = fth_array_ref(array, i + 1);
 		fth_push_ficl_cell(vm, val);
 		depth = FTH_STACK_DEPTH(vm);
+
 		for (j = 2; j < depth; j++) {
 			tmp = STACK_FTH_INDEX_REF(vm->dataStack, j);
+
 			if (FTH_KEYWORD_P(tmp) && tmp == key) {
 				ficlStackRoll(vm->dataStack, j);
 				ficlStackDrop(vm->dataStack, 1);
 				ficlStackRoll(vm->dataStack, (int) i - 1);
+
 				/*
 				 * If user specified undef, drop that and use
 				 * default value.
 				 */
-				if (!FTH_UNDEF_P(
-					STACK_FTH_INDEX_REF(vm->dataStack, 0)))
+				tmp = STACK_FTH_INDEX_REF(vm->dataStack, 0);
+
+				if (!FTH_UNDEF_P(tmp))
 					ficlStackRoll(vm->dataStack, 1);
+
 				ficlStackDrop(vm->dataStack, 1);
 				break;
 			}
@@ -1788,7 +1882,7 @@ ARGS is an array with default values, REQ is number of required arguments.  \
 Return REQ + ARGS length values on stack, \
 either default ones or from stack.\n\
 See also <{, get-optkey, get-optarg, get-optkeys."
-	FTH 		args;
+	FTH 		args, tmp;
 	ficlInteger 	req, pos, i, j, len, depth;
 
 	FTH_STACK_CHECK(vm, 2, 0);
@@ -1796,17 +1890,22 @@ See also <{, get-optkey, get-optarg, get-optkeys."
 	args = ficlStackPopFTH(vm->dataStack);
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(args), args, FTH_ARG1, "an array");
 	len = fth_array_length(args);
+
 	if (len == 0)
 		return;
+
 	FTH_STACK_CHECK(vm, req, len);
 	depth = FTH_STACK_DEPTH(vm) - req;
+
 	if (depth > len)
 		depth = len;
+
 	for (i = 0, j = depth - 1, pos = req; i < len; i++, j--, pos++) {
 		/* Replace undef with default values. */
-		if (FTH_UNDEF_P(STACK_FTH_INDEX_REF(vm->dataStack, j)))
-			STACK_FTH_INDEX_SET(vm->dataStack,
-			    j, fth_to_ficl(fth_array_fast_ref(args, i)));
+		if (FTH_UNDEF_P(STACK_FTH_INDEX_REF(vm->dataStack, j))) {
+			tmp = fth_array_fast_ref(args, i);
+			STACK_FTH_INDEX_SET(vm->dataStack, j, fth_to_ficl(tmp));
+		}
 		/* Missing args filled with default values. */
 		if (FTH_STACK_DEPTH(vm) <= pos)
 			fth_push_ficl_cell(vm, fth_array_fast_ref(args, i));
@@ -1818,7 +1917,7 @@ static ficlWord *args_optional_paren;
 static ficlWord *local_paren;
 
 #define FICL_EVAL_STRING_AND_THROW(Vm, Buffer) do {			\
-	int status;							\
+	int		status;						\
 									\
 	status = ficlVmEvaluate(Vm, fth_string_ref(Buffer));		\
 	if (status == FICL_VM_STATUS_ERROR_EXIT)			\
@@ -1841,30 +1940,38 @@ ficl_args_keys_paren_co(ficlVm *vm)
 	FTH_ASSERT_ARGS(FTH_ARRAY_P(keys), keys, FTH_ARG1, "an array");
 	len = fth_array_length(keys);
 	FTH_STACK_CHECK(vm, req, len);
+
 	for (i = 0; i < len; i++) {
 		FTH 		key, val, arg, tmp;
 		int 		j, depth;
 
 		arg = fth_array_fast_ref(keys, i);
+
 		if (fth_array_length(arg) != 2)
 			FTH_OPTKEY_ERROR_THROW(keys);
+
 		key = fth_keyword(fth_string_ref(fth_array_ref(arg, 0L)));
 		val = fth_array_ref(arg, 1L);
 		FICL_EVAL_STRING_AND_THROW(vm, val);
 		depth = FTH_STACK_DEPTH(vm);
+
 		for (j = 2; j < depth; j++) {
 			tmp = STACK_FTH_INDEX_REF(vm->dataStack, j);
+
 			if (FTH_KEYWORD_P(tmp) && tmp == key) {
 				ficlStackRoll(vm->dataStack, j);
 				ficlStackDrop(vm->dataStack, 1);
 				ficlStackRoll(vm->dataStack, j - 1);
+
 				/*
 				 * If user specified undef, drop that and use
 				 * default value.
 				 */
-				if (!FTH_UNDEF_P(
-					STACK_FTH_INDEX_REF(vm->dataStack, 0)))
+				tmp = STACK_FTH_INDEX_REF(vm->dataStack, 0);
+
+				if (!FTH_UNDEF_P(tmp))
 					ficlStackRoll(vm->dataStack, 1);
+
 				ficlStackDrop(vm->dataStack, 1);
 				break;
 			}
@@ -1875,31 +1982,36 @@ ficl_args_keys_paren_co(ficlVm *vm)
 static void
 ficl_args_optional_paren_co(ficlVm *vm)
 {
-	FTH 		defs;
+	FTH 		defs, fs, tmp;
 	ficlInteger 	req, pos, i, j, len, depth;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	req = ficlStackPopInteger(vm->dataStack);
 	defs = fth_pop_ficl_cell(vm);
 	len = fth_array_length(defs);
+
 	if (len == 0)
 		return;
+
 	FTH_STACK_CHECK(vm, req, len);
 	depth = FTH_STACK_DEPTH(vm) - req;
+
 	if (depth > len)
 		depth = len;
+
 	for (i = 0, j = depth - 1, pos = req; i < len; i++, j--, pos++) {
 		/* Replace undef with evaled default values. */
 		if (FTH_UNDEF_P(STACK_FTH_INDEX_REF(vm->dataStack, j))) {
-			FICL_EVAL_STRING_AND_THROW(vm,
-			    fth_array_fast_ref(defs, i));
-			STACK_FTH_INDEX_SET(vm->dataStack, j,
-			    ficlStackPopFTH(vm->dataStack));
+			fs = fth_array_fast_ref(defs, i);
+			FICL_EVAL_STRING_AND_THROW(vm, fs);
+			tmp = ficlStackPopFTH(vm->dataStack);
+			STACK_FTH_INDEX_SET(vm->dataStack, j, tmp);
 		}
 		/* Missing args filled with evaled default values. */
-		if (FTH_STACK_DEPTH(vm) <= pos)
-			FICL_EVAL_STRING_AND_THROW(vm,
-			    fth_array_fast_ref(defs, i));
+		if (FTH_STACK_DEPTH(vm) <= pos) {
+			fs = fth_array_fast_ref(defs, i);
+			FICL_EVAL_STRING_AND_THROW(vm, fs);
+		}
 	}
 }
 
@@ -1915,8 +2027,10 @@ See also <{."
 	ficlWord       *smudge;
 
 	smudge = ficlVmGetDictionary(vm)->smudge;
+
 	if (!FTH_PROC_P(smudge))
 		smudge = FICL_WORD_REF(fth_make_proc(smudge, 0, 0, 0));
+
 	if (FTH_FALSE_P(FICL_WORD_DOC(smudge)))
 		fth_word_doc_set(smudge, "( -- )");
 }
@@ -1932,14 +2046,18 @@ get_string_from_tib(ficlVm *vm, int pos)
 	stop = ficlVmGetInBufEnd(vm);
 	tmp = trace;
 	FICL_STRING_SET_POINTER(s, trace);
+
 	for (cur_pos = 0; trace != stop && cur_pos != pos; cur_pos++, trace++)
 		if (*trace == '\n')
 			*tmp++ = ' ';
 		else
 			*tmp++ = *trace;
+
 	FICL_STRING_SET_LENGTH(s, tmp - s.text);
+
 	if (trace != stop && cur_pos == pos)
 		trace++;
+
 	ficlVmUpdateTib(vm, trace);
 	return (s);
 }
@@ -1990,6 +2108,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	FTH_FREE(buffer);
 	fth_array_pop(args);	/* eliminate delimiter `}>' */
 	len = fth_array_length(args);
+
 	/*-
 	 * Use local variables and optional values as stack effect for
 	 * building a default doc string:
@@ -2003,10 +2122,13 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	 *   clm-mix  ( infile :key output #f output-frame 0 frames #f -- )
 	 */
 	fs = fth_make_string("( ");
+
 	for (i = 0; i < len; i++)
 		fth_string_sformat(fs, "%S ", fth_array_fast_ref(args, i));
+
 	fth_string_sformat(fs, ")");
 	fth_word_doc_set(word, fth_string_ref(fs));
+
 	/*
 	 * Eliminate elements after `--'.
 	 */
@@ -2019,6 +2141,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 				args = fth_array_subarray(args, 0L, i);
 			break;
 		}
+
 	/*-
 	 * Count required arguments and push their local variable names on
 	 * stack.
@@ -2031,6 +2154,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	 */
 	while (FTH_NOT_FALSE_P(arg = fth_array_shift(args))) {
 		s = fth_string_ref(arg);
+
 		if (s != NULL && strncmp(s, ":key", 4L) == 0) {
 			key_p = 1;
 			break;
@@ -2039,6 +2163,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 			opt_p = 1;
 			break;
 		}
+
 		/*
 		 * Push local variable name on stack.
 		 */
@@ -2048,29 +2173,35 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 #define LIST_START_P(Str)						\
 	((Str) != NULL && strlen(Str) == 2 &&				\
 	    Str[1] == '(' && (Str[0] == '#' || Str[0] == '\''))
+
 	/*
 	 * Keyword arguments.
 	 */
 	if (key_p) {
 		while (FTH_NOT_FALSE_P(arg1 = fth_array_shift(args))) {
 			s = fth_string_ref(arg1);
+
 			if (s != NULL && strncmp(s, ":optional", 9L) == 0) {
 				opt_p = 1;
 				break;
 			}
+
 			/*
 			 * Push local variable name on stack.
 			 */
 			push_forth_string(vm, s);
 			arg2 = fth_array_shift(args);
+
 			if (FTH_FALSE_P(arg2)) {
 				FTH_OPTKEY_ERROR_THROW(args);
 				/* NOTREACHED */
 				return;
 			}
 			s = fth_string_ref(arg2);
+
 			if (LIST_START_P(s)) {
 				in_lst = 1;
+
 				do {
 					fs = fth_array_shift(args);
 					s = fth_string_ref(fs);
@@ -2088,6 +2219,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 			}
 			fth_array_push(keys, fth_make_array_var(2, arg1, arg2));
 		}
+
 		/*-
 		 * keys postpone literal
 		 * req postpone literal
@@ -2099,9 +2231,11 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 		ficlDictionaryAppendInteger(dict, req);
 		ficlDictionaryAppendPointer(dict, args_keys_paren);
 		keyslen = fth_array_length(keys);
+
 		for (i = 0; i < keyslen; i++)
 			ficlVmExecuteXT(vm, local_paren);
 	}
+
 	/*
 	 * Optional arguments.
 	 */
@@ -2113,14 +2247,17 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 			push_forth_string(vm, fth_string_ref(arg1));
 			opt++;
 			arg2 = fth_array_shift(args);
+
 			if (FTH_FALSE_P(arg2)) {
 				FTH_OPTKEY_ERROR_THROW(args);
 				/* NOTREACHED */
 				return;
 			}
 			s = fth_string_ref(arg2);
+
 			if (LIST_START_P(s)) {
 				in_lst = 1;
+
 				do {
 					fs = fth_array_shift(args);
 					s = fth_string_ref(fs);
@@ -2138,6 +2275,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 			}
 			fth_array_push(defs, arg2);
 		}
+
 		/*-
 		 * defs postpone literal
 		 * req postpone literal
@@ -2149,15 +2287,19 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 		ficlDictionaryAppendInteger(dict, req);
 		ficlDictionaryAppendPointer(dict, args_optional_paren);
 		defslen = fth_array_length(defs);
+
 		for (i = 0; i < defslen; i++)
 			ficlVmExecuteXT(vm, local_paren);
 	}
+
 	/* Takes local variable names from stack in reverse order. */
 	for (i = 0; i < req; i++)
 		ficlVmExecuteXT(vm, local_paren);
+
 	ficlStackPushInteger(vm->dataStack, 0L);
 	ficlStackPushInteger(vm->dataStack, 0L);
 	ficlVmExecuteXT(vm, local_paren);	/* 0 0 (local) */
+
 	if (!FTH_PROC_P(word))
 		fth_make_proc(word, (int) req, (int) opt, key_p);
 }
@@ -2438,8 +2580,10 @@ be used in word definitions."
 
 	vars = fth_make_hash();
 	sys = vm->callback.system;
+
 	if (sys->localsCount == 0)
 		goto finish;
+
 	/*
 	 * At compile time we can only collect the names and the
 	 * offset to frame of every local variable.  At interpret
@@ -2448,6 +2592,7 @@ be used in word definitions."
 	 */
 	locals = ficlSystemGetLocals(sys);
 	hash = locals->wordlists[0];
+
 	while (hash != NULL) {
 		for (i = (int) hash->size - 1; i >= 0; i--) {
 			word = hash->table[i];
@@ -2456,6 +2601,7 @@ be used in word definitions."
 					word = word->link;
 					continue;
 				}
+
 				/*-
 				 *  key: FTH (name)
 				 *  val: ficlInteger (offset)
@@ -2511,19 +2657,26 @@ fth_word_inspect(FTH obj)
 
 	if (obj == 0)
 		return (FTH_FALSE);
+
 	if (FICL_INSTRUCTION_P(obj))
 		return (fth_make_string(ficlDictionaryInstructionNames[obj]));
+
 	if (!FICL_WORD_DEFINED_P(obj))
-		return (fth_make_string_format("unknown word %p", (void *) obj));
+		return (fth_make_string_format("unknown word 0x%X", obj));
+
 	fs = FTH_WORD_NAME(obj);
+
 	if (FTH_FALSE_P(fs))
 		fs = fth_make_string("noname");
+
 	if (FICL_WORD_REF(obj) != FICL_WORD_CURRENT_WORD(obj)) {
 		cfs = FTH_WORD_NAME(FICL_WORD_CURRENT_WORD(obj));
+
 		if (FTH_FALSE_P(cfs))
 			fth_string_sformat(fs, " in noname");
 		else
 			fth_string_sformat(fs, " in %S", cfs);
+
 		if (FICL_WORD_CURRENT_LINE(obj) > 0)
 			fth_string_sformat(fs, " (%S:%ld)",
 			    FICL_WORD_CURRENT_FILE(obj),
@@ -2532,10 +2685,12 @@ fth_word_inspect(FTH obj)
 		fth_string_sformat(fs, " (%S:%ld)",
 		    FICL_WORD_FILE(obj),
 		    FICL_WORD_LINE(obj));
+
 	if (FICL_VARIABLES_P(obj))
 		fth_string_sformat(fs, " (%S)", FTH_WORD_PARAM(obj));
 	else if (FTH_EXCEPTION_P(obj)) {
 		msg = fth_exception_last_message_ref(obj);
+
 		if (FTH_NOT_FALSE_P(msg))
 			fth_string_sformat(fs, " (%S)", msg);
 	}
@@ -2551,8 +2706,10 @@ fth_word_to_string(FTH obj)
 {
 	if (obj == 0)
 		return (FTH_FALSE);
+
 	if (FICL_INSTRUCTION_P(obj))
 		return (fth_make_string(ficlDictionaryInstructionNames[obj]));
+
 	if (FICL_WORD_DEFINED_P(obj)) {
 		if (FICL_WORD_REF(obj)->length > 0)
 			return (FTH_WORD_NAME(obj));
@@ -2572,8 +2729,10 @@ fth_word_dump(FTH obj)
 	FTH 		src;
 
 	src = fth_source_ref(obj);
+
 	if (FTH_FALSE_P(src))
 		return (fth_word_to_string(obj));
+
 	return (src);
 }
 
@@ -2659,8 +2818,10 @@ fth_variable_set(const char *name, FTH value)
 	ficlWord       *word;
 
 	word = FICL_WORD_NAME_REF(name);
+
 	if (word != NULL)
 		return (fth_var_set((FTH) word, value));
+
 	return (fth_define_variable(name, value, NULL));
 }
 
@@ -2726,8 +2887,10 @@ See also untrace-var."
 		return;
 	}
 	hook = fth_word_property_ref(obj, FTH_SYMBOL_TRACE_VAR);
+
 	if (!FTH_HOOK_P(hook))
 		hook = fth_make_simple_hook(1);
+
 	fth_add_hook(hook, proc_or_xt);
 	fth_word_property_set(obj, FTH_SYMBOL_TRACE_VAR, hook);
 	FICL_WORD_TYPE(obj) = FW_TRACE_VAR;
@@ -2765,8 +2928,10 @@ fth_trace_var_execute(ficlWord *word)
 	FTH_ASSERT_ARGS(FTH_TRACE_VAR_P(word), (FTH) word, FTH_ARG1,
 	    "a global variable");
 	hook = fth_word_property_ref((FTH) word, FTH_SYMBOL_TRACE_VAR);
+
 	if (!FTH_HOOK_P(hook))
 		return (FTH_FALSE);
+
 	args = fth_make_array_var(1, FTH_WORD_PARAM(word));
 	res = fth_hook_apply(hook, args, RUNNING_WORD());
 	return (res);
@@ -2777,9 +2942,9 @@ init_proc(void)
 {
 	ficlString 	s;
 
-	s.text = "(local)";
-	s.length = strlen(s.text);
+	FICL_STRING_SET_FROM_CSTRING(s, "(local)");
 	local_paren = ficlDictionaryLookup(FTH_FICL_DICT(), s);
+
 	/* proc */
 	FTH_PRI1("proc?", ficl_proc_p, h_proc_p);
 	FTH_PRI1("thunk?", ficl_thunk_p, h_thunk_p);
@@ -2814,6 +2979,7 @@ init_proc(void)
 	FTH_VOID_PROC("source-set!", fth_source_set, 2, 0, 0, h_source_set);
 	FTH_PROC("source-file", fth_source_file, 1, 0, 0, h_source_file);
 	FTH_PROC("source-line", fth_source_line, 1, 0, 0, h_source_line);
+
 	/* ficl system */
 	FTH_PRI1("see2", ficl_see, h_see);
 	FTH_PRI1("latestxt", ficl_latestxt, h_latestxt);
@@ -2835,12 +3001,14 @@ init_proc(void)
 	    ficl_args_keys_paren_co, NULL);
 	args_optional_paren = FTH_PRIM_CO("(args-optional)",
 	    ficl_args_optional_paren_co, NULL);
+
 	/* redefinition of colon (:) */
 	FTH_PRIMITIVE_SET(":", ficl_begin_definition,
 	    FICL_WORD_DEFAULT, h_begin_definition);
 	FTH_PRI1("lambda:", ficl_lambda_definition, h_lambda_definition);
 	FTH_PRIM_CO("proc-create", ficl_proc_create_co, h_proc_create);
 	FTH_PRIM_CO("word-create", ficl_word_create_co, h_word_create);
+
 	/* redefinition of constant and value with gc protection */
 	FTH_PRIMITIVE_SET("constant", ficl_constant,
 	    FICL_WORD_DEFAULT, h_constant);

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	1.91 1/1/18
+ * @(#)hash.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)

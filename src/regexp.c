@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	1.105 12/31/17
+ * @(#)regexp.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -62,23 +62,23 @@ typedef struct {
 #define FTH_REGEXP_THROW(Msg)						\
 	fth_throw(FTH_REGEXP_ERROR, "%s: %s", RUNNING_WORD(), Msg)
 
-static void 	ficl_make_regexp(ficlVm *vm);
-static void 	ficl_make_regexp_im(ficlVm *vm);
-static void 	ficl_re(ficlVm *vm);
-static void 	ficl_re_match(ficlVm *vm);
-static void 	ficl_re_search(ficlVm *vm);
-static void 	ficl_regexp_match(ficlVm *vm);
-static void 	ficl_regexp_p(ficlVm *vm);
-static void 	ficl_regexp_search(ficlVm *vm);
-static FTH 	reg_copy(FTH self);
-static void 	reg_free(FTH self);
-static FTH 	reg_inspect(FTH self);
-static FTH 	reg_length(FTH self);
-static void 	reg_mark(FTH self);
-static FTH 	reg_ref(FTH self, FTH idx);
-static FTH 	reg_to_array(FTH self);
-static FTH 	reg_to_string(FTH self);
-static ficlInteger regexp_search(FTH regexp, char *str, int kind);
+static void 	ficl_make_regexp(ficlVm *);
+static void 	ficl_make_regexp_im(ficlVm *);
+static void 	ficl_re(ficlVm *);
+static void 	ficl_re_match(ficlVm *);
+static void 	ficl_re_search(ficlVm *);
+static void 	ficl_regexp_match(ficlVm *);
+static void 	ficl_regexp_p(ficlVm *);
+static void 	ficl_regexp_search(ficlVm *);
+static FTH	reg_copy(FTH);
+static void 	reg_free(FTH);
+static FTH	reg_inspect(FTH);
+static FTH	reg_length(FTH);
+static void 	reg_mark(FTH);
+static FTH	reg_ref(FTH, FTH);
+static FTH	reg_to_array(FTH);
+static FTH	reg_to_string(FTH);
+static ficlInteger regexp_search(FTH, char *, int);
 
 #define h_list_of_regexp_functions "\
 *** REGEXP PRIMITIVES ***\n\
@@ -144,8 +144,10 @@ reg_ref(FTH self, FTH idx)
 	ficlInteger 	index;
 
 	index = FTH_INT_REF(idx);
+
 	if (index >= fth_array_length(FTH_REGEXP_RESULTS(self)))
 		return (FTH_FALSE);
+
 	return (fth_array_ref(FTH_REGEXP_RESULTS(self), index));
 }
 
@@ -216,7 +218,6 @@ fth_make_regexp(const char *reg)
 		/* NOTREACHED */
 		return (FTH_FALSE);
 	}
-
 	r->data = FTH_STRDUP(reg);
 	r->length = (ficlInteger) fth_strlen(reg);
 	r->results = fth_make_array_with_init(r->re_buf.re_nsub + 1, FTH_FALSE);
@@ -280,7 +281,6 @@ regexp_search(FTH regexp, char *str, int kind)
 		FTH_FREE(pmatch);
 		return (pos);
 	}
-
 	beg = pmatch[0].rm_so;
 	end = pmatch[0].rm_eo;
 
@@ -338,7 +338,6 @@ fth_regexp_find(const char *reg, const char *str)
 		/* NOTREACHED */
 		return (found);
 	}
-
 	ret = regexec(&re, str, 1L, match, 0);
 
 	if (ret != 0) {
@@ -486,7 +485,6 @@ fth_regexp_search(FTH regexp, FTH string, ficlInteger start, ficlInteger range)
 		s = regexp_scratch;
 		allocated = 0;
 	}
-
 	fth_array_clear(FTH_REGEXP_RESULTS(regexp));
 	fth_array_clear(regexp_results);
 	fth_strncpy(s, size, fth_string_ref(string) + start, (size_t) range);
@@ -603,6 +601,7 @@ Return a new string in any case, with or without replacement."
 			}
 			if (++i < rpl_len && isdigit((int) rpl[i])) {
 				digit = rpl[i] - 0x30;
+
 				if (digit < reg_len) {
 					ds = fth_array_ref(res_ary, digit);
 					fth_string_push(fs, ds);
@@ -645,7 +644,6 @@ Return count of matched characters or -1 for no match."
 		ficlStackPushInteger(vm->dataStack, -1);
 		return;
 	}
-
 	if (FTH_STRING_P(reg))
 		reg = fth_make_regexp(fth_string_ref(reg));
 
@@ -689,7 +687,6 @@ Return index of match or -1 for no match."
 		ficlStackPushInteger(vm->dataStack, -1);
 		return;
 	}
-
 	if (FTH_STRING_P(reg))
 		reg = fth_make_regexp(fth_string_ref(reg));
 
@@ -713,7 +710,6 @@ Return index of match or -1 for no match."
 		s = regexp_scratch;
 		allocated = 0;
 	}
-
 	fth_array_clear(FTH_REGEXP_RESULTS(reg));
 	fth_array_clear(regexp_results);
 	fth_strncpy(s, size, fth_string_ref(str) + start, (size_t) range);
@@ -794,8 +790,7 @@ fth_regexp_var_ref(ficlInteger index)
 static void								\
 ficl_re_ ## Numb (ficlVm *vm)						\
 {									\
-	fth_push_ficl_cell(vm,						\
-	    fth_array_ref(regexp_results, (ficlInteger)Numb));		\
+	fth_push_ficl_cell(vm, fth_array_ref(regexp_results, Numb));	\
 }
 
 /*
@@ -866,7 +861,7 @@ init_regexp(void)
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_REGEXP, h_list_of_regexp_functions);
 }
 
-#else		/* !HAVE_POSIX_REGEX */
+#else				/* !HAVE_POSIX_REGEX */
 
 FTH
 fth_make_regexp(const char *str)
@@ -935,7 +930,7 @@ init_regexp(void)
 	FTH_PRIM_IM("re/", ficl_make_regexp_im, NULL);
 }
 
-#endif		/* HAVE_POSIX_REGEX */
+#endif				/* HAVE_POSIX_REGEX */
 
 /*
  * regexp.c ends here
