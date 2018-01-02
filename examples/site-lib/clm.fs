@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 18/01/02 07:07:50
+\ Changed: 18/01/02 07:20:24
 \
-\ @(#)clm.fs	2.1 1/2/18
+\ @(#)clm.fs	2.2 1/2/18
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -2301,18 +2301,19 @@ violin-gen-test run-gen map-channel drop"
 	<'> violin-gen-test :channels 1 :srate 11025 :to-dac #t with-sound drop
 ;
 
-: violin-map-test ( -- snd )
-	\ fill *dac-instruments* with #( prc beg end ) elements
-	violin-gen-test
-	0 { size }
-	*dac-instruments* each { el }
-		el 2 array-ref size max to size
-	end-each
-	get-func-name ".snd" $+ :channels 1 :size size new-sound { snd }
-	run-gen map-channel drop
-	snd play drop
-	snd
-;
+'snd provided? [if]
+	: violin-map-test ( -- )
+		\ fill *dac-instruments* with #( prc beg end ) elements
+		violin-gen-test
+		0 { size }
+		*dac-instruments* each { el }
+			el 2 array-ref size max to size
+		end-each
+		get-func-name ".snd" $+ :channels 1 :size size new-sound { snd }
+		run-gen map-channel drop
+		snd play drop
+	;
+[then]
 
 \ generators.scm
 : make-waveshape <{ :optional
