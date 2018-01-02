@@ -2,9 +2,9 @@
 
 \ Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 04/03/15 19:25:58
-\ Changed: 17/12/31 19:08:09
+\ Changed: 18/01/02 07:07:50
 \
-\ @(#)clm.fs	1.141 12/31/17
+\ @(#)clm.fs	2.1 1/2/18
 
 \ clm-print		( fmt :optional args -- )
 \ clm-message		( fmt :optional args -- )
@@ -73,7 +73,8 @@
 \ src-simp		( start dur amp sr sr-env fname -- )
 \ conv-simp		( start dur filt fname amp -- )
 \ arpeggio		( start dur freq amp keyword-args -- )
-\ simp-gen		( start dur freq amp -- ; samp args -- val )
+\ simp-gen		( start dur freq amp --; samp args -- val )
+\ violin-gen		( start dur freq amp keyword-args --; samp args -- val )
 \
 \ from generators.scm:
 \ make-waveshape	( :optional freq parts wave size -- )
@@ -344,7 +345,7 @@ set-current
 previous
 
 \ === Global User Variables (settable in ~/.snd_forth or ~/.fthrc) ===
-"fth 2017/12/31"	value *clm-version*
+"fth 2018/01/02"	value *clm-version*
 mus-lshort	value *clm-audio-format*
 #f		value *clm-comment*
 1.0		value *clm-decay-time*
@@ -595,15 +596,10 @@ hide
 ;
 
 : .dac-info { ws -- }
-	ws :output ws-ref { output }
-	ws :channels ws-ref { chans }
-	ws :srate ws-ref { srate }
 	ws :timer ws-ref { timer }
-	ws :framples ws-ref { framples }
-	output chans srate .file
 	timer if
 		timer .timer
-		srate framples timer .timer-ratio
+		ws :srate ws-ref ws :framples ws-ref timer .timer-ratio
 	then
 ;
 set-current
@@ -626,6 +622,10 @@ set-current
 			output reverb-file scaled tm .file-info
 		then
 	then
+;
+
+: dac-info { ws -- }
+	ws :output ws-ref ws :channels ws-ref ws :srate ws-ref .file
 ;
 previous
 
@@ -1181,12 +1181,14 @@ set-current
 previous
 
 \ Instruments prepared with run-gen-instrument ... end-run-gen can
-\ be used for map-channel or ":to-dac #t with-sound".  An example
-\ instrument and test-gen can be found at the end of this file.
+\ be used for map-channel or ":to-dac #t with-sound".  Example
+\ instruments and gen tests can be found at the end of this file.
 \
 \ <'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop
+\ <'> violin-gen-test :channels 1 :srate 11025 :to-dac #t with-sound drop
 \ or
 \ test-gen run-gen map-channel
+\ violin-gen-test run-gen map-channel
 hide
 lambda: <{ a b -- f }>
 	a 1 array-ref { ba }
@@ -1258,6 +1260,10 @@ set-current
 	y
 ;
 
+\ Returns a proc ( y -- res ) for use with map-channel.
+\ Requires a filled *dac-instruments* variable, usually done with
+\ run-gen-instrument ... end-run-gen prepared functions, see simp-gen
+\ and violin-gen at the end of this file.
 : run-gen ( -- prc; y self -- y' )
 	*dac-instruments* empty? if
 		'with-sound-error
@@ -1265,8 +1271,8 @@ set-current
 		       get-func-name ) fth-throw
 	then
 	0 { len }
-	*dac-instruments* each ( args )
-		2 array-ref len max to len
+	*dac-instruments* each { el }
+		el 2 array-ref len max to len
 	end-each
 	1 proc-create ( prc )
 	0 , len ,
@@ -1485,6 +1491,7 @@ previous
 hide
 : with-sound-default-args ( keyword-args -- ws )
 	#() to *clm-instruments*
+	#() to *dac-instruments*
 	#w{} { ws }
 	*ws-args* ws array-push to *ws-args*
 	:channels		*clm-channels*		ws set-args
@@ -1737,13 +1744,14 @@ hide
 		2 array-ref len max to len
 	end-each
 	ws :framples len ws-set! drop
-	len play-cb play drop
+	ws :statistics ws-ref if
+		ws dac-info
+	then
+	len play-cb :wait #t play drop
 	ws :timer ws-ref stop-timer
 	ws :statistics ws-ref if
 		ws snd-info
 	then
-	#() to *clm-instruments*
-	#() to *dac-instruments*
 	ws ws-after-output ( ws )
 ;
 set-current
@@ -1757,7 +1765,7 @@ set-current
 ;
 
 \ Usage: <'> resflt-test with-sound drop
-\        <'> resflt-test :play #f :channels 2 with-sound .g
+\        <'> resflt-test :play #f :channels 2 with-sound . cr
 \        lambda: resflt-test ; :output "resflt.snd" with-sound drop
 : with-sound ( body-xt keyword-args -- ws )
 	doc" \\ keywords and default values:\n\
@@ -2207,6 +2215,10 @@ event: arpeggio-test ( -- )
 ;event
 
 instrument: simp-gen { start dur freq amp -- ; samp args -- val }
+	doc" simple example for an instrument generator:\n\
+<'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop\n\
+or\n\
+test-gen run-gen map-channel drop"
 	:frequency freq make-oscil { os }
 	:envelope #( 0 0 25 1 75 1 100 0 )
 	:duration dur :scaler amp make-env { en }
@@ -2215,6 +2227,9 @@ instrument: simp-gen { start dur freq amp -- ; samp args -- val }
 	end-run-gen
 ;instrument
 
+\ <'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop
+\ or
+\ test-gen run-gen map-channel drop
 : test-gen ( -- )
 	0.0 0.1  440 0.2 simp-gen
 	0.5 0.2  550 0.2 simp-gen
@@ -2223,9 +2238,81 @@ instrument: simp-gen { start dur freq amp -- ; samp args -- val }
 	1.1 0.1 1320 0.2 simp-gen
 	2.0 0.1  220 0.2 simp-gen
 ;
-\ <'> test-gen :channels 1 :srate 22050 :to-dac #t with-sound drop
+
+\ snd/fm.html
+\ see clm-ins.fs for file version
+instrument: violin-gen <{ start dur freq amp :key
+    fm-index 1.0
+    amp-env #( 0 0 25 1 75 1 100 0 )
+    index-env #( 0 1 25 0.4 75 0.6 100 0 )
+    degree #f
+    distance #f
+    reverb-amount #f -- }>
+	doc" Violin example from snd/fm.html as generator:\n\
+<'> violin-gen-test :channels 1 :srate 11025 :to-dac #t with-sound drop\n\
+or\n\
+violin-gen-test run-gen map-channel drop"
+	freq hz->radians { frq-scl }
+	frq-scl fm-index f* { maxdev }
+	5.0 freq flog f/ maxdev f* { index1 }
+	8.5 freq flog f- 3.0 freq 1000.0 f/ f+ f/ maxdev 3.0 f* f* { index2 }
+	4.0 freq fsqrt f/ maxdev f* { index3 }
+	:frequency freq make-oscil { carrier }
+	:frequency freq make-oscil { fmosc1 }
+	:frequency freq 3.0 f* make-oscil { fmosc2 }
+	:frequency freq 4.0 f* make-oscil { fmosc3 }
+	:envelope amp-env :scaler amp :duration dur make-env { ampf }
+	:envelope index-env :scaler index1 :duration dur make-env { indf1 }
+	:envelope index-env :scaler index2 :duration dur make-env { indf2 }
+	:envelope index-env :scaler index3 :duration dur make-env { indf3 }
+	:frequency 5.0
+	    :amplitude 0.0025 frq-scl f* make-triangle-wave { pervib }
+	:frequency 16.0
+	    :amplitude 0.005 frq-scl f* make-rand-interp   { ranvib }
+	start dur nil run-gen-instrument { samp args -- val }
+		args "pervib" args@ 0.0 triangle-wave
+		args "ranvib" args@ 0.0 rand-interp f+ { vib }
+		args "carrier" args@
+		    vib
+		    args "fmosc1" args@ vib 0.0 oscil
+		    args "indf1" args@ env f* f+
+		    args "fmosc2" args@ 3.0 vib f* 0.0 oscil
+		    args "indf2" args@ env f* f+
+		    args "fmosc3" args@ 4.0 vib f* 0.0 oscil
+		    args "indf3" args@ env f* f+
+		    0.0 oscil
+		args "ampf" args@ env f*
+	end-run-gen
+;instrument
+
+\ <'> violin-gen-test :channels 1 :srate 11025 :to-dac #t with-sound drop
 \ or
-\ test-gen run-gen map-channel drop
+\ violin-gen-test run-gen map-channel drop
+: violin-gen-test <{ :optional start 0.0 dur 1.0 -- }>
+	start now!
+	now@ dur |Bf4 0.5 violin-gen dur f2/ step
+	now@ dur |A4  0.5 violin-gen dur f2/ step
+	now@ dur |C5  0.5 violin-gen dur f2/ step
+	now@ dur |B4  0.5 violin-gen dur f2/ step
+	0.2 step
+;
+
+: violin-dac-test ( -- )
+	<'> violin-gen-test :channels 1 :srate 11025 :to-dac #t with-sound drop
+;
+
+: violin-map-test ( -- snd )
+	\ fill *dac-instruments* with #( prc beg end ) elements
+	violin-gen-test
+	0 { size }
+	*dac-instruments* each { el }
+		el 2 array-ref size max to size
+	end-each
+	get-func-name ".snd" $+ :channels 1 :size size new-sound { snd }
+	run-gen map-channel drop
+	snd play drop
+	snd
+;
 
 \ generators.scm
 : make-waveshape <{ :optional
