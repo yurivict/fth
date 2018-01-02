@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)symbol.c	1.99 12/31/17
+ * @(#)symbol.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,33 +36,35 @@
 /* === SYMBOL === */
 
 /* symbol */
-static void 	ficl_create_symbol(ficlVm *vm);
-static void 	ficl_print_symbol(ficlVm *vm);
-static void 	ficl_symbol_intern_im(ficlVm *vm);
-static void 	ficl_symbol_name(ficlVm *vm);
-static void 	ficl_symbol_p(ficlVm *vm);
-static void 	ficl_symbol_paren(ficlVm *vm);
-static int 	fth_any_symbol_p(const char *name, int kind);
-static FTH 	fth_make_symbol(FTH name);
-static FTH	make_symbol(const char *n, const char *m, char prefix, int k);
+static void 	ficl_create_symbol(ficlVm *);
+static void 	ficl_print_symbol(ficlVm *);
+static void 	ficl_symbol_intern_im(ficlVm *);
+static void 	ficl_symbol_name(ficlVm *);
+static void 	ficl_symbol_p(ficlVm *);
+static void 	ficl_symbol_paren(ficlVm *);
+static int	fth_any_symbol_p(const char *, int);
+static FTH	fth_make_symbol(FTH);
+static FTH	make_symbol(const char *, const char *, char, int);
+
 /* keyword */
-static void 	ficl_create_keyword(ficlVm *vm);
-static void 	ficl_keyword_intern_im(ficlVm *vm);
-static void 	ficl_keyword_name(ficlVm *vm);
-static void 	ficl_keyword_p(ficlVm *vm);
-static void 	ficl_keyword_paren(ficlVm *vm);
-static void 	ficl_print_keyword(ficlVm *vm);
-static FTH 	fth_make_keyword(FTH name);
+static void 	ficl_create_keyword(ficlVm *);
+static void 	ficl_keyword_intern_im(ficlVm *);
+static void 	ficl_keyword_name(ficlVm *);
+static void 	ficl_keyword_p(ficlVm *);
+static void 	ficl_keyword_paren(ficlVm *);
+static void 	ficl_print_keyword(ficlVm *);
+static FTH	fth_make_keyword(FTH);
+
 /* exception */
-static void 	ficl_create_exception(ficlVm *vm);
-static void 	ficl_exception_last_message_ref(ficlVm *vm);
-static void 	ficl_exception_last_message_set(ficlVm *vm);
-static void 	ficl_exception_message_ref(ficlVm *vm);
-static void 	ficl_exception_message_set(ficlVm *vm);
-static void 	ficl_exception_name(ficlVm *vm);
-static void 	ficl_exception_p(ficlVm *vm);
-static void 	ficl_make_exception(ficlVm *vm);
-static void 	ficl_print_exception(ficlVm *vm);
+static void 	ficl_create_exception(ficlVm *);
+static void 	ficl_exception_last_message_ref(ficlVm *);
+static void 	ficl_exception_last_message_set(ficlVm *);
+static void 	ficl_exception_message_ref(ficlVm *);
+static void 	ficl_exception_message_set(ficlVm *);
+static void 	ficl_exception_name(ficlVm *);
+static void 	ficl_exception_p(ficlVm *);
+static void 	ficl_make_exception(ficlVm *);
+static void 	ficl_print_exception(ficlVm *);
 
 #define MAKE_REF_AND_EQUAL_P(name, NAME)				\
 char *									\
@@ -81,13 +83,14 @@ fth_ ## name ## _equal_p(FTH obj1, FTH obj2)				\
 static void								\
 ficl_ ## name ## _equal_p(ficlVm *vm)					\
 {									\
-	FTH obj1, obj2;							\
+	FTH		obj1, obj2;					\
+	int		flag;						\
 									\
 	FTH_STACK_CHECK(vm, 2, 0);					\
 	obj2 = ficlStackPopFTH(vm->dataStack);				\
 	obj1 = ficlStackPopFTH(vm->dataStack);				\
-	ficlStackPushBoolean(vm->dataStack,				\
-	    fth_ ## name ## _equal_p(obj1, obj2));			\
+	flag = fth_ ## name ## _equal_p(obj1, obj2);			\
+	ficlStackPushBoolean(vm->dataStack, flag);			\
 }									\
 static char* h_ ## name ## _equal_p = "( obj1 obj2 -- f )  compare\n\
 'test :test " #name "= #f\n\
@@ -121,7 +124,6 @@ fth_string_or_symbol_ref(FTH obj)
 {
 	if (FTH_STRING_P(obj))
 		return (fth_string_ref(obj));
-
 	return (fth_symbol_ref(obj));
 }
 
@@ -139,7 +141,6 @@ fth_any_symbol_p(const char *name, int kind)
 	flag = 0;
 
 	if (name != NULL && *name != '\0') {
-
 		if (name[0] == kind)
 			flag = FICL_NAME_DEFINED_P(name);
 		else {
@@ -204,6 +205,7 @@ make_symbol(const char *name, const char *message, char prefix, int kind)
 	if (word != NULL) {
 		word->kind = kind;
 		CELL_VOIDP_SET(word->param, word);
+
 		if (kind == FW_EXCEPTION && message != NULL)
 			fth_word_property_set((FTH) word,
 			    FTH_SYMBOL_MESSAGE, fth_make_string(message));

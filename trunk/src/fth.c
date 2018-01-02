@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	1.119 1/1/18";
+const char fth_sccsid[] = "@(#)fth.c	2.1 1/2/18";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)

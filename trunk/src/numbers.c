@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	1.172 1/1/18
+ * @(#)numbers.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -4105,7 +4105,7 @@ Return inexact number within ERR of X."
 
 #if HAVE_COMPLEX
 #define N_CMP_COMPLEX_OP(Numb1, Numb2, Flag, OP) do {			\
-	ficlComplex x, y;						\
+	ficlComplex	x, y;						\
 									\
 	x = fth_complex_ref(Numb1);					\
 	y = fth_complex_ref(Numb2);					\
@@ -4132,7 +4132,7 @@ Return inexact number within ERR of X."
 #endif				/* HAVE_BN */
 
 #define N_CMP_TWO_OP(Numb1, Numb2, Flag, OP, Name) do {			\
-	int type;							\
+	int		type;						\
 									\
 	type = -1;							\
 									\
@@ -4212,7 +4212,7 @@ fth_number_less_p(FTH m, FTH n)
 #endif				/* HAVE_BN */
 
 #define N_MATH_OP(Numb1, Numb2, OP, GOP) do {				\
-	int type;							\
+	int		type;						\
 									\
 	type = -1;							\
 									\

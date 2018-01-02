@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	1.168 12/31/17
+ * @(#)string.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -70,68 +70,68 @@ MAKE_STRING_MEMBER(Integer, top)
 #define FTH_STRREG_P(Obj)	(FTH_STRING_P(Obj) || FTH_REGEXP_P(Obj))
 #define FTH_TO_CCHAR(Obj)	((char)(FTH_TO_CHAR(Obj)))
 
-static void 	ficl_char_p(ficlVm *vm);
-static void 	ficl_cr_string(ficlVm *vm);
-static void 	ficl_die(ficlVm *vm);
-static void 	ficl_error(ficlVm *vm);
-static void 	ficl_error_object(ficlVm *vm);
-static void 	ficl_forth_string_to_string(ficlVm *vm);
-static void 	ficl_fth_die(FTH fmt, FTH args);
-static void 	ficl_fth_error(FTH fmt, FTH args);
-static FTH 	ficl_fth_format(FTH fmt, FTH args);
-static void 	ficl_fth_print(FTH fmt, FTH args);
-static void 	ficl_fth_warning(FTH fmt, FTH args);
-static void 	ficl_make_empty_string(ficlVm *vm);
-static void 	ficl_make_string(ficlVm *vm);
-static void 	ficl_make_string_im(ficlVm *vm);
-static void 	ficl_print_debug(ficlVm *vm);
-static void 	ficl_print_object(ficlVm *vm);
-static void 	ficl_print_stderr(ficlVm *vm);
-static void 	ficl_print_stdout(ficlVm *vm);
-static void 	ficl_space_string(ficlVm *vm);
-static void 	ficl_spaces_string(ficlVm *vm);
-static void 	ficl_string_capitalize(ficlVm *vm);
-static void 	ficl_string_capitalize_bang(ficlVm *vm);
-static void 	ficl_string_chomp(ficlVm *vm);
-static void 	ficl_string_chomp_bang(ficlVm *vm);
-static void 	ficl_string_delete(ficlVm *vm);
-static void 	ficl_string_downcase(ficlVm *vm);
-static void 	ficl_string_downcase_bang(ficlVm *vm);
-static void 	ficl_string_cmp(ficlVm *vm);
-static void 	ficl_string_equal_p(ficlVm *vm);
-static void 	ficl_string_eval(ficlVm *vm);
-static void 	ficl_string_eval_with_status(ficlVm *vm);
-static void 	ficl_string_greater_p(ficlVm *vm);
-static void 	ficl_string_immutable_paren(ficlVm *vm);
-static void 	ficl_string_insert(ficlVm *vm);
-static void 	ficl_string_length(ficlVm *vm);
-static void 	ficl_string_less_p(ficlVm *vm);
-static void 	ficl_string_member_p(ficlVm *vm);
-static void 	ficl_string_not_equal_p(ficlVm *vm);
-static void 	ficl_string_p(ficlVm *vm);
-static void 	ficl_string_ref(ficlVm *vm);
-static void 	ficl_string_replace(ficlVm *vm);
-static void 	ficl_string_replace_bang(ficlVm *vm);
-static void 	ficl_string_reverse(ficlVm *vm);
-static void 	ficl_string_reverse_bang(ficlVm *vm);
-static void 	ficl_string_set(ficlVm *vm);
-static void 	ficl_string_substring(ficlVm *vm);
-static void 	ficl_string_to_forth_string(ficlVm *vm);
-static void 	ficl_string_upcase(ficlVm *vm);
-static void 	ficl_string_upcase_bang(ficlVm *vm);
-static void 	ficl_values_to_string(ficlVm *vm);
-static void 	ficl_warning(ficlVm *vm);
-static FTH 	make_string_instance(FString *s);
-static FString *make_string_len(ficlInteger len);
-static FTH 	str_dump(FTH self);
-static FTH 	str_equal_p(FTH self, FTH obj);
-static void 	str_free(FTH self);
-static FTH 	str_inspect(FTH self);
-static FTH 	str_length(FTH self);
-static FTH 	str_ref(FTH self, FTH fidx);
-static FTH 	str_set(FTH self, FTH fidx, FTH value);
-static FTH 	str_to_array(FTH self);
-static FTH 	str_to_string(FTH self);
+static void 	ficl_char_p(ficlVm *);
+static void 	ficl_cr_string(ficlVm *);
+static void 	ficl_die(ficlVm *);
+static void 	ficl_error(ficlVm *);
+static void 	ficl_error_object(ficlVm *);
+static void 	ficl_forth_string_to_string(ficlVm *);
+static void 	ficl_fth_die(FTH, FTH);
+static void 	ficl_fth_error(FTH, FTH);
+static FTH	ficl_fth_format(FTH, FTH);
+static void 	ficl_fth_print(FTH, FTH);
+static void 	ficl_fth_warning(FTH, FTH);
+static void 	ficl_make_empty_string(ficlVm *);
+static void 	ficl_make_string(ficlVm *);
+static void 	ficl_make_string_im(ficlVm *);
+static void 	ficl_print_debug(ficlVm *);
+static void 	ficl_print_object(ficlVm *);
+static void 	ficl_print_stderr(ficlVm *);
+static void 	ficl_print_stdout(ficlVm *);
+static void 	ficl_space_string(ficlVm *);
+static void 	ficl_spaces_string(ficlVm *);
+static void 	ficl_string_capitalize(ficlVm *);
+static void 	ficl_string_capitalize_bang(ficlVm *);
+static void 	ficl_string_chomp(ficlVm *);
+static void 	ficl_string_chomp_bang(ficlVm *);
+static void 	ficl_string_delete(ficlVm *);
+static void 	ficl_string_downcase(ficlVm *);
+static void 	ficl_string_downcase_bang(ficlVm *);
+static void 	ficl_string_cmp(ficlVm *);
+static void 	ficl_string_equal_p(ficlVm *);
+static void 	ficl_string_eval(ficlVm *);
+static void 	ficl_string_eval_with_status(ficlVm *);
+static void 	ficl_string_greater_p(ficlVm *);
+static void 	ficl_string_immutable_paren(ficlVm *);
+static void 	ficl_string_insert(ficlVm *);
+static void 	ficl_string_length(ficlVm *);
+static void 	ficl_string_less_p(ficlVm *);
+static void 	ficl_string_member_p(ficlVm *);
+static void 	ficl_string_not_equal_p(ficlVm *);
+static void 	ficl_string_p(ficlVm *);
+static void 	ficl_string_ref(ficlVm *);
+static void 	ficl_string_replace(ficlVm *);
+static void 	ficl_string_replace_bang(ficlVm *);
+static void 	ficl_string_reverse(ficlVm *);
+static void 	ficl_string_reverse_bang(ficlVm *);
+static void 	ficl_string_set(ficlVm *);
+static void 	ficl_string_substring(ficlVm *);
+static void 	ficl_string_to_forth_string(ficlVm *);
+static void 	ficl_string_upcase(ficlVm *);
+static void 	ficl_string_upcase_bang(ficlVm *);
+static void 	ficl_values_to_string(ficlVm *);
+static void 	ficl_warning(ficlVm *);
+static FTH	make_string_instance(FString *);
+static FString *make_string_len(ficlInteger);
+static FTH	str_dump(FTH);
+static FTH	str_equal_p(FTH, FTH);
+static void 	str_free(FTH);
+static FTH	str_inspect(FTH);
+static FTH	str_length(FTH);
+static FTH	str_ref(FTH, FTH);
+static FTH	str_set(FTH, FTH, FTH);
+static FTH	str_to_array(FTH);
+static FTH	str_to_string(FTH);
 
 #define h_list_of_string_functions "\
 *** STRING PRIMITIVES ***\n\
@@ -521,7 +521,6 @@ fth_make_string_format(const char *fmt,...)
 	va_start(ap, fmt);
 	fth_vasprintf(&str, fmt, ap);
 	va_end(ap);
-
 	fs = fth_make_string(str);
 	FTH_FREE(str);
 	return (fs);

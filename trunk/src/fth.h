@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	1.220 1/1/18
+ * @(#)fth.h	2.1 1/2/18
  */
 
 #if !defined(_FTH_H_)

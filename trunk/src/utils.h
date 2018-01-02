@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.h	1.123 12/31/17
+ * @(#)utils.h	2.1 1/2/18
  */
 
 #if !defined(_UTILS_H_)
@@ -67,7 +67,7 @@
 #define FTH_SET_CONSTANT(Name)						\
 	fth_define_constant(#Name, (FTH)(Name), NULL)
 
-/*
+/*-
  * MAKE_MEMBER(Object, Name, Type, Member)
  *
  * Object = object type, e.g. FArray, FHash etc.
@@ -92,10 +92,11 @@
 static void								\
 cb_ ## Name ## _ ## Member(ficlVm *vm)					\
 {									\
-	FTH obj;							\
+	FTH		obj;						\
 									\
 	FTH_STACK_CHECK(vm, 1, 1);					\
 	obj = fth_pop_ficl_cell(vm);					\
+									\
 	if (fth_instance_p(obj))					\
 		ficlStackPush ## Type(vm->dataStack,			\
 		    FTH_INSTANCE_REF_GEN(obj, Object)->Member);		\
@@ -174,16 +175,16 @@ typedef struct {
 	int 		input_p;
 	int 		output_p;
 	int 		closed_p;
-	int             (*read_char) (void *ptr);
-	void            (*write_char) (void *ptr, int c);
-	char           *(*read_line) (void *ptr);
-	void            (*write_line) (void *ptr, const char *line);
-	int             (*eof_p) (void *ptr);
-	ficl2Integer    (*tell) (void *ptr);
-	ficl2Integer    (*seek) (void *ptr, ficl2Integer pos, int whence);
-	void            (*flush) (void *ptr);
-	void            (*rewind) (void *ptr);
-	void            (*close) (void *ptr);
+	int             (*read_char) (void *);
+	void            (*write_char) (void *, int);
+	char           *(*read_line) (void *);
+	void            (*write_line) (void *, const char *);
+	int             (*eof_p) (void *);
+	ficl2Integer    (*tell) (void *);
+	ficl2Integer    (*seek) (void *, ficl2Integer, int);
+	void            (*flush) (void *);
+	void            (*rewind) (void *);
+	void            (*close) (void *);
 } FIO;
 
 #define FTH_IO_OBJECT(Obj)	FTH_INSTANCE_REF_GEN(Obj, FIO)
@@ -273,11 +274,11 @@ void		init_utils(void);
 
 /* array.c */
 /* Next two have no bound checks! */
-FTH		fth_array_fast_set(FTH array, ficlInteger index, FTH value);
-FTH		fth_array_fast_ref(FTH array, ficlInteger index);
+FTH		fth_array_fast_set(FTH, ficlInteger, FTH);
+FTH		fth_array_fast_ref(FTH, ficlInteger);
 
 /* io.c */
-FTH		make_io_base(int fam);
+FTH		make_io_base(int);
 
 /* misc.c */
 void		forth_init(void);
@@ -285,79 +286,79 @@ void		forth_init_before_load(void);
 extern int	fth_signal_caught_p;
 #if !defined(_WIN32)
 extern sigjmp_buf fth_sig_toplevel;
-void		signal_check(int sig);
+void		signal_check(int);
 #endif
 void		fth_reset_loop_and_depth(void);
 
 /* numbers.c */
-int		ficl_parse_number(ficlVm *vm, ficlString s);
+int		ficl_parse_number(ficlVm *, ficlString);
 #if HAVE_COMPLEX
-int		ficl_parse_complex(ficlVm *vm, ficlString s);
+int		ficl_parse_complex(ficlVm *, ficlString);
 #endif
 #if HAVE_BN
-int		ficl_parse_bignum(ficlVm *vm, ficlString s);
-int		ficl_parse_ratio(ficlVm *vm, ficlString s);
+int		ficl_parse_bignum(ficlVm *, ficlString);
+int		ficl_parse_ratio(ficlVm *, ficlString);
 #endif
 
 /* object.c */
-FTH		make_object_type(const char *name, fobj_t type);
-FTH		make_object_type_from(const char *name, fobj_t type, FTH base);
+FTH		make_object_type(const char *, fobj_t);
+FTH		make_object_type_from(const char *, fobj_t, FTH);
 
-void		gc_free_all(void);
-void		gc_push   (ficlWord *word);
-void		gc_pop    (void);
-void		gc_loop_reset(void);
-void		fth_set_backtrace(FTH exception);
-void		fth_show_backtrace(int verbose);
+void 		gc_free_all(void);
+void 		gc_push(ficlWord *);
+void 		gc_pop(void);
+void 		gc_loop_reset(void);
+void 		fth_set_backtrace(FTH);
+void 		fth_show_backtrace(int);
 
 /* port.c */
-FTH		io_keyword_args_ref(int fam);
+FTH		io_keyword_args_ref(int);
 
 /* proc.c */
-FTH		fth_word_dump(FTH obj);
-FTH		fth_word_inspect(FTH obj);
-FTH		fth_word_to_source(ficlWord *word);
-FTH		fth_word_to_string(FTH obj);
-void		ficl_init_locals(ficlVm *vm, ficlDictionary *dict);
+FTH		fth_word_dump(FTH);
+FTH		fth_word_inspect(FTH);
+FTH		fth_word_to_source(ficlWord *);
+FTH		fth_word_to_string(FTH);
+void		ficl_init_locals(ficlVm *, ficlDictionary *);
 
 /* string.c */
 /* Next two have no bound checks! */
-char		fth_string_c_char_fast_ref(FTH string, ficlInteger idx);
-char		fth_string_c_char_fast_set(FTH string, ficlInteger idx, char c);
+char		fth_string_c_char_fast_ref(FTH, ficlInteger);
+char		fth_string_c_char_fast_set(FTH, ficlInteger, char);
 /* Doesn't remove sep_str. */
-FTH		fth_string_split_2(FTH string, FTH sep_str);
+FTH		fth_string_split_2(FTH, FTH);
 
 /* symbol.c */
-FTH		ficl_ans_real_exc(int exc);
+FTH		ficl_ans_real_exc(int);
 
 /* utils.c */
-simple_array   *make_simple_array(int incr);
-simple_array   *make_simple_array_var(int len,...);
-int		simple_array_length(simple_array *ary);
-int		simple_array_equal_p(simple_array *ary1, simple_array *ary2);
-void           *simple_array_ref(simple_array *ary, int i);
-void		simple_array_set(simple_array *ary, int i, void *obj);
-void		simple_array_push(simple_array *ary, void *obj);
-void           *simple_array_pop(simple_array *ary);
-int		simple_array_index(simple_array *ary, void *obj);
-int		simple_array_rindex(simple_array *ary, void *obj);
-int		simple_array_member_p(simple_array *ary, void *obj);
-void           *simple_array_delete(simple_array *ary, void *obj);
-void           *simple_array_rdelete(simple_array *ary, void *obj);
-simple_array   *simple_array_reverse(simple_array *ary);
-simple_array   *simple_array_clear(simple_array *ary);
-void		simple_array_free(simple_array *ary);
-FTH		simple_array_to_array(simple_array *ary);
+simple_array   *make_simple_array(int);
+simple_array   *make_simple_array_var(int,...);
+int		simple_array_length(simple_array *);
+int		simple_array_equal_p(simple_array *, simple_array *);
+void           *simple_array_ref(simple_array *, int);
+void		simple_array_set(simple_array *, int, void *);
+void		simple_array_push(simple_array *, void *);
+void           *simple_array_pop(simple_array *);
+int		simple_array_index(simple_array *, void *);
+int		simple_array_rindex(simple_array *, void *);
+int		simple_array_member_p(simple_array *, void *);
+void           *simple_array_delete(simple_array *, void *);
+void           *simple_array_rdelete(simple_array *, void *);
+simple_array   *simple_array_reverse(simple_array *);
+simple_array   *simple_array_clear(simple_array *);
+void		simple_array_free(simple_array *);
+FTH		simple_array_to_array(simple_array *);
 
-void		push_forth_string(ficlVm *vm, char *string);
+void		push_forth_string(ficlVm *, char *);
 
-char           *parse_input_buffer(ficlVm *vm, char *delimiter);
+char           *parse_input_buffer(ficlVm *, char *);
 char           *parse_tib_with_restart(ficlVm *, char *, int,
 		    ficlString (*) (ficlVm *, int));
 
 __END_DECLS
 
-#endif	/* _UTILS_H_ */
+#endif				/* _UTILS_H_ */
 
 /*
  * utils.h ends here

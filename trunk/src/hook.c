@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hook.c	1.85 1/1/18
+ * @(#)hook.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)

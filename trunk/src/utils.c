@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	1.231 12/31/17
+ * @(#)utils.c	2.1 1/2/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -40,17 +40,17 @@
 #include <signal.h>
 #endif
 
-static char    *do_strncat(char *d, size_t size, const char *s, size_t count);
-static char    *do_strncpy(char *d, size_t size, const char *s, size_t count);
+static char    *do_strncat(char *, size_t, const char *, size_t);
+static char    *do_strncpy(char *, size_t, const char *, size_t);
 static void	ficl_cold(ficlVm *);
 #if defined(HAVE_LIBTECLA)
 static void	ficl_ps_cb(ficlVm *);
 #endif
 static void	ficl_repl_cb(ficlVm *);
-static void    *fixup_null_alloc(size_t n, const char *name);
-static int	get_pos_from_buffer(ficlVm *vm, char *delim);
-static ficlString parse_input_buffer_0(ficlVm *vm, int pos);
-static void	utils_throw_error(FTH exc, FTH args, int with_lisp_fmt_p);
+static void    *fixup_null_alloc(size_t, const char *);
+static int	get_pos_from_buffer(ficlVm *, char *);
+static ficlString parse_input_buffer_0(ficlVm *, int pos);
+static void	utils_throw_error(FTH, FTH, int);
 
 char           *
 fth_strerror(int n)
@@ -307,7 +307,7 @@ fth_execute_xt(ficlVm *vm, ficlWord *word)
 	return (status);
 }
 
-#else	/* _WIN32 */
+#else				/* _WIN32 */
 
 int
 fth_evaluate(ficlVm *vm, const char *buffer)
@@ -334,7 +334,7 @@ fth_execute_xt(ficlVm *vm, ficlWord *word)
 
 	return (status);
 }
-#endif	/* _WIN32 */
+#endif				/* _WIN32 */
 
 /* === Utilities === */
 
@@ -627,11 +627,13 @@ parse_input_buffer_0(ficlVm *vm, int pos)
 				*tmp++ = *trace;
 				break;
 			}
+
 			esc = 0;
 			continue;
 		}
 		*tmp++ = *trace;
 	}
+
 	FICL_STRING_SET_LENGTH(s, tmp - s.text);
 
 	if (trace != stop && cur_pos == pos)
@@ -964,20 +966,20 @@ static FTH 	fgl_nobeep;	/* nobeep */
 #endif
 
 static GetLine *repl_gl_init(void);
-static void 	ficl_history(ficlVm *vm);
-static void 	ficl_history_lineno(ficlVm *vm);
-static void 	ficl_history_next(ficlVm *vm);
-static void 	ficl_history_prev(ficlVm *vm);
-static int 	gl_config(GetLine * gl, FTH action);
-static void 	ficl_bindkey(ficlVm *vm);
+static void 	ficl_history(ficlVm *);
+static void 	ficl_history_lineno(ficlVm *);
+static void 	ficl_history_next(ficlVm *);
+static void 	ficl_history_prev(ficlVm *);
+static int 	gl_config(GetLine *, FTH);
+static void 	ficl_bindkey(ficlVm *);
 
-static int	repl_command_generator(WordCompletion * cpl,
-    void *data, const char *line, int word_end);
+static int	repl_command_generator(WordCompletion *,
+		    void *, const char *, int);
 static int 	repl_init_history(void);
-static int 	repl_unique_history(GetLine * gl, char *line);
-static int 	repl_append_history(GetLine * gl, char *line);
-static char    *repl_expand_history(GetLine * gl, char *line);
-static char    *repl_replace_history(GetLine * gl, char *line);
+static int 	repl_unique_history(GetLine *, char *);
+static int 	repl_append_history(GetLine *, char *);
+static char    *repl_expand_history(GetLine *, char *);
+static char    *repl_replace_history(GetLine *, char *);
 
 static simple_array *fgl_getline_config;
 static simple_array *fgl_getline_bindkey;
@@ -1068,7 +1070,6 @@ gl-clear: clear all history events."
 		arg = fth_pop_ficl_cell(vm);
 		action = fth_pop_ficl_cell(vm);
 	}
-
 	if (action == fgl_load) {
 		char           *fname;
 
@@ -1444,6 +1445,7 @@ repl_init_history(void)
 
 		FGL_HISTFILE_SET(fs);
 	}
+
 	/*-
 	 * Set history length.
 	 *
@@ -1502,7 +1504,7 @@ repl_unique_history(GetLine * gl, char *line)
 	return (gl_load_history(gl, hf, FGL_COMMENT));
 }
 
-/*
+/*-
  * XXX: gl_append_history() (Wed Jan 15 18:10:07 CET 2014)
  *
  * According to libtecla's source files, gl_append_history() adds only
@@ -1684,13 +1686,14 @@ repl_replace_history(GetLine * gl, char *line)
 				res = fth_string_ref(rpl);
 				break;
 			}
+
 	if (res == NULL)
 		fth_printf("%s: event not found\n", src);
 
 	return (res);
 }
 
-#else	/* !HAVE_LIBTECLA */
+#else				/* !HAVE_LIBTECLA */
 
 static void	ficl_bindkey(ficlVm *vm);
 static char    *get_line(char *prompt, char *dummy);
@@ -1704,6 +1707,7 @@ ficl_bindkey(ficlVm *vm)
 
 	/* clear at most 2 stack entries */
 	len = FTH_STACK_DEPTH(vm);
+
 	switch (len) {
 	case 2:
 		fth_pop_ficl_cell(vm);
@@ -1737,7 +1741,7 @@ get_line(char *prompt, char *dummy)
 	return (buf);
 }
 
-#endif	/* !HAVE_LIBTECLA */
+#endif				/* !HAVE_LIBTECLA */
 
 void
 fth_repl(int argc, char **argv)
@@ -1786,6 +1790,7 @@ fth_repl(int argc, char **argv)
 		/* NOTREACHED */
 		return;
 	}
+
 	/*
 	 * Delayed init of config and bindkey sequences from ~/.fthrc.
 	 */
@@ -1795,6 +1800,7 @@ fth_repl(int argc, char **argv)
 		char           *app;
 
 		app = simple_array_ref(fgl_getline_config, i);
+
 		if (gl_configure_getline(gl, app, NULL, NULL)) {
 			FTH_GL_ERROR(gl);
 			/* NOTREACHED */
@@ -1889,6 +1895,7 @@ fth_repl(int argc, char **argv)
 			}
 			continue;
 		}
+
 		/*
 		 * If command line starts with !, try to substitute with
 		 * commands from previous history events.
@@ -1901,6 +1908,7 @@ fth_repl(int argc, char **argv)
 
 			fth_printf("%s\n", line);
 		}
+
 		/*
 		 * If command line starts with ^, try a search from previous
 		 * history events and replace it with second part of
