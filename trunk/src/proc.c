@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.3 1/3/18
+ * @(#)proc.c	2.4 1/3/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1314,22 +1314,26 @@ fth_word_doc_set(ficlWord *word, const char *str)
 }
 
 /*
- * Takes first comment after word name (on same line) as documentation
- * string.
+ * Takes first comment or local variables declaration after word name (on
+ * same line) as documentation string.
+ *
+ * : foo ( a b -- c )	=> foo  ( a b -- c )
+ * : foo \ a b -- c	=> foo  \ a b -- c
+ * : foo { a b -- c }	=> foo  { a b -- c }
  */
 static void
 word_documentation(ficlVm *vm, ficlWord *word)
 {
 	char           *name, *doc;
 	ficlInteger 	idx;
-	ficlString 	s, s1;
+	ficlString 	s;
 
 	idx = ficlVmGetTibIndex(vm);
 	s = ficlVmGetWord0(vm);
 
 	/*
-	 * Reset the terminal input index.  We need only the length of the
-	 * next word.
+	 * Reset terminal input index.  We need only the length of the next
+	 * word.
 	 */
 	ficlVmSetTibIndex(vm, idx);
 
@@ -1339,11 +1343,18 @@ word_documentation(ficlVm *vm, ficlWord *word)
 	name = word->length > 0 ? word->name : "noname";
 
 	if (s.text[0] == '(') {
-		s1 = ficlVmParseString(vm, ')');
-		doc = fth_format("%s  %.*s)", name, (int) s1.length, s1.text);
+		s = ficlVmParseString(vm, ')');
+		doc = fth_format("%s  %.*s)", name, (int) s.length, s.text);
+	} else if (s.text[0] == '{') {
+		s = ficlVmParseString(vm, '}');
+		/*
+		 * Reset terminal input index for reading local vars.
+		 */
+		ficlVmSetTibIndex(vm, idx);
+		doc = fth_format("%s  %.*s}", name, (int) s.length, s.text);
 	} else if (s.text[0] == '\\') {
-		s1 = ficlVmParseString(vm, '\n');
-		doc = fth_format("%s  %.*s", name, (int) s1.length, s1.text);
+		s = ficlVmParseString(vm, '\n');
+		doc = fth_format("%s  %.*s", name, (int) s.length, s.text);
 	} else
 		doc = fth_format("%s", name);
 
@@ -2119,14 +2130,14 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	 *
 	 * automatically create this doc string:
 	 *
-	 *   clm-mix  ( infile :key output #f output-frame 0 frames #f -- )
+	 *   clm-mix  <{ infile :key output #f output-frame 0 frames #f -- }>
 	 */
-	fs = fth_make_string("( ");
+	fs = fth_make_string("<{ ");
 
 	for (i = 0; i < len; i++)
 		fth_string_sformat(fs, "%S ", fth_array_fast_ref(args, i));
 
-	fth_string_sformat(fs, ")");
+	fth_string_sformat(fs, "}>");
 	fth_word_doc_set(word, fth_string_ref(fs));
 
 	/*
