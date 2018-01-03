@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.1 1/2/18
+ * @(#)proc.c	2.3 1/3/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2048,7 +2048,7 @@ get_string_from_tib(ficlVm *vm, int pos)
 	FICL_STRING_SET_POINTER(s, trace);
 
 	for (cur_pos = 0; trace != stop && cur_pos != pos; cur_pos++, trace++)
-		if (*trace == '\n')
+		if (*trace == '\n' || *trace == '\t')
 			*tmp++ = ' ';
 		else
 			*tmp++ = *trace;

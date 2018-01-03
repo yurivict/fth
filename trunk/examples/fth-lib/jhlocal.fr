@@ -34,8 +34,18 @@ hide
 : compiled-float-zero ficlInstructionF0 , ;
 
 
+\ [ms] Wed Jan  3 17:14:33 CET 2018
+\ Compare only frist 2 chars if looking for "--".
+\ Accidently typed something like below shouldn't result in a core dump.
+\ : foo-cb { a b --; y self -- r } \ instead of { a b -- ; y self -- r }
+\   does> { y self -- r }
+\ ;
+\
+\ : ?--   ( c-addr u -- c-addr u flag )
+\     2dup s" --" compare 0= ;
+
 : ?--   ( c-addr u -- c-addr u flag )
-    2dup s" --" compare 0= ;
+    2dup drop 2 s" --" compare 0= ;
 : ?}    ( c-addr u -- c-addr u flag )
     2dup s" }"  compare 0= ;
 : ?|    ( c-addr u -- c-addr u flag )

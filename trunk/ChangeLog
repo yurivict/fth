@@ -1,3 +1,9 @@
+2018-01-03  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/fth-lib/jhlocal.fr ({ -- }): Compare only first
+	two chars if looking for '--'.  Something like { a b --; }
+	shouldn't segfault fth.
+
 2017-12-31  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* ficl/* src/*: remove bool header and bool type
