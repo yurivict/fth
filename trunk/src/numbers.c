@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	2.1 1/2/18
+ * @(#)numbers.c	2.3 1/4/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -3967,8 +3967,11 @@ number_floor(FTH x)
 	int 		type;
 	ficlFloat 	f;
 
-	if (!FTH_NUMBER_T_P(x))
+	if (x == 0 || !FTH_NUMBER_T_P(x)) {
 		FTH_WRONG_NUMBER_TYPE(x, "a number");
+		/* NOTREACHED */
+		return (FTH_FALSE);
+	}
 
 	type = FTH_INSTANCE_TYPE(x);
 
@@ -3995,8 +3998,11 @@ number_inv(FTH x)
 	int 		type;
 	ficlFloat 	f;
 
-	if (!FTH_NUMBER_T_P(x))
+	if (x == 0 || !FTH_NUMBER_T_P(x)) {
 		FTH_WRONG_NUMBER_TYPE(x, "a number");
+		/* NOTREACHED */
+		return (FTH_FALSE);
+	}
 
 	type = FTH_INSTANCE_TYPE(x);
 
@@ -4173,7 +4179,9 @@ fth_number_equal_p(FTH m, FTH n)
 	if (NUMB_FIXNUM_P(m) && NUMB_FIXNUM_P(n))
 		return (FIX_TO_INT(m) == FIX_TO_INT(n));
 
+	/*
 	flag = 0;
+	*/
 	N_CMP_TWO_OP(m, n, flag, ==, eq);
 	return (flag);
 }
@@ -4186,7 +4194,9 @@ fth_number_less_p(FTH m, FTH n)
 	if (NUMB_FIXNUM_P(m) && NUMB_FIXNUM_P(n))
 		return (FIX_TO_INT(m) < FIX_TO_INT(n));
 
+	/*
 	flag = 0;
+	*/
 	N_CMP_TWO_OP(m, n, flag, <, less);
 	return (flag);
 }

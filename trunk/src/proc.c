@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.4 1/3/18
+ * @(#)proc.c	2.5 1/4/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2936,8 +2936,12 @@ fth_trace_var_execute(ficlWord *word)
 {
 	FTH 		hook, res, args;
 
-	FTH_ASSERT_ARGS(FTH_TRACE_VAR_P(word), (FTH) word, FTH_ARG1,
-	    "a global variable");
+	if (!FTH_TRACE_VAR_P(word)) {
+		FTH_ASSERT_ARGS(FTH_TRACE_VAR_P(word),
+		    (FTH) word, FTH_ARG1, "a global traced variable");
+		/* NOTREACHED */
+		return (FTH_FALSE);
+	}
 	hook = fth_word_property_ref((FTH) word, FTH_SYMBOL_TRACE_VAR);
 
 	if (!FTH_HOOK_P(hook))
