@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.5 12/31/17
+# @(#)SConstruct	1.6 1/4/18
 
 #
 # scons -h
@@ -50,6 +50,7 @@ sc_h['shared_v']	= "enable shared library support"
 sc_h['warnings']	= "enable extra C compiler warning flags"
 sc_h['cc']		= "C compiler"
 sc_h['cflags']		= "additional CFLAGS"
+sc_h['ldflags']		= "additional LDFLAGS"
 sc_h['tecla_l']		= "do not use tecla(7) command-line editing"
 sc_h['tecla_v']		= "use tecla(7) command-line editing"
 sc_h['mode_t']		= "Define to 'int' if not defined."
@@ -136,6 +137,7 @@ warnings		= GetOption('warnings')
 vars.AddVariables(
 	('CC', sc_h['cc'], 'cc'),
 	('CFLAGS', sc_h['cflags'], ''),
+	('LDFLAGS', sc_h['ldflags'], ''),
 	('build', sc_h['build'], build_dir),
 	('program_prefix', sc_h['prg_prefix'], prg_prefix),
 	('program_suffix', sc_h['prg_suffix'], prg_suffix),
@@ -164,6 +166,7 @@ missing			= []
 cflags			= env['CFLAGS']
 env['CFLAGS']		= []
 env.MergeFlags(cflags)
+env.Append(LINKFLAGS	= env['LDFLAGS'])
 env['top_srcdir']	= Dir('.').path
 env['CPPPATH']		= ['.', 'ficl', 'lib', 'src']
 if prefix == tecla_prefix:

@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	2.4 1/3/18";
+const char libfth_sccsid[] = "@(#)misc.c	2.5 1/4/18";
 #endif /* not lint */
 
-#define FTH_DATE		"2018/01/03"
+#define FTH_DATE		"2018/01/04"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -2763,12 +2763,14 @@ See wait(2) for more information."
 	int 		status;
 
 	FTH_STACK_CHECK(vm, 0, 1);
-	pid = status = 0;
+	status = 0;
 #if defined(HAVE_WAIT)
 	pid = wait(&status);
 
 	if (pid == -1)
 		FTH_SYSTEM_ERROR_THROW(wait);
+#else
+	pid = 0;
 #endif
 	fth_set_exit_status(status);
 	ficlStackPushInteger(vm->dataStack, (ficlInteger) pid);

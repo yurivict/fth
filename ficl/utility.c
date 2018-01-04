@@ -50,7 +50,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utility.c	1.25 10/17/13
+ * @(#)utility.c	1.26 1/4/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -230,7 +230,7 @@ char *ficlLtoa( ficlInteger value, char *string, int radix )
   else if (pwr != 0)
   {
     ficlUnsigned v = (ficlUnsigned) value;
-    ficlUnsigned mask = (ficlUnsigned) ~(-1 << pwr);
+    ficlUnsigned mask = (ficlUnsigned) ~(((ficlUnsigned)(-1)) << pwr);
 
     while (v)
     {
