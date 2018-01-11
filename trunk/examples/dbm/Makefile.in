@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Copyright (c) 2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2012-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.10 9/13/13
+# @(#)Makefile.in	1.11 1/11/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -58,11 +58,11 @@ ${SO_DBM_LIB}: ${OBJS}
 
 install: all
 	test -z "${SO_DBM_LIB}" || \
-	    ${INSTALL} ${SO_DBM_LIB} ${pkglibdir}/${SO_DBM_LIB}
+	    ${INSTALL} ${SO_DBM_LIB} ${DESTDIR}${pkglibdir}/${SO_DBM_LIB}
 
 uninstall:
 	test -z "${SO_DBM_LIB}" || \
-	    ${RM} ${pkglibdir}/${SO_DBM_LIB}
+	    ${RM} ${DESTDIR}${pkglibdir}/${SO_DBM_LIB}
 
 test:
 dist: Makefile

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.139 1/8/18
+# @(#)Makefile.in	1.140 1/11/18
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -122,43 +122,48 @@ all-dep: Makefile fth-config.h config.h \
 	    ${top_srcdir}/libfth.0
 
 install: all
-	${SHELL} ${top_srcdir}/mkinstalldirs ${libdir}
-	${SHELL} ${top_srcdir}/mkinstalldirs ${mandir}/man1
-	${SHELL} ${top_srcdir}/mkinstalldirs ${mandir}/man3
-	${SHELL} ${top_srcdir}/mkinstalldirs ${aclocaldir}
-	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgincludedir}
-	${SHELL} ${top_srcdir}/mkinstalldirs ${pkglibdir}
-	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgdatadir}/fth-lib
-	${SHELL} ${top_srcdir}/mkinstalldirs ${pkgdatadir}/site-fth
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${libdir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man1
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man3
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${aclocaldir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${pkgincludedir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${pkglibdir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${pkgdatadir}/fth-lib
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${pkgdatadir}/site-fth
 	for f in ${SUBDIRS}; do \
 		(cd $${f} && ${MAKE} install); \
 	done
-	${RM} ${pkgincludedir}/*
+	${RM} ${DESTDIR}${pkgincludedir}/*
 	for f in ${HEADERS}; do \
-		${INSTALL_DATA} $${f} ${pkgincludedir}/; \
+		${INSTALL_DATA} $${f} ${DESTDIR}${pkgincludedir}/; \
 	done
 	for f in ${FS_LIB}; do \
-		${INSTALL_DATA} ${fthlib}/$${f} ${pkgdatadir}/fth-lib/$${f}; \
+		${INSTALL_DATA} ${fthlib}/$${f} \
+		    ${DESTDIR}${pkgdatadir}/fth-lib/$${f}; \
 	done
 	for f in ${SITE_LIB}; do \
-		${INSTALL_DATA} ${fthsite}/$${f} ${pkgdatadir}/site-fth/$${f}; \
+		${INSTALL_DATA} ${fthsite}/$${f} \
+		    ${DESTDIR}${pkgdatadir}/site-fth/$${f}; \
 	done
-	${INSTALL_DATA} ${top_srcdir}/fth.m4 ${aclocaldir}/fth.m4
-	${RM} ${mandir}/man1/fth.1*
-	${INSTALL_DATA} ${top_srcdir}/fth.1 ${mandir}/man1/fth.1
-	${MANZIP} -f ${mandir}/man1/fth.1
-	${RM} ${mandir}/man3/libfth.3*
-	${INSTALL_DATA} ${top_srcdir}/libfth.3 ${mandir}/man3/libfth.3
-	${MANZIP} -f ${mandir}/man3/libfth.3
-	@MAINTAINER_MODE_TRUE@if test -d ${mandir}/cat1; then \
-		${RM} ${mandir}/cat1/fth.*; \
-		${INSTALL_DATA} ${top_srcdir}/fth.0 ${mandir}/cat1/; \
-		${MANZIP} -f ${mandir}/cat1/fth.0; \
+	${INSTALL_DATA} ${top_srcdir}/fth.m4 ${DESTDIR}${aclocaldir}/fth.m4
+	${RM} ${DESTDIR}${mandir}/man1/fth.1*
+	${INSTALL_DATA} ${top_srcdir}/fth.1 ${DESTDIR}${mandir}/man1/fth.1
+	${MANZIP} -f ${DESTDIR}${mandir}/man1/fth.1
+	${RM} ${DESTDIR}${mandir}/man3/libfth.3*
+	${INSTALL_DATA} ${top_srcdir}/libfth.3 ${DESTDIR}${mandir}/man3/libfth.3
+	${MANZIP} -f ${DESTDIR}${mandir}/man3/libfth.3
+
+maintainer-install: install
+	if test -d ${DESTDIR}${mandir}/cat1; then \
+		${RM} ${DESTDIR}${mandir}/cat1/fth.*; \
+		${INSTALL_DATA} ${top_srcdir}/fth.0 ${DESTDIR}${mandir}/cat1/; \
+		${MANZIP} -f ${DESTDIR}${mandir}/cat1/fth.0; \
 	fi
-	@MAINTAINER_MODE_TRUE@if test -d ${mandir}/cat3; then \
-		${RM} ${mandir}/cat3/libfth.*; \
-		${INSTALL_DATA} ${top_srcdir}/libfth.0 ${mandir}/cat3/; \
-		${MANZIP} -f ${mandir}/cat3/libfth.0; \
+	if test -d ${DESTDIR}${mandir}/cat3; then \
+		${RM} ${DESTDIR}${mandir}/cat3/libfth.*; \
+		${INSTALL_DATA} ${top_srcdir}/libfth.0 \
+		    ${DESTDIR}${mandir}/cat3/; \
+		${MANZIP} -f ${DESTDIR}${mandir}/cat3/libfth.0; \
 	fi
 
 install-site-fth: install
@@ -189,21 +194,21 @@ uninstall:
 	for f in ${SUBDIRS}; do \
 		(cd $${f} && ${MAKE} uninstall); \
 	done
-	${RM} ${aclocaldir}/fth.m4
-	${RM} ${mandir}/man1/fth.1*
-	${RM} ${mandir}/man3/libfth.3*
-	if test -d ${mandir}/cat1; then \
-		${RM} ${mandir}/cat1/fth.1*; \
+	${RM} ${DESTDIR}${aclocaldir}/fth.m4
+	${RM} ${DESTDIR}${mandir}/man1/fth.1*
+	${RM} ${DESTDIR}${mandir}/man3/libfth.3*
+	if test -d ${DESTDIR}${mandir}/cat1; then \
+		${RM} ${DESTDIR}${mandir}/cat1/fth.1*; \
 	fi
-	if test -d ${mandir}/cat3; then \
-		${RM} ${mandir}/cat3/libfth.3*; \
+	if test -d ${DESTDIR}${mandir}/cat3; then \
+		${RM} ${DESTDIR}${mandir}/cat3/libfth.3*; \
 	fi
-	${RM} ${pkgincludedir}/*
+	${RM} ${DESTDIR}${pkgincludedir}/*
 	for f in ${FS_LIB};  do \
-		${RM} ${pkgdatadir}/fth-lib/$${f}; \
+		${RM} ${DESTDIR}${pkgdatadir}/fth-lib/$${f}; \
 	done
 	for f in ${SITE_LIB}; do \
-		${RM} ${pkgdatadir}/site-fth/$${f}; \
+		${RM} ${DESTDIR}${pkgdatadir}/site-fth/$${f}; \
 	done
 
 distpaths = \
@@ -368,7 +373,7 @@ ${top_srcdir}/libfth.0: ${top_srcdir}/libfth.3
 	${MANDOC} $> > $@
 
 .PHONY: all install fth-shared fth-static install-shared install-static \
-	install-strip install-site-fth uninstall \
+	install-strip install-site-fth maintainer-install uninstall \
 	dist test clean distclean maintainer-clean depend
 
 # Makefile.in ends here.
