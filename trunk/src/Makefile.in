@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	2.4 1/11/18
+# @(#)Makefile.in	2.5 1/12/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -176,19 +176,24 @@ install-static: install-prog
 		${INSTALL_DATA} ${FTH_A_LIB} ${DESTDIR}${libdir}/${FTH_A_LIB}; \
 	fi
 
-install-strip: strip-shared strip-static install
+install-strip: install-shared-strip install-static-strip
 
-strip-prog: fth
-	${STRIP} fth ${FTH_PROG}
+install-prog-strip: all
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${bindir}
+	${SHELL} ${top_srcdir}/mkinstalldirs ${DESTDIR}${libdir}
+	${INSTALL} -s ${FTH_PROG} ${DESTDIR}${bindir}/${prog_name}
 
-strip-shared: strip-prog
+install-shared-strip: install-prog-strip
 	if test -f ${FTH_SO_LIB}; then \
-		${STRIP} ${FTH_SO_LIB}; \
+		${RM} ${DESTDIR}${libdir}/${FTH_SO_LIB}*; \
+		${INSTALL} -s ${FTH_SO_LIB} ${DESTDIR}${libdir}/${FTH_SO_LIB}; \
 	fi
 
-strip-static: strip-prog
+install-static-strip: install-prog-strip
 	if test -f ${FTH_A_LIB}; then \
-		${STRIP} ${FTH_A_LIB}; \
+		${RM} ${DESTDIR}${libdir}/${FTH_A_LIB}; \
+		${INSTALL_DATA} -s ${FTH_A_LIB} \
+		    ${DESTDIR}${libdir}/${FTH_A_LIB}; \
 	fi
 
 dist: Makefile
