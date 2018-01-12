@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Copyright (c) 2006-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2006-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.46 10/17/13
+# @(#)Makefile.in	1.47 1/12/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -61,9 +61,8 @@ FICL_OBJECTS = \
 
 all: Makefile ${FICL_OBJECTS}
 install:
+install-strip:
 uninstall:
-test:
-check:
 dist: Makefile
 
 include ${top_srcdir}/common.mk

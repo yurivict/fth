@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.11 1/11/18
+# @(#)Makefile.in	1.12 1/12/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -60,11 +60,14 @@ install: all
 	test -z "${SO_DBM_LIB}" || \
 	    ${INSTALL} ${SO_DBM_LIB} ${DESTDIR}${pkglibdir}/${SO_DBM_LIB}
 
+install-strip: all
+	test -z "${SO_DBM_LIB}" || \
+	    ${INSTALL} -s ${SO_DBM_LIB} ${DESTDIR}${pkglibdir}/${SO_DBM_LIB}
+
 uninstall:
 	test -z "${SO_DBM_LIB}" || \
 	    ${RM} ${DESTDIR}${pkglibdir}/${SO_DBM_LIB}
 
-test:
 dist: Makefile
 
 # Makefile.in ends here.
